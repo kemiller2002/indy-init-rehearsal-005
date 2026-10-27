@@ -13,6 +13,7 @@
     <Compile Include="FixtureReplayTests.fs" />
     <Compile Include="KernelTests.fs" />
     <Compile Include="HistoryAndProposalTests.fs" />
+    <Compile Include="AiLoopTests.fs" />
     <Compile Include="WasmSafetyTests.fs" />
     <Compile Include="InterfaceManifestTests.fs" />
   </ItemGroup>

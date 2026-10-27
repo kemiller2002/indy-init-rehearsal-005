@@ -96,7 +96,7 @@ let private describeType (t: Type) : Json =
 
 /// Which boundary each public type belongs to (the only hand-written input: the assignment, not the content).
 let private boundaryOf (name: string) =
-    let a = set [ "Proposals"; "ProposalDraft"; "AgentIdentity"; "AgentOutputError"; "Kernel"; "Decide"; "Faults"; "Command"; "CommandEnvelope"; "Session"; "Accepted"; "Rejection"; "DomainError"; "Actor"; "ActorKind"; "EvidenceInput"; "HypothesisCommand"; "UnknownCommand"; "ContradictionCommand"; "AssumptionCommand"; "ActionCommand"; "CorrectionCommand"; "Transitions"; "Names" ]
+    let a = set [ "AiLoop"; "ProviderKey"; "AiProvider"; "AiProfile"; "AiHttpEffect"; "AiHttpOutcome"; "AiUsage"; "AiResult"; "AiPending"; "AiLoopState"; "AiLoopFault"; "Proposals"; "ProposalDraft"; "AgentIdentity"; "AgentOutputError"; "Kernel"; "Decide"; "Faults"; "Command"; "CommandEnvelope"; "Session"; "Accepted"; "Rejection"; "DomainError"; "Actor"; "ActorKind"; "EvidenceInput"; "HypothesisCommand"; "UnknownCommand"; "ContradictionCommand"; "AssumptionCommand"; "ActionCommand"; "CorrectionCommand"; "Transitions"; "Names" ]
     let b = set [ "Timeline"; "TimelineEntry"; "EventCategory"; "SemanticChange"; "HistoricalView"; "EntityRef"; "Projection"; "InvestigationProjection"; "Capability"; "CapabilityAction"; "RecordKind"; "Obligation"; "DomainVerification"; "DataIntegrity"; "Policy"; "Investigation" ]
     let c = set [ "JsonModule"; "Storage"; "StorageError"; "LoadedInvestigation"; "FileSet"; "History"; "Evolve"; "Wire"; "Json"; "Schema"; "Hashing"; "EventBody"; "DomainEvent"; "LifecycleCommand" ]
     let e = set [ "ReportProjection"; "ReportCause"; "ReportCorrection" ]
