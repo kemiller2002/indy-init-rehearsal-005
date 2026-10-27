@@ -14,19 +14,19 @@
     "requirements": 108,
     "obligations": 326,
     "binding": {
-      "bound": 0,
+      "bound": 3,
       "declared": 0,
-      "missing": 326
+      "missing": 323
     },
     "verification": {
-      "PASS": 0,
+      "PASS": 3,
       "FAIL": 0,
-      "NOT_RUN": 326
+      "NOT_RUN": 323
     },
     "requirementsByVerification": {
-      "PASS": 0,
+      "PASS": 1,
       "FAIL": 0,
-      "NOT_RUN": 108
+      "NOT_RUN": 107
     }
   },
   "unknownTags": [],
@@ -106,10 +106,25 @@
       "requirement": "AR-004",
       "sourceObligation": "AR-004-O2",
       "text": "Failing, missing, skipped, or bypassed checks cannot be reported PASS.",
-      "binding": "missing",
-      "verification": "NOT_RUN",
+      "binding": "bound",
+      "verification": "PASS",
       "declaredIn": [],
-      "tests": []
+      "tests": [
+        {
+          "testId": "dotnet:Causa.Acceptance.Tests.AcceptanceTests.failing, missing, skipped or merely declared tests are never reported PASS",
+          "name": "Causa.Acceptance.Tests.AcceptanceTests.failing, missing, skipped or merely declared tests are never reported PASS",
+          "suite": "dotnet",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261027203208.trx"
+        },
+        {
+          "testId": "dotnet:Causa.Acceptance.Tests.AcceptanceTests.gates pass only on producers that succeeded in this run; absent, reused or failed producers do not",
+          "name": "Causa.Acceptance.Tests.AcceptanceTests.gates pass only on producers that succeeded in this run; absent, reused or failed producers do not",
+          "suite": "dotnet",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261027203208.trx"
+        }
+      ]
     },
     {
       "id": "VPO-a5e276239baf88ad",
@@ -2976,20 +2991,36 @@
       "requirement": "VER-008",
       "sourceObligation": "VER-008-O1",
       "text": "A mandatory gate must verify the locked manifest against installed/loaded artifacts and compatibility evidence.",
-      "binding": "missing",
-      "verification": "NOT_RUN",
+      "binding": "bound",
+      "verification": "PASS",
       "declaredIn": [],
-      "tests": []
+      "tests": [
+        {
+          "testId": "dotnet:Causa.Acceptance.Tests.AcceptanceTests.the lock gate fails when an installed artifact differs from the locked set",
+          "name": "Causa.Acceptance.Tests.AcceptanceTests.the lock gate fails when an installed artifact differs from the locked set",
+          "suite": "dotnet",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261027203208.trx"
+        }
+      ]
     },
     {
       "id": "VPO-22f350dce03290a4",
       "requirement": "VER-008",
       "sourceObligation": "VER-008-O2",
       "text": "Missing dependencies, stale evidence, unverified artifacts, or skipped gates result in BLOCKED/FAIL, not PASS.",
-      "binding": "missing",
-      "verification": "NOT_RUN",
+      "binding": "bound",
+      "verification": "PASS",
       "declaredIn": [],
-      "tests": []
+      "tests": [
+        {
+          "testId": "dotnet:Causa.Acceptance.Tests.AcceptanceTests.missing dependencies or unverifiable artifacts never yield PASS",
+          "name": "Causa.Acceptance.Tests.AcceptanceTests.missing dependencies or unverifiable artifacts never yield PASS",
+          "suite": "dotnet",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261027203208.trx"
+        }
+      ]
     },
     {
       "id": "VPO-6f0348e05133ebd2",

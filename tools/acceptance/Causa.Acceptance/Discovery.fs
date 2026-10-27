@@ -60,8 +60,8 @@ let suiteName =
 // ---------------------------------------------------------------------------------------------------------------
 // Traits from test assemblies (metadata only; the assembly is never executed).
 
-/// (className, methodName) -> obligation ids from `Trait("obligation", …)`.
-let traitObligations (assemblyPath: string) : Map<string * string, string list> =
+/// (className, methodName) -> obligation ids from `Trait(traitName, …)`.
+let traitObligationsNamed (traitName: string) (assemblyPath: string) : Map<string * string, string list> =
     if not (File.Exists assemblyPath) then Map.empty
     else
         let dir = Path.GetDirectoryName assemblyPath
@@ -84,7 +84,7 @@ let traitObligations (assemblyPath: string) : Map<string * string, string list> 
                           try
                               m.GetCustomAttributesData()
                               |> Seq.filter (fun a -> a.AttributeType.FullName = "Xunit.TraitAttribute" && a.ConstructorArguments.Count = 2)
-                              |> Seq.filter (fun a -> string a.ConstructorArguments[0].Value = "obligation")
+                              |> Seq.filter (fun a -> string a.ConstructorArguments[0].Value = traitName)
                               |> Seq.map (fun a -> string a.ConstructorArguments[1].Value)
                               |> obligationsIn
                           with _ -> []
@@ -93,6 +93,9 @@ let traitObligations (assemblyPath: string) : Map<string * string, string list> 
             |> List.map (fun (k, v) -> k, v |> List.collect snd |> List.distinct |> List.sort)
             |> Map.ofList
         with _ -> Map.empty
+
+/// (className, methodName) -> obligation ids from `Trait("obligation", …)`.
+let traitObligations = traitObligationsNamed "obligation"
 
 // ---------------------------------------------------------------------------------------------------------------
 // TRX

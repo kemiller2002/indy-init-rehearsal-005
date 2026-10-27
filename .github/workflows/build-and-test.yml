@@ -564,17 +564,22 @@ jobs:
           path: .indy-init
           fetch-depth: 0
           persist-credentials: false
+      # 10.0.402 is the SDK Indy-init's global.json pins (rollForward: disable) for the plan verifier.
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "10.0.x"
+          dotnet-version: |
+            10.0.x
+            10.0.402
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      # The test assemblies are rebuilt at the same paths so trait tags can be read from their metadata.
+      # The test assemblies are rebuilt at the same paths so trait tags can be read from their metadata. The plan
+      # verifier is built outside this repository so this repository's Directory.Build.props does not apply to it.
       - name: Build the candidate and the plan verifier
         run: |
           dotnet build App.slnx -c Release
-          dotnet build .indy-init/tools/requirements-compiler/src -c Release
+          mv .indy-init "$RUNNER_TEMP/indy-init"
+          (cd "$RUNNER_TEMP/indy-init" && dotnet build tools/requirements-compiler/src -c Release)
       - uses: actions/download-artifact@v4
         with:
           pattern: "{core-results,browser-results,live-results,lock-gate}"
@@ -612,7 +617,7 @@ jobs:
           cat "$RUNNER_TEMP/producers.json"
       - name: Evidence bundle, ledger and computed verdict
         env:
-          INDY_INIT: .indy-init
+          INDY_INIT: ${{ runner.temp }}/indy-init
           RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
           SOURCE_SHA: ${{ github.sha }}
           DEPLOYED_SHA: ${{ needs.deployed-smoke.outputs.sha }}
