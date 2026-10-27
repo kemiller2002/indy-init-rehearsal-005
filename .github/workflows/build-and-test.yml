@@ -333,6 +333,16 @@ jobs:
           name: site
           path: dist/
           retention-days: 7
+      # `npm run build` also writes the test configuration (its own .NET publish with the test-only exports and the
+      # Percepta state hook). Never deployed; the browser, live and percepta jobs serve it on 4322.
+      - name: Publish the test configuration
+        if: steps.build.outputs.built == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-test
+          path: obj/site-test/
+          if-no-files-found: error
+          retention-days: 7
 
   browser:
     needs: [reuse, site]
@@ -370,10 +380,13 @@ jobs:
         with:
           name: site
           path: dist
-      # The test configuration (Percepta state hook enabled) is built from dist/'s WebAssembly output, no .NET SDK.
-      - name: Build the test configuration (obj/site-test)
-        if: needs.reuse.outputs.browser != 'reuse'
-        run: npm run build:test
+      # The test configuration, as the site job built it (its own .NET publish; never deployed).
+      - name: Built test configuration
+        if: needs.reuse.outputs.browser != 'reuse' && needs.site.outputs.built == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: site-test
+          path: obj/site-test
       # percepta.spec.js runs `percepta verify-app`: the CLI exactly as the pinned channel resolves it (SHA-256 verified).
       - name: Install the Percepta CLI and its browser
         if: needs.reuse.outputs.browser != 'reuse'
@@ -491,10 +504,13 @@ jobs:
         with:
           name: site
           path: dist
-      # Playwright serves both builds (dist/ on 4321, obj/site-test/ on 4322).
-      - name: Build the test configuration (obj/site-test)
+      # Playwright serves both builds (dist/ on 4321, obj/site-test/ on 4322), as the site job built them.
+      - name: Built test configuration
         if: needs.site.outputs.built == 'true'
-        run: npm run build:test
+        uses: actions/download-artifact@v4
+        with:
+          name: site-test
+          path: obj/site-test
       - name: Install the browsers
         timeout-minutes: 15
         run: |
@@ -700,6 +716,12 @@ jobs:
         with:
           name: site
           path: dist
+      - name: Built test configuration
+        if: needs.site.outputs.built == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: site-test
+          path: obj/site-test
       - name: percepta verify-app
         id: verify
         timeout-minutes: 20
@@ -713,7 +735,7 @@ jobs:
             exit 0
           fi
           npm ci
-          npm run build:test
+          test -f obj/site-test/index.html || { echo "::error::the site job published no test configuration"; exit 1; }
           export PATH="$(tools/acceptance/ci/install-host-tool.sh percepta-semantic percepta "$RUNNER_TEMP/host-tools"):$PATH"
           percepta version | tee TestResults/percepta/percepta-version.txt
           timeout 600 percepta install-browser
