@@ -21,7 +21,7 @@ let ``VPO-ff2e466b7aaa3e12 the evidence inspector shows source, timestamps, orig
     Assert.Equal("Casing temperature 96 °C at 02:10.", (value i "Original content").Value)
     Assert.Equal("Control-room trend log", (value i "Source").Value)
     Assert.Equal("Measurement", (value i "Category").Value)
-    Assert.Equal("2026-03-01 02:00 UTC", (value i "Captured at").Value)
+    Assert.Equal("2026-03-01 02:00:00 UTC", (value i "Captured at").Value)
     Assert.Equal("investigator-a", (value i "Recorded by").Value)
     Assert.False((value i "Recorded at").Missing)
     Assert.Equal("Not yet assessed", (value i "Assessment").Value)

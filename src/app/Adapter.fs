@@ -50,7 +50,11 @@ type CardProjection =
       LastActivity: string option
       Hypotheses: Count
       Evidence: Count
-      Contradictions: Count }
+      Contradictions: Count
+      /// Open questions (unknowns not yet answered or accepted), when the domain holds them.
+      OpenQuestionCount: Count
+      /// The next lifecycle action the F# policy allows now (Records.nextLegalAction); None offers none.
+      NextAction: string option }
 
 type HypothesisRow = { Id: string; Statement: string; State: string; Supporting: Count; Contradicting: Count }
 type EvidenceRow = { Id: string; Content: string; Source: string option; Category: string; RecordedAt: string option }
@@ -145,7 +149,10 @@ type InvestigationProjection =
       /// Technical integrity of how the data was obtained, for Administration only (UI-023-O2).
       Integrity: string option
       Report: ReportView option
-      Capabilities: Capability list }
+      Capabilities: Capability list
+      /// The engine's typed projection and history (Records: relationships, inspector, explanations, next steps);
+      /// None for a shell-only fixture.
+      Typed: Records.Source option }
 
 /// Distinct save and sync states (UI-006-O1). Only `RemotelySynced` may say the provider holds the change.
 type SyncStatus =

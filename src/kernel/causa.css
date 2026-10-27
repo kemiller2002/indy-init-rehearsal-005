@@ -336,3 +336,16 @@ fieldset.causa-panel legend { font-weight: 700; color: var(--causa-color-structu
 .causa-timeline__entry[data-current="true"] { outline: 3px solid var(--causa-color-action); outline-offset: 2px; }
 .causa-timeline__entry a { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
 .causa-findings { margin: 0.25rem 0; }
+
+/* Stream ux: catalog tools, record details links, next steps and the detail inspector (Forma record header,
+   key-value list and relationship index carry the structure; these rules only place them). */
+.causa-catalog-tools { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin: 0.5rem 0 0.75rem; }
+.causa-card[data-selected="true"] { outline: 3px solid var(--causa-color-structure); outline-offset: 2px; }
+.causa-card__next { margin: 0.5rem 0 0; font-weight: 600; }
+.causa-card__reference { margin: 0.5rem 0 0; font-size: 0.8rem; }
+.causa-details { display: inline-block; min-height: 44px; line-height: 44px; color: var(--causa-color-action-ink); }
+.causa-item[data-selected="true"], .causa-item[data-selected="open"], .causa-timeline__entry[data-selected="true"], .causa-timeline__entry[data-selected="open"] { outline: 3px solid var(--causa-color-structure); outline-offset: 2px; }
+.causa-step__action { margin: 0.25rem 0 0; font-size: 0.9rem; }
+.causa-inspector { margin-top: 1rem; padding: 1rem; border: 1px solid var(--ef-color-border-subtle); border-radius: 6px; background: var(--causa-color-raised); min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+.causa-inspector [data-missing="true"] dd { font-style: italic; color: var(--causa-color-muted); }
+.causa-absent { font-style: italic; color: var(--causa-color-muted); }

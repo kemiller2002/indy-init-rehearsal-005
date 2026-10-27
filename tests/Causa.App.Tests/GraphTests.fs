@@ -23,7 +23,8 @@ let private inv hypotheses causes =
       Findings = None
       Integrity = None
       Report = None
-      Capabilities = [] }
+      Capabilities = []
+      Typed = None }
 
 [<Fact>]
 let ``VPO-0a171a55852aaf80 VPO-d2d5200b61947ce8 only recorded causal members and their outcomes become nodes, each role labelled`` () =

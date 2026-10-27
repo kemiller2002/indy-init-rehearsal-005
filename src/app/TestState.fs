@@ -92,7 +92,8 @@ let toProjection (s: Injected) : WorkspaceProjection =
           Integrity = None
           Report = None
           Timeline = [ { Sequence = 1L; EventType = "InvestigationOpened"; OccurredAt = "2026-01-01T00:00:00Z"; RecordedAt = Some "2026-01-01T00:00:00Z"; Actor = Some "Fixture"; Category = "lifecycle"; Affected = []; ClockBeforePrevious = false } ]
-          Capabilities = capabilities }
+          Capabilities = capabilities
+          Typed = None }
 
     { Connection = ConnectedTo("fixture/percepta", "main", "test")
       ConnectionStatus = None
@@ -105,7 +106,9 @@ let toProjection (s: Injected) : WorkspaceProjection =
                 LastActivity = Some "2026-01-01"
                 Hypotheses = Known 1
                 Evidence = Known 1
-                Contradictions = Unknown } ]
+                Contradictions = Unknown
+                OpenQuestionCount = Unknown
+                NextAction = None } ]
       Opened = Map.ofList [ fixtureId, Loaded investigation ]
       Sync = NoChanges
       Capabilities = capabilities

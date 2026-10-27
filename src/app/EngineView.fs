@@ -305,8 +305,8 @@ let ofProjection (writable: bool) (history: DomainEvent list) (p: InvestigationP
         |> List.sortBy (fun e -> e.AdmittedAtVersion)
         |> List.map (fun e ->
             ({ Id = e.Id.Text
-               Content = (match e.Content with TextContent t -> t.Value | ArtifactContent url -> url)
-               Source = Some e.Source.Value
+               Content = Records.clean (match e.Content with TextContent t -> t.Value | ArtifactContent url -> url)
+               Source = Some(Records.clean e.Source.Value)
                Category = category e.Category
                RecordedAt = Some(stamp e.Provenance.RecordedAt) }: A.EvidenceRow))
       Blockers = p.Obligations |> List.map (fun o -> ({ Id = o.EntityId; Question = o.Message; Material = true }: A.BlockerRow))
@@ -352,7 +352,8 @@ let ofProjection (writable: bool) (history: DomainEvent list) (p: InvestigationP
             let checkedText = if i.AdmissibilityChecked then "checked" else "not checked"
             $"events SHA-256 {i.EventsSha256.Substring(0, min 12 i.EventsSha256.Length)}…, state SHA-256 {i.StateSha256.Substring(0, min 12 i.StateSha256.Length)}…, admissibility {checkedText}")
       Report = Some(reportView inv)
-      Capabilities = capabilities }
+      Capabilities = capabilities
+      Typed = Some { Projection = p; History = history } }
 
 /// The card for the investigation list: counts the engine state actually holds (never unknown-as-zero).
 let card (writable: bool) (p: InvestigationProjection) (history: DomainEvent list) : A.CardProjection =
@@ -362,7 +363,9 @@ let card (writable: bool) (p: InvestigationProjection) (history: DomainEvent lis
       Title = p.Title
       Lifecycle = lifecycle p.Lifecycle
       Writable = writable
-      LastActivity = history |> List.tryLast |> Option.map (fun e -> stamp e.At)
+      LastActivity = Language.activity history
       Hypotheses = A.Known inv.Hypotheses.Count
       Evidence = A.Known inv.Evidence.Count
-      Contradictions = A.Known(values inv.Contradictions |> List.filter Policy.isOpenContradiction |> List.length) }
+      Contradictions = A.Known(values inv.Contradictions |> List.filter Policy.isOpenContradiction |> List.length)
+      OpenQuestionCount = A.Known(Records.openQuestions inv)
+      NextAction = Records.nextLegalAction p }

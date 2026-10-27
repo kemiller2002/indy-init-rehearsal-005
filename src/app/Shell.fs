@@ -45,6 +45,8 @@ type Model =
       HistoryVersion: int64 option
       /// Timeline category filter ("all" or a category key, UI-003-O2).
       TimelineFilter: string
+      /// The investigation catalog's order (stream ux): "activity", "title" or "status".
+      CatalogSort: string
       /// Bumped each time a token or key is taken, so the page can empty its password fields.
       SecretEpoch: int
       /// Text typed for a capability that needs one input, by capability id.
@@ -71,6 +73,7 @@ let initial =
       SecretEpoch = 0
       HistoryVersion = None
       TimelineFilter = "all"
+      CatalogSort = "activity"
       TestHooks = false
       InjectedState = None }
 
@@ -160,6 +163,7 @@ let rec private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
         match Int64.TryParse value with
         | true, n when n >= 1L -> { model with HistoryVersion = Some n }, []
         | _ -> { model with HistoryVersion = None }, []
+    | "catalog-sort" -> { model with CatalogSort = (if List.exists (fun (v, _) -> v = value) [ "activity", (); "title", (); "status", () ] then value else "activity") }, []
     | "timeline-filter" -> { model with TimelineFilter = (if value = "" then "all" else value) }, []
     | "ai-model" -> { model with Settings = { model.Settings with AiModel = value.Trim() } }, []
     | "ai-key" -> { model with Drafts = { d with AiKey = value } }, []

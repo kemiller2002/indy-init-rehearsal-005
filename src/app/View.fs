@@ -100,24 +100,6 @@ let project (model: Model) : ViewState =
         |> List.map (fun (sec, slug, name) ->
             item [ "id", slug; "label", name; "href", Routes.format (Investigation(invId, sec)); "current", current (inv.IsSome && sec = section) ])
 
-    let cards =
-        match ws.Investigations with
-        | Loaded cs ->
-            cs
-            |> List.map (fun c ->
-                item
-                    [ "id", c.Id
-                      "title", c.Title
-                      "status", label c.Lifecycle
-                      "tone", tone c.Lifecycle
-                      "kind", (if c.Writable then "Your working copy" else "Read-only demonstration")
-                      "activity", (c.LastActivity |> Option.map (fun a -> "Latest activity " + a) |> Option.defaultValue "Latest activity not recorded")
-                      "hypotheses", count c.Hypotheses "hypotheses"
-                      "evidence", count c.Evidence "evidence items"
-                      "contradictions", count c.Contradictions "unresolved contradictions"
-                      "href", Routes.format (Investigation(c.Id, Overview)) ])
-        | _ -> []
-
     let listLoading = match ws.Investigations with Loading | NotRequested -> true | _ -> false
     let listFailed = match ws.Investigations with Failed _ -> true | _ -> false
     let listFailure = match ws.Investigations with Failed r -> r | _ -> ""
@@ -135,6 +117,8 @@ let project (model: Model) : ViewState =
                       "supporting", count h.Supporting "supporting"
                       "contradicting", count h.Contradicting "contradicting"
                       "href", Routes.formatItem (Investigation(i.Id, Hypotheses)) h.Id
+                      "selected", (UxView.selectionState model.Selected h.Id)
+                      "detailsLabel", "Details: " + h.Statement
                       "changes",
                       (match i.Capabilities |> List.filter (fun c -> c.Legal && c.Id.StartsWith("TransitionHypothesis:" + h.Id + ":")) with
                        | [] -> "No change is allowed now."
@@ -152,7 +136,9 @@ let project (model: Model) : ViewState =
                       "source", (e.Source |> Option.defaultValue "Source not recorded")
                       "category", label e.Category
                       "recorded", (e.RecordedAt |> Option.map (fun t -> "Recorded " + t) |> Option.defaultValue "Recording time not recorded")
-                      "href", Routes.formatItem (Investigation(i.Id, Evidence)) e.Id ]))
+                      "href", Routes.formatItem (Investigation(i.Id, Evidence)) e.Id
+                      "selected", (UxView.selectionState model.Selected e.Id)
+                      "detailsLabel", "Details: " + e.Content ]))
         |> Option.defaultValue []
 
     let blockers =
@@ -216,7 +202,10 @@ let project (model: Model) : ViewState =
                       (first
                        |> Option.bind (fun (slug, id, _) -> sectionOf slug |> Option.map (fun sec -> Routes.formatItem (Investigation(i.Id, sec)) id))
                        |> Option.defaultValue "")
-                      "current", (if model.HistoryVersion = Some t.Sequence then "true" else "false") ]
+                      "current", (if model.HistoryVersion = Some t.Sequence then "true" else "false")
+                      "eventHref", Routes.formatItem (Investigation(i.Id, Timeline)) $"event-{t.Sequence}"
+                      "eventLabel", $"Details of event #{t.Sequence}"
+                      "selected", (UxView.selectionState model.Selected $"event-{t.Sequence}") ]
                     [ "hasAffected", first.IsSome
                       "clockNote", t.ClockBeforePrevious ]))
         |> Option.defaultValue []
@@ -260,7 +249,10 @@ let project (model: Model) : ViewState =
                       "outcome", c.Outcome
                       "state", label c.State
                       "tone", tone c.State
-                      "members", (if members.IsEmpty then "No contributing hypotheses recorded." else String.concat "; " members) ]))
+                      "members", (if members.IsEmpty then "No contributing hypotheses recorded." else String.concat "; " members)
+                      "href", Routes.formatItem (Investigation(i.Id, CausalAnalysis)) c.Id
+                      "selected", (UxView.selectionState model.Selected c.Id)
+                      "detailsLabel", "Details: " + c.Outcome ]))
         |> Option.defaultValue []
 
     // Counts of what the projection says blocks progress; derived only from the engine's blockers and legality.
@@ -436,7 +428,11 @@ let project (model: Model) : ViewState =
       "list.failed", flag listFailed
       "list.failure", text listFailure
       "list.empty", flag (match ws.Investigations with Loaded [] -> true | _ -> false)
-      "cards", items cards
+      // The catalog's cards, sort and selection (stream ux, UI-001, UI-022).
+      "cards", items (UxView.cardItems model.CatalogSort model.Selected (match ws.Investigations with Loaded cs -> cs | _ -> []))
+      "catalog.sorts", items (UxView.sortOptions |> List.map (fun (v, l) -> item [ "id", v; "value", v; "label", l ]))
+      "catalog.sort", text model.CatalogSort
+      "inv.backHref", text (if invId = "" then "#/investigations" else Routes.formatItem Investigations invId)
       "screen.new", flag (screen = NewScreen)
       "screen.opening", flag (screen = OpeningScreen)
       "screen.failed", flag (match screen with FailedScreen _ -> true | _ -> false)
@@ -618,4 +614,6 @@ let project (model: Model) : ViewState =
           | ConnectedTo(repo, branch, workspace) -> $"Connected to {repo}, branch {branch}, workspace {workspace}, for this session."
           | _ -> "Not connected. The repository you enter on Connect is used for this session only and is not remembered."
       ) ]
+    // Inspector, next steps and record links (stream ux).
+    @ UxView.keys model.Route model.Selected inv
     |> Map.ofList
