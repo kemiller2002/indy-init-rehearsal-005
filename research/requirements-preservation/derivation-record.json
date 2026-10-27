@@ -1,0 +1,32 @@
+{
+  "schema": "indy-init.r5-derivation-record/1",
+  "task": "T07",
+  "tool": "tools/derive-requirements (F#, identity derivation)",
+  "baseline": {
+    "id": "BL-CAUSA-INDY-INIT-aab8f80c7743",
+    "commit": "aab8f80c7743392e794b3b631542903ed4ed6f64",
+    "sha256": "621e2f960038dcfb0daa2a9fe18a0c1c350faed297ba2856da1236a0360857b9"
+  },
+  "inputs": {
+    "normalizedRequirementsSha256": "9fea70e7cc8edf5ec6dfd72a6269284003e6d8ef30e4ccc390c7c68576f861da"
+  },
+  "outputs": {
+    "derivedDocuments": 461,
+    "derivedDocumentsSha256": "ad31cb2488deb2e34f4315be036534f51f8f214c2c3166837967da8dfef0c4c2",
+    "derivedDocumentsDigestMethod": "sha256 of the lines '<sha256>  <file name>\\n' for every research/requirements/*.md, ordinal by file name",
+    "dispositionSha256": "1b56008f90724e21e37eeb82d2e4514c5cf3495adc13477c3f85cef8ae5cf7ae",
+    "reviewRequestsSha256": "1e98c9234b30173616e3aec77e0ac54633a92acb5dfe60895b24668423254dd5"
+  },
+  "counts": {
+    "requirements": 461,
+    "p0": 108,
+    "obligations": 2293,
+    "preserved": 461,
+    "exclusions": 0,
+    "reviewsRequested": 775,
+    "reviewsRequestedByteIdentical": 775,
+    "reviewsApplied": 0,
+    "approvalsWritten": 0
+  },
+  "sourceTextChecked": true
+}
