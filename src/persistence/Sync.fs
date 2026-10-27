@@ -193,15 +193,24 @@ module Sync =
 
     let oidText (Book.Oid s) = s
 
-    /// A book observing `head` for this document: core's own Connect -> Connected transitions. The request counter
-    /// continues from the previous book so its ids are never reused.
-    let private bookAt (previous: Book.State) (head: string) : Book.State =
-        match Book.step { Book.initial with Issued = previous.Issued } Book.Connect with
-        | Ok(s, [ Book.OpenConnection r ]) ->
-            match Book.step s (Book.Connected(r, Book.Oid head)) with
-            | Ok(s2, _) -> s2
-            | Error f -> invalidOp ("the request book refused a connection: " + f.Reason)
-        | _ -> invalidOp "the request book refused Connect from its initial state"
+    /// A new book observing `head` (core's attach on its initial state).
+    let private bookAt (head: string) : Book.State = Book.attach (Book.Oid head) Book.initial
+
+    let private stepOr (b: Book.State) (e: Book.Event) =
+        match Book.step b e with
+        | Ok(b2, _) -> b2
+        | Error _ -> b
+
+    /// Re-observe the branch head through core's own transitions: attach after a restore, Reloaded otherwise. A
+    /// pending change decided at another head becomes a held conflict there (core: never re-targeted, DC-001).
+    let private observe (head: string) (book: Book.State) : Book.State =
+        let h = Book.Oid head
+        match book.Phase with
+        | Book.Disconnected -> Book.attach h book
+        | Book.Idle _
+        | Book.Held(_, _, Book.Conflict _) -> stepOr book (Book.Reloaded h)
+        | Book.Held(_, _, Book.NotWritten _) -> stepOr (stepOr book Book.Discard) (Book.Reloaded h)
+        | _ -> book
 
     let private bookInFlight (s: Book.State) =
         match s.Phase with
@@ -233,6 +242,15 @@ module Sync =
           Marker = marker
           Files = filesFor t v |> List.map (fun (p, b) -> { Book.FileWrite.Path = p; Book.FileWrite.Bytes = Json.strictUtf8.GetString b }) }
 
+    /// After observing `head`, when the investigation's remote files are the ones this device confirmed: the local
+    /// change is handed back by the book (Discard -> Released) and reapplied as decided at that head.
+    let private offer (t: Target) (marker: string) (head: string) (local: Verified) (book: Book.State) : Book.State =
+        let reapply b = stepOr b (Book.Reapply(changeOf t marker head local))
+        match book.Phase with
+        | Book.Held(_, _, Book.Conflict _) -> reapply (stepOr book Book.Discard)
+        | Book.Idle(_, None) -> reapply book
+        | _ -> book
+
     let unsettled (d: Document) = bookInFlight d.Book || d.Reload.IsSome
 
     let private anyUnsettled (m: Model) = m.Documents |> Map.exists (fun _ d -> unsettled d)
@@ -255,22 +273,8 @@ module Sync =
               "events", JStr(Json.strictUtf8.GetString v.EventsFile)
               "snapshot", JStr(Json.strictUtf8.GetString v.Snapshot) ]
 
-    /// The book's state as stored. A send that had started is stored as unknown: after a restart nobody knows
-    /// whether it was applied (reload safety). Everything else is re-derived from the files at the next load.
-    let private bookRecord (s: Book.State) =
-        let attempt (head: Book.Oid) (a: Book.Attempt) =
-            JObj
-                [ "phase", JStr "unknown"
-                  "head", JStr(oidText head)
-                  "decidedAt", JStr(oidText a.Change.DecidedAt)
-                  "marker", JStr a.Change.Marker ]
-        match s.Phase with
-        | Book.Writing(h, a)
-        | Book.Confirming(h, a, _, _)
-        | Book.Unknown(h, a)
-        | Book.Reconciling(h, a, _) -> attempt h a
-        | Book.Held(_, _, Book.Conflict _) -> JObj [ "phase", JStr "conflict" ]
-        | _ -> JObj [ "phase", JStr "idle" ]
+    /// The book's own durable form (core Sync.encode, causa.sync-state/1, no credentials).
+    let private bookRecord (b: Book.State) = JStr(IndyInitRootCauseInvestigator.Engine.Json.canonical (Book.encode b))
 
     /// The durable local record: target (no credential) and, per writable document, the confirmed files and the
     /// commit they were confirmed at, the local files, the book state and the last sync time.
@@ -352,23 +356,14 @@ module Sync =
                         match c |> Option.map (fun c -> Store.successor c l) with
                         | Some(Error e) -> Error("the stored local copy does not extend its confirmed copy: " + e.Code)
                         | _ ->
+                            // Core's decode + restore: anything in flight becomes Unknown; the counter is kept.
                             let book =
-                                match Json.field "book" d with
-                                | Some(JObj b) when Json.str "phase" b = Some "unknown" ->
-                                    match Json.str "head" b, Json.str "decidedAt" b, Json.str "marker" b with
-                                    | Some h, Some decided, Some marker ->
-                                        // Restore hook (requested from core: Sync.restoreUnknown): a send whose outcome
-                                        // was not known at the restart is Unknown in the book; only Reconcile leaves it.
-                                        { Book.State.Phase =
-                                            Book.Unknown(
-                                                Book.Oid h,
-                                                { Request = Book.RequestId 0L
-                                                  Change = changeOf t marker decided l
-                                                  Stage = Book.Sent }
-                                            )
-                                          Book.State.Issued = 0L }
-                                    | _ -> Book.initial
-                                | _ -> Book.initial
+                                match Json.str "book" d with
+                                | Some text ->
+                                    match IndyInitRootCauseInvestigator.Engine.Json.parse text |> Result.bind Book.decode with
+                                    | Ok b -> Book.restore b
+                                    | Error _ -> Book.initial
+                                | None -> Book.initial
                             let conflict =
                                 match Json.field "conflict" d with
                                 | Some(JObj c) ->
@@ -475,7 +470,7 @@ module Sync =
               Confirmed = Some v
               ConfirmedHead = Some head
               Local = v
-              Book = bookAt Book.initial head
+              Book = bookAt head
               RemoteConflict = None
               Durability = SavedLocally
               LastSyncedAt = None
@@ -486,16 +481,11 @@ module Sync =
             | None, None -> true
             | _ -> false
         let rebased (d: Document) =
-            let book = bookAt d.Book head
+            let book = observe head d.Book
             let book =
-                if pending d then
-                    match m.Target with
-                    | Some t ->
-                        match Book.step book (Book.Reapply(changeOf t marker head d.Local)) with
-                        | Ok(b, _) -> b
-                        | Error _ -> book
-                    | None -> book
-                else book
+                match m.Target with
+                | Some t when pending d -> offer t marker head d.Local book
+                | _ -> book
             { d with Book = book; ConfirmedHead = (if d.Confirmed.IsSome then Some head else d.ConfirmedHead); RemoteConflict = None; Reload = None }
         let doc =
             match Map.tryFind id m.Documents, remote with
@@ -505,7 +495,7 @@ module Sync =
             | Some d, _ when bookInFlight d.Book || bookUnknown d.Book -> Some { d with Reload = None }
             | Some d, _ when sameAsConfirmed d -> Some(rebased d)
             | Some d, Some r when not (pending d) && (d.Confirmed.IsNone || Store.successor d.Local r |> Result.isOk) ->
-                Some { fresh r with LastSyncedAt = d.LastSyncedAt; Book = bookAt d.Book head }
+                Some { fresh r with LastSyncedAt = d.LastSyncedAt; Book = observe head d.Book }
             | Some d, _ when d.Confirmed.IsNone && remote.IsNone -> Some(rebased d)
             | Some d, _ ->
                 let detail =
@@ -842,7 +832,7 @@ module Sync =
                 let book =
                     match m.Head with
                     | Some h when canWrite m ->
-                        match Book.step (bookAt Book.initial h) (Book.Edit(changeOf t marker h local)) with
+                        match Book.step (bookAt h) (Book.Edit(changeOf t marker h local)) with
                         | Ok(b, _) -> b
                         | Error _ -> Book.initial
                     | _ -> Book.initial
@@ -972,7 +962,10 @@ module Sync =
             | Some d ->
                 // Core's Discard leaves a held change; the book is then re-observed at the copy being adopted.
                 let book =
-                    if bookHeld d.Book then Book.step d.Book Book.Discard |> Result.map fst else Ok d.Book
+                    match d.Book.Phase with
+                    | Book.Held _
+                    | Book.Idle(_, Some _) -> Book.step d.Book Book.Discard |> Result.map fst
+                    | _ -> Ok d.Book
                 match book with
                 | Error f -> refuse f.Reason
                 | Ok book ->
@@ -982,7 +975,7 @@ module Sync =
                         | None -> d.Confirmed, d.ConfirmedHead
                     match adopt with
                     | Some v ->
-                        let book = match head with Some h -> bookAt book h | None -> book
+                        let book = match head with Some h -> observe h book | None -> book
                         Ok(persistLocal [ id ] (m |> setDoc id (fun d -> { d with Confirmed = Some v; ConfirmedHead = head; Local = v; Book = book; RemoteConflict = None }), []))
                     | None -> Ok(persistLocal [] ({ m with Documents = m.Documents |> Map.remove id }, []))
         | HttpAnswered(rid, r) -> answered env rid (Ok r) m
