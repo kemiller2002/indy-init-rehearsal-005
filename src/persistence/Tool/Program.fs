@@ -230,6 +230,82 @@ let private recordAll (token: string) (repoFull: string) (runId: string) =
                 Console.Out.WriteLine("RESULT: FAIL " + String.Join(",", ctx.Failures))
                 1
 
+/// Drive the real Sync program: dispatch, perform its effects against real GitHub, feed the answers back.
+let private runProgram (env: Env) (model: Model) (msg: Msg) : Model * string list =
+    let mutable m = model
+    let mutable refusals = []
+    let mutable queue = [ msg ]
+    while not queue.IsEmpty do
+        let next = queue.Head
+        queue <- queue.Tail
+        match Sync.update env next m with
+        | Error r -> refusals <- refusals @ [ r.Reason ]
+        | Ok(m2, effects) ->
+            m <- m2
+            for e in effects do
+                match e with
+                | StoreLocal(writeId, _, _) -> queue <- queue @ [ LocalStored(writeId, true) ]
+                | Send(id, request) ->
+                    match Transport.send request with
+                    | Ok r -> queue <- queue @ [ HttpAnswered(id, r) ]
+                    | Error f -> queue <- queue @ [ HttpFailed(id, f) ]
+    m, refusals
+
+/// T25 / EXT-DATA-013 / PF-014: connect to the historical catalog's repository and workspace with a credential and
+/// load every case through the same program the application runs (no bundled record, no hardcoded id).
+let private catalogLive (token: string) (repoFull: string) (branch: string) (workspace: string) =
+    let secrets = [ token ]
+    let say (v: JValue) = Console.Out.WriteLine(Sanitize.guard secrets (Json.canonicalText v))
+    match repoFull.Split('/'), Credential.create token with
+    | [| owner; repo |], Ok cred ->
+        match Target.create owner repo branch workspace with
+        | Error p ->
+            Console.Out.WriteLine("RESULT: BLOCKED (" + String.Join(" ", p) + ")")
+            2
+        | Ok t ->
+            let env = { Engine = HistoryEngine.notWired; Now = now }
+            let sw = Stopwatch.StartNew()
+            let m, refusals = runProgram env Sync.initial (Connect(t, cred))
+            sw.Stop()
+            say (JObj [ "check", JStr "catalog.connect"; "connection", JStr(Sync.connectionLabel m); "detail", JStr(Sync.connectionDetail m |> Option.defaultValue ""); "elapsedMs", JInt sw.ElapsedMilliseconds; "refusals", JInt(int64 refusals.Length) ])
+            match m.Catalog with
+            | CatalogVerified(man, results) ->
+                for r in results do
+                    match r.Outcome with
+                    | Ok v ->
+                        say (
+                            JObj
+                                [ "case", JStr r.Case.CaseKey
+                                  "investigationId", JStr v.InvestigationId
+                                  "title", JStr v.Title
+                                  "version", JInt v.Version
+                                  "lifecycle", JStr v.Lifecycle
+                                  "stateSha256", JStr v.StateSha256
+                                  "expectedStateSha256", JStr r.Case.ExpectedStateSha256
+                                  "readOnly", JBool(m.Documents |> Map.tryFind v.InvestigationId |> Option.exists (fun d -> d.ReadOnly))
+                                  "admissibility", JStr(Sync.admissibilityLabel v) ]
+                        )
+                    | Error e -> say (JObj [ "case", JStr r.Case.CaseKey; "error", JStr e.Code ])
+                let allOk = results |> List.forall (fun r -> Result.isOk r.Outcome)
+                let onlyCatalog = m.Documents |> Map.forall (fun _ d -> d.ReadOnly)
+                say (JObj [ "catalogId", JStr man.CatalogId; "catalogVersion", JStr man.CatalogVersion; "cases", JInt(int64 results.Length) ])
+                if allOk && onlyCatalog && results.Length = 3 && Sync.connectionLabel m = "connected" then
+                    Console.Out.WriteLine "RESULT: PASS (live catalog load; digests and replayed state digests match the catalog manifest; admissibility evaluated only if an engine is wired)"
+                    0
+                else
+                    Console.Out.WriteLine "RESULT: FAIL"
+                    1
+            | other ->
+                say (JObj [ "catalog", JStr(sprintf "%A" other |> fun s -> s.Split('\n')[0]) ])
+                Console.Out.WriteLine "RESULT: FAIL (the catalog was not verified)"
+                1
+    | _, Error _ ->
+        Console.Out.WriteLine "RESULT: BLOCKED (no usable credential: every connection needs one, DEC-025)"
+        2
+    | _ ->
+        Console.Out.WriteLine "RESULT: BLOCKED (catalog repository is not owner/repo)"
+        2
+
 [<EntryPoint>]
 let main argv =
     match argv with
@@ -246,6 +322,9 @@ let main argv =
             2
         else
             recordAll token repo (if String.IsNullOrEmpty runId then "local" else runId)
+    | [| "catalog" |] ->
+        let env name fallback = Environment.GetEnvironmentVariable name |> Option.ofObj |> Option.filter (fun s -> s <> "") |> Option.defaultValue fallback
+        catalogLive (env "CAUSA_CATALOG_TOKEN" "") (env "CAUSA_CATALOG_REPO" "kemiller2002/causa-data") (env "CAUSA_CATALOG_BRANCH" "main") (env "CAUSA_CATALOG_WORKSPACE" "historical-v1")
     | _ ->
-        eprintfn "usage: causa-persistence record"
+        eprintfn "usage: causa-persistence record | catalog"
         64

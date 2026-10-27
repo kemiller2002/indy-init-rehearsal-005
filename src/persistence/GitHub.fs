@@ -188,6 +188,16 @@ module GitHub =
                 elif kind = "RATE_LIMITED" then Error(RateLimited None)
                 else Error(Rejected(200, kind))
 
+    /// DEC-025 / EXT-DATA-004-O4: a classic token granting repo or admin scopes is refused. GitHub reports a classic
+    /// token's scopes in `X-OAuth-Scopes`; fine-grained and installation tokens send no such header.
+    let broadClassicScopes (r: HttpResponse) =
+        match header "x-oauth-scopes" r with
+        | Some scopes ->
+            scopes.Split(',')
+            |> Array.map (fun s -> s.Trim())
+            |> Array.exists (fun s -> s = "repo" || s.StartsWith("admin:", StringComparison.Ordinal) || s = "delete_repo" || s = "workflow")
+        | None -> false
+
     /// Git's blob id of exact bytes: SHA-1 of "blob <length>\0" + bytes. Lets a re-read prove which bytes are at a
     /// commit without downloading them.
     let gitBlobSha (bytes: byte[]) =

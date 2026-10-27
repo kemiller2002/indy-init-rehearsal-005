@@ -629,6 +629,17 @@ module Sync =
                 | Error t -> Error(asFailure t)
             match f.Purpose with
             | ProbeRepository ->
+                match outcome with
+                | Ok r when GitHub.broadClassicScopes r ->
+                    Ok(
+                        { m with
+                            Credential = None
+                            Generation = m.Generation + 1
+                            InFlight = Map.empty
+                            Connection = AccessDenied "Classic tokens with repo or admin scopes are refused. Use a fine-grained token for this repository only (Contents read/write, Metadata read)." },
+                        []
+                    )
+                | _ ->
                 match read GitHub.parseRepository with
                 | Ok info -> Ok(send ProbeHead (fun c t id -> GitHub.getBranchHead c t id) ({ m with Repository = Some info }, []))
                 | Error e -> Ok(loadFailed e st)
