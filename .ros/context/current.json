@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "1.0.0",
+  "protocolVersion": "1.0.0",
+  "repository": "indy-init-rehearsal-005",
+  "actor": "ros-bootstrap",
+  "startedAt": "2026-10-27T20:07:19.258Z",
+  "updatedAt": "2026-10-27T20:07:19.258Z",
+  "baselineDirtyPaths": [],
+  "workItems": [
+    {
+      "id": "ROS-INSTALL-3-22-0",
+      "type": "mechanical",
+      "state": "complete",
+      "semanticState": "complete",
+      "evidence": [
+        {
+          "type": "installation",
+          "path": ".ros/installation.json"
+        }
+      ],
+      "updatedAt": "2026-10-27T20:07:19.258Z",
+      "completedAt": "2026-10-27T20:07:19.258Z"
+    }
+  ]
+}
