@@ -150,7 +150,7 @@ let ``VER-006 the integrations were exercised in this run, not only compared as 
 // Requirements preservation (this run's re-run of the gate)
 
 [<Fact; Trait("obligation", "VPO-b5f193731c58028b"); Trait("obligation", "VPO-b55ed2a4a2fd465c")>]
-let ``AR-002 WDL-015 every baseline obligation, WDL-001..WDL-015 included, maps to a derived criterion or a recorded disposition`` () =
+let ``AR-002 WDL-015 every baseline obligation, WDL-001 to WDL-015 included, maps to a derived criterion or a recorded disposition`` () =
     let gate = load (Path.Combine(envPath "GATE_RECORDS", "preservation-gate/gate.json"))
     Assert.Equal(Some "pass", str "verdict" gate)
     let summary = (field "summary" gate).Value

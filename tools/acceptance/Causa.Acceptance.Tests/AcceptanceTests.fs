@@ -85,20 +85,24 @@ let ``TRX results take obligations from the test name and from trait tags`` () =
                  <UnitTestResult testId="1" testName="M.%s named" outcome="Passed" />
                  <UnitTestResult testId="2" testName="M.traited" outcome="Failed" />
                  <UnitTestResult testId="3" testName="M.not run" outcome="NotExecuted" />
+                 <UnitTestResult testId="4" testName="M.contract 5.2 dotted" outcome="Passed" />
                </Results><TestDefinitions>
                  <UnitTest id="1"><TestMethod className="M" name="%s named" codeBase="x.dll" /></UnitTest>
                  <UnitTest id="2"><TestMethod className="M" name="traited" codeBase="x.dll" /></UnitTest>
                  <UnitTest id="3"><TestMethod className="M" name="not run" codeBase="x.dll" /></UnitTest>
+                 <UnitTest id="4"><TestMethod className="M.contract 5" name="2 dotted" codeBase="x.dll" /></UnitTest>
                </TestDefinitions></TestRun>"""
             o1
             o1
-    let traits = Map.ofList [ ("M", "traited"), [ o2 ] ]
+    let traits = Map.ofList [ ("M", "traited"), [ o2 ]; ("M", "contract 5.2 dotted"), [ o3 ] ]
     let rs = parseTrx "r.trx" traits (XDocument.Parse trx)
     Assert.Equal<string list>([ o1 ], rs[0].Obligations)
     Assert.Equal("dotnet:M." + o1 + " named", rs[0].TestId)
     Assert.Equal<string list>([ o2 ], rs[1].Obligations)
     Assert.Equal(Failed, rs[1].Outcome)
     Assert.Equal(Skipped, rs[2].Outcome)
+    // VSTest split the dotted method name at its '.'; the trait is still found by the full name.
+    Assert.Equal<string list>([ o3 ], rs[3].Obligations)
 
 // A private trait name, so this self-test's fake id never reaches the real binding.
 [<Fact; Trait("obligation-selftest", "VPO-00000000000000ff")>]
