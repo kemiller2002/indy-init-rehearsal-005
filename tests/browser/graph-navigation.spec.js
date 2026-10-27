@@ -3,7 +3,7 @@
 // links Causa's graph wrote, and only within "#/investigations/" (allow-list).
 import { expect, test } from "./support/fixtures.js";
 
-const TEST_SITE = `http://127.0.0.1:${process.env.CAUSA_TEST_PORT ?? 4322}/`;
+const TEST_SITE = `http://127.0.0.1:${process.env.CAUSA_TEST_PORT ?? 4822}/`;
 const FIXTURE = "00000000-0000-4000-8000-0000000000f1";
 const PROTOCOL = "forma-workflow-host/1";
 
