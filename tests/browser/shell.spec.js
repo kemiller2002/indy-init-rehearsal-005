@@ -1,7 +1,8 @@
 // The Causa application shell in a real browser, against the production build (dist/) unless a test says otherwise.
 // Each test title carries the verification-plan obligation ids (VPO-…) it proves.
 import { readFileSync } from "node:fs";
-import { expect, test } from "@playwright/test";
+// Non-live specs use the network guard: GitHub is answered from recordings, any other host fails the test.
+import { expect, test } from "./support/fixtures.js";
 
 const TEST_SITE = "http://127.0.0.1:4322/";
 
@@ -108,7 +109,7 @@ test.describe("Administration and Settings (UI-018, UI-019, VER-007)", () => {
     await expect(table.getByRole("row", { name: /^commit/ })).toContainText(info.commit);
     await expect(table.getByRole("row", { name: /\.NET runtime \(loaded\)/ })).toContainText(/^.*\d+\.\d+\.\d+/);
     // Unknown and unavailable are distinct words, never an implied pass.
-    await expect(page.getByRole("row", { name: /Data provider/ })).toContainText("Unavailable");
+    await expect(page.getByRole("row", { name: /Data provider/ })).toContainText("GitHub (not connected)");
     await expect(page.getByRole("row", { name: /Investigation engine/ })).toContainText("Reported by the running application");
     // Versions and commits stay out of the workflow and the chrome.
     await page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Investigations" }).click();
@@ -143,7 +144,8 @@ test.describe("security of the shell", () => {
     await page.getByLabel("Repository (owner/name)").fill("someone/somewhere");
     await page.getByLabel("Workspace").fill("demo");
     await page.getByRole("button", { name: "Connect" }).click();
-    await expect(page.getByRole("alert").first()).toContainText("Nothing was sent");
+    // The recorded GitHub answer for an unknown repository (support/fixtures.js): refused, nothing loaded.
+    await expect(page.getByRole("alert").first()).toContainText("not found, or is not visible to this credential");
     const html = await page.content();
     expect(html).not.toContain(token);
     expect(page.url()).not.toContain(token);
