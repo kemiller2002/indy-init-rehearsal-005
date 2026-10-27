@@ -112,7 +112,9 @@ type Inputs =
       Pin: Text.Json.Nodes.JsonNode
       /// executable -> version reported, None when not on PATH.
       HostVersions: Map<string, string option>
-      RequiredHostTools: string list }
+      RequiredHostTools: string list
+      /// Whether package-lock.json is tracked by git. A lock that `npm install` just generated proves nothing.
+      PackageLockCommitted: bool }
 
 let private readText root rel =
     let p = Path.Combine(root, rel)
@@ -159,7 +161,7 @@ let evaluate (i: Inputs) : Check list =
                 |> List.map (fun (k, n) -> k, n.GetValue<string>()))
             |> Option.defaultValue []
             |> Map.ofList
-        let packageLock = Json.tryLoad (Path.Combine(root, "package-lock.json"))
+        let packageLock = if i.PackageLockCommitted then Json.tryLoad (Path.Combine(root, "package-lock.json")) else None
         [ for name, sys in npmPackages do
               match deps.TryFind name with
               | None -> yield { (gap (sprintf "npm.declared.%s" sys) (sprintf "package.json %s" name) (v sys) "not declared") with Status = Fail }

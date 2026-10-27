@@ -203,11 +203,14 @@ jobs:
       - name: Restore and build (project.assets.json, causa-acceptance)
         if: needs.reuse.outputs.lock-gate != 'reuse'
         run: dotnet build App.slnx -c Release
-      - name: Install Dokimos onto PATH
+      # Every host tool exactly as the channel resolves it (SHA-256 verified), so the gate observes real versions.
+      - name: Install the host tools onto PATH
         if: needs.reuse.outputs.lock-gate != 'reuse'
         run: |
-          exe=$(tools/acceptance/ci/install-dokimos.sh "$RUNNER_TEMP/dokimos")
-          dirname "$exe" >> "$GITHUB_PATH"
+          for t in "praxis praxis" "ordo ordo" "dokimos dokimos" "percepta-semantic percepta" "percepta percepta-repo"; do
+            set -- $t
+            tools/acceptance/ci/install-host-tool.sh "$1" "$2" "$RUNNER_TEMP/host-tools" >> "$GITHUB_PATH"
+          done
       - name: The pinned channel copy equals the registry file at the pinned commit
         if: needs.reuse.outputs.lock-gate != 'reuse'
         run: |
@@ -222,7 +225,8 @@ jobs:
         run: |
           set +e
           $CA lock-gate --root . --stack acceptance/stack/echelon-current-1.29.0.linux-x64.json --pin acceptance/stack/pin.json \
-            --require-host-tool dokimos --out TestResults/lock-gate/lock-gate.json \
+            --require-host-tool praxis --require-host-tool ordo --require-host-tool dokimos \
+            --require-host-tool percepta --require-host-tool percepta-repo --out TestResults/lock-gate/lock-gate.json \
             --context "sourceSha=$GITHUB_SHA" --context "runId=$GITHUB_RUN_ID"
           status=$?
           set -e

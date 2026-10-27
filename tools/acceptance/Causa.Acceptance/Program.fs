@@ -18,6 +18,7 @@ let usage =
   reuse-request --config acceptance/reuse.json --revision SHA --out FILE [--changed FILE] [--prior FILE]...
   reuse-decision --plan PLAN.json --test ID          Prints run or reuse.
   provenance  --plan PLAN.json --test ID --revision SHA --run-id ID --outcome passed|failed --out FILE
+  curation    --traceability FILE --out FILE         testBindings for Indy-init's verification-plan curation.
   report      --verdict FILE --traceability FILE --out FILE [--assessment FILE] [--lock-gate FILE] [--context k=v]...
 """
 
@@ -52,6 +53,16 @@ let traceOf opts root =
     let declared = Traceability.scanSources root (many opts "sources" |> List.map (full root))
     plan, Traceability.build plan results declared
 
+let gitTracks (root: string) (path: string) =
+    try
+        let psi = Diagnostics.ProcessStartInfo("git", sprintf "-C \"%s\" ls-files --error-unmatch -- %s" root path, RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false)
+        use p = Diagnostics.Process.Start psi
+        p.StandardOutput.ReadToEnd() |> ignore
+        p.StandardError.ReadToEnd() |> ignore
+        p.WaitForExit()
+        p.ExitCode = 0
+    with _ -> false
+
 let lockGate opts =
     let root = one opts "root" |> Option.defaultValue "."
     let stackPath = full root (required opts "stack")
@@ -61,7 +72,8 @@ let lockGate opts =
           ChannelSha256 = sha256File stackPath
           Pin = Json.load (full root (required opts "pin"))
           HostVersions = LockGate.hostTools |> List.map (fun (exe, _) -> exe, LockGate.runVersion exe) |> Map.ofList
-          RequiredHostTools = many opts "require-host-tool" }
+          RequiredHostTools = many opts "require-host-tool"
+          PackageLockCommitted = gitTracks root "package-lock.json" }
     let checks = LockGate.evaluate inputs
     let ctx = contextOf opts |> List.map (fun (k, v) -> k, jstr v)
     Json.write (required opts "out") (LockGate.toJson checks ctx) |> ignore
@@ -159,6 +171,33 @@ let provenance opts =
             Json.write (required opts "out") (jarr [ p ]) |> ignore
             0
 
+/// testBindings for Indy-init requirements-compiled/v1/curation/verification-plan.json, from a traceability file:
+/// the exact test identities bound to each baseline obligation (kind live for the live suite, else deterministic).
+/// The plan verifier reports PASS only for obligations the recompiled plan binds; this is the input for that
+/// curation, which the requirements owner applies and recompiles (new plan id). It never binds a missing obligation.
+let curation opts =
+    let trace = Json.load (required opts "traceability")
+    let bindings =
+        items "obligations" trace
+        |> List.choose (fun o ->
+            let tests =
+                items "tests" o
+                |> List.map (fun t ->
+                    let kind = if (strOr "" "resultFile" t).Contains "/live/" then "live" else "deterministic"
+                    strOr "" "testId" t, kind)
+                |> List.distinct
+                |> List.sort
+            if tests.IsEmpty then None
+            else
+                Some(
+                    jobj
+                        [ "obligation", jstr (strOr "" "sourceObligation" o)
+                          "tests", jarr (tests |> List.map (fun (id, k) -> jobj [ "id", jstr id; "kind", jstr k ])) ]
+                ))
+    Json.write (required opts "out") (jobj [ "testBindings", jarr bindings ]) |> ignore
+    printfn "%d obligations with bound tests" bindings.Length
+    0
+
 let report opts =
     let verdict = Json.load (required opts "verdict")
     let assessment = one opts "assessment" |> Option.bind Json.tryLoad
@@ -191,6 +230,7 @@ let main argv =
                 | "reuse-decision" -> reuseDecision opts
                 | "provenance" -> provenance opts
                 | "report" -> report opts
+                | "curation" -> curation opts
                 | other ->
                     eprintfn "unknown command %s\n%s" other usage
                     2

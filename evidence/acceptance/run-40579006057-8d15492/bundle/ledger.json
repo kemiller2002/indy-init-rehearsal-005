@@ -1,0 +1,1450 @@
+{
+  "schema": "causa.acceptance-ledger/2",
+  "run_id": "40579006057-1",
+  "source_commit_sha": "8d154928196bc95dcc6656d483c4acd13e909b6f",
+  "deployed_commit_sha": null,
+  "contract_version": "causa.acceptance-ledger/2; plan VP-e77a2134e1b0",
+  "frozen_fixture_digest": "unavailable: no frozen fixture set in this candidate",
+  "dependency_lock_sha": "7e068a11f00ef78ae1f2531563192ad9e4ef6b17bc45ad95aac7187a47805adf",
+  "interface_manifest_sha": "unavailable: no interface manifest in this candidate",
+  "requirements_baseline": {
+    "id": "BL-CAUSA-INDY-INIT-aab8f80c7743",
+    "repository": "kemiller2002/indy-init",
+    "commit": "aab8f80c7743392e794b3b631542903ed4ed6f64",
+    "sha256": "621e2f960038dcfb0daa2a9fe18a0c1c350faed297ba2856da1236a0360857b9"
+  },
+  "approvals_sha256": "3e70dcd2e87811c4f3744ee97585855639741c3ba7a63d98f4b842c7e86bace7",
+  "evidence_manifest_sha256": "b24bd2624613abf8a06052fa8d9301f4faa45bfa2323d7f57b660e9b6f6b975e",
+  "verification_plan": {
+    "planId": "VP-e77a2134e1b0",
+    "digest": "e77a2134e1b014539fd5e585a6c440debee03074dc274e3496c60b0e7c3b2942"
+  },
+  "scope_changes": [],
+  "requirements": [
+    {
+      "id": "AR-001",
+      "source_doc": "docs/AGENT-RELIABILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-a5795f29e0de763c, VPO-e30db6532f5cf262)"
+    },
+    {
+      "id": "AR-002",
+      "source_doc": "docs/AGENT-RELIABILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-b5f193731c58028b, VPO-413ff7efb9ab1eaf)"
+    },
+    {
+      "id": "AR-003",
+      "source_doc": "docs/AGENT-RELIABILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-9b0ea135ac4e6776, VPO-74e10fdbcee13f97)"
+    },
+    {
+      "id": "AR-004",
+      "source_doc": "docs/AGENT-RELIABILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [
+        "dotnet:Causa.Acceptance.Tests.AcceptanceTests.failing, missing, skipped or merely declared tests are never reported PASS",
+        "dotnet:Causa.Acceptance.Tests.AcceptanceTests.gates pass only on producers that succeeded in this run; absent, reused or failed producers do not"
+      ],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "1 of 2 obligations have no named test (VPO-60d3de8d19b647a8)"
+    },
+    {
+      "id": "AR-005",
+      "source_doc": "docs/AGENT-RELIABILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-a5e276239baf88ad, VPO-59214484c4423a46)"
+    },
+    {
+      "id": "AR-006",
+      "source_doc": "docs/AGENT-RELIABILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-6886a2a6e612f704, VPO-199103f9166730e7)"
+    },
+    {
+      "id": "AR-007",
+      "source_doc": "docs/AGENT-RELIABILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-42705f754abba51b, VPO-8d0817ad76ab9956)"
+    },
+    {
+      "id": "AR-008",
+      "source_doc": "docs/AGENT-RELIABILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-94507c8e92862459, VPO-7593c929d716d3bf)"
+    },
+    {
+      "id": "AR-009",
+      "source_doc": "docs/AGENT-RELIABILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-821ce84e76d497b9, VPO-787e24f3c23195e9)"
+    },
+    {
+      "id": "AR-010",
+      "source_doc": "docs/AGENT-RELIABILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-2f4beacb25bb0586, VPO-fbcff0eece408886)"
+    },
+    {
+      "id": "AR-011",
+      "source_doc": "docs/AGENT-RELIABILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-79a72fb717368c95, VPO-dbd2edcdfa078b0e)"
+    },
+    {
+      "id": "AR-012",
+      "source_doc": "docs/AGENT-RELIABILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-a59db6f04d98cd0d, VPO-33b57a9348c4707d)"
+    },
+    {
+      "id": "AR-013",
+      "source_doc": "docs/AGENT-RELIABILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-c83b17e570429db6, VPO-98deffeeff197c5d)"
+    },
+    {
+      "id": "AR-014",
+      "source_doc": "docs/AGENT-RELIABILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-770de2a43b888b53, VPO-c41f10e4ed8a086b)"
+    },
+    {
+      "id": "AR-015",
+      "source_doc": "docs/AGENT-RELIABILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "1 of 1 obligations have no named test (VPO-b54c8db02f0fb4b3)"
+    },
+    {
+      "id": "AR-017",
+      "source_doc": "docs/AGENT-RELIABILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-4f48b0b01fd918ea, VPO-30ecf50560947199)"
+    },
+    {
+      "id": "AR-018",
+      "source_doc": "docs/AGENT-RELIABILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-9827ff5a95a7c74f, VPO-b65e916f00fd843a)"
+    },
+    {
+      "id": "AR-019",
+      "source_doc": "docs/AGENT-RELIABILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "4 of 4 obligations have no named test (VPO-6f2f2edbfc6b5c65, VPO-a96869ed8f00e776, VPO-4a40040c5484b444, VPO-a191144b5315b64a)"
+    },
+    {
+      "id": "AR-020",
+      "source_doc": "docs/AGENT-RELIABILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "3 of 3 obligations have no named test (VPO-da69ee0106c21847, VPO-5e9adab59b7498ad, VPO-e6cb4bb12bf3f901)"
+    },
+    {
+      "id": "AR-021",
+      "source_doc": "docs/AGENT-RELIABILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "3 of 3 obligations have no named test (VPO-1382da3cee447700, VPO-d84c2e19e3161c81, VPO-936a73d2f53c22ad)"
+    },
+    {
+      "id": "AR-022",
+      "source_doc": "docs/AGENT-RELIABILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "3 of 3 obligations have no named test (VPO-7f06980ae32e712b, VPO-a71f7df7b092e654, VPO-7b54ff75e3784cae)"
+    },
+    {
+      "id": "AR-023",
+      "source_doc": "docs/AGENT-RELIABILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "4 of 4 obligations have no named test (VPO-d1885e94421cf8a4, VPO-9145c1f2ed57ebca, VPO-e6f25a1308c520c6, VPO-7478642aec32b7da)"
+    },
+    {
+      "id": "AR-024",
+      "source_doc": "docs/AGENT-RELIABILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-2825c9554af4f069, VPO-5feb800a1da326b9)"
+    },
+    {
+      "id": "EXT-DATA-001",
+      "source_doc": "docs/REHEARSAL-EXTERNAL-DATA-BOUNDARY.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-f8cbaa452cd4eb0b, VPO-0304a8342e7147dd)"
+    },
+    {
+      "id": "EXT-DATA-002",
+      "source_doc": "docs/REHEARSAL-EXTERNAL-DATA-BOUNDARY.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-d79488f204e14ff8, VPO-8ba57ebcfe06030f)"
+    },
+    {
+      "id": "EXT-DATA-003",
+      "source_doc": "docs/REHEARSAL-EXTERNAL-DATA-BOUNDARY.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-1e613b30576dc52c, VPO-70c58e3278725c35)"
+    },
+    {
+      "id": "EXT-DATA-004",
+      "source_doc": "docs/REHEARSAL-EXTERNAL-DATA-BOUNDARY.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "4 of 4 obligations have no named test (VPO-2de744fb2c8bdc70, VPO-0e682dd716a12d49, VPO-54b0eef91ceeada4, VPO-a460a95198e68863)"
+    },
+    {
+      "id": "EXT-DATA-005",
+      "source_doc": "docs/REHEARSAL-EXTERNAL-DATA-BOUNDARY.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-0b0fb80724185366, VPO-c135d16c59f5baf8)"
+    },
+    {
+      "id": "EXT-DATA-006",
+      "source_doc": "docs/REHEARSAL-EXTERNAL-DATA-BOUNDARY.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-7ced47ef45099aab, VPO-d7fbd84e40ded145)"
+    },
+    {
+      "id": "EXT-DATA-007",
+      "source_doc": "docs/REHEARSAL-EXTERNAL-DATA-BOUNDARY.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-4c2041ba04ba0b31, VPO-57fe23e7c821450f)"
+    },
+    {
+      "id": "EXT-DATA-008",
+      "source_doc": "docs/REHEARSAL-EXTERNAL-DATA-BOUNDARY.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-61b2e81f99761d55, VPO-9c6055c47e4eb07d)"
+    },
+    {
+      "id": "EXT-DATA-009",
+      "source_doc": "docs/REHEARSAL-EXTERNAL-DATA-BOUNDARY.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-05eeddad528e2cd4, VPO-b50ee1d4e3e78f25)"
+    },
+    {
+      "id": "EXT-DATA-010",
+      "source_doc": "docs/REHEARSAL-EXTERNAL-DATA-BOUNDARY.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "3 of 3 obligations have no named test (VPO-d8a63d43b7a2cf56, VPO-c6c90d9f4acc5fe6, VPO-37d860d18826cf0a)"
+    },
+    {
+      "id": "EXT-DATA-011",
+      "source_doc": "docs/REHEARSAL-EXTERNAL-DATA-BOUNDARY.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-5933d986a6ba6dc3, VPO-2d84a4c6df612b0d)"
+    },
+    {
+      "id": "EXT-DATA-012",
+      "source_doc": "docs/REHEARSAL-EXTERNAL-DATA-BOUNDARY.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "3 of 3 obligations have no named test (VPO-074f1b1804e54869, VPO-0157918192f093da, VPO-43aef41e6256b122)"
+    },
+    {
+      "id": "EXT-DATA-013",
+      "source_doc": "docs/REHEARSAL-EXTERNAL-DATA-BOUNDARY.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "3 of 3 obligations have no named test (VPO-4b4747eaff96e385, VPO-c81484cbcf203d4f, VPO-77f6e22e08d5bba0)"
+    },
+    {
+      "id": "PF-001",
+      "source_doc": "docs/PROVIDER-FIXTURE-AND-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "3 of 3 obligations have no named test (VPO-b090ff3e3c16c13d, VPO-ff3dc45c64bfa0cb, VPO-da07c2ac97baa9f1)"
+    },
+    {
+      "id": "PF-002",
+      "source_doc": "docs/PROVIDER-FIXTURE-AND-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-c90593e00b2dae72, VPO-acd13bfa08dba51a)"
+    },
+    {
+      "id": "PF-003",
+      "source_doc": "docs/PROVIDER-FIXTURE-AND-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "4 of 4 obligations have no named test (VPO-6eaf42e86c5ffad7, VPO-d4b0d50550578aeb, VPO-00c1408c9f31d4a2, VPO-0a23bb42b8fb58b4)"
+    },
+    {
+      "id": "PF-004",
+      "source_doc": "docs/PROVIDER-FIXTURE-AND-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "3 of 3 obligations have no named test (VPO-557743cb4997c484, VPO-3d67d1f2b8287e39, VPO-dc48d066cfa2309d)"
+    },
+    {
+      "id": "PF-005",
+      "source_doc": "docs/PROVIDER-FIXTURE-AND-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-0c1ba98e8a26ee4b, VPO-5581f11810c02191)"
+    },
+    {
+      "id": "PF-006",
+      "source_doc": "docs/PROVIDER-FIXTURE-AND-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-ad958e7a60d7fd9b, VPO-f00be0cb5a2bb0f8)"
+    },
+    {
+      "id": "PF-007",
+      "source_doc": "docs/PROVIDER-FIXTURE-AND-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-9d59cc57fd44b927, VPO-f52d9071426e82b3)"
+    },
+    {
+      "id": "PF-008",
+      "source_doc": "docs/PROVIDER-FIXTURE-AND-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-533a2328decf91cb, VPO-8fbeadc2bfc10f7a)"
+    },
+    {
+      "id": "PF-009",
+      "source_doc": "docs/PROVIDER-FIXTURE-AND-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "3 of 3 obligations have no named test (VPO-cd9dd8ec730c3d3e, VPO-2d4b7557ce013e50, VPO-8c435e1ebdf43e7c)"
+    },
+    {
+      "id": "PF-011",
+      "source_doc": "docs/PROVIDER-FIXTURE-AND-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "6 of 6 obligations have no named test (VPO-8579de88e6b699f8, VPO-91b97073e4e85125, VPO-74efa48033c82a96, VPO-903077d337faf198, VPO-da8e100075889a8d, VPO-2a6aa540f193ab6c)"
+    },
+    {
+      "id": "PF-012",
+      "source_doc": "docs/PROVIDER-FIXTURE-AND-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "3 of 3 obligations have no named test (VPO-89df49b291078827, VPO-23b26660a58ef990, VPO-39d6eb77cb2097af)"
+    },
+    {
+      "id": "PF-013",
+      "source_doc": "docs/PROVIDER-FIXTURE-AND-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "4 of 4 obligations have no named test (VPO-bb13dc090d4c152b, VPO-03b8215501e25334, VPO-ab625062f52606bb, VPO-3d7d8f82a053dce7)"
+    },
+    {
+      "id": "PF-014",
+      "source_doc": "docs/PROVIDER-FIXTURE-AND-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "4 of 4 obligations have no named test (VPO-d87bf2493f9268ae, VPO-c81b5785b2ffa1c2, VPO-6292ea3728a2532b, VPO-7672a3ef81f74ac5)"
+    },
+    {
+      "id": "PF-015",
+      "source_doc": "docs/PROVIDER-FIXTURE-AND-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "4 of 4 obligations have no named test (VPO-a59ccf551bbd8407, VPO-3721d1beaef6b57f, VPO-ca58030e3eecdf9b, VPO-9a5982e4a5994629)"
+    },
+    {
+      "id": "PF-016",
+      "source_doc": "docs/PROVIDER-FIXTURE-AND-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-8cd7943440a55f6f, VPO-727b07dc99ecb7c5)"
+    },
+    {
+      "id": "PF-017",
+      "source_doc": "docs/PROVIDER-FIXTURE-AND-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-92aa50bd20b70eeb, VPO-3c80e06a4abb77cf)"
+    },
+    {
+      "id": "PF-018",
+      "source_doc": "docs/PROVIDER-FIXTURE-AND-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-dfe1c434e9f7f329, VPO-4b7f3050c9ba72b7)"
+    },
+    {
+      "id": "PF-019",
+      "source_doc": "docs/PROVIDER-FIXTURE-AND-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-7833f2bbb6af960d, VPO-eac3d689399c924e)"
+    },
+    {
+      "id": "PF-020",
+      "source_doc": "docs/PROVIDER-FIXTURE-AND-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-fe04733e99e5e461, VPO-b58ad46c59853677)"
+    },
+    {
+      "id": "UI-001",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "6 of 6 obligations have no named test (VPO-2f4f9de66ddd6434, VPO-02b53bd16db4ee17, VPO-05f9c2a398ed7454, VPO-985886de7f012c74, VPO-1cd1f428fe646f06, VPO-b3ea3d93850c4c8f)"
+    },
+    {
+      "id": "UI-003",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "4 of 4 obligations have no named test (VPO-33324aeb860bce06, VPO-c3326322b8ed473a, VPO-7fe0d0f0d00df8a0, VPO-db25c20e9414ab46)"
+    },
+    {
+      "id": "UI-004",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "6 of 6 obligations have no named test (VPO-be99a964783c59b5, VPO-9659118aa1ef95ff, VPO-b9af1bcfc961c8bb, VPO-be22751d9b5b8098, VPO-3b9b2a8a4bf56535, VPO-04eb901270c2994a)"
+    },
+    {
+      "id": "UI-005",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "4 of 4 obligations have no named test (VPO-ff2e466b7aaa3e12, VPO-cc57508f3ac056de, VPO-34334672f9ff0014, VPO-c7c84a08e62427e4)"
+    },
+    {
+      "id": "UI-006",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "6 of 6 obligations have no named test (VPO-89ed6170f531961e, VPO-b3efad6eb85360be, VPO-4c06d10238d15c5c, VPO-34731ac9a977b818, VPO-d60e3a3a25cb106d, VPO-bb08b9a414ba4cd7)"
+    },
+    {
+      "id": "UI-010",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "5 of 5 obligations have no named test (VPO-4355a83607ddc8da, VPO-e54ee03f405cdc8f, VPO-97351596eb39e14e, VPO-b8e1657130d006fd, VPO-fba8a61be6d12adf)"
+    },
+    {
+      "id": "UI-011",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "5 of 5 obligations have no named test (VPO-447fd64210e3d9e3, VPO-0684fde6ced06208, VPO-40f80428200fc71c, VPO-cb75698b278332f5, VPO-0e6a69f7673cace8)"
+    },
+    {
+      "id": "UI-013",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "4 of 4 obligations have no named test (VPO-f1a416eaeec6c129, VPO-21abf6acd60d0acc, VPO-d08de632c7c1a4ab, VPO-adf482d16e75a882)"
+    },
+    {
+      "id": "UI-014",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "3 of 3 obligations have no named test (VPO-9501908622238a66, VPO-0bd752bd2ac89796, VPO-014f5e1139ed692b)"
+    },
+    {
+      "id": "UI-015",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "4 of 4 obligations have no named test (VPO-59c5cc78868b7d74, VPO-dccec1843ba79b6b, VPO-5c8d5917d17f8960, VPO-fd43b3e4e7e02f59)"
+    },
+    {
+      "id": "UI-016",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "17 of 17 obligations have no named test (VPO-cecb71404071030d, VPO-3d80d031f05ec0dc, VPO-d0c711c2da0f3800, VPO-e0e945fc040386e1, VPO-fbc386df77130f2d, VPO-8905fd51176a3fc6, VPO-fe19413526420c16, VPO-d657e8dd084961b1, VPO-f4f9d09fc20df79d, VPO-5a993f5a761fd6ee, VPO-6051ea46b65ebe27, VPO-7fd9b69b4aa5b401, VPO-de371f74930347b8, VPO-406b16e7341d28c2, VPO-3f1eb00d9960fe1c, VPO-b3cab23e517cd0d3, VPO-1a1aae8ffa920386)"
+    },
+    {
+      "id": "UI-017",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "5 of 5 obligations have no named test (VPO-7b0ba1d1f6f663a5, VPO-78541ad7e7bfc045, VPO-0b37bb6a955165e2, VPO-7e849b4055bdfadf, VPO-c18f969a9c8b65bf)"
+    },
+    {
+      "id": "UI-018",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "6 of 6 obligations have no named test (VPO-41642822de594b56, VPO-a07751ce0dce5689, VPO-a74264901d267d03, VPO-97a56b1abd22a396, VPO-18e6fc4dd0730354, VPO-b27f3de8fd81d25c)"
+    },
+    {
+      "id": "UI-019",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "6 of 6 obligations have no named test (VPO-23d8a096e64b2625, VPO-1224fd4d58ddcaa6, VPO-d39e3d1f28d9e2ac, VPO-fc28e815f45f2e9b, VPO-c5d77a4b2eb52927, VPO-a500f6d5a0f3e254)"
+    },
+    {
+      "id": "UI-020",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "4 of 4 obligations have no named test (VPO-e5cfc842f2367421, VPO-9eb8f87800355c73, VPO-86dfcce77d8a048f, VPO-e5017d9f8ae702fb)"
+    },
+    {
+      "id": "UI-021",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "3 of 3 obligations have no named test (VPO-2ad36bd062191d2b, VPO-026da8a495857549, VPO-57c0df8ba4399c17)"
+    },
+    {
+      "id": "UI-022",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "6 of 6 obligations have no named test (VPO-8f9c1b8914be43f6, VPO-3f3db98e519aa95c, VPO-3fc89c9d18b678a4, VPO-c6f789b832466ab9, VPO-78852bf4d2da804b, VPO-56201f80b312c7c8)"
+    },
+    {
+      "id": "UI-023",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "4 of 4 obligations have no named test (VPO-d0e33c8aaaf705f2, VPO-c8114e2b7bd759fa, VPO-f0256bc31283be14, VPO-58231f4725864068)"
+    },
+    {
+      "id": "UI-024",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "6 of 6 obligations have no named test (VPO-d8ac36bdb18a7b39, VPO-e8570ba5427ce32b, VPO-d4a9c8fd05795e00, VPO-6f0a2e18f9a19003, VPO-e1fb14be4ca10f5f, VPO-7fff10ce82e7c162)"
+    },
+    {
+      "id": "UI-025",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "4 of 4 obligations have no named test (VPO-12f35805677987db, VPO-e49834d009021cd0, VPO-fcf404b4a7afa635, VPO-f97eb988899c23af)"
+    },
+    {
+      "id": "UI-026",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "4 of 4 obligations have no named test (VPO-684e6c5f94988bd9, VPO-db2d02dab493e914, VPO-b36c63fba6f83d4c, VPO-05441c1c18ce3dc1)"
+    },
+    {
+      "id": "UI-029",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "4 of 4 obligations have no named test (VPO-7bb1e8c5bdccc2f2, VPO-628a11b571e65796, VPO-625e96f365f2c1b8, VPO-dba405d7ed58872b)"
+    },
+    {
+      "id": "UI-030",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "4 of 4 obligations have no named test (VPO-bff050b54a481780, VPO-885e4767b84371de, VPO-0a1011b7c5476354, VPO-f70d9f1e42371d48)"
+    },
+    {
+      "id": "UI-031",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "5 of 5 obligations have no named test (VPO-5c147c83f19f2c8c, VPO-a4ab030e74ad080a, VPO-5fe930a650a08b04, VPO-7fe69b1e93fa0c7f, VPO-06e616ae2378cfcd)"
+    },
+    {
+      "id": "UI-032",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-29cc81617de241fb, VPO-141be05c7de03e17)"
+    },
+    {
+      "id": "UI-033",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-5a85f3ea85db30b2, VPO-63d89380e8017050)"
+    },
+    {
+      "id": "UI-034",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "3 of 3 obligations have no named test (VPO-f3ebcdbe15cdf92d, VPO-8f8156f91b64963b, VPO-a2099d5e8abc8ef0)"
+    },
+    {
+      "id": "UI-038",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-f8666daf6fdf79d7, VPO-ffda9fea0324a42e)"
+    },
+    {
+      "id": "UI-039",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-ad49e5ff43f1ace6, VPO-f1f1bfbfc325fa21)"
+    },
+    {
+      "id": "UI-040",
+      "source_doc": "docs/CAUSA-UI-EXPERIENCE-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-8a5de7e5afae98cb, VPO-45c306b736593248)"
+    },
+    {
+      "id": "VER-001",
+      "source_doc": "docs/SYSTEM-VERSION-AND-COMPATIBILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "3 of 3 obligations have no named test (VPO-f8c818739fb10bb9, VPO-6ae60e9f7196e16c, VPO-e6647e8155448d52)"
+    },
+    {
+      "id": "VER-002",
+      "source_doc": "docs/SYSTEM-VERSION-AND-COMPATIBILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "3 of 3 obligations have no named test (VPO-5281c2e8b5927722, VPO-924f0b36b70bfd0e, VPO-d4566deb24f7e80b)"
+    },
+    {
+      "id": "VER-003",
+      "source_doc": "docs/SYSTEM-VERSION-AND-COMPATIBILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "3 of 3 obligations have no named test (VPO-d7cf349736bfc48f, VPO-b06105a4b3121295, VPO-882ef92ed9177a58)"
+    },
+    {
+      "id": "VER-004",
+      "source_doc": "docs/SYSTEM-VERSION-AND-COMPATIBILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "3 of 3 obligations have no named test (VPO-0fcb67bd52732582, VPO-90a9a6272db10df8, VPO-e362dff6239f51ed)"
+    },
+    {
+      "id": "VER-005",
+      "source_doc": "docs/SYSTEM-VERSION-AND-COMPATIBILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-8828df556b382d9a, VPO-8deeef0ef7b7e4ab)"
+    },
+    {
+      "id": "VER-006",
+      "source_doc": "docs/SYSTEM-VERSION-AND-COMPATIBILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "3 of 3 obligations have no named test (VPO-4e417c6f238cb460, VPO-b82b86a55e20e54f, VPO-86b8bffb323a80b7)"
+    },
+    {
+      "id": "VER-007",
+      "source_doc": "docs/SYSTEM-VERSION-AND-COMPATIBILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-b93e86bd3809524a, VPO-183d6671da7467b8)"
+    },
+    {
+      "id": "VER-008",
+      "source_doc": "docs/SYSTEM-VERSION-AND-COMPATIBILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [
+        "dotnet:Causa.Acceptance.Tests.AcceptanceTests.missing dependencies or unverifiable artifacts never yield PASS",
+        "dotnet:Causa.Acceptance.Tests.AcceptanceTests.the lock gate fails when an installed artifact differs from the locked set"
+      ],
+      "evidence_paths": [
+        "evidence/requirements/VER-008.json"
+      ],
+      "status": "PASS",
+      "reason": "all 2 obligations bound to executed tests that passed in run 40579006057-1"
+    },
+    {
+      "id": "VER-010",
+      "source_doc": "docs/SYSTEM-VERSION-AND-COMPATIBILITY-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-6f0348e05133ebd2, VPO-1d26080e6f69aad4)"
+    },
+    {
+      "id": "WDL-001",
+      "source_doc": "docs/WORKFLOW-DIAGRAM-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-b34d65289bec1814, VPO-35548bc529249967)"
+    },
+    {
+      "id": "WDL-002",
+      "source_doc": "docs/WORKFLOW-DIAGRAM-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-69f661459a587bbd, VPO-ebaf420b3a7538cd)"
+    },
+    {
+      "id": "WDL-003",
+      "source_doc": "docs/WORKFLOW-DIAGRAM-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-0a171a55852aaf80, VPO-d2d5200b61947ce8)"
+    },
+    {
+      "id": "WDL-004",
+      "source_doc": "docs/WORKFLOW-DIAGRAM-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-beeaf5b2a56c521d, VPO-9ecccb3e2aa9f3f4)"
+    },
+    {
+      "id": "WDL-005",
+      "source_doc": "docs/WORKFLOW-DIAGRAM-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-434d1a1d24b4b20e, VPO-2a3f7cbe7df14c03)"
+    },
+    {
+      "id": "WDL-006",
+      "source_doc": "docs/WORKFLOW-DIAGRAM-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-9fe0158bf99720e2, VPO-37a1821f8918e8a9)"
+    },
+    {
+      "id": "WDL-007",
+      "source_doc": "docs/WORKFLOW-DIAGRAM-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-39cfd9f8545f99b9, VPO-170fa438de9df91f)"
+    },
+    {
+      "id": "WDL-008",
+      "source_doc": "docs/WORKFLOW-DIAGRAM-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-94576f95354806bd, VPO-17ea30ea2f160b62)"
+    },
+    {
+      "id": "WDL-009",
+      "source_doc": "docs/WORKFLOW-DIAGRAM-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-531b33816ba9cddf, VPO-7f9018a0a0d1e32b)"
+    },
+    {
+      "id": "WDL-010",
+      "source_doc": "docs/WORKFLOW-DIAGRAM-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-1c3905d9fa746df0, VPO-3eba4ae44451132f)"
+    },
+    {
+      "id": "WDL-011",
+      "source_doc": "docs/WORKFLOW-DIAGRAM-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-0fa99d435ca39516, VPO-b148b239fc1c24b0)"
+    },
+    {
+      "id": "WDL-012",
+      "source_doc": "docs/WORKFLOW-DIAGRAM-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-3ec21931ff613a67, VPO-f635d053f07b64fe)"
+    },
+    {
+      "id": "WDL-014",
+      "source_doc": "docs/WORKFLOW-DIAGRAM-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-4c6f9ea0dcc0bd29, VPO-adec3c95bc6ac2c4)"
+    },
+    {
+      "id": "WDL-015",
+      "source_doc": "docs/WORKFLOW-DIAGRAM-INTEGRATION-REQUIREMENTS.md",
+      "priority": "P0",
+      "owner": "rehearsal-005",
+      "implementation_paths": [],
+      "tests": [],
+      "evidence_paths": [],
+      "status": "NOT_RUN",
+      "reason": "2 of 2 obligations have no named test (VPO-b55ed2a4a2fd465c, VPO-97136db88b6c60fb)"
+    }
+  ],
+  "gates": [
+    {
+      "id": "G0",
+      "title": "Scope",
+      "status": "NOT_RUN",
+      "verified_sha": null,
+      "evidence_paths": [],
+      "requires": [
+        "preservation-gate"
+      ],
+      "reason": "producer(s) did not succeed in this run: preservation-gate"
+    },
+    {
+      "id": "G1",
+      "title": "Dependencies",
+      "status": "NOT_RUN",
+      "verified_sha": null,
+      "evidence_paths": [],
+      "requires": [
+        "lock-gate",
+        "stack-smoke"
+      ],
+      "reason": "producer(s) did not succeed in this run: lock-gate, stack-smoke"
+    },
+    {
+      "id": "G2",
+      "title": "Interfaces",
+      "status": "NOT_RUN",
+      "verified_sha": null,
+      "evidence_paths": [],
+      "requires": [
+        "interface-manifest"
+      ],
+      "reason": "producer(s) did not succeed in this run: interface-manifest"
+    },
+    {
+      "id": "G3",
+      "title": "Domain",
+      "status": "NOT_RUN",
+      "verified_sha": null,
+      "evidence_paths": [],
+      "requires": [
+        "core",
+        "domain-obligations"
+      ],
+      "reason": "producer(s) did not succeed in this run: domain-obligations"
+    },
+    {
+      "id": "G4",
+      "title": "Frozen data",
+      "status": "NOT_RUN",
+      "verified_sha": null,
+      "evidence_paths": [],
+      "requires": [
+        "frozen-data"
+      ],
+      "reason": "producer(s) did not succeed in this run: frozen-data"
+    },
+    {
+      "id": "G5",
+      "title": "UI",
+      "status": "NOT_RUN",
+      "verified_sha": null,
+      "evidence_paths": [],
+      "requires": [
+        "browser",
+        "percepta-verify-app"
+      ],
+      "reason": "producer(s) did not succeed in this run: percepta-verify-app"
+    },
+    {
+      "id": "G6",
+      "title": "Persistence",
+      "status": "NOT_RUN",
+      "verified_sha": null,
+      "evidence_paths": [],
+      "requires": [
+        "live"
+      ],
+      "reason": "producer(s) did not succeed in this run: live"
+    },
+    {
+      "id": "G7",
+      "title": "Defect class",
+      "status": "NOT_RUN",
+      "verified_sha": null,
+      "evidence_paths": [],
+      "requires": [
+        "defect-class-review"
+      ],
+      "reason": "producer(s) did not succeed in this run: defect-class-review"
+    },
+    {
+      "id": "G8",
+      "title": "Candidate",
+      "status": "NOT_RUN",
+      "verified_sha": null,
+      "evidence_paths": [],
+      "requires": [
+        "core",
+        "site",
+        "browser",
+        "live",
+        "lock-gate",
+        "traceability"
+      ],
+      "reason": "producer(s) did not succeed in this run: site, live, lock-gate, traceability"
+    },
+    {
+      "id": "G9",
+      "title": "Deployment",
+      "status": "NOT_RUN",
+      "verified_sha": null,
+      "evidence_paths": [],
+      "requires": [
+        "deploy",
+        "deployed-smoke",
+        "core",
+        "site",
+        "browser",
+        "live",
+        "lock-gate",
+        "traceability"
+      ],
+      "reason": "producer(s) did not succeed in this run: deploy, deployed-smoke, site, live, lock-gate, traceability"
+    }
+  ],
+  "defect_classes": [
+    {
+      "id": "DC-001",
+      "severity": "HIGH",
+      "status": "NOT_RUN",
+      "fix_sha": null,
+      "reviewer_evidence": null,
+      "evidence_paths": [],
+      "tests": [
+        "DCT-001-A",
+        "DCT-001-B"
+      ],
+      "reason": "class closure not recorded: needs failing-first tests, fix SHA and independent review (G7)"
+    },
+    {
+      "id": "DC-002",
+      "severity": "HIGH",
+      "status": "NOT_RUN",
+      "fix_sha": null,
+      "reviewer_evidence": null,
+      "evidence_paths": [],
+      "tests": [
+        "DCT-002-A",
+        "DCT-002-B"
+      ],
+      "reason": "class closure not recorded: needs failing-first tests, fix SHA and independent review (G7)"
+    },
+    {
+      "id": "DC-003",
+      "severity": "HIGH",
+      "status": "NOT_RUN",
+      "fix_sha": null,
+      "reviewer_evidence": null,
+      "evidence_paths": [],
+      "tests": [
+        "DCT-003-A"
+      ],
+      "reason": "class closure not recorded: needs failing-first tests, fix SHA and independent review (G7)"
+    },
+    {
+      "id": "DC-004",
+      "severity": "HIGH",
+      "status": "NOT_RUN",
+      "fix_sha": null,
+      "reviewer_evidence": null,
+      "evidence_paths": [],
+      "tests": [
+        "DCT-004-A"
+      ],
+      "reason": "class closure not recorded: needs failing-first tests, fix SHA and independent review (G7)"
+    },
+    {
+      "id": "DC-005",
+      "severity": "HIGH",
+      "status": "NOT_RUN",
+      "fix_sha": null,
+      "reviewer_evidence": null,
+      "evidence_paths": [],
+      "tests": [
+        "DCT-005-A"
+      ],
+      "reason": "class closure not recorded: needs failing-first tests, fix SHA and independent review (G7)"
+    },
+    {
+      "id": "DC-006",
+      "severity": "HIGH",
+      "status": "NOT_RUN",
+      "fix_sha": null,
+      "reviewer_evidence": null,
+      "evidence_paths": [],
+      "tests": [
+        "DCT-006-A"
+      ],
+      "reason": "class closure not recorded: needs failing-first tests, fix SHA and independent review (G7)"
+    },
+    {
+      "id": "R3-LESSON-3",
+      "severity": "HIGH",
+      "status": "NOT_RUN",
+      "fix_sha": null,
+      "reviewer_evidence": null,
+      "evidence_paths": [],
+      "tests": [
+        "DCT-INPUT-A"
+      ],
+      "reason": "class closure not recorded: needs failing-first tests, fix SHA and independent review (G7)"
+    },
+    {
+      "id": "DC-001..DC-005",
+      "severity": "HIGH",
+      "status": "NOT_RUN",
+      "fix_sha": null,
+      "reviewer_evidence": null,
+      "evidence_paths": [],
+      "tests": [
+        "DCT-LIVE-A"
+      ],
+      "reason": "class closure not recorded: needs failing-first tests, fix SHA and independent review (G7)"
+    }
+  ],
+  "unresolved_decisions": [],
+  "accepted": false
+}

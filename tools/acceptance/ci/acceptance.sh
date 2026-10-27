@@ -44,6 +44,8 @@ manifest_sha=$($CA ledger --root . --plan "$plan" --results "$RESULTS" --sources
   --run-id "$RUN_ID" --source-sha "$SOURCE_SHA" $deployed_arg --out-dir "$OUT/bundle" \
   --command "tools/acceptance/ci/acceptance.sh (run $RUN_ID)" | tail -n 1)
 echo "$manifest_sha" > "$OUT/evidence-manifest.sha256"
+# Input for the requirements owner's plan curation (testBindings); never applied here.
+$CA curation --traceability "$OUT/bundle/traceability.json" --out "$OUT/curation-test-bindings.json"
 
 verify() {
   python3 "$INDY_INIT/tools/compute-acceptance-verdict.py" "$OUT/bundle/ledger.json" --repo . \
