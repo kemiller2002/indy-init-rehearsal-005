@@ -157,6 +157,27 @@ let extend (model: Model) (view: ViewState) : ViewState =
     // ---- S23: persistence conflict recovery ----
     let conflict = on Overview && ws.Sync = Conflict
 
+    // ---- S08: epistemic blocker detail (an open question or contradiction selected on the overview) ----
+    let blocker =
+        if not (on Overview) || model.Selected = "" then None
+        else
+            detail.Unknowns
+            |> List.tryFind (fun u -> u.Id = model.Selected)
+            |> Option.map (fun u -> "Open question", u)
+            |> Option.orElse (detail.Contradictions |> List.tryFind (fun c -> c.Id = model.Selected) |> Option.map (fun c -> "Contradiction", c))
+
+    let blockerId = blocker |> Option.map (fun (_, r) -> r.Id) |> Option.defaultValue ""
+    let isContradiction = blocker |> Option.exists (fun (k, _) -> k = "Contradiction")
+    let waiting = caps |> List.filter (fun c -> not c.Legal && c.BlockerId = Some blockerId && blockerId <> "")
+
+    let resolveUnknown =
+        control caps "ResolveUnknown" "Mark the question answered" [ "ResolveUnknown"; "ResolveUnknown:" + blockerId ]
+            (if isContradiction then "This is a contradiction, not an open question." else "This question cannot be marked answered in its current state.") overviewBlocker
+
+    let resolveContradiction =
+        control caps "ResolveContradiction" "Mark the contradiction resolved" [ "ResolveContradiction"; "ResolveContradiction:" + blockerId ]
+            (if isContradiction then "This contradiction cannot be marked resolved in its current state." else "This is an open question, not a contradiction.") overviewBlocker
+
     // ---- S24: settings semantic manifest ----
     let pin =
         match ws.Capabilities |> List.tryFind (fun c -> c.Id = "PinPolicyVersion") with
@@ -283,7 +304,7 @@ let extend (model: Model) (view: ViewState) : ViewState =
           "an.diff.capabilities", items (history |> Option.map (fun h -> lines h.CapabilityChanges) |> Option.defaultValue [])
           "an.diff.capabilities.empty", flag (history |> Option.forall (fun h -> h.CapabilityChanges.IsEmpty))
           // S23
-          "an.overview.screen", text (if conflict then "persistence-conflict-recovery" else "investigation-overview")
+          "an.overview.screen", text (if conflict then "persistence-conflict-recovery" elif blocker.IsSome then "epistemic-blocker-detail" else "investigation-overview")
           "an.conflict", flag conflict
           "an.conflict.local", text (inv |> Option.map (fun i -> $"This device: version {i.Version} of “{i.Title}”, including your change. It is kept here and is not saved to GitHub.") |> Option.defaultValue "")
           "an.conflict.remote",
@@ -294,6 +315,21 @@ let extend (model: Model) (view: ViewState) : ViewState =
           )
           "an.conflict.pending", text "Your changes since the last confirmed save are held on this device. Nothing is sent to GitHub until you choose below."
           "an.conflict.semantic", text "Whether the two versions disagree in meaning is not decided here: reloading GitHub's version keeps your change so both can be compared, and nothing is merged automatically."
+          // S08
+          "an.blocker.show", flag blocker.IsSome
+          "an.blocker.kind", text (blocker |> Option.map fst |> Option.defaultValue "")
+          "an.blocker.text", text (blocker |> Option.map (fun (_, r) -> r.Text) |> Option.defaultValue "")
+          "an.blocker.state", text (blocker |> Option.map (fun (_, r) -> r.State) |> Option.defaultValue "")
+          "an.blocker.related", items (blocker |> Option.map (fun (_, r) -> evidenceRows r.Related) |> Option.defaultValue [])
+          "an.blocker.blocks", items (waiting |> List.map (fun c -> item [ "id", c.Id; "text", c.Label; "state", c.Reason |> Option.defaultValue "" ]))
+          "an.blocker.blocks.empty", flag waiting.IsEmpty
+          "an.blocker.path",
+          text (
+              if isContradiction then "Resolve it with a basis that explains the disagreement, or accept it as residual uncertainty. Either is recorded in the history."
+              else "Answer it with a basis, or accept it as residual uncertainty. Either is recorded in the history."
+          )
+          "an.form.resolveUnknown.basis", text (field "ResolveUnknown.basis")
+          "an.form.resolveContradiction.basis", text (field "ResolveContradiction.basis")
           // S24
           "an.manifest.semantic", text "Semantic version 1.0.0 of the Causa investigation model (storage contract v1.0.0). It changes only through an approved semantic evolution, never silently."
           "an.manifest.pack", text "No domain pack is installed: the core investigation model applies. Storage contract v1.0.0 allows no domain packs."
@@ -311,5 +347,7 @@ let extend (model: Model) (view: ViewState) : ViewState =
         @ formKeys "reopen" reopen
         @ formKeys "ca" recordCorrection
         @ formKeys "verify" verify
+        @ formKeys "resolveUnknown" resolveUnknown
+        @ formKeys "resolveContradiction" resolveContradiction
 
     keys |> List.fold (fun (m: ViewState) (k, v) -> m.Add(k, v)) view

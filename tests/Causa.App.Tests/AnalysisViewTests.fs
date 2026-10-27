@@ -157,3 +157,28 @@ let ``every analysis key is present on every screen`` () =
     let reference = keysOn Routes.Settings
     for route in [ Routes.Investigations; Routes.Investigation(id, Routes.Overview); Routes.Investigation(id, Routes.Hypotheses); Routes.Investigation(id, Routes.Timeline) ] do
         Assert.Equal<Set<string>>(reference, keysOn route)
+
+[<Fact>]
+let ``S08 a selected open question shows what waits on it, and answering it goes to the engine with its basis`` () =
+    let port, id, _ = active ()
+    let port = send port id "IdentifyUnknown" [ "text", "Was the valve replaced last month?" ]
+    let u = (opened port id).Detail.Unknowns.Head
+    let route = Routes.Investigation(id, Routes.Overview)
+    let v = view port route u.Id
+    Assert.Equal("epistemic-blocker-detail", textOf v "an.overview.screen")
+    Assert.Equal("Open question", textOf v "an.blocker.kind")
+    // Whatever the engine blocks on this question is listed; the contradiction control explains it does not apply.
+    let blocked = (opened port id).Capabilities |> List.filter (fun c -> not c.Legal && c.BlockerId = Some u.Id)
+    Assert.Equal(blocked.IsEmpty, flagOf v "an.blocker.blocks.empty")
+    Assert.True(flagOf v "an.resolveContradiction.disabled")
+    Assert.Equal("This is an open question, not a contradiction.", textOf v "an.resolveContradiction.reason")
+    let legal = (opened port id).Capabilities |> List.exists (fun c -> c.Id = "ResolveUnknown:" + u.Id && c.Legal)
+    Assert.Equal(not legal, flagOf v "an.resolveUnknown.disabled")
+    let ev name value: SemanticEvent = { Name = name; Key = None; Value = Some value; Checked = None; Values = None; Submitter = None }
+    let model = { Shell.initial with Route = route; Port = port; Selected = u.Id }
+    let model, _ = Shell.update (entropy ()) (BrowserToEngineMessage.Event(ev "field-ResolveUnknown.basis" "The maintenance log says no.")) model
+    let model, _ = Shell.update (entropy ()) (BrowserToEngineMessage.Event(ev "submit-ResolveUnknown" "")) model
+    if legal then Assert.StartsWith("Answered", (opened model.Port id).Detail.Unknowns.Head.State)
+    else Assert.Equal((opened port id).Version, (opened model.Port id).Version)
+    // Without a selection the overview keeps its own identity.
+    Assert.Equal("investigation-overview", textOf (view port route "") "an.overview.screen")

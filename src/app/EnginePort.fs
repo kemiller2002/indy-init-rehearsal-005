@@ -208,6 +208,14 @@ let commandFor (entropy: A.Entropy) (name: string) (fields: Map<string, string>)
             | _ -> Correction
         let targets = match Guid.TryParse(text fields "cause") with | true, c -> [ Id.ofGuid c ] | _ -> []
         Ok(RecordCorrectiveAction(Id.ofGuid (fresh 2), kind, text fields "description", targets))
+    | [| "ResolveUnknown" |] ->
+        match Guid.TryParse(text fields "item") with
+        | true, u -> Ok(TransitionUnknown(Id.ofGuid u, ResolveUnknown, text fields "basis"))
+        | _ -> Error "That open question is not in this investigation."
+    | [| "ResolveContradiction" |] ->
+        match Guid.TryParse(text fields "item") with
+        | true, c -> Ok(TransitionContradiction(Id.ofGuid c, ResolveContradiction, text fields "basis"))
+        | _ -> Error "That contradiction is not in this investigation."
     | [| "RecordPrediction" |] ->
         match Guid.TryParse(text fields "hypothesis") with
         | true, h ->

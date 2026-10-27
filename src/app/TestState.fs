@@ -67,6 +67,8 @@ let private capabilityLabel (id: string) =
     | "RecordCorrectiveAction" -> "Record a corrective action"
     | "MarkCorrectiveActionImplemented" -> "Mark implemented"
     | "RecordVerification" -> "Record a verification result"
+    | "ResolveUnknown" -> "Mark the question answered"
+    | "ResolveContradiction" -> "Mark the contradiction resolved"
     | other -> other
 
 /// The fixed projection for an injected state.
@@ -111,7 +113,7 @@ let toProjection (s: Injected) : WorkspaceProjection =
               Predictions = [ { Id = "p-1"; Text = "A seal tested at the same temperature loses resilience."; State = "Necessary: if it fails, the hypothesis is falsified"; Related = [ "h-1" ] } ]
               Actions = [ { Id = "act-1"; Text = "Compress a seal sample at the recorded temperature."; State = "Test · Proposed"; Related = [ "h-1" ] } ]
               NegativeKnowledge = [ { Id = "nk-1"; Text = "The joint was not damaged in transport."; State = "Scope: transport to the site"; Related = [ "e-1" ] } ]
-              Unknowns = blockers |> List.map (fun b -> { Id = b.Id; Text = b.Question; State = "Open · Material"; Related = [] })
+              Unknowns = [ { Id = blockerId; Text = "Was the material change in the event sequence observed directly?"; State = (if blocked then "Open · Material" else "Open · Not material"); Related = [] } ]
               CauseGates = [ "c-1", (if blocked then [ "An open material question must be answered first." ] else []) ]
               Corrections = [ { Id = "ca-1"; Description = "Qualify the seal for the lowest launch temperature."; Kind = "Root-cause correction"; State = "Approved"; Targets = [ "c-1" ] } ]
               Criteria = [ { Id = "cr-1"; Correction = "ca-1"; Expected = "No seal loses resilience in qualification at the lowest temperature."; Method = Some "Qualification test"; Satisfied = false; Results = [] } ] } }

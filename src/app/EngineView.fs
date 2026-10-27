@@ -107,6 +107,8 @@ let describe (inv: Investigation) (action: CapabilityAction) : (string * string 
     | Create RelateEvidenceKind -> Some("RelateEvidence", "RelateEvidence", "Link evidence to a hypothesis", Some formMarker)
     | Create RecordCauseKind -> Some("RecordCause", "RecordCause", "Record a causal relationship", Some formMarker)
     | Create RecordCorrectiveActionKind -> Some("RecordCorrectiveAction", "RecordCorrectiveAction", "Record a corrective action", Some formMarker)
+    | UnknownAction(u, ResolveUnknown) -> Some("ResolveUnknown:" + u.Text, "ResolveUnknown", "Mark the question answered", Some formMarker)
+    | ContradictionAction(c, ResolveContradiction) -> Some("ResolveContradiction:" + c.Text, "ResolveContradiction", "Mark the contradiction resolved", Some formMarker)
     | Create RecordPredictionKind -> Some("RecordPrediction", "RecordPrediction", "Record a prediction", Some formMarker)
     | Create RecordActionKind -> Some("RecordInvestigationAction", "RecordInvestigationAction", "Plan an investigation action", Some formMarker)
     | RecordVerificationAction cr -> Some("RecordVerification:" + cr.Text, "RecordVerification", "Record a verification result", Some formMarker)
