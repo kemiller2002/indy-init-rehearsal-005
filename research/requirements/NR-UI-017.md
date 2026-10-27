@@ -1,0 +1,19 @@
+---
+id: NR-UI-017
+status: accepted
+version: 1.0.0
+priority: P0
+source: UI-017
+---
+
+# NR-UI-017
+
+Derived from baseline requirement `UI-017` (Investigation-facing copy is domain-focused). Each obligation is carried verbatim as the criterion that bears its id.
+
+| ID | Statement |
+|---|---|
+| UI-017-O1 | Investigation pages MUST present user tasks, investigation content, actionable statuses, and concise recovery instructions. |
+| UI-017-O2 | They MUST NOT display implementation explanations, storage schema versions, catalog identifiers, commit SHAs, replay/validation mechanics, framework versions, or infrastructure details as introductory paragraphs, persistent banners, or other routine UI copy. |
+| UI-017-O3 | Specifically, remove the catalog/replay paragraph beginning "The active catalog historical-v1" from the investigation catalog. |
+| UI-017-O4 | Where a technical issue affects the user's ability to proceed, show a short plain-language explanation and next action, with technical details accessible from Administration. |
+| UI-017-O5 | Preserve required investigation provenance and evidence source attribution within their domain views; do not hide substantive investigation facts. |
