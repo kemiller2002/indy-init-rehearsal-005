@@ -34,7 +34,7 @@ let plan =
     |> Plan.ofJson
 
 let result id outcome obligations =
-    { TestId = id; DisplayName = id; Suite = DotnetTest; Outcome = outcome; Obligations = obligations; Source = "r.trx" }
+    { TestId = id; DisplayName = id; Suite = DotnetTest; Outcome = outcome; Obligations = obligations; Tags = []; Source = "r.trx" }
 
 let verificationOf (trace: Trace) id =
     (trace.Obligations |> List.find (fun o -> o.Obligation.Id = id)).Verification
@@ -277,3 +277,89 @@ let ``tool versions are read from both version formats`` () =
     Assert.Equal(Some "0.8.0", LockGate.parseToolVersion """{ "ReleaseVersion": "0.8.0", "DokimosVersion": "0.8.0+49a9" }""")
     Assert.Equal(Some "0.3.0", LockGate.parseToolVersion "percepta 0.3.0+c9747c2632074fc2cac94c1ad44ed22f5c2a251b")
     Assert.Equal(Some "1.18.0", LockGate.parseToolVersion "1.18.0")
+
+// ---------------------------------------------------------------------------------------------------------------
+// Computed gate producers
+
+let selector name prefix contains tag minimum : Producers.Selector =
+    { Name = name; TestIdPrefix = prefix; Contains = contains; Tag = tag; Minimum = minimum }
+
+[<Fact; Trait("obligation", "VPO-95819a9f20306ce1")>]
+let ``a producer succeeds only when every selected test ran and passed`` () =
+    let results = [ result "dotnet:Suite.a illegal move" Passed []; result "dotnet:Suite.b forged" Failed []; result "dotnet:Other.c" Skipped [] ]
+    let check s = (Producers.selectorCheck results s).Status
+    Assert.Equal(Producers.CheckPass, check (selector "illegal" (Some "dotnet:Suite.") (Some "illegal") None 1))
+    Assert.Equal(Producers.CheckFail, check (selector "suite" (Some "dotnet:Suite.") None None 1))
+    Assert.Equal(Producers.CheckNotRun, check (selector "too few" (Some "dotnet:Suite.a") None None 2))
+    Assert.Equal(Producers.CheckNotRun, check (selector "absent" None None (Some "@stack-smoke-limen") 1))
+    Assert.Equal(Producers.CheckNotRun, check (selector "skipped" (Some "dotnet:Other.") None None 1))
+    // A selector with no criterion selects nothing rather than everything.
+    Assert.Equal(Producers.CheckNotRun, check (selector "empty" None None None 1))
+    let c st : Producers.Check = { Name = "x"; Status = st; Detail = ""; Tests = [] }
+    Assert.Equal(Ledger.Succeeded, Producers.status [ c Producers.CheckPass; c Producers.CheckPass ])
+    Assert.Equal(Ledger.NotProduced, Producers.status [ c Producers.CheckPass; c Producers.CheckNotRun ])
+    Assert.Equal(Ledger.ProducerFailed, Producers.status [ c Producers.CheckNotRun; c Producers.CheckFail ])
+    Assert.Equal(Ledger.NotProduced, Producers.status [])
+
+[<Fact>]
+let ``playwright tags select stack smoke tests`` () =
+    let r = { result "playwright:smoke.spec.js > Limen starts" Passed [] with Tags = [ "@stack-smoke-limen" ]; Suite = Playwright }
+    Assert.Equal(Producers.CheckPass, (Producers.selectorCheck [ r ] (selector "limen" None None (Some "@stack-smoke-limen") 1)).Status)
+    Assert.Equal(Producers.CheckNotRun, (Producers.selectorCheck [ r ] (selector "forma" None None (Some "@stack-smoke-forma") 1)).Status)
+
+[<Fact>]
+let ``a plan gate check passes only when every routed requirement passes`` () =
+    let partial = build plan [ result "a" Passed [ o1 ]; result "b" Passed [ o2 ] ] []
+    Assert.Equal(Producers.CheckNotRun, (Producers.planGateCheck partial "G3").Status)
+    let failing = build plan [ result "a" Passed [ o1; o2 ]; result "c" Failed [ o3 ] ] []
+    Assert.Equal(Producers.CheckFail, (Producers.planGateCheck failing "G3").Status)
+    let full = build plan [ result "a" Passed [ o1; o2; o3 ] ] []
+    Assert.Equal(Producers.CheckPass, (Producers.planGateCheck full "G3").Status)
+    let none = Producers.planGateCheck full "G4"
+    Assert.Equal(Producers.CheckPass, none.Status)
+    Assert.Contains("routes no P0 requirement to G4", none.Detail)
+
+[<Fact; Trait("obligation", "VPO-95819a9f20306ce1")>]
+let ``a defect class counts only when the reviewer closed it at a fix in the candidate's history`` () =
+    let dc status fix ev : Ledger.DefectClass =
+        { Id = "DC-1"; Severity = "HIGH"; Tests = [ "DCT-1-A" ]; FixSha = fix; ReviewerEvidence = ev; Status = status }
+    let results = [ result "dotnet:S.DCT-1-A reproduces" Passed [] ]
+    let statusOf isAncestor d = Producers.defectClassChecks results isAncestor [ d ] |> Producers.status
+    Assert.Equal(Ledger.NotProduced, statusOf (fun _ -> true) (dc "NOT_RUN" None None))
+    Assert.Equal(Ledger.NotProduced, statusOf (fun _ -> true) (dc "PASS" (Some "abc") None))
+    Assert.Equal(Ledger.ProducerFailed, statusOf (fun _ -> false) (dc "PASS" (Some "abc") (Some "review.json")))
+    Assert.Equal(Ledger.Succeeded, statusOf (fun _ -> true) (dc "PASS" (Some "abc") (Some "review.json")))
+    let failingTest = Producers.defectClassChecks [ result "dotnet:S.DCT-1-A reproduces" Failed [] ] (fun _ -> true) [ dc "PASS" (Some "abc") (Some "r") ]
+    Assert.Equal(Ledger.ProducerFailed, Producers.status failingTest)
+
+[<Fact>]
+let ``a committed file must exist and have its declared schema`` () =
+    let read =
+        function
+        | "ok.json" -> Some("1", Some(parse """{"schema":"s/1"}"""))
+        | "bad.json" -> Some("2", Some(parse """{"schema":"s/2"}"""))
+        | _ -> None
+    let st p = (Producers.fileCheck read { Path = p; Schema = Some "s/1" }).Status
+    Assert.Equal(Producers.CheckPass, st "ok.json")
+    Assert.Equal(Producers.CheckFail, st "bad.json")
+    Assert.Equal(Producers.CheckFail, st "missing.json")
+
+[<Fact>]
+let ``curation bindings are applied to a copy only when every binding names a plan obligation`` () =
+    let dir = tempDir ()
+    let p name (text: string) =
+        let f = Path.Combine(dir, name)
+        File.WriteAllText(f, text)
+        f
+    let planFile = p "plan.json" (serialize (parse (sprintf """{"planIdentity":{"planId":"VP-x"},"requirements":[{"requirement":"REQ-1","obligations":[{"id":"%s","sourceObligation":"REQ-1-O1"},{"id":"%s","sourceObligation":"REQ-1-O2"}]}]}""" o1 o2)))
+    let curationFile = p "curation.json" """{"schema":"indy-init.verification-plan-curation/1","testBindings":[],"defaultPolicy":"X"}"""
+    let good = p "good.json" """{"testBindings":[{"obligation":"REQ-1-O2","tests":[{"id":"dotnet:B","kind":"deterministic"}]},{"obligation":"REQ-1-O1","tests":[{"id":"dotnet:A","kind":"live"}]}]}"""
+    let bad = p "bad.json" """{"testBindings":[{"obligation":"REQ-9-O1","tests":[{"id":"dotnet:A","kind":"deterministic"}]}]}"""
+    let out = Path.Combine(dir, "out.json")
+    let run b = Program.applyCuration [ "curation", curationFile; "plan", planFile; "bindings", b; "out", out ]
+    Assert.Equal(1, run bad)
+    Assert.False(File.Exists out)
+    Assert.Equal(0, run good)
+    let applied = load out
+    Assert.Equal<string list>([ "REQ-1-O1"; "REQ-1-O2" ], items "testBindings" applied |> List.map (strOr "" "obligation"))
+    Assert.Equal("X", strOr "" "defaultPolicy" applied)

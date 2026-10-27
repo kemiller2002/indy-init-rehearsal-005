@@ -10,7 +10,7 @@
         "preservation-gate"
       ],
       "evidenceType": "preservation",
-      "note": "Praxis requirements preservation verify at acceptance (no released build yet: F-004); produced by the coordinator"
+      "note": "preservation-gate: the CI job preservation-gate re-runs `praxis requirements preservation verify` exactly as recorded in evidence/requirements-preservation/gate-pre-implementation-command.txt (Indy-init 459f65a + aab8f80, Praxis 3.22.0 from the pinned channel); success only on exit 0 and verdict pass"
     },
     {
       "id": "G1",
@@ -18,10 +18,11 @@
       "definition": "verified package/SHA/integrity lock, SDK, WASM/Forma/Folio smoke",
       "requires": [
         "lock-gate",
+        "wasm-smoke",
         "stack-smoke"
       ],
       "evidenceType": "lock",
-      "note": "lock-gate is the T11 stack lock gate (PASS needs package-lock.json); stack-smoke is the Limen startup / Forma render / Folio print / frozen golden replay smoke (DEP-CURRENT-004), not yet produced"
+      "note": "lock-gate is the T11 stack lock gate (PASS needs package-lock.json); wasm-smoke is the CI job that loads the three historical cases in the engine compiled to .NET WebAssembly; stack-smoke is computed (producers.stack-smoke): Limen startup / Forma render / Folio print browser tests tagged @stack-smoke-limen/-forma/-folio plus the frozen golden replay"
     },
     {
       "id": "G2",
@@ -31,7 +32,7 @@
         "interface-manifest"
       ],
       "evidenceType": "interface",
-      "note": "no interface manifest producer yet"
+      "note": "interface-manifest is computed (producers.interface-manifest): the committed docs/architecture/interface-manifest.json and its staleness test"
     },
     {
       "id": "G3",
@@ -42,7 +43,7 @@
         "domain-obligations"
       ],
       "evidenceType": "test",
-      "note": "domain-obligations: every G3 requirement bound and passing; not yet produced"
+      "note": "domain-obligations is computed (producers.domain-obligations): plan requirements routed to G3 (the plan routes none), the engine suite, illegal-transition and forged-history tests"
     },
     {
       "id": "G4",
@@ -52,7 +53,7 @@
         "frozen-data"
       ],
       "evidenceType": "fixture",
-      "note": "no frozen-data producer yet"
+      "note": "frozen-data is computed (producers.frozen-data): plan requirements routed to G4 and the T15 fixture replay against causa-data (pinned)"
     },
     {
       "id": "G5",
@@ -63,7 +64,7 @@
         "percepta-verify-app"
       ],
       "evidenceType": "ui",
-      "note": "percepta verify-app against the built site; not yet produced"
+      "note": "percepta-verify-app: the CI job percepta runs `percepta verify-app` against the built site when .percepta/bindings.json and dist/ exist; NOT_RUN otherwise"
     },
     {
       "id": "G6",
@@ -83,7 +84,7 @@
         "defect-class-review"
       ],
       "evidenceType": "review",
-      "note": "independent reviewer (T33); recorded in acceptance/defect-classes.json"
+      "note": "defect-class-review is computed (producers.defect-class-review): every class closed by the independent reviewer (T33) in acceptance/defect-classes.json with a fix SHA in the candidate's history, and its failing-first tests passed in this run"
     },
     {
       "id": "G8",
@@ -116,6 +117,110 @@
       ],
       "evidenceType": "deployment",
       "note": "deploy and deployed-smoke run on main pushes when DEPLOY_TARGET=github-pages"
+    }
+  ],
+  "producers": [
+    {
+      "id": "stack-smoke",
+      "kind": "tests",
+      "description": "DEP-CURRENT-004 stack smoke: Limen startup, Forma render and Folio print in a real browser (tests tagged @stack-smoke-limen/-forma/-folio) and the frozen golden replay; the WASM engine smoke is the separate wasm-smoke producer.",
+      "tests": [
+        {
+          "name": "Limen startup",
+          "tag": "@stack-smoke-limen"
+        },
+        {
+          "name": "Forma render",
+          "tag": "@stack-smoke-forma"
+        },
+        {
+          "name": "Folio print",
+          "tag": "@stack-smoke-folio"
+        },
+        {
+          "name": "frozen golden replay",
+          "testIdPrefix": "dotnet:App.Engine.Tests.FixtureReplayTests.",
+          "contains": "five golden scenarios replay"
+        }
+      ]
+    },
+    {
+      "id": "interface-manifest",
+      "kind": "tests",
+      "description": "T14: the frozen versioned handoff manifest is committed and equals the extraction from the compiled kernel (staleness test).",
+      "files": [
+        {
+          "path": "docs/architecture/interface-manifest.json",
+          "schema": "causa.interface-manifest/1"
+        }
+      ],
+      "tests": [
+        {
+          "name": "interface manifest staleness test",
+          "testIdPrefix": "dotnet:App.Engine.Tests.InterfaceManifestTests.",
+          "contains": "interface manifest equals the extraction"
+        },
+        {
+          "name": "every interface manifest test",
+          "testIdPrefix": "dotnet:App.Engine.Tests.InterfaceManifestTests."
+        }
+      ]
+    },
+    {
+      "id": "domain-obligations",
+      "kind": "tests",
+      "planGate": "G3",
+      "description": "G3: every plan requirement routed to G3 bound and passing; the F# engine suite ran and passed, including illegal-transition and forged-history variants.",
+      "tests": [
+        {
+          "name": "F# engine suite",
+          "testIdPrefix": "dotnet:App.Engine.Tests.",
+          "minimum": 20
+        },
+        {
+          "name": "illegal-transition variants",
+          "testIdPrefix": "dotnet:App.Engine.Tests.",
+          "contains": "illegal"
+        },
+        {
+          "name": "forged-history variants",
+          "testIdPrefix": "dotnet:App.Engine.Tests.",
+          "contains": "forged"
+        }
+      ]
+    },
+    {
+      "id": "frozen-data",
+      "kind": "tests",
+      "planGate": "G4",
+      "description": "G4 / T15: the frozen fixture replay against causa-data (storage contract v1.0.0): five golden scenarios, byte-identical rewrite, 90 negative fixtures, locked digests, historical catalog.",
+      "tests": [
+        {
+          "name": "T15 fixture replay",
+          "testIdPrefix": "dotnet:App.Engine.Tests.FixtureReplayTests.",
+          "minimum": 6
+        },
+        {
+          "name": "five golden scenarios",
+          "testIdPrefix": "dotnet:App.Engine.Tests.FixtureReplayTests.",
+          "contains": "five golden scenarios"
+        },
+        {
+          "name": "negative fixtures",
+          "testIdPrefix": "dotnet:App.Engine.Tests.FixtureReplayTests.",
+          "contains": "negative fixtures"
+        },
+        {
+          "name": "locked digests",
+          "testIdPrefix": "dotnet:App.Engine.Tests.FixtureReplayTests.",
+          "contains": "locked digest"
+        }
+      ]
+    },
+    {
+      "id": "defect-class-review",
+      "kind": "defect-classes",
+      "description": "G7: every defect class in acceptance/defect-classes.json closed by the independent reviewer (status PASS, fix SHA in the candidate's history, reviewer evidence), and its failing-first tests passed in this run. Only the reviewer edits closures."
     }
   ]
 }

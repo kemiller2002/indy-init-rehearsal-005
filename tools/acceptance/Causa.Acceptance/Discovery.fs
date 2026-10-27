@@ -33,6 +33,8 @@ type TestResult =
       Suite: Suite
       Outcome: Outcome
       Obligations: string list
+      /// Playwright tags (`@…`); empty for TRX results.
+      Tags: string list
       /// Repository-relative path of the result file this came from.
       Source: string }
 
@@ -132,6 +134,7 @@ let parseTrx (source: string) (traits: Map<string * string, string list>) (doc: 
           Suite = DotnetTest
           Outcome = outcome
           Obligations = obligationsIn (name :: fromTraits)
+          Tags = []
           Source = source })
     |> List.ofSeq
 
@@ -176,6 +179,7 @@ let parsePlaywright (source: string) (report: Text.Json.Nodes.JsonNode) : TestRe
                     Suite = Playwright
                     Outcome = outcome
                     Obligations = obligationsIn (titlePath :: tags @ annotations)
+                    Tags = tags
                     Source = source } ]
 
 // ---------------------------------------------------------------------------------------------------------------

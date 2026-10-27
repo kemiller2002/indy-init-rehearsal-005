@@ -52,8 +52,8 @@ Rules:
 | `declared` | a file under `tests/` names it, but no result in this run contains a tagged test |
 | `bound` | an executed result names it |
 
-Gates G0–G9 (`acceptance/gates.json`) are PASS only when every producer they name succeeded in the candidate run;
-a gate with no producer wired stays NOT_RUN. G8 and G9 also require the computed `traceability` producer: every
+Gates G0–G9 (`acceptance/gates.json`) are PASS only when every producer they name succeeded in the candidate run
+(see "Gate producers" below). G8 and G9 also require the computed `traceability` producer: every
 obligation bound and passing. Defect classes (`acceptance/defect-classes.json`) are closed only by the independent
 reviewer recording `fixSha` and `reviewerEvidence`.
 
@@ -79,21 +79,92 @@ RUN_ID=local SOURCE_SHA=$(git rev-parse HEAD) PRODUCERS=/tmp/producers.json OUT=
 
 | Path | What |
 | --- | --- |
-| `tools/acceptance/Causa.Acceptance` | F# tool `causa-acceptance`: `lock-gate`, `bind`, `ledger`, `curation`, `reuse-request`, `reuse-decision`, `provenance`, `report` |
-| `tools/acceptance/ci/acceptance.sh` | bundle + ledger + both verifiers + report (pins: plan, baseline, approvals, operator) |
+| `tools/acceptance/Causa.Acceptance` | F# tool `causa-acceptance`: `lock-gate`, `bind`, `ledger`, `produce`, `curation`, `apply-curation`, `reuse-request`, `reuse-decision`, `provenance`, `report` |
+| `tools/acceptance/ci/acceptance.sh` | computed producers + bundle + ledger + both verifiers + report (pins: plan id/path, baseline, approvals, operator) |
+| `tools/acceptance/ci/preservation-gate.sh` | the G0 producer: the recorded preservation gate command, re-run |
+| `tools/acceptance/ci/curate-plan.sh` | plan curation on a copy of Indy-init (see "Plan curation") |
 | `tools/acceptance/ci/fingerprint.sh` | content fingerprint that lets Echelon foundations / Praxis validation skip an input that already passed |
 | `tools/acceptance/ci/install-dokimos.sh`, `install-host-tool.sh` | host tools exactly as the pinned channel resolves them, SHA-256 verified |
 | `acceptance/stack/` | T11 pin: byte copy of the echelon-current 1.29.0 linux-x64 channel resolution |
 | `acceptance/reuse.json` | Dokimos test-to-input mappings; branches may skip unchanged producers, main never reuses, live never |
-| `acceptance/gates.json`, `acceptance/defect-classes.json` | gate producers, recurring defect classes |
+| `acceptance/gates.json`, `acceptance/defect-classes.json` | gates, computed producer specs, recurring defect classes |
 | `acceptance/traceability.json` | every one of the 326 obligations and its bound tests |
 | `evidence/acceptance/` | committed computed verdicts (CI's are in the `acceptance-evidence` artifact of each run) |
 
 Pinned inputs: Indy-init `459f65a` (verifiers, plan `VP-e77a2134e1b0`), baseline sha256 `621e2f96…`, approvals
 `kickoff/rehearsal-005/approvals.causa.json` at `295bc64` sha256 `3e70dcd2…`, trusted operator `kemiller2002`.
 
-Known limit: `verify-plan` reports a requirement PASS only when the **plan** binds a test identity to every
-obligation (Indy-init `curation/verification-plan.json` `testBindings`, then recompilation: a new plan id). Until
-that curation is done from `acceptance/traceability.json`, a requirement whose tests all pass is `UNBOUND` there,
-and the combined result cannot be ACCEPTED. Every CI run writes `curation-test-bindings.json` (the
-`testBindings` for that curation) into its `acceptance-evidence` artifact.
+## Gate producers
+
+A gate (`acceptance/gates.json` `gates`) is PASS only when every producer it `requires` succeeded in the candidate
+run. Producers are either reported by a CI job or computed by `causa-acceptance produce` from what the run observed
+(`acceptance/gates.json` `producers`; each writes a `causa.acceptance-producer/1` record to
+`acceptance-evidence/producers/<id>.json` naming every check and the exact tests it selected).
+
+| Producer | Gate | Kind | Succeeds only when |
+| --- | --- | --- | --- |
+| `preservation-gate` | G0 | job `preservation-gate` | `praxis requirements preservation verify`, re-run byte for byte as recorded in `evidence/requirements-preservation/gate-pre-implementation-command.txt` (Indy-init 459f65a + aab8f80, Praxis 3.22.0 from the pinned channel), exits 0 with verdict pass. `compare.txt` in its record says whether the result equals the committed one. |
+| `lock-gate` | G1, G8, G9 | job `lock-gate` | T11 stack lock gate PASS |
+| `wasm-smoke` | G1 | job `wasm-smoke` (required) | the engine compiled to .NET WebAssembly loads Apollo 1, Apollo 11 and Challenger from causa-data (pinned) to their catalog state digests and returns typed faults |
+| `stack-smoke` | G1 | computed | browser tests tagged `@stack-smoke-limen`, `@stack-smoke-forma`, `@stack-smoke-folio` each ran and passed, and the T15 five-golden-scenario replay passed |
+| `interface-manifest` | G2 | computed | `docs/architecture/interface-manifest.json` is committed with schema `causa.interface-manifest/1` (its SHA-256 is read from the file and recorded in the ledger), and the `InterfaceManifestTests` staleness test ran and passed |
+| `core`, `domain-obligations` | G3 | job / computed | plan requirements routed to G3 bound and passing (the plan routes none, and the record says so); the F# engine suite (≥ 20 tests) all passed, with illegal-transition and forged-history variants among them |
+| `frozen-data` | G4 | computed | plan requirements routed to G4 bound and passing; the T15 `FixtureReplayTests` (≥ 6: golden scenarios, negative fixtures, locked digests) ran and passed. The ledger records the causa-data lock digest. |
+| `browser`, `percepta-verify-app` | G5 | jobs `browser`, `percepta` | `percepta verify-app --base-url <dist/ served>` with `.percepta/bindings.json` exits 0. Not produced while there is no `npm run build` output or no bindings. |
+| `live` | G6, G8, G9 | job `live` | the `@live` suite ran and passed on main |
+| `defect-class-review` | G7 | computed | every class in `acceptance/defect-classes.json` is closed by the independent reviewer (`status` PASS, `fixSha` an ancestor of the candidate, `reviewerEvidence`) and each failing-first test it lists (`DCT-…` in the test name) ran and passed |
+| `traceability` | G8, G9 | computed | every plan obligation bound to executed tests that all passed |
+| `deploy`, `deployed-smoke` | G9 | jobs | main push, `DEPLOY_TARGET=github-pages`, the served `version.json` equals the source SHA |
+
+Selection is never inferred: a test counts for a producer only by its identity prefix, a name substring or a tag
+listed in `gates.json`. A selected test that failed fails the producer; one that did not run leaves it not produced.
+
+**For the shell stream:** tag the stack smoke browser tests `@stack-smoke-limen` (Limen kernel starts and binds the
+engine), `@stack-smoke-forma` (a Forma `ef-*` component renders), `@stack-smoke-folio` (the Folio print page
+renders). Percepta runs against `dist/` as built by `npm run build`; if `window.__perceptaSetState` is only in a
+test build, make `npm run build` emit that build or say so to the acceptance stream.
+
+## Plan curation (the path to ACCEPTED)
+
+`requirements-compiler verify-plan` reports a requirement PASS only when the **plan** gives every one of its
+obligations a test identity (`testIdentity.status: bound`). Indy-init's plan `VP-e77a2134e1b0` binds none, so a
+requirement whose tests all pass is `UNBOUND` there and the combined verdict cannot be ACCEPTED. Binding is a
+curation of Indy-init `requirements-compiled/v1/curation/verification-plan.json` (`testBindings`) followed by a
+recompilation, which yields a **new plan id**. It belongs to the requirements owner; this repository only prepares it.
+
+Every CI run writes `curation-test-bindings.json` into its `acceptance-evidence` artifact: for each baseline
+obligation (`AR-004-O2`, …) the exact test identities that were bound to it **and ran in that run** (`live` for the
+live suite, else `deterministic`). Unbound obligations are omitted, never guessed.
+
+Procedure (verified locally on 2026-10-27: the unmodified 459f65a package reproduces with `--check`; applying a
+run's 41 bindings compiled PASS to `VP-def803ec5237`, and `verify-plan` against it moved those 11 requirements from
+UNBOUND to PASS with the same evidence):
+
+```sh
+export PATH=$HOME/.local/bin:$HOME/.dotnet:$PATH
+dotnet build tools/acceptance/Causa.Acceptance -c Release
+(cd ../indy-init && dotnet build tools/requirements-compiler/src -c Release)
+# 1. Inputs: the bindings of the candidate run (main, deployed SHA), and a checkout of every repository listed in
+#    Indy-init requirements-compiled/v1/curation/sources.json under one directory.
+gh run download <run-id> -R kemiller2002/indy-init-rehearsal-005 -n acceptance-evidence -D /tmp/acc-<run-id>
+# 2. Apply to a COPY (a detached worktree of the pinned INDY_INIT_REF under WORK) and recompile there:
+INDY_INIT=../indy-init BINDINGS=/tmp/acc-<run-id>/curation-test-bindings.json REPOS=/path/to/checkouts \
+  WORK=/tmp/curation-<run-id> tools/acceptance/ci/curate-plan.sh          # prints the new plan id
+```
+
+`curate-plan.sh` runs `causa-acceptance apply-curation` (replaces only the `testBindings` value, keeping every other
+byte of the curation file; refuses the whole set if any binding names an obligation outside the plan, names no test,
+an empty id or an unknown kind, or binds an obligation twice), then `requirements-compiler … --out
+requirements-compiled/v1` (must PASS) and the same with `--check` (must reproduce). It commits and pushes nothing.
+
+3. The requirements owner reviews the copy's diff (`git -C WORK/indy-init diff`: the curation file, the regenerated
+   `verification-plan.json` and `package-manifest.json`), commits it to Indy-init and records the new commit.
+4. This repository then changes, in one reviewed commit to `.github/workflows/build-and-test.yml`, `INDY_INIT_REF`
+   (the new Indy-init commit), `PLAN_ID` (the printed id) and, if it moved, `PLAN_PATH`. `acceptance.sh` refuses any
+   plan whose id differs from `PLAN_ID` or whose id is not its digest's prefix. The baseline, approvals and
+   operator pins are unchanged by a curation (the compiler rejects bindings that would change them).
+
+Apply it once the run's traceability binds every obligation it can: each application is a new plan id, and an
+obligation the plan leaves unbound stays `UNBOUND`/`NOT_RUN`. Renaming a bound test after curation does not break
+`verify-plan` (it checks the plan's binding, not the name), but the ledger's own traceability still requires the
+renamed test to carry the VPO tag, so keep tags on tests rather than relying on names.

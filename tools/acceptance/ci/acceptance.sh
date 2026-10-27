@@ -9,7 +9,12 @@
 #   INDY_INIT       Indy-init checkout with full history (default ../indy-init)
 #   COMPILER        requirements-compiler.dll (default $INDY_INIT/tools/requirements-compiler/src/bin/Release/net10.0/requirements-compiler.dll)
 #   CA              command prefix for causa-acceptance (default: dotnet tools/acceptance/Causa.Acceptance/bin/Release/net10.0/causa-acceptance.dll)
-#   RUN_ID SOURCE_SHA [DEPLOYED_SHA] PRODUCERS(file) OUT(dir) RESULTS(dir, default TestResults)
+#   PLAN_ID         pinned verification plan id (default VP-e77a2134e1b0); the run refuses any other plan
+#   PLAN_PATH       plan path inside INDY_INIT (default requirements-compiled/v1/verification-plan.json)
+#   CAUSA_DATA_DIR  causa-data checkout (pinned) whose frozen lock digest the ledger records (optional)
+#   RUN_ID SOURCE_SHA [DEPLOYED_SHA] PRODUCERS(file: workflow-reported producers) OUT(dir) RESULTS(dir, default TestResults)
+# The computed producers of acceptance/gates.json (`causa-acceptance produce`) are appended to PRODUCERS; their
+# records are written to OUT/producers/.
 # Exit: 0 when the verdict was computed (whatever it is); non-zero only when it could not be computed honestly.
 set -eu
 INDY_INIT="${INDY_INIT:-../indy-init}"
@@ -19,28 +24,48 @@ RESULTS="${RESULTS:-TestResults}"
 DEPLOYED_SHA="${DEPLOYED_SHA:-}"
 : "${RUN_ID:?}" "${SOURCE_SHA:?}" "${PRODUCERS:?}" "${OUT:?}"
 
-# Pins (acceptance/README.md). Changing any of them is a deliberate, reviewed change.
-PLAN_ID=VP-e77a2134e1b0
+# Pins (acceptance/README.md). Changing any of them is a deliberate, reviewed change. The plan id changes when the
+# requirements owner recompiles the plan with new testBindings (acceptance/README.md, "Plan curation"); the
+# workflow then pins the new INDY_INIT_REF, PLAN_ID and PLAN_PATH together.
+PLAN_ID="${PLAN_ID:-VP-e77a2134e1b0}"
+PLAN_PATH="${PLAN_PATH:-requirements-compiled/v1/verification-plan.json}"
 BASELINE_SHA256=621e2f960038dcfb0daa2a9fe18a0c1c350faed297ba2856da1236a0360857b9
 APPROVALS_COMMIT=295bc6475a17d54d83a1c9e4f7679fab30e43169
 APPROVALS_PATH=kickoff/rehearsal-005/approvals.causa.json
 APPROVALS_SHA256=3e70dcd2e87811c4f3744ee97585855639741c3ba7a63d98f4b842c7e86bace7
 OPERATOR=kemiller2002
 
-plan="$INDY_INIT/requirements-compiled/v1/verification-plan.json"
+plan="$INDY_INIT/$PLAN_PATH"
 baseline="$INDY_INIT/requirements/causa-requirements-baseline.json"
 mkdir -p "$OUT/inputs"
 actual_plan=$(jq -r .planIdentity.planId "$plan")
 [ "$actual_plan" = "$PLAN_ID" ] || { echo "verification plan is $actual_plan, pinned $PLAN_ID" >&2; exit 2; }
+# The id is the digest's prefix: a plan whose identity was edited by hand is refused.
+plan_digest=$(jq -r .planIdentity.digest "$plan")
+[ "VP-$(printf %s "$plan_digest" | cut -c1-12)" = "$PLAN_ID" ] || { echo "plan id $PLAN_ID does not match its digest $plan_digest" >&2; exit 2; }
 git -C "$INDY_INIT" show "$APPROVALS_COMMIT:$APPROVALS_PATH" > "$OUT/inputs/approvals.causa.json"
 echo "$APPROVALS_SHA256  $OUT/inputs/approvals.causa.json" | sha256sum -c - >&2
 echo "$BASELINE_SHA256  $baseline" | sha256sum -c - >&2
 
+# Computed gate producers (interface-manifest, domain-obligations, frozen-data, stack-smoke, defect-class-review).
+$CA produce --root . --plan "$plan" --results "$RESULTS" --sources tests --assemblies . \
+  --gates acceptance/gates.json --defects acceptance/defect-classes.json --producers "$PRODUCERS" \
+  --run-id "$RUN_ID" --source-sha "$SOURCE_SHA" --out "$OUT/producers.json" --records-dir "$OUT/producers" \
+  --record-prefix producers/ >&2
+
 deployed_arg=""
 [ -n "$DEPLOYED_SHA" ] && deployed_arg="--deployed-sha $DEPLOYED_SHA"
+ifm=docs/architecture/interface-manifest.json
+ifm_sha="unavailable: no interface manifest in this candidate"
+[ -f "$ifm" ] && ifm_sha="$(sha256sum "$ifm" | cut -d' ' -f1) $ifm"
+frozen="unavailable: no frozen fixture set in this run"
+if [ -n "${CAUSA_DATA_DIR:-}" ] && [ -f "$CAUSA_DATA_DIR/compatibility/v1.0.0/lock.json" ]; then
+  frozen="$(sha256sum "$CAUSA_DATA_DIR/compatibility/v1.0.0/lock.json" | cut -d' ' -f1) causa-data@$(git -C "$CAUSA_DATA_DIR" rev-parse HEAD):compatibility/v1.0.0/lock.json"
+fi
 # shellcheck disable=SC2086
 manifest_sha=$($CA ledger --root . --plan "$plan" --results "$RESULTS" --sources tests --assemblies . \
-  --gates acceptance/gates.json --defects acceptance/defect-classes.json --producers "$PRODUCERS" \
+  --gates acceptance/gates.json --defects acceptance/defect-classes.json --producers "$OUT/producers.json" \
+  --interface-manifest-sha "$ifm_sha" --frozen-fixture-digest "$frozen" \
   --run-id "$RUN_ID" --source-sha "$SOURCE_SHA" $deployed_arg --out-dir "$OUT/bundle" \
   --command "tools/acceptance/ci/acceptance.sh (run $RUN_ID)" | tail -n 1)
 echo "$manifest_sha" > "$OUT/evidence-manifest.sha256"
