@@ -175,6 +175,13 @@ let private recordAll (token: string) (repoFull: string) (runId: string) =
                 // Blob read (immutable) of the written manifest.
                 let blobId = GitHub.gitBlobSha created.Manifest
                 observe ctx "blob.read" "GET /repos/{owner}/{repo}/git/blobs/{sha}" (GitHub.getBlob (Some cred) t blobId) (GitHub.classify >> Result.bind GitHub.parseBlob >> classification) [] |> ignore
+                // One file through the contents API (used for the catalog pointer and manifest), present and absent.
+                let fileOf (r: HttpResponse) = GitHub.classify r |> Result.bind GitHub.parseFile
+                let fileRead =
+                    observe ctx "contents.read.file" "GET /repos/{owner}/{repo}/contents/{path}?ref={commit}" (GitHub.getFile (Some cred) t oid1 (Target.investigationDir t iid + "/" + FileSet.manifestName)) (fileOf >> classification) []
+                    |> Option.bind (fileOf >> Result.toOption)
+                expect ctx "live.read.file" (fileRead = Some created.Manifest) "the file read through the contents API is byte-identical"
+                observe ctx "contents.read.file.missing" "GET /repos/{owner}/{repo}/contents/{path}?ref={commit}" (GitHub.getFile (Some cred) t oid1 "catalog/active.json") (fileOf >> classification) [] |> ignore
                 // Reload: read the head and the files again from the provider, verify through the full reader.
                 let headAfter = readHead "ref.read.afterCreate"
                 expect ctx "live.reload.head" (headAfter = Some oid1) "the branch head is the acknowledged commit"
