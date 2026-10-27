@@ -70,6 +70,7 @@ async function buildCase(page) {
 }
 
 const inspector = (page) => page.locator("[data-percepta-region=inspector]");
+const evidenceDetail = (page) => page.locator("[data-percepta-screen=investigation-evidence-detail]");
 const row = (page, group) => inspector(page).locator(".ef-relationship-index__list > div").filter({ has: page.locator("dt", { hasText: group }) });
 
 test.describe("investigation catalog (UI-001, UI-022)", () => {
@@ -149,30 +150,41 @@ test.describe("investigation catalog (UI-001, UI-022)", () => {
 });
 
 test.describe("detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039)", () => {
-  test("the evidence inspector shows provenance, timestamps, cleaned original text, missing provenance labelled, and links to its hypothesis [VPO-ff2e466b7aaa3e12] [VPO-34334672f9ff0014] [VPO-5fe930a650a08b04] [VPO-c18f969a9c8b65bf]", async ({ page }) => {
+  test("the evidence inspector shows provenance, timestamps, cleaned original text, missing provenance labelled, links to its hypothesis, dependents and lineage [VPO-ff2e466b7aaa3e12] [VPO-34334672f9ff0014] [VPO-5fe930a650a08b04] [VPO-c18f969a9c8b65bf]", async ({ page }) => {
     await buildCase(page);
     await section(page, "Evidence");
     const ev = page.locator("[data-percepta-screen=investigation-evidence] .causa-item--evidence").first();
     // Untrusted text is shown as text: no element is created from it and direction overrides are removed.
     await expect(ev).toContainText('<img src=x onerror="window.__pwned=1">Fan tachometer read 0 rpm from 11:52.');
     await ev.getByRole("link", { name: /^Details:/ }).click();
-    const box = inspector(page);
+    const box = evidenceDetail(page);
     await expect(box).toBeVisible();
+    await expect(box).toBeFocused();
     await expect(box.locator(".ef-record-header__type")).toHaveText("Evidence");
-    await expect(box.locator("dt", { hasText: "Original content" }).locator("+ dd")).toHaveText('<img src=x onerror="window.__pwned=1">Fan tachometer read 0 rpm from 11:52.');
-    await expect(box.locator("dt", { hasText: "Source" }).locator("+ dd")).toHaveText("Inverter 7 telemetry export");
-    await expect(box.locator("dt", { hasText: "Category" }).locator("+ dd")).toHaveText("Measurement");
-    await expect(box.locator("dt", { hasText: "Recorded by" }).locator("+ dd")).toHaveText("causa-user");
-    await expect(box.locator("dt", { hasText: "Recorded at" }).locator("+ dd")).toHaveText(/^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d UTC$/);
+    const dd = (label) => box.locator("dt", { hasText: label }).locator("+ dd");
+    await expect(dd("Original content")).toHaveText('<img src=x onerror="window.__pwned=1">Fan tachometer read 0 rpm from 11:52.');
+    await expect(dd("Source")).toHaveText("Inverter 7 telemetry export");
+    await expect(dd("Category")).toHaveText("Measurement");
+    await expect(dd("Recorded by")).toHaveText("causa-user");
+    await expect(dd("Recorded at")).toHaveText(/^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d UTC$/);
     const captured = box.locator("div[data-missing=true]").filter({ hasText: "Captured at" });
     await expect(captured).toContainText("Capture time not recorded");
-    await expect(box.locator("dt", { hasText: "Assessment" }).locator("+ dd")).toHaveText("Not yet assessed");
+    await expect(dd("Assessment")).toHaveText("Not yet assessed");
     await expect(box.locator("img")).toHaveCount(0);
     expect(await page.evaluate(() => window.__pwned)).toBeUndefined();
     expect(await page.locator("body").innerHTML()).not.toContain("\u202E");
     // Explicit links to supporting and contradicting hypotheses; absence is stated.
-    await expect(row(page, "Hypotheses it supports").getByRole("link")).toHaveText("The cooling fan failed.");
-    await expect(row(page, "Hypotheses it contradicts")).toContainText("It is not linked as contradicting any hypothesis.");
+    const rel = (group) => box.locator(".ef-relationship-index__list > div").filter({ has: page.locator("dt", { hasText: group }) });
+    await expect(rel("Hypotheses it supports").getByRole("link")).toHaveText("The cooling fan failed.");
+    await expect(rel("Hypotheses it contradicts")).toContainText("It is not linked as contradicting any hypothesis.");
+    // What depends on it is shown as dependent, and its lineage lists the events that recorded and linked it.
+    await expect(box.locator("[data-percepta-region=dependency-graph]")).toContainText("Hypothesis it supports: The cooling fan failed.");
+    await expect(box.locator("[data-percepta-region=dependency-graph]")).toContainText("Causal relationship: Inverter 7 tripped on over-temperature.");
+    await expect(box.locator("[data-percepta-region=lineage-table] tbody tr")).toHaveCount(2);
+    await expect(box.locator("[data-percepta-region=lineage-table] tbody tr").first()).toContainText("Evidence admitted");
+    // Back to the list returns focus to the record's row.
+    await box.getByRole("link", { name: "Back to all evidence" }).click();
+    await expect(ev).toBeFocused();
   });
 
   test("traversal follows recorded relationships with stable addresses and explicit absent links, and closing restores focus @responsive [VPO-5a85f3ea85db30b2] [VPO-63d89380e8017050] [VPO-f3ebcdbe15cdf92d] [VPO-8f8156f91b64963b] [VPO-ad49e5ff43f1ace6] [VPO-8a5de7e5afae98cb]", async ({ page }) => {
@@ -400,8 +412,8 @@ test.describe("identity, failures and component ownership (UI-017-O4, UI-022-O1,
       expect(causa, `${cls} is not re-implemented by Causa`).not.toMatch(new RegExp("\\." + cls + "\\b[^{,]*\\{"));
     }
     await buildCase(page);
-    await section(page, "Evidence");
-    await page.locator("[data-percepta-screen=investigation-evidence] .causa-item--evidence").first().getByRole("link", { name: /^Details:/ }).click();
+    await section(page, "Hypotheses");
+    await page.locator("[data-percepta-screen=investigation-hypotheses] .causa-item--hypothesis").first().getByRole("link", { name: /^Details:/ }).click();
     const box = inspector(page);
     await expect(box.locator(".ef-record-header")).toHaveCount(1);
     await expect(box.locator("dl.ef-key-value-list")).toHaveCount(1);

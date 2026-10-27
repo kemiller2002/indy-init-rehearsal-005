@@ -153,3 +153,75 @@ let keys (route: Route) (selected: string) (inv: InvestigationProjection option)
       "next.none", flag (steps |> Option.exists List.isEmpty)
       "ux.corrections", items corrections
       "ux.corrections.empty", flag (src.IsSome && corrections.IsEmpty) ]
+
+/// The evidence detail screen (S06, S07): shown on the Evidence section when an evidence record is selected.
+let evidenceDetail (route: Route) (selected: string) (inv: InvestigationProjection option) : (string * ViewValue) list =
+    let src = inv |> Option.bind (fun i -> i.Typed)
+    let onEvidence = match route with Investigation(_, Evidence) -> true | _ -> false
+    let target =
+        if onEvidence then src |> Option.bind (fun s -> Records.resolve s selected) |> Option.filter (fun r -> r.Kind = Records.EvidenceRecord)
+        else None
+    let inspected = Option.map2 Records.inspect src target |> Option.flatten
+    let fieldsOf (labels: string list) =
+        inspected
+        |> Option.map (fun i -> i.Fields |> List.filter (fun f -> List.contains f.Label labels) |> List.mapi (fun k f -> itemF [ "id", string k; "label", f.Label; "value", f.Value ] [ "missing", f.Missing ]))
+        |> Option.defaultValue []
+    let lineage =
+        match src, target with
+        | Some s, Some r -> Records.lineage s r.Id |> List.map (fun l -> itemF [ "id", string l.Sequence; "sequence", $"#{l.Sequence}"; "what", l.What; "by", l.By; "at", l.At ] [])
+        | _ -> []
+    let deps =
+        match src, target with
+        | Some s, Some r -> Records.dependencies s r.Id |> List.mapi (fun k d -> itemF [ "id", string k; "kind", d.Kind; "text", d.Text; "href", d.Href; "note", d.Note ] [])
+        | _ -> []
+    let closeHref =
+        match inv, target with
+        | Some i, Some r -> Routes.formatItem (Investigation(i.Id, Evidence)) ("from-" + r.Id)
+        | Some i, None -> Routes.format (Investigation(i.Id, Evidence))
+        | _ -> "#/investigations"
+    [ "evdetail.show", flag inspected.IsSome
+      "evdetail.heading", text (inspected |> Option.map (fun i -> i.Heading) |> Option.defaultValue "")
+      "evdetail.state", text (inspected |> Option.map (fun i -> i.State) |> Option.defaultValue "")
+      "evdetail.source", items (fieldsOf [ "Original content"; "Original artifact"; "Source"; "Category" ])
+      "evdetail.provenance", items (fieldsOf [ "Recorded by"; "Recorded at"; "Captured at"; "Admitted at version" ])
+      "evdetail.integrity", items (fieldsOf [ "Assessment"; "Superseded by" ])
+      "evdetail.lineage", items lineage
+      "evdetail.lineage.empty", flag (inspected.IsSome && lineage.IsEmpty)
+      "evdetail.deps", items deps
+      "evdetail.deps.empty", flag (inspected.IsSome && deps.IsEmpty)
+      "evdetail.close", text closeHref
+      // Each evidence record's own assessment (S05 verification): admitted is not verified.
+      "ux.assessments",
+      items (
+          src
+          |> Option.map (fun s ->
+              s.Projection.State.Evidence
+              |> Map.toList
+              |> List.map snd
+              |> List.sortBy (fun e -> e.AdmittedAtVersion)
+              |> List.map (fun e ->
+                  let r: Records.Ref = { Kind = Records.EvidenceRecord; Id = e.Id.Text }
+                  itemF [ "id", e.Id.Text; "text", Records.title s r; "assessment", Language.evidenceAssessment e.Verification ] []))
+          |> Option.defaultValue []
+      ) ]
+
+/// Every stream-ux key for the model, merged over the shell's view (a Map union; ux keys win).
+let merge (model: Shell.Model) (inv: InvestigationProjection option) (view: Map<string, ViewValue>) : Map<string, ViewValue> =
+    let invId = inv |> Option.map (fun i -> i.Id) |> Option.defaultValue ""
+    let cards = match model.Port.Projection.Investigations with Loaded cs -> cs | _ -> []
+    let extra =
+        [ "cards", items (cardItems model.CatalogSort model.Selected cards)
+          "catalog.sorts", items (sortOptions |> List.map (fun (v, l) -> itemF [ "id", v; "value", v; "label", l ] []))
+          "catalog.sort", text model.CatalogSort
+          "inv.backHref", text (if invId = "" then "#/investigations" else Routes.formatItem Investigations invId) ]
+        @ keys model.Route model.Selected inv
+    let detail = evidenceDetail model.Route model.Selected inv
+    let detailShown = detail |> List.exists (fun (k, v) -> k = "evdetail.show" && v = ViewValue.Flag true)
+    let extra =
+        extra
+        @ detail
+        @ (if detailShown then [ "inspector.show", flag false; "section.evidence", flag false; "section.evidenceDetail", flag true ]
+           else [ "section.evidenceDetail", flag false ])
+        @ [ "legal.RelateEvidence", flag (view.TryFind "not.RelateEvidence" = Some(ViewValue.Flag false)) ]
+    extra |> List.fold (fun (m: Map<string, ViewValue>) (k, v) -> m.Add(k, v)) view
+

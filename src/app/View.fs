@@ -431,11 +431,6 @@ let project (model: Model) : ViewState =
       "list.failed", flag listFailed
       "list.failure", text listFailure
       "list.empty", flag (match ws.Investigations with Loaded [] -> true | _ -> false)
-      // The catalog's cards, sort and selection (stream ux, UI-001, UI-022).
-      "cards", items (UxView.cardItems model.CatalogSort model.Selected (match ws.Investigations with Loaded cs -> cs | _ -> []))
-      "catalog.sorts", items (UxView.sortOptions |> List.map (fun (v, l) -> item [ "id", v; "value", v; "label", l ]))
-      "catalog.sort", text model.CatalogSort
-      "inv.backHref", text (if invId = "" then "#/investigations" else Routes.formatItem Investigations invId)
       "screen.new", flag (screen = NewScreen)
       "screen.opening", flag (screen = OpeningScreen)
       "screen.failed", flag (match screen with FailedScreen _ -> true | _ -> false)
@@ -617,6 +612,6 @@ let project (model: Model) : ViewState =
           | ConnectedTo(repo, branch, workspace) -> $"Connected to {repo}, branch {branch}, workspace {workspace}, for this session."
           | _ -> "Not connected. The repository you enter on Connect is used for this session only and is not remembered."
       ) ]
-    // Inspector, next steps and record links (stream ux).
-    @ UxView.keys model.Route model.Selected inv
     |> Map.ofList
+    // Catalog, inspector, next steps and record links (stream ux), merged after: kept out of this function's body.
+    |> UxView.merge model inv

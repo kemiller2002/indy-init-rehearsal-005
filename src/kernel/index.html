@@ -380,12 +380,17 @@
           <section aria-labelledby="sec-evidence" data-percepta-screen="investigation-evidence">
             <h2 id="sec-evidence">Evidence</h2>
             <template data-if="evidence.empty"><p class="causa-muted">No evidence recorded yet.</p></template>
-            <ul class="causa-list">
+            <ul class="causa-list" data-percepta-region="source" aria-label="Recorded evidence">
               <template data-each="evidence" data-key="id">
                 <li class="causa-item causa-item--evidence" data-bind-data-selected="selected" tabindex="-1"><p data-text="content"></p><p class="causa-muted"><span data-text="category"></span> · <span data-text="source"></span> · <span data-text="recorded"></span></p><p><a class="causa-details" data-bind-href="href" data-bind-aria-label="detailsLabel">Details</a></p></li>
               </template>
             </ul>
-            <form class="ef-form causa-form causa-panel" data-event="submit-AdmitEvidence" aria-labelledby="ev-form-heading">
+            <section class="causa-panel" aria-labelledby="ev-verification-heading" data-percepta-region="verification">
+              <h3 id="ev-verification-heading">Assessment</h3>
+              <p class="causa-muted">Admitting evidence records it as it was found; it is not verified until someone assesses it.</p>
+              <ul class="causa-list"><template data-each="ux.assessments" data-key="id"><li><span data-text="text"></span>: <strong data-text="assessment"></strong></li></template></ul>
+            </section>
+            <form class="ef-form causa-form causa-panel" data-event="submit-AdmitEvidence" aria-labelledby="ev-form-heading" data-percepta-region="capture">
               <h3 id="ev-form-heading">Admit evidence</h3>
               <div class="ef-field"><label class="ef-field__label" id="ev-content-label" for="ev-content">What the evidence shows, quoted as recorded</label>
                 <textarea id="ev-content" aria-labelledby="ev-content-label" class="causa-input" rows="3" required data-event="field-AdmitEvidence.content" data-on="input" data-bind-value="form.ev.content"></textarea></div>
@@ -398,9 +403,9 @@
                   <input id="ev-source" aria-labelledby="ev-source-label" class="causa-input" type="text" required data-event="field-AdmitEvidence.source" data-on="input" data-bind-value="form.ev.source"></div>
               </div>
               <button type="submit" class="ef-button" data-ef-variant="primary" data-bind-disabled="not.AdmitEvidence" data-percepta-capability="AdmitEvidence">Admit evidence</button>
-              <template data-if="not.AdmitEvidence"><p class="causa-capability__reason" data-text="why.AdmitEvidence"></p></template>
+              <template data-if="not.AdmitEvidence"><p class="causa-capability__reason" data-percepta-unavailable-reason-for="AdmitEvidence" data-text="why.AdmitEvidence"></p></template>
             </form>
-            <form class="ef-form causa-form causa-panel" data-event="submit-RelateEvidence" aria-labelledby="rel-form-heading">
+            <form class="ef-form causa-form causa-panel" data-event="submit-RelateEvidence" aria-labelledby="rel-form-heading" data-percepta-region="scope">
               <h3 id="rel-form-heading">Link evidence to a hypothesis</h3>
               <div class="causa-form__row">
                 <div class="ef-field"><label class="ef-field__label" id="rel-evidence-label" for="rel-evidence">Evidence</label>
@@ -421,8 +426,70 @@
               <div class="ef-field"><label class="ef-field__label" id="rel-rationale-label" for="rel-rationale">Why (optional)</label>
                 <input id="rel-rationale" aria-labelledby="rel-rationale-label" class="causa-input" type="text" data-event="field-RelateEvidence.rationale" data-on="input" data-bind-value="form.rel.rationale"></div>
               <button type="submit" class="ef-button" data-ef-variant="primary" data-bind-disabled="not.RelateEvidence" data-percepta-capability="RelateEvidence">Link</button>
-              <template data-if="not.RelateEvidence"><p class="causa-capability__reason" data-text="why.RelateEvidence"></p></template>
+              <template data-if="not.RelateEvidence"><p class="causa-capability__reason" data-percepta-unavailable-reason-for="RelateEvidence" data-text="why.RelateEvidence"></p></template>
             </form>
+          </section>
+        </template>
+        <!-- Evidence detail (stream ux, S06/S07, UI-005): one evidence record, its source, provenance, assessment,
+             relationships, what depends on it and its lineage, from the engine's typed records. -->
+        <template data-if="section.evidenceDetail">
+          <section class="causa-evidence-detail" aria-labelledby="evd-heading" data-percepta-screen="investigation-evidence-detail" tabindex="-1" data-bind-data-selected="inspector.selected">
+            <header class="ef-record-header">
+              <div class="ef-record-header__main">
+                <div class="ef-record-header__title">
+                  <div><span class="ef-record-header__type">Evidence</span><h2 id="evd-heading" data-text="evdetail.heading"></h2></div>
+                  <span class="ef-status-lozenge causa-inspector__state" data-text="evdetail.state"></span>
+                </div>
+              </div>
+              <div class="ef-record-header__actions"><a class="ef-button causa-link-button causa-inspector__close" data-bind-href="evdetail.close">Back to all evidence</a></div>
+            </header>
+            <div class="causa-overview-grid">
+              <section class="causa-panel" aria-labelledby="evd-source" data-percepta-region="source">
+                <h3 id="evd-source">Source and content</h3>
+                <dl class="ef-key-value-list"><template data-each="evdetail.source" data-key="id"><div data-bind-data-missing="missing"><dt data-text="label"></dt><dd data-text="value"></dd></div></template></dl>
+                <template data-if="inspector.hasUrl"><p><a class="causa-inspector__artifact" data-bind-href="inspector.url" rel="noopener noreferrer" target="_blank">Open the original artifact</a></p></template>
+              </section>
+              <section class="causa-panel" aria-labelledby="evd-provenance" data-percepta-region="provenance">
+                <h3 id="evd-provenance">Provenance</h3>
+                <dl class="ef-key-value-list"><template data-each="evdetail.provenance" data-key="id"><div data-bind-data-missing="missing"><dt data-text="label"></dt><dd data-text="value"></dd></div></template></dl>
+              </section>
+              <section class="causa-panel" aria-labelledby="evd-integrity" data-percepta-region="integrity">
+                <h3 id="evd-integrity">Assessment</h3>
+                <p class="causa-muted">The investigator's assessment of this record. Reading it from the repository does not verify it.</p>
+                <dl class="ef-key-value-list"><template data-each="evdetail.integrity" data-key="id"><div data-bind-data-missing="missing"><dt data-text="label"></dt><dd data-text="value"></dd></div></template></dl>
+              </section>
+              <section class="causa-panel ef-relationship-index" aria-labelledby="evd-relationships" data-percepta-region="relationships">
+                <h3 id="evd-relationships">Relationships</h3>
+                <dl class="ef-relationship-index__list">
+                  <template data-each="inspector.links" data-key="id">
+                    <div><dt data-text="group"></dt><dd>
+                      <template data-if="link"><a data-bind-href="href" data-text="text"></a> <span class="causa-muted" data-text="relation"></span></template>
+                      <template data-if="absent"><span class="causa-absent" data-text="text"></span></template>
+                    </dd></div>
+                  </template>
+                </dl>
+                <template data-if="legal.RelateEvidence"><a class="ef-button causa-link-button" data-percepta-capability="RelateEvidence" data-bind-href="evdetail.close">Link this evidence to a hypothesis</a></template>
+                <template data-if="not.RelateEvidence"><div class="causa-capability"><button type="button" class="ef-button" disabled data-percepta-capability="RelateEvidence" aria-describedby="evd-relate-reason">Link this evidence to a hypothesis</button>
+                  <p id="evd-relate-reason" class="causa-capability__reason" data-percepta-unavailable-reason-for="RelateEvidence" data-text="why.RelateEvidence"></p></div></template>
+              </section>
+              <section class="causa-panel" aria-labelledby="evd-deps" data-percepta-region="dependency-graph">
+                <h3 id="evd-deps">What depends on it</h3>
+                <p class="causa-muted">Records listed here rely on this evidence or share its source; they are not independent of it.</p>
+                <template data-if="evdetail.deps.empty"><p class="causa-absent">No recorded hypothesis, cause or other evidence depends on it or shares its source.</p></template>
+                <ul class="causa-list"><template data-each="evdetail.deps" data-key="id"><li class="causa-item"><p><span class="causa-label" data-text="kind"></span>: <a data-bind-href="href" data-text="text"></a></p><p class="causa-muted" data-text="note"></p></li></template></ul>
+              </section>
+              <section class="causa-panel" aria-labelledby="evd-lineage" data-percepta-region="lineage">
+                <h3 id="evd-lineage">Lineage</h3>
+                <div data-percepta-region="lineage-table">
+                  <template data-if="evdetail.lineage.empty"><p class="causa-absent">No recorded event touches it.</p></template>
+                  <table class="causa-table">
+                    <caption class="ef-visually-hidden">Events that recorded or changed this evidence, in sequence order</caption>
+                    <thead><tr><th scope="col">Sequence</th><th scope="col">What happened</th><th scope="col">By</th><th scope="col">When</th></tr></thead>
+                    <tbody><template data-each="evdetail.lineage" data-key="id"><tr><td data-text="sequence"></td><td data-text="what"></td><td data-text="by"></td><td data-text="at"></td></tr></template></tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
           </section>
         </template>
         <template data-if="section.hypotheses">

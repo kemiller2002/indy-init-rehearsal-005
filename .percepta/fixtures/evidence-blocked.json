@@ -1,0 +1,10 @@
+{
+  "name": "evidence-blocked",
+  "predicates": [
+    "material-blocker-exists"
+  ],
+  "capabilities": {
+    "AdmitEvidence": "illegal",
+    "RelateEvidence": "illegal"
+  }
+}

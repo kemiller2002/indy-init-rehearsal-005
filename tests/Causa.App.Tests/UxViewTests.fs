@@ -67,7 +67,8 @@ let ``VPO-885e4767b84371de VPO-02b53bd16db4ee17 an unknown count on a card is ne
 
 [<Fact>]
 let ``VPO-141be05c7de03e17 when the engine's records are unavailable, next steps say so instead of showing no work`` () =
-    let ws = TestState.toProjection { Name = "x"; Predicates = []; Capabilities = [] }
+    let fixture = TestState.toProjection { Name = "x"; Predicates = []; Capabilities = [] }
+    let ws = { fixture with Opened = fixture.Opened |> Map.map (fun _ l -> match l with Loaded i -> Loaded { i with Typed = None } | o -> o) }
     let v = View.project (model ws (Routes.Investigation(TestState.fixtureId, Routes.Overview)) "")
     Assert.True(flagOf v "next.unavailable")
     Assert.False(flagOf v "next.none")

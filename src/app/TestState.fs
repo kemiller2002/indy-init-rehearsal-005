@@ -93,7 +93,7 @@ let toProjection (s: Injected) : WorkspaceProjection =
           Report = None
           Timeline = [ { Sequence = 1L; EventType = "InvestigationOpened"; OccurredAt = "2026-01-01T00:00:00Z"; RecordedAt = Some "2026-01-01T00:00:00Z"; Actor = Some "Fixture"; Category = "lifecycle"; Affected = []; ClockBeforePrevious = false } ]
           Capabilities = capabilities
-          Typed = None }
+          Typed = UxFixture.source }
 
     { Connection = ConnectedTo("fixture/percepta", "main", "test")
       ConnectionStatus = None

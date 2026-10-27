@@ -569,3 +569,51 @@ let nextLegalAction (p: InvestigationProjection) =
             | ReopenInvestigationCommand -> Some "Reopen the investigation"
             | VerificationFailedFollowOn -> None
         | _ -> None)
+
+// ---- evidence dependency and lineage (S06, S07) ----
+
+/// One row of an evidence record's lineage: what happened to it, in sequence order.
+type LineageRow = { Sequence: int64; What: string; By: string; At: string }
+
+/// Records that depend on, or share a source with, one piece of evidence. Never presented as independent.
+type Dependency = { Kind: string; Text: string; Href: string; Note: string }
+
+let lineage (src: Source) (eid: string) : LineageRow list =
+    src.History
+    |> List.sortBy (fun e -> e.Version)
+    |> List.filter (fun e -> Timeline.affected e.Investigation e.Body |> List.exists (fun a -> a.Kind = "evidence" && a.Id = eid))
+    |> List.map (fun e -> { Sequence = e.Version; What = Language.event e.Body; By = clean (Language.actor e.Actor); At = Language.stamp e.At })
+
+let dependencies (src: Source) (eid: string) : Dependency list =
+    let inv = src.Projection.State
+    let invId = src.Projection.InvestigationId.Text
+    match inv.Evidence |> Map.tryPick (fun k v -> if k.Text = eid then Some v else None) with
+    | None -> []
+    | Some ev ->
+        let lnk kind id = href invId { Kind = kind; Id = id }
+        let commonSource =
+            values inv.Evidence
+            |> List.filter (fun o -> o.Id <> ev.Id && o.Source.Value = ev.Source.Value)
+            |> List.map (fun o ->
+                { Kind = "Shares its source"; Text = short (evidenceText o); Href = lnk EvidenceRecord o.Id.Text
+                  Note = $"Both come from \"{clean ev.Source.Value}\": they are not independent confirmations." })
+        let derived =
+            [ match ev.SupersededBy |> Option.bind (fun s -> inv.Evidence |> Map.tryFind s) with
+              | Some r -> yield { Kind = "Superseded by"; Text = short (evidenceText r); Href = lnk EvidenceRecord r.Id.Text; Note = "The replacement derives from this record." }
+              | None -> ()
+              for o in values inv.Evidence do
+                  if o.SupersededBy = Some ev.Id then
+                      yield { Kind = "Replaces"; Text = short (evidenceText o); Href = lnk EvidenceRecord o.Id.Text; Note = "This record derives from the one it replaces." } ]
+        let rels = values inv.Relationships |> List.filter (fun r -> r.Evidence = ev.Id)
+        let hyps =
+            rels
+            |> List.choose (fun r ->
+                inv.Hypotheses |> Map.tryFind r.Hypothesis |> Option.map (fun h ->
+                    { Kind = $"Hypothesis it {(Language.relationship r.Kind).ToLowerInvariant()}"; Text = short h.Statement.Value; Href = lnk HypothesisRecord h.Id.Text
+                      Note = "Depends on this evidence." }))
+        let hypIds = rels |> List.map (fun r -> r.Hypothesis) |> Set.ofList
+        let causes =
+            values inv.Causes
+            |> List.filter (fun c -> c.Members |> List.exists (fun m -> hypIds.Contains m.Hypothesis))
+            |> List.map (fun c -> { Kind = "Causal relationship"; Text = short c.Outcome.Value; Href = lnk CauseRecord c.Id.Text; Note = "Depends on this evidence through its hypotheses." })
+        commonSource @ derived @ hyps @ causes

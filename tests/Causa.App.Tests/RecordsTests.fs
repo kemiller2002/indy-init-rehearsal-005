@@ -142,3 +142,19 @@ let ``VPO-ad49e5ff43f1ace6 one typed inspector contract serves evidence, hypothe
         Assert.NotEmpty i.Relations
         Assert.Equal(Some r, resolve s r.Id)
         for f in i.Fields do Assert.Empty(Language.leaks f.Value)
+
+[<Fact>]
+let ``VPO-ff2e466b7aaa3e12 evidence sharing a source is shown as dependent, never independent, and lineage lists its events in sequence`` () =
+    let s = Option.get UxFixture.source
+    let deps = dependencies s UxFixture.evidenceId
+    let shared = deps |> List.filter (fun d -> d.Kind = "Shares its source")
+    Assert.Equal(1, shared.Length)
+    Assert.Contains("not independent", shared.Head.Note)
+    Assert.Contains(deps, fun d -> d.Kind = "Hypothesis it supports")
+    Assert.Contains(deps, fun d -> d.Kind = "Causal relationship")
+    let rows = lineage s UxFixture.evidenceId
+    Assert.Equal<string list>([ "Evidence admitted"; "Evidence linked to a hypothesis (Supports)" ], rows |> List.map (fun r -> r.What))
+    Assert.True(rows |> List.pairwise |> List.forall (fun (a, b) -> a.Sequence < b.Sequence))
+    // In the synthetic case the two evidence items have different sources: no shared-source dependency is invented.
+    let other = dependencies src.Value eTemp.Text
+    Assert.DoesNotContain(other, fun d -> d.Kind = "Shares its source")
