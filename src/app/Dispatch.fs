@@ -27,6 +27,9 @@ let private inject (e: SemanticEvent) (model: Model) =
     if not testHooks then model
     else
         match TestState.parse (e.Value |> Option.defaultValue "") with
+        | Ok s when s.Name = "engine-memory" ->
+            // The real kernel over an in-memory workspace (T17 checkpoint); nothing is saved anywhere.
+            { model with Port = EnginePort.create (EnginePort.Persistence.memory Map.empty []); InjectedState = Some s.Name; Notice = None }
         | Ok s -> { model with Port = Port.fixedAt (TestState.toProjection s); InjectedState = Some s.Name; Notice = None }
         | Error reason -> { model with InjectedState = Some("refused: " + reason) }
 

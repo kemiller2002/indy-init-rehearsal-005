@@ -69,6 +69,8 @@ let toProjection (s: Injected) : WorkspaceProjection =
         s.Capabilities
         |> List.map (fun (id, legal) ->
             { Id = id
+              Name = id
+              Input = None
               Label = capabilityLabel id
               Legal = legal
               Reason = (if legal then None elif blocked then Some "An open material question must be answered first." else Some "Not allowed in the current status.")

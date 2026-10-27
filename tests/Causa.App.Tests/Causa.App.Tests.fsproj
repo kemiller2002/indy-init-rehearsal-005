@@ -11,6 +11,7 @@
     <Compile Include="RouteTests.fs" />
     <Compile Include="ProjectionTests.fs" />
     <Compile Include="GraphTests.fs" />
+    <Compile Include="EnginePortTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />

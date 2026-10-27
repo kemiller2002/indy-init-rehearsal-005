@@ -269,13 +269,18 @@
                   <template data-each="capabilities" data-key="id">
                     <li>
                       <template data-if="legal">
-                        <button type="button" class="ef-button" data-ef-variant="primary" data-event="command" data-bind-data-percepta-capability="id" data-text="label"></button>
+                        <button type="button" class="ef-button" data-ef-variant="primary" data-event="command" data-bind-data-percepta-capability="name" data-text="label"></button>
                       </template>
+                      <template data-if="legalInput"><div class="causa-capability causa-capability--input">
+                        <label class="ef-field__label" data-bind-for="inputId" data-bind-id="inputLabelId" data-text="inputLabel"></label>
+                        <input class="causa-input" type="text" autocomplete="off" data-bind-id="inputId" data-bind-aria-labelledby="inputLabelId" data-event="command-input" data-on="input" data-bind-value="inputValue">
+                        <button type="button" class="ef-button" data-ef-variant="primary" data-event="command" data-bind-data-percepta-capability="name" data-text="label"></button>
+                      </div></template>
                       <template data-if="illegal"><div class="causa-capability">
-                        <button type="button" class="ef-button" disabled data-bind-data-percepta-capability="id" data-bind-aria-describedby="reasonId" data-text="label"></button>
-                        <p class="causa-capability__reason" data-bind-id="reasonId" data-bind-data-percepta-unavailable-reason-for="id" data-text="reason"></p>
+                        <button type="button" class="ef-button" disabled data-bind-data-percepta-capability="name" data-bind-aria-describedby="reasonId" data-text="label"></button>
+                        <p class="causa-capability__reason" data-bind-id="reasonId" data-bind-data-percepta-unavailable-reason-for="name" data-text="reason"></p>
                         <template data-if="hasBlocker">
-                          <a class="causa-related" data-bind-href="blockerHref" data-bind-data-percepta-blocker-link-for="id">See the open question</a>
+                          <a class="causa-related" data-bind-href="blockerHref" data-bind-data-percepta-blocker-link-for="name">See the open question</a>
                         </template>
                       </div></template>
                     </li>

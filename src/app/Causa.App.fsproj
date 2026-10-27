@@ -11,10 +11,16 @@
     <PackageReference Include="EchelonFoundry.Limen.Guest" Version="0.9.0" />
   </ItemGroup>
   <ItemGroup>
+    <!-- The core kernel (Boundaries A, B, E; docs/architecture/BOUNDARIES.md). -->
+    <ProjectReference Include="../engine/App.Engine.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Routes.fs" />
     <Compile Include="Adapter.fs" />
     <Compile Include="Presentation.fs" />
     <Compile Include="Graph.fs" />
+    <Compile Include="EngineView.fs" />
+    <Compile Include="EnginePort.fs" />
     <Compile Include="Shell.fs" />
     <Compile Include="TestState.fs" />
     <Compile Include="View.fs" />

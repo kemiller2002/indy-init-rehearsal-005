@@ -27,7 +27,12 @@ type Loadable<'a> =
 
 /// One capability the F# policy decided for the current version (UI-004-O1/O2). The shell renders exactly these.
 type Capability =
-    { Id: string
+    { /// Unique among the capabilities shown (e.g. "ConfirmCause:<cause id>").
+      Id: string
+      /// The command's name (e.g. "ConfirmCause"): the Percepta capability and the command the shell submits.
+      Name: string
+      /// The one text input the command needs from the person, as its label; None when it needs none.
+      Input: string option
       Label: string
       Legal: bool
       /// Why it is unavailable, when the engine supplies a reason.
@@ -116,7 +121,7 @@ type AdapterInput =
     | Disconnect
     | Open of id: string
     /// A semantic command with its form fields and the version the form was rendered from (Boundary A).
-    | Command of name: string * fields: Map<string, string> * expectedVersion: int64
+    | Command of investigation: string option * name: string * fields: Map<string, string> * expectedVersion: int64
     | Answer of correlation: string * EffectResult
 
 /// The engine and persistence as the shell sees them.

@@ -96,7 +96,7 @@ test.describe("Administration and Settings (UI-018, UI-019, VER-007)", () => {
     const info = await (await page.request.get(new URL("build-info.json", baseURL).href)).json();
     await page.goto("index.html#/administration");
     await started(page);
-    const table = page.locator("table.causa-admin");
+    const table = page.locator("[data-percepta-screen=administration]");
     const limen = JSON.parse(readFileSync("node_modules/@echelon-foundry/limen/package.json", "utf8")).version;
     const forma = JSON.parse(readFileSync("node_modules/@echelon-foundry/design-system/package.json", "utf8")).version;
     if (!process.env.CAUSA_BASE_URL) {
@@ -108,7 +108,8 @@ test.describe("Administration and Settings (UI-018, UI-019, VER-007)", () => {
     await expect(table.getByRole("row", { name: /^commit/ })).toContainText(info.commit);
     await expect(table.getByRole("row", { name: /\.NET runtime \(loaded\)/ })).toContainText(/^.*\d+\.\d+\.\d+/);
     // Unknown and unavailable are distinct words, never an implied pass.
-    await expect(table.getByRole("row", { name: /Investigation engine/ })).toContainText("Unavailable");
+    await expect(page.getByRole("row", { name: /Data provider/ })).toContainText("Unavailable");
+    await expect(page.getByRole("row", { name: /Investigation engine/ })).toContainText("Reported by the running application");
     // Versions and commits stay out of the workflow and the chrome.
     await page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Investigations" }).click();
     await expect(page.locator("body")).not.toContainText(info.commit);
@@ -307,5 +308,41 @@ test.describe("report, timeline and administration views (T22, T26, T29)", () =>
     await expect(page.locator("[data-percepta-region=security]")).toContainText("default-src 'self'");
     // Read-only: no form or action button on the page.
     await expect(page.locator("[data-percepta-screen=administration] form, [data-percepta-screen=administration] button")).toHaveCount(0);
+  });
+});
+
+test.describe("integration checkpoint 1: a legal command end to end through Limen and the F# kernel (T17)", () => {
+  test("starting and activating an investigation crosses Limen into the kernel; every view refreshes from the one new version; a refusal changes nothing [VPO-21abf6acd60d0acc] [VPO-be99a964783c59b5] [VPO-f1a416eaeec6c129] [VPO-b3efad6eb85360be]", async ({ page }) => {
+    await page.goto(TEST_SITE + "index.html#/investigations/new");
+    await started(page);
+    // Test build only: the real kernel over an in-memory workspace (nothing is saved anywhere).
+    await page.evaluate(() => window.__perceptaSetState({ name: "engine-memory", predicates: [], capabilities: {} }));
+    await expect(page.getByRole("heading", { level: 1, name: "New investigation" })).toBeVisible();
+    await page.getByLabel("Title").fill("Valve leak on line 3");
+    await page.getByLabel(/Problem statement/).fill("Coolant was found under valve 3 during the night shift.");
+    await page.getByRole("button", { name: "Start the investigation" }).click();
+    await expect(page).toHaveURL(/#\/investigations\/[0-9a-f-]{36}$/);
+    await expect(page.getByRole("heading", { level: 1, name: "Valve leak on line 3" })).toBeVisible();
+    await expect(page.locator(".causa-inv-meta")).toContainText("Draft");
+    await expect(page.locator(".causa-inv-meta")).toContainText("Version 1");
+    await expect(page.locator(".causa-observation")).toHaveText("Coolant was found under valve 3 during the night shift.");
+    await expect(page.locator(".causa-sync")).toContainText("1 unsaved change(s)");
+    // A legal engine capability: activate.
+    await page.getByRole("button", { name: "Activate the investigation" }).click();
+    await expect(page.locator(".causa-inv-meta")).toContainText("Active");
+    await expect(page.locator(".causa-inv-meta")).toContainText("Version 2");
+    await expect(page.getByRole("status").filter({ hasText: "Recorded" })).toContainText("Not saved yet");
+    // A command with an input: record a hypothesis; the overview, timeline and list all show version 3.
+    const hypothesisInput = page.getByLabel("Hypothesis statement");
+    await hypothesisInput.fill("The valve seal degraded.");
+    await page.getByRole("button", { name: "Record a hypothesis" }).click();
+    await expect(page.locator(".causa-inv-meta")).toContainText("Version 3");
+    await expect(page.locator("[data-percepta-region=hypotheses]")).toContainText("The valve seal degraded.");
+    await page.getByRole("navigation", { name: "Investigation sections" }).getByRole("link", { name: "Timeline" }).click();
+    await expect(page.locator(".causa-timeline__entry")).toHaveCount(3);
+    await expect(page.locator("[data-percepta-region=version-state]")).toContainText("version 3");
+    await page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Investigations" }).click();
+    await expect(page.locator(".causa-card")).toContainText("Active");
+    await expect(page.locator(".causa-card")).toContainText("1 hypotheses");
   });
 });

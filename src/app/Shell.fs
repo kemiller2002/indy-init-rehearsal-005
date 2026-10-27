@@ -28,6 +28,8 @@ type Model =
       /// Correlation ids of requests the shell itself made; every other answer belongs to the port.
       ShellPending: Set<string>
       PageBase: string
+      /// Text typed for a capability that needs one input, by capability id.
+      CommandInputs: Map<string, string>
       /// Only the test build enables this (Percepta state injection).
       TestHooks: bool
       /// The Percepta fixture state name currently shown, if any.
@@ -42,10 +44,11 @@ let initial =
       Notice = None
       Settings = { LargeText = false; ReducedMotion = false }
       Build = NotRequested
-      Port = Port.unavailable
+      Port = EnginePort.create EnginePort.Persistence.unavailable
       Counter = 0
       ShellPending = Set.empty
       PageBase = ""
+      CommandInputs = Map.empty
       TestHooks = false
       InjectedState = None }
 
@@ -90,7 +93,15 @@ let parseBuildInfo (text: string) : Result<(string * string) list, string> =
 
 let private toPort (entropy: Entropy) (input: AdapterInput) (model: Model) =
     let port, effects = model.Port.Handle entropy input
-    { model with Port = port }, effects
+    // Limen does not answer the engine's own navigation with LocationChanged: the route follows the push here.
+    let route =
+        effects
+        |> List.tryPick (fun e ->
+            match e with
+            | EffectRequest.Navigation(NavigationEffectRequest.Push(_, url))
+            | EffectRequest.Navigation(NavigationEffectRequest.Replace(_, url)) -> Some(Routes.parse url)
+            | _ -> None)
+    { model with Port = port; Route = route |> Option.defaultValue model.Route }, effects
 
 let private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
     let value = e.Value |> Option.defaultValue ""
@@ -106,7 +117,7 @@ let private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
     | "start" ->
         // The engine decides whether it may start and validates the fields; the shell only forwards them (UI-004-O6).
         let fields = Map.ofList [ "title", d.Title.Trim(); "problemStatement", d.Statement.Trim() ]
-        toPort entropy (Command("StartInvestigation", fields, 0L)) model
+        toPort entropy (Command(None, "StartInvestigation", fields, 0L)) model
     | "connect" ->
         let request: ConnectRequest = { Token = d.Token; Repository = d.Repository; Branch = d.Branch; Workspace = d.Workspace }
         // The token leaves the shell's model as soon as it is handed to the port (memory only, OD-INDY-10).
@@ -117,6 +128,10 @@ let private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
     | "graph-select" when value = "" || Routes.selection ("?item=" + value) = value -> { model with Selected = value }, []
     | "text-size" -> { model with Settings = { model.Settings with LargeText = (value = "large") } }, []
     | "motion" -> { model with Settings = { model.Settings with ReducedMotion = (value = "reduced") } }, []
+    | "command-input" ->
+        match e.Key with
+        | Some capability -> { model with CommandInputs = model.CommandInputs.Add(capability, value) }, []
+        | None -> model, []
     | "command" ->
         // A capability the engine offered for the version this view was rendered from (UI-004-O4).
         let version =
@@ -128,7 +143,10 @@ let private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
             | _ -> None
 
         match e.Key, version with
-        | Some capability, Some v -> toPort entropy (Command(capability, Map.empty, v)) model
+        | Some capability, Some v ->
+            let fields = model.CommandInputs |> Map.tryFind capability |> Option.map (fun t -> Map.ofList [ "text", t ]) |> Option.defaultValue Map.empty
+            let investigation = match model.Route with Investigation(id, _) -> Some id | _ -> None
+            toPort entropy (Command(investigation, capability, fields, v)) { model with CommandInputs = model.CommandInputs.Remove capability }
         | _ -> { model with Notice = Some { Tone = "warning"; Text = "That action is not available here." } }, []
     | _ -> model, []
 

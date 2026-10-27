@@ -163,11 +163,16 @@ let project (model: Model) : ViewState =
             |> List.map (fun c ->
                 itemF
                     [ "id", c.Id
+                      "name", c.Name
                       "label", c.Label
+                      "inputLabel", (c.Input |> Option.defaultValue "")
+                      "inputId", "input-" + c.Id.Replace(":", "-")
+                      "inputLabelId", "input-label-" + c.Id.Replace(":", "-")
+                      "inputValue", (model.CommandInputs |> Map.tryFind c.Id |> Option.defaultValue "")
                       "reason", (c.Reason |> Option.defaultValue "")
-                      "reasonId", "reason-" + c.Id
+                      "reasonId", "reason-" + c.Id.Replace(":", "-")
                       "blockerHref", (c.BlockerId |> Option.map (fun b -> Routes.formatItem (Investigation(i.Id, Overview)) b) |> Option.defaultValue "") ]
-                    [ "legal", c.Legal; "illegal", not c.Legal; "hasBlocker", c.BlockerId.IsSome ]))
+                    [ "legal", c.Legal && c.Input.IsNone; "legalInput", c.Legal && c.Input.IsSome; "illegal", not c.Legal; "hasBlocker", c.BlockerId.IsSome ]))
         |> Option.defaultValue []
 
     let timeline =
@@ -270,7 +275,7 @@ let project (model: Model) : ViewState =
         ws.Capabilities
         |> List.tryFind (fun c -> c.Id = "StartInvestigation")
         |> Option.defaultValue
-            { Id = "StartInvestigation"; Label = "Start the investigation"; Legal = false; Reason = Some "Starting an investigation is not available in this build yet."; BlockerId = None }
+            { Id = "StartInvestigation"; Name = "StartInvestigation"; Input = None; Label = "Start the investigation"; Legal = false; Reason = Some "Starting an investigation is not available in this build yet."; BlockerId = None }
 
     let wsBlockers =
         ws.Blockers |> List.map (fun b -> item [ "id", b.Id; "anchor", "ws-blocker-" + b.Id; "question", b.Question; "materiality", (if b.Material then "Material question" else "Not material") ])
