@@ -25,6 +25,8 @@
     <Compile Include="Schema.fs" />
     <Compile Include="Wire.fs" />
     <Compile Include="Storage.fs" />
+    <Compile Include="Kernel.fs" />
+    <Compile Include="Projection.fs" />
     <Compile Include="Sync.fs" />
   </ItemGroup>
 </Project>

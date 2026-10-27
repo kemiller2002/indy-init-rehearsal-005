@@ -11,6 +11,7 @@
     <Compile Include="RouteTests.fs" />
     <Compile Include="WriteInvariantTests.fs" />
     <Compile Include="FixtureReplayTests.fs" />
+    <Compile Include="KernelTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
