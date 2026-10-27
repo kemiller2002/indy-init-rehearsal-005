@@ -125,6 +125,16 @@ jobs:
         run: echo "Inputs identical to an earlier passing run (Dokimos Reusable); not re-run. Not acceptance evidence." >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/checkout@v4
         if: needs.reuse.outputs.core != 'reuse'
+      # The engine's fixture-replay tests (T15) read the frozen Causa storage
+      # contract v1.0.0 fixtures and the historical-v1 workspace. Pinned to a
+      # commit whose frozen paths equal tag causa-storage-v1.0.0.
+      - uses: actions/checkout@v4
+        if: needs.reuse.outputs.core != 'reuse'
+        with:
+          repository: kemiller2002/causa-data
+          ref: 3d861bc181ad7f4f49d82c8147325737b6d3aa1c
+          path: causa-data
+          persist-credentials: false
       - uses: actions/setup-dotnet@v4
         if: needs.reuse.outputs.core != 'reuse'
         with:
@@ -142,6 +152,8 @@ jobs:
         id: test
         if: needs.reuse.outputs.core != 'reuse'
         shell: bash
+        env:
+          CAUSA_DATA_DIR: ${{ github.workspace }}/causa-data
         run: |
           set -uo pipefail
           output=$(dotnet test App.slnx -c Release --no-build --logger "trx;LogFilePrefix=core" --results-directory TestResults/dotnet 2>&1)
