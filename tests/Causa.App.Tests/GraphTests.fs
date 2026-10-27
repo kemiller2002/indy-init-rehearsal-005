@@ -111,7 +111,7 @@ let fixtures: (string * string * InvestigationProjection) list =
       "One outcome explained by four hypotheses, one per cause role.",
       projection
           "Four roles"
-          [ hyp "h-1" "supported" (Known 3) (Known 0) "Root cause hypothesis"
+          [ { hyp "h-1" "supported" (Known 3) (Known 0) "Root cause hypothesis" with Evidence = [ "e-1"; "e-2"; "e-3" ] }
             hyp "h-2" "plausible" (Known 1) (Known 1) "Trigger hypothesis"
             hyp "h-3" "weakened" (Known 1) (Known 2) "Contributing factor hypothesis"
             hyp "h-4" "proposed" Unknown Unknown "Enabling condition hypothesis" ]
@@ -234,19 +234,136 @@ let ``WDL-004-O1 WDL-008-O2 VPO-beeaf5b2a56c521d VPO-17ea30ea2f160b62 Causa supp
         Assert.False(String.IsNullOrWhiteSpace(e.GetProperty("label").GetString()))
 
 [<Fact>]
-let ``UI-005-O4 (links only; the click path is browser-tested) graph nodes link to their records by the application's own routes`` () =
-    let p = inv [ h "a" "supported" ] [ { Id = "c1"; Outcome = "O1"; State = "identified"; Members = [ "a", RootCause ] } ]
+[<Trait("obligation", "VPO-c7c84a08e62427e4")>]
+let ``UI-005-O4 VPO-c7c84a08e62427e4 a hypothesis node opens its own evidence and every link is an application route`` () =
+    let withEvidence = { h "a" "supported" with Evidence = [ "e1"; "e2" ] }
+    let p = inv [ withEvidence; h "b" "proposed" ] [ { Id = "c1"; Outcome = "O1"; State = "identified"; Members = [ "a", RootCause; "b", Trigger ] } ]
     let root = parse (Graph.toDocument "T" p.Id (Graph.ofInvestigation p))
-    let refs (id: string) =
-        [ for n in root.GetProperty("nodes").EnumerateArray() do
-              if n.GetProperty("id").GetString() = id then
-                  for r in n.GetProperty("references").EnumerateArray() -> r.GetProperty("href").GetString() ]
-    let hrefs = refs "h-a"
-    Assert.Contains(Routes.formatItem (Routes.Investigation(p.Id, Routes.Hypotheses)) "a", hrefs)
-    Assert.Contains(Routes.format (Routes.Investigation(p.Id, Routes.Evidence)), hrefs)
-    Assert.Equal<string list>([ Routes.formatItem (Routes.Investigation(p.Id, Routes.CausalAnalysis)) "c1" ], refs "c-c1")
-    // Every link resolves to a real route of the application (never NotFound).
-    for href in hrefs @ refs "c-c1" do
-        match Routes.parse href with
-        | Routes.NotFound p -> failwith $"unroutable {p}"
-        | _ -> ()
+    let node (id: string) = root.GetProperty("nodes").EnumerateArray() |> Seq.find (fun n -> n.GetProperty("id").GetString() = id)
+    let target (n: JsonElement) =
+        let refId = n.GetProperty("interaction").GetProperty("target").GetProperty("reference").GetString()
+        n.GetProperty("references").EnumerateArray() |> Seq.find (fun r -> r.GetProperty("id").GetString() = refId)
+    // The node's Open intent goes to its first related evidence record in the evidence view.
+    Assert.Equal(Routes.formatItem (Routes.Investigation(p.Id, Routes.Evidence)) "e1", (target (node "h-a")).GetProperty("href").GetString())
+    Assert.Equal("Evidence (2 related)", (target (node "h-a")).GetProperty("label").GetString())
+    // Without related evidence it opens the hypothesis record; an outcome opens its causal relationship.
+    Assert.Equal(Routes.formatItem (Routes.Investigation(p.Id, Routes.Hypotheses)) "b", (target (node "h-b")).GetProperty("href").GetString())
+    Assert.Equal(Routes.formatItem (Routes.Investigation(p.Id, Routes.CausalAnalysis)) "c1", (target (node "c-c1")).GetProperty("href").GetString())
+    // Every link resolves to a real route of the application (never NotFound) and satisfies the kernel's allow-list.
+    for n in root.GetProperty("nodes").EnumerateArray() do
+        for r in n.GetProperty("references").EnumerateArray() do
+            let href = r.GetProperty("href").GetString()
+            Assert.StartsWith("#/investigations/", href)
+            match Routes.parse href with
+            | Routes.NotFound path -> failwith $"unroutable {path}"
+            | _ -> ()
+
+[<Fact>]
+[<Trait("obligation", "VPO-c7c84a08e62427e4")>]
+let ``UI-005-O4 VPO-c7c84a08e62427e4 the shell's hypothesis rows carry the evidence the engine relates to them, in admission order`` () =
+    let ns = Guid "6f1e2d3c-4b5a-4968-8778-695a4b3c2d1e"
+    let gid (n: string) = IndyInitRootCauseInvestigator.Engine.Hashing.uuidV5 ns n
+    let id n : IndyInitRootCauseInvestigator.Engine.Id<'T> = IndyInitRootCauseInvestigator.Engine.Id(gid n)
+    let human: IndyInitRootCauseInvestigator.Engine.Actor = { ActorId = "investigator-01"; Kind = IndyInitRootCauseInvestigator.Engine.Human }
+    let t0 = DateTimeOffset(2026, 10, 27, 12, 0, 0, TimeSpan.Zero)
+    let invId: IndyInitRootCauseInvestigator.Engine.InvestigationId = id "inv"
+    let commands =
+        let open' = IndyInitRootCauseInvestigator.Engine.Command.StartInvestigation("Synthetic", id "obs", "Synthetic observation.")
+        [ open'
+          IndyInitRootCauseInvestigator.Engine.ActivateInvestigation
+          IndyInitRootCauseInvestigator.Engine.RecordHypothesis(id "h", "Synthetic hypothesis", None)
+          IndyInitRootCauseInvestigator.Engine.AdmitEvidence(id "e-first", IndyInitRootCauseInvestigator.Engine.TextInput "First", IndyInitRootCauseInvestigator.Engine.Log, "log", None)
+          IndyInitRootCauseInvestigator.Engine.AdmitEvidence(id "e-second", IndyInitRootCauseInvestigator.Engine.TextInput "Second", IndyInitRootCauseInvestigator.Engine.Log, "log", None)
+          IndyInitRootCauseInvestigator.Engine.AdmitEvidence(id "e-unrelated", IndyInitRootCauseInvestigator.Engine.TextInput "Other", IndyInitRootCauseInvestigator.Engine.Log, "log", None)
+          // related in the opposite order to admission, once supporting and once contradicting
+          IndyInitRootCauseInvestigator.Engine.RelateEvidence(id "r1", id "e-second", id "h", IndyInitRootCauseInvestigator.Engine.Contradicts, None)
+          IndyInitRootCauseInvestigator.Engine.RelateEvidence(id "r2", id "e-first", id "h", IndyInitRootCauseInvestigator.Engine.Supports, None)
+          IndyInitRootCauseInvestigator.Engine.RelateEvidence(id "r3", id "e-first", id "h", IndyInitRootCauseInvestigator.Engine.Discriminates, None) ]
+    let session =
+        commands
+        |> List.indexed
+        |> List.fold
+            (fun s (i, c) ->
+                match
+                    IndyInitRootCauseInvestigator.Engine.Kernel.submit
+                        s
+                        ({ CommandId = gid $"c{i}"; Investigation = invId; ExpectedVersion = None; Actor = human; RequestedAt = t0.AddMinutes(float i); Command = c }: IndyInitRootCauseInvestigator.Engine.CommandEnvelope)
+                with
+                | Ok a -> a.Session
+                | Error r -> failwithf "%A" r)
+            IndyInitRootCauseInvestigator.Engine.Kernel.empty
+    let state = session.State.Value
+    let projection = IndyInitRootCauseInvestigator.Engine.Projection.ofInvestigation human t0 None state
+    let view = EngineView.ofProjection true session.History projection
+    let row = view.Hypotheses |> List.exactlyOne
+    Assert.Equal<string list>([ (gid "e-first").ToString("D"); (gid "e-second").ToString("D") ], row.Evidence)
+
+// ---- the graph of the real historical investigations, offline (read from a causa-data checkout at run time) ----
+
+let private causaData () =
+    match Environment.GetEnvironmentVariable "CAUSA_DATA_DIR" with
+    | null
+    | "" ->
+        let rec up (d: DirectoryInfo) =
+            if isNull d then failwith "causa-data checkout not found (CAUSA_DATA_DIR)"
+            elif Directory.Exists(Path.Combine(d.FullName, "causa-data", "catalog")) then Path.Combine(d.FullName, "causa-data")
+            else up d.Parent
+        up (DirectoryInfo AppContext.BaseDirectory)
+    | dir -> dir
+
+[<Fact>]
+let ``WDL-012 (offline layer) the graph of each historical case is exactly its recorded causal structure with its evidence counts`` () =
+    let data = causaData ()
+    let active = JsonDocument.Parse(File.ReadAllText(Path.Combine(data, "catalog", "active.json"))).RootElement
+    let manifest = JsonDocument.Parse(File.ReadAllText(Path.Combine(data, active.GetProperty("manifest").GetString()))).RootElement
+    let human: IndyInitRootCauseInvestigator.Engine.Actor = { ActorId = "viewer"; Kind = IndyInitRootCauseInvestigator.Engine.Human }
+    let cases = [ for c in manifest.GetProperty("cases").EnumerateArray() -> c ]
+    Assert.Equal(3, cases.Length)
+    for c in cases do
+        let id = c.GetProperty("investigationId").GetString()
+        let dir = Path.Combine(data, c.GetProperty("path").GetString())
+        let files = Directory.GetFiles dir |> Array.map (fun f -> Path.GetFileName f, File.ReadAllBytes f) |> Map.ofArray
+        let loaded =
+            match IndyInitRootCauseInvestigator.Engine.Storage.read id files with
+            | Ok l -> l
+            | Error e -> failwithf "%A" e
+        // Independently from the events: causes, members with roles, and supports/contradicts per hypothesis.
+        let events = File.ReadAllLines(Path.Combine(dir, "events.ndjson")) |> Array.filter (fun l -> l <> "") |> Array.map (fun l -> JsonDocument.Parse(l).RootElement)
+        let roleLabel = Map.ofList [ "rootCause", "Root cause"; "trigger", "Trigger"; "contributingFactor", "Contributing factor"; "enablingCondition", "Enabling condition" ]
+        let causes =
+            [ for e in events do
+                  if e.GetProperty("eventType").GetString() = "CausalAssertionRecorded" then
+                      let p = e.GetProperty("payload")
+                      yield p.GetProperty("causeId").GetString(), [ for m in p.GetProperty("members").EnumerateArray() -> m.GetProperty("hypothesisId").GetString(), m.GetProperty("role").GetString() ] ]
+        let members = causes |> List.collect (snd >> List.map fst) |> Set.ofList
+        let related kind h =
+            events
+            |> Array.filter (fun e -> e.GetProperty("eventType").GetString() = "EvidenceRelated")
+            |> Array.filter (fun e -> let p = e.GetProperty("payload") in p.GetProperty("hypothesisId").GetString() = h && p.GetProperty("kind").GetString() = kind)
+            |> Array.length
+        let view = EngineView.ofProjection false loaded.Events (IndyInitRootCauseInvestigator.Engine.Projection.ofInvestigation human DateTimeOffset.UnixEpoch None loaded.State)
+        let g = Graph.ofInvestigation view
+        Assert.Equal<string list>(
+            ([ for h in members -> "h-" + h ] @ [ for cid, _ in causes -> "c-" + cid ]) |> List.sort,
+            g.Nodes |> List.map (fun n -> n.Id) |> List.sort
+        )
+        Assert.Equal<string list>(
+            [ for cid, ms in causes do for h, r in ms -> $"{h}->{cid}:{roleLabel[r]}" ] |> List.sort,
+            [ for e in g.Edges -> $"{e.Source.Substring 2}->{e.Target.Substring 2}:{e.Label}" ] |> List.sort
+        )
+        for n in g.Nodes |> List.filter (fun n -> n.Kind = "hypothesis") do
+            let h = n.Id.Substring 2
+            let supports = related "supports" h
+            let contradicts = related "contradicts" h
+            Assert.Equal($"{supports} supporting, {contradicts} contradicting evidence", n.Description)
+        // And the document for it is one the layout engine accepts by its own limits (labels within 1000 chars).
+        let documentText = Graph.toDocument view.Title view.Id g
+        // Diagnostics only: write the documents somewhere outside the repository for an offline layout check.
+        match Environment.GetEnvironmentVariable "CAUSA_GRAPH_DUMP_DIR" with
+        | null
+        | "" -> ()
+        | out -> File.WriteAllText(Path.Combine(out, id + ".json"), documentText)
+        let doc = JsonDocument.Parse(documentText).RootElement
+        for n in doc.GetProperty("nodes").EnumerateArray() do
+            Assert.True(n.GetProperty("label").GetString().Length <= 1000)
+            Assert.True(n.GetProperty("accessibility").GetProperty("name").GetString().Length <= 1000)

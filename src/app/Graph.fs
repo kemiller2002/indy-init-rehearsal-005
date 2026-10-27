@@ -86,8 +86,13 @@ let ofInvestigation (inv: InvestigationProjection) : CausalGraph =
               Status = Presentation.label h.State
               Slot = slotOfTone (Presentation.tone h.State)
               References =
-                [ { Id = "hypothesis"; Kind = "hypothesis"; Label = "Hypothesis record"; Href = sectionHref inv.Id Routes.Hypotheses h.Id }
-                  { Id = "evidence"; Kind = "evidence"; Label = "Evidence records"; Href = Routes.format (Routes.Investigation(inv.Id, Routes.Evidence)) } ] })
+                let record = { Id = "hypothesis"; Kind = "hypothesis"; Label = "Hypothesis record"; Href = sectionHref inv.Id Routes.Hypotheses h.Id }
+                match h.Evidence with
+                | [] -> [ record ]
+                | first :: _ ->
+                    // The node opens its own evidence (UI-005-O4): the first related record, in the evidence view.
+                    [ { Id = "evidence"; Kind = "evidence"; Label = $"Evidence ({h.Evidence.Length} related)"; Href = sectionHref inv.Id Routes.Evidence first }
+                      record ] })
 
     let outcomes =
         inv.Causes
@@ -186,7 +191,7 @@ let toDocument (title: string) (investigationId: string) (g: CausalGraph) : stri
                       n.References
                       |> List.map (fun r -> obj [ "id", str r.Id; "system", str "org.causa"; "type", str r.Kind; "key", str r.Href; "label", str r.Label; "href", str r.Href ])
                   )
-                  "interaction", obj [ "action", str "navigate"; "target", obj [ "reference", str (List.head n.References).Id ]; "label", str ("Open " + (List.head n.References).Label.ToLowerInvariant()) ] ]
+                  "interaction", obj [ "action", str "navigate"; "target", obj [ "reference", str (List.head n.References).Id ]; "label", str ("Open " + (List.head n.References).Label) ] ]
             obj members
 
         let edge (e: Edge) =
