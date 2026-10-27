@@ -178,6 +178,27 @@ let extend (model: Model) (view: ViewState) : ViewState =
         control caps "ResolveContradiction" "Mark the contradiction resolved" [ "ResolveContradiction"; "ResolveContradiction:" + blockerId ]
             (if isContradiction then "This contradiction cannot be marked resolved in its current state." else "This is an open question, not a contradiction.") overviewBlocker
 
+    // ---- S09 / S10: investigation actions (designer, and result capture for ?item=<action>) ----
+    let actionsHere = on Actions
+    let selectedAction = if actionsHere then detail.Actions |> List.tryFind (fun a -> a.Id = model.Selected) else None
+    let aId = selectedAction |> Option.map (fun a -> a.Id) |> Option.defaultValue ""
+    let actionHref (a: string) = Routes.formatItem (Investigation(invId, Actions)) a
+    let targetsText (ids: string list) = if ids.IsEmpty then "No hypothesis is named." else "Tests: " + (ids |> List.map statementOf |> String.concat "; ")
+    let prospective = detail.Predictions |> List.filter (fun p -> p.State.Contains "Prospective") |> List.length
+    let findingsHere = detail.Findings |> List.filter (fun f -> f.Related |> List.contains aId)
+    let recordFinding = control caps "RecordFinding" "Record the result" [ "RecordFinding"; "RecordFinding:" + aId ] "No action is selected, so there is nothing to record a result for." overviewBlocker
+
+    // ---- S19: replay / spectator (read-only, one recorded version at a time) ----
+    let replay = on Timeline && model.Selected = "replay"
+    let steps = inv |> Option.map (fun i -> i.Timeline |> List.sortBy (fun t -> t.Sequence)) |> Option.defaultValue []
+    let step = match model.HistoryVersion with Some v -> Some v | None -> steps |> List.tryHead |> Option.map (fun t -> t.Sequence)
+    let replayView = match inv, step with Some i, Some v when replay -> model.Port.History i.Id v | _ -> None
+    let stepIndex = steps |> List.tryFindIndex (fun t -> Some t.Sequence = step)
+    let stepAt k = if k >= 0 && k < steps.Length then Some steps[k] else None
+    let prev = stepIndex |> Option.bind (fun k -> stepAt (k - 1))
+    let next = stepIndex |> Option.bind (fun k -> stepAt (k + 1))
+    let replayHref (v: int64) = Routes.format (Investigation(invId, Timeline)) + $"?item=replay&version={v}"
+
     // ---- S24: settings semantic manifest ----
     let pin =
         match ws.Capabilities |> List.tryFind (fun c -> c.Id = "PinPolicyVersion") with
@@ -291,7 +312,7 @@ let extend (model: Model) (view: ViewState) : ViewState =
           "an.cr.evidence.empty", flag cited.IsEmpty
           "an.cr.backHref", text (blockerAt CorrectiveActions caId)
           // S15
-          "an.timeline.screen", text (if history.IsSome then "semantic-diff" else "investigation-timeline")
+          "an.timeline.screen", text (if replay then "replay-spectator" elif history.IsSome then "semantic-diff" else "investigation-timeline")
           "an.diff.versions",
           text (
               match history with
@@ -330,6 +351,61 @@ let extend (model: Model) (view: ViewState) : ViewState =
           )
           "an.form.resolveUnknown.basis", text (field "ResolveUnknown.basis")
           "an.form.resolveContradiction.basis", text (field "ResolveContradiction.basis")
+          // S09
+          "an.section.actions", flag actionsHere
+          "an.actions.designer", flag (actionsHere && selectedAction.IsNone)
+          "an.actions.capture", flag selectedAction.IsSome
+          "an.actions.targets",
+          items (
+              (hypotheses |> List.map (fun h -> item [ "id", h.Id; "text", h.Statement; "state", "Hypothesis: " + label h.State ]))
+              @ (detail.Unknowns |> List.map (fun u -> item [ "id", u.Id; "text", u.Text; "state", "Open question: " + u.State ]))
+          )
+          "an.actions.targets.empty", flag (hypotheses.IsEmpty && detail.Unknowns.IsEmpty)
+          "an.actions.list", items (detail.Actions |> List.map (fun a -> item [ "id", a.Id; "text", a.Text; "state", a.State + ". " + targetsText a.Related; "href", actionHref a.Id ]))
+          "an.actions.list.empty", flag detail.Actions.IsEmpty
+          "an.actions.prereg",
+          text (
+              match detail.Predictions.Length with
+              | 0 -> "No prediction is recorded yet, so nothing is pre-registered."
+              | n -> $"{prospective} of {n} predictions were recorded before any finding (prospective); the rest were recorded after one and are marked retrospective."
+          )
+          "an.actions.cost", text "Cost, time and risk: not recorded. The investigation model has no fields for them, so none are shown."
+          // S10
+          "an.capture.text", text (selectedAction |> Option.map (fun a -> a.Text) |> Option.defaultValue "")
+          "an.capture.state", text (selectedAction |> Option.map (fun a -> a.State + ". " + targetsText a.Related) |> Option.defaultValue "")
+          "an.capture.backHref", text (Routes.format (Investigation(invId, Actions)))
+          "an.capture.results", items (rows findingsHere)
+          "an.capture.results.empty", flag findingsHere.IsEmpty
+          "an.capture.anomalies", text "Anomalies: not recorded. The finding record has no anomaly field; note any anomaly in the result text."
+          "an.capture.evidence", text "A result is not evidence. To admit it as evidence, record it on the Evidence screen and link it to the hypotheses it bears on."
+          "an.capture.evidenceHref", text (Routes.format (Investigation(invId, Evidence)))
+          "an.form.finding.result", text (field "RecordFinding.result")
+          "an.form.finding.interpretation", text (field "RecordFinding.interpretation")
+          // S19
+          "an.replay.show", flag replay
+          "an.replay.startHref", text (steps |> List.tryHead |> Option.map (fun t -> replayHref t.Sequence) |> Option.defaultValue "")
+          "an.replay.problem", text (inv |> Option.bind (fun i -> i.Description) |> Option.defaultValue "The problem statement is not recorded.")
+          "an.replay.version",
+          text (
+              match replayView, stepIndex with
+              | Some h, Some k -> $"Step {k + 1} of {steps.Length}: version {h.AtVersion} of {h.LatestVersion}. A past state, shown read-only."
+              | _ -> "This version is not available to replay."
+          )
+          "an.replay.hypotheses", items (replayView |> Option.map (fun h -> h.Hypotheses |> List.mapi (fun k (t, st) -> item [ "id", string k; "text", t; "state", st ])) |> Option.defaultValue [])
+          "an.replay.hypotheses.empty", flag (replayView |> Option.forall (fun h -> h.Hypotheses.IsEmpty))
+          "an.replay.event",
+          text (
+              stepIndex
+              |> Option.bind stepAt
+              |> Option.map (fun t -> $"""#{t.Sequence} {t.EventType}, {t.Actor |> Option.defaultValue "actor not recorded"}, event time {t.OccurredAt}""")
+              |> Option.defaultValue ""
+          )
+          "an.replay.changes", items (replayView |> Option.map (fun h -> lines h.ChangesHere) |> Option.defaultValue [])
+          "an.replay.hasPrev", flag prev.IsSome
+          "an.replay.prevHref", text (prev |> Option.map (fun t -> replayHref t.Sequence) |> Option.defaultValue "")
+          "an.replay.hasNext", flag next.IsSome
+          "an.replay.nextHref", text (next |> Option.map (fun t -> replayHref t.Sequence) |> Option.defaultValue "")
+          "an.replay.next", text (match next with Some t -> $"Next recorded event: #{t.Sequence} {t.EventType}." | None -> "This is the last recorded event; nothing follows.")
           // S24
           "an.manifest.semantic", text "Semantic version 1.0.0 of the Causa investigation model (storage contract v1.0.0). It changes only through an approved semantic evolution, never silently."
           "an.manifest.pack", text "No domain pack is installed: the core investigation model applies. Storage contract v1.0.0 allows no domain packs."
@@ -348,6 +424,7 @@ let extend (model: Model) (view: ViewState) : ViewState =
         @ formKeys "ca" recordCorrection
         @ formKeys "verify" verify
         @ formKeys "resolveUnknown" resolveUnknown
+        @ formKeys "finding" recordFinding
         @ formKeys "resolveContradiction" resolveContradiction
 
     keys |> List.fold (fun (m: ViewState) (k, v) -> m.Add(k, v)) view

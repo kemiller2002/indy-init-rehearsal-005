@@ -68,6 +68,7 @@ let private capabilityLabel (id: string) =
     | "MarkCorrectiveActionImplemented" -> "Mark implemented"
     | "RecordVerification" -> "Record a verification result"
     | "ResolveUnknown" -> "Mark the question answered"
+    | "RecordFinding" -> "Record the result"
     | "ResolveContradiction" -> "Mark the contradiction resolved"
     | other -> other
 
@@ -110,12 +111,13 @@ let toProjection (s: Injected) : WorkspaceProjection =
           Detail =
             { Contradictions = [ { Id = "x-1"; Text = "The recorded temperature and the operator's log disagree."; State = "Unresolved"; Related = [ "e-1" ] } ]
               Assumptions = [ { Id = "a-1"; Text = "The sensor was calibrated before the event."; State = "Not verified · Material"; Related = [] } ]
-              Predictions = [ { Id = "p-1"; Text = "A seal tested at the same temperature loses resilience."; State = "Necessary: if it fails, the hypothesis is falsified"; Related = [ "h-1" ] } ]
+              Predictions = [ { Id = "p-1"; Text = "A seal tested at the same temperature loses resilience."; State = "Necessary: if it fails, the hypothesis is falsified · Prospective: recorded before any finding"; Related = [ "h-1" ] } ]
               Actions = [ { Id = "act-1"; Text = "Compress a seal sample at the recorded temperature."; State = "Test · Proposed"; Related = [ "h-1" ] } ]
               NegativeKnowledge = [ { Id = "nk-1"; Text = "The joint was not damaged in transport."; State = "Scope: transport to the site"; Related = [ "e-1" ] } ]
               Unknowns = [ { Id = blockerId; Text = "Was the material change in the event sequence observed directly?"; State = (if blocked then "Open · Material" else "Open · Not material"); Related = [] } ]
               CauseGates = [ "c-1", (if blocked then [ "An open material question must be answered first." ] else []) ]
               Corrections = [ { Id = "ca-1"; Description = "Qualify the seal for the lowest launch temperature."; Kind = "Root-cause correction"; State = "Approved"; Targets = [ "c-1" ] } ]
+              Findings = [ { Id = "f-1"; Text = "The sample lost 40% of its rebound at the recorded temperature."; State = "No interpretation recorded."; Related = [ "act-1" ] } ]
               Criteria = [ { Id = "cr-1"; Correction = "ca-1"; Expected = "No seal loses resilience in qualification at the lowest temperature."; Method = Some "Qualification test"; Satisfied = false; Results = [] } ] } }
 
     { Connection = ConnectedTo("fixture/percepta", "main", "test")
@@ -154,7 +156,8 @@ let history (s: Injected) (_: string) (version: int64) : HistoryView option =
               ChangesHere = [ "Status set to Active" ]
               ChangesSince = (if historical then [ "Added evidence e-1"; "Hypothesis h-1: Proposed → Plausible" ] else [])
               BlockerChanges = (if historical && s.Predicates |> List.contains "material-blocker-exists" then [ "Opened since: Was the material change in the event sequence observed directly?" ] else [])
-              CapabilityChanges = (if historical then [ "Link evidence to a hypothesis: not available then, available now" ] else []) }
+              CapabilityChanges = (if historical then [ "Link evidence to a hypothesis: not available then, available now" ] else [])
+              Hypotheses = [ "A seal lost resilience in the cold.", (if historical then "Proposed" else "Plausible") ] }
 
 /// The port for an injected state: the fixed projection, plus the fixture history for time travel.
 let port (s: Injected) : Port =

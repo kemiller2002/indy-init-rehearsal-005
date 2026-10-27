@@ -109,6 +109,7 @@ let describe (inv: Investigation) (action: CapabilityAction) : (string * string 
     | Create RecordCorrectiveActionKind -> Some("RecordCorrectiveAction", "RecordCorrectiveAction", "Record a corrective action", Some formMarker)
     | UnknownAction(u, ResolveUnknown) -> Some("ResolveUnknown:" + u.Text, "ResolveUnknown", "Mark the question answered", Some formMarker)
     | ContradictionAction(c, ResolveContradiction) -> Some("ResolveContradiction:" + c.Text, "ResolveContradiction", "Mark the contradiction resolved", Some formMarker)
+    | RecordFindingAction a -> Some("RecordFinding:" + a.Text, "RecordFinding", "Record the result", Some formMarker)
     | Create RecordPredictionKind -> Some("RecordPrediction", "RecordPrediction", "Record a prediction", Some formMarker)
     | Create RecordActionKind -> Some("RecordInvestigationAction", "RecordInvestigationAction", "Plan an investigation action", Some formMarker)
     | RecordVerificationAction cr -> Some("RecordVerification:" + cr.Text, "RecordVerification", "Record a verification result", Some formMarker)
@@ -264,7 +265,8 @@ let history (events: DomainEvent list) (version: int64) : A.HistoryView option =
           ChangesHere = Timeline.changesAt events v.AtVersion |> List.map changeText
           ChangesSince = (if v.IsHistorical then Timeline.between events v.AtVersion v.LatestVersion |> List.map changeText else [])
           BlockerChanges = (match latest with Some l when v.IsHistorical -> blockerChanges s l | _ -> [])
-          CapabilityChanges = (match latest with Some l when v.IsHistorical -> capabilityChanges at s l | _ -> []) })
+          CapabilityChanges = (match latest with Some l when v.IsHistorical -> capabilityChanges at s l | _ -> [])
+          Hypotheses = values s.Hypotheses |> List.sortBy (fun h -> h.Provenance.RecordedAt, h.Id.Text) |> List.map (fun h -> h.Statement.Value, Language.hypothesis h.State) })
 
 let private strength =
     function
@@ -328,7 +330,9 @@ let detail (p: InvestigationProjection) : A.InvestigationDetail =
         |> List.map (fun a -> row a.Id.Text a.Proposition.Value $"{Language.assumptionState a.State} · {Language.materiality a.Materiality}" [])
       Predictions =
         values inv.Predictions
-        |> List.map (fun x -> row x.Id.Text x.Statement.Value (predictionStrengthText x.Strength) [ x.Hypothesis.Text ])
+        |> List.map (fun x ->
+            let timing = match x.Timing with Prospective -> "Prospective: recorded before any finding" | Retrospective -> "Retrospective: recorded after a finding"
+            row x.Id.Text x.Statement.Value $"{predictionStrengthText x.Strength} · {timing}" [ x.Hypothesis.Text ])
       Actions =
         values inv.Actions
         |> List.map (fun a -> row a.Id.Text a.Purpose.Value $"{actionKindText a.Kind} · {Language.actionState a.State}" (a.Targets |> List.map (fun h -> h.Text)))
@@ -359,7 +363,11 @@ let detail (p: InvestigationProjection) : A.InvestigationDetail =
                  values inv.Verifications
                  |> List.filter (fun v -> v.Criterion = cr.Id)
                  |> List.sortBy (fun v -> v.RecordedAtVersion)
-                 |> List.map (fun v -> Language.verificationOutcome v.Outcome, v.Evidence |> List.map (fun e -> e.Text)) }: A.CriterionRow)) }
+                 |> List.map (fun v -> Language.verificationOutcome v.Outcome, v.Evidence |> List.map (fun e -> e.Text)) }: A.CriterionRow))
+      Findings =
+        values inv.Findings
+        |> List.map (fun f ->
+            row f.Id.Text f.OriginalResult.Value (f.Interpretation |> Option.map (fun i -> "Interpretation: " + i.Value) |> Option.defaultValue "No interpretation recorded.") [ f.Action.Text ]) }
 
 /// Boundary B -> the shell's investigation view.
 let ofProjection (writable: bool) (history: DomainEvent list) (p: InvestigationProjection) : A.InvestigationProjection =

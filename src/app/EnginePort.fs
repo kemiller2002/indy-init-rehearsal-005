@@ -208,6 +208,12 @@ let commandFor (entropy: A.Entropy) (name: string) (fields: Map<string, string>)
             | _ -> Correction
         let targets = match Guid.TryParse(text fields "cause") with | true, c -> [ Id.ofGuid c ] | _ -> []
         Ok(RecordCorrectiveAction(Id.ofGuid (fresh 2), kind, text fields "description", targets))
+    | [| "RecordFinding" |] ->
+        match Guid.TryParse(text fields "item") with
+        | true, a ->
+            let interpretation = text fields "interpretation"
+            Ok(RecordFinding(Id.ofGuid (fresh 2), Id.ofGuid a, text fields "result", (if String.IsNullOrWhiteSpace interpretation then None else Some interpretation)))
+        | _ -> Error "Choose the action this result came from."
     | [| "ResolveUnknown" |] ->
         match Guid.TryParse(text fields "item") with
         | true, u -> Ok(TransitionUnknown(Id.ofGuid u, ResolveUnknown, text fields "basis"))

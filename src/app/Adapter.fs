@@ -91,7 +91,9 @@ type HistoryView =
       /// Open questions that differ between AtVersion and the latest version (S15).
       BlockerChanges: string list
       /// Actions whose availability differs between AtVersion and the latest version (S15).
-      CapabilityChanges: string list }
+      CapabilityChanges: string list
+      /// The hypotheses as they stood at AtVersion, with their state then (S19 replay).
+      Hypotheses: (string * string) list }
 
 type CauseRole =
     | RootCause
@@ -165,7 +167,9 @@ type InvestigationDetail =
       /// Per cause id: what the confirmation gate still requires (empty = the gate is open).
       CauseGates: (string * string list) list
       Corrections: CorrectionRow list
-      Criteria: CriterionRow list }
+      Criteria: CriterionRow list
+      /// Findings: the original result (Text), its interpretation (State), and the action it came from (Related).
+      Findings: DetailRow list }
 
 let noDetail =
     { Contradictions = []
@@ -176,7 +180,8 @@ let noDetail =
       Unknowns = []
       CauseGates = []
       Corrections = []
-      Criteria = [] }
+      Criteria = []
+      Findings = [] }
 
 type InvestigationProjection =
     { Id: string
