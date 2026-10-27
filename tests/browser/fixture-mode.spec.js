@@ -30,7 +30,9 @@ test(
     await connectFixture(page);
     // Conspicuous and honest: a masthead tag and the connection label say it is synthetic, not GitHub.
     await expect(page.locator(".causa-fixture-mode")).toHaveText("Fixture data: synthetic, not GitHub", { timeout: 60_000 });
-    await expect(page.locator(".causa-connection")).toContainText("Local fixture: synthetic data, not GitHub");
+    // Administration names the provider plainly: synthetic data generated in this page, nothing from or to GitHub.
+    await page.goto(TEST_SITE + "index.html#/administration");
+    await expect(page.getByRole("row", { name: /Data provider/ })).toContainText("Local fixture: synthetic data generated in this page");
     await page.goto(TEST_SITE + "index.html#/investigations");
     const card = page.locator(".causa-card");
     await expect(card).toHaveCount(1, { timeout: 60_000 });
