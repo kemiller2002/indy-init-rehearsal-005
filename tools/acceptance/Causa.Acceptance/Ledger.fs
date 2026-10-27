@@ -65,7 +65,9 @@ type Inputs =
       FrozenFixtureDigest: string
       DependencyLockSha: string
       InterfaceManifestSha: string
-      Command: string }
+      Command: string
+      /// Where the evidence was produced (runner OS/image, .NET runtime, CI run URL): cited by every evidence file.
+      Environment: (string * string) list }
 
 let loadGates (node: Text.Json.Nodes.JsonNode) =
     items "gates" node
@@ -118,7 +120,8 @@ let private evidence (i: Inputs) subjectType subjectId status evidenceType (extr
           "status", jstr status
           "exit_code", jint (if status = "PASS" then 0 else 1)
           "evidence_type", jstr evidenceType
-          "command", jstr i.Command ]
+          "command", jstr i.Command
+          "environment", jobj (i.Environment |> List.map (fun (k, v) -> k, jstr v)) ]
         @ extra
     )
 

@@ -409,6 +409,7 @@ let project (model: Model) : ViewState =
       "sync.conflict", flag (ws.Sync = Conflict)
       "confirm.show", flag model.PendingConfirm.IsSome
       "confirm.text", text (model.PendingConfirm |> Option.map snd |> Option.defaultValue "")
+      "data.fixture", flag (model.Port.Name = "engine/fixture")
       "connected", flag connected
       "notice.show", flag notice.IsSome
       "notice.text", text (notice |> Option.defaultValue "")

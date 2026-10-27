@@ -119,11 +119,18 @@ let parseTrx (source: string) (traits: Map<string * string, string list>) (doc: 
             attr "id" ut, (cls, meth, storage))
         |> Map.ofSeq
 
+    let byFullName = traits |> Map.toList |> List.map (fun ((c, m), ids) -> c + "." + m, ids) |> Map.ofList
+
     doc.Descendants(ns + "UnitTestResult")
     |> Seq.map (fun r ->
         let name = attr "testName" r
         let cls, meth, _ = definitions.TryFind(attr "testId" r) |> Option.defaultValue ("", "", "")
-        let fromTraits = traits.TryFind((cls, meth)) |> Option.defaultValue []
+        // VSTest splits "Class.Method" at the last '.', which lands inside a method name that contains a '.', so
+        // the full name is matched too.
+        let fromTraits =
+            match traits.TryFind((cls, meth)) with
+            | Some ids -> ids
+            | None -> byFullName.TryFind(cls + "." + meth) |> Option.defaultValue []
         let outcome =
             match attr "outcome" r with
             | "Passed" -> Passed

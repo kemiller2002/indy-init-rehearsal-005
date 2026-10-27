@@ -636,6 +636,47 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+  # Adversarial tests of the preservation gate (AR-002, PF-018, WDL-015): the recorded command against mutated copies
+  # of the derived package (omission, negation, weakening, value and role swaps). Not required: a mutation the gate
+  # does not catch is a finding about the gate, recorded as a failing obligation, not a defect of this candidate.
+  preservation-adversarial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: kemiller2002/Indy-init
+          ref: ${{ env.INDY_INIT_REF }}
+          path: .indy-init
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Indy-init at the pinned ref and at the baseline source commit, outside the checkout
+        run: |
+          mv .indy-init "$RUNNER_TEMP/indy-init"
+          git -C "$RUNNER_TEMP/indy-init" worktree add --detach "$RUNNER_TEMP/indy-init-aab8f80" aab8f80c7743392e794b3b631542903ed4ed6f64
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - name: Install Praxis (verified against the pinned channel)
+        run: tools/acceptance/ci/install-host-tool.sh praxis praxis "$RUNNER_TEMP/host-tools" >> "$GITHUB_PATH"
+      - name: Mutations of the derived package against the recorded gate
+        env:
+          INDY_INIT: ${{ runner.temp }}/indy-init
+          INDY_INIT_SOURCE: ${{ runner.temp }}/indy-init-aab8f80
+        run: |
+          dotnet build tools/acceptance/Causa.Acceptance.RunTests -c Release
+          dotnet test tools/acceptance/Causa.Acceptance.RunTests -c Release --no-build --filter "job=preservation" \
+            --logger "trx;LogFilePrefix=preservation-adversarial" --results-directory TestResults/preservation-adversarial
+      - name: Publish the results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: preservation-adversarial-results
+          path: TestResults/preservation-adversarial/
+          if-no-files-found: warn
+          retention-days: 30
+
   # G5: `percepta verify-app` against the test configuration of the built site (obj/site-test, built from dist/ with
   # the Percepta state hook) with the committed .percepta/bindings.json and contracts. Producer status:
   #   success       exit 0 and the report is complete (every contract bound and PASS)
@@ -761,7 +802,7 @@ jobs:
     needs: deploy
     if: needs.deploy.result == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 25
     outputs:
       sha: ${{ steps.smoke.outputs.sha }}
     steps:
@@ -777,9 +818,42 @@ jobs:
           [ "$served" = "$GITHUB_SHA" ] || { echo "::error::deployment serves '$served', not $GITHUB_SHA"; exit 1; }
           curl -fsSL -o /dev/null "${URL%/}/"
           echo "sha=$served" >> "$GITHUB_OUTPUT"
+      # The deployed site at this exact SHA, in a browser, without credentials: every artifact file served byte for
+      # byte, the application starts, and screenshots at desktop, iPad portrait/landscape and mobile sizes
+      # (tools/acceptance/deployed). Published as deployed-results for the acceptance evidence.
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: The deployed site artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: ${{ runner.temp }}/site
+      - name: Install Playwright and Chromium
+        timeout-minutes: 10
+        run: |
+          npm ci
+          timeout 300 npx playwright install chromium
+      - name: Verify the deployment in a browser and capture screenshots
+        env:
+          DEPLOYED_URL: ${{ needs.deploy.outputs.url }}
+          EXPECTED_SHA: ${{ github.sha }}
+          SITE_DIR: ${{ runner.temp }}/site
+          SCREENSHOT_DIR: TestResults/deployed/screenshots
+          PLAYWRIGHT_JSON_OUTPUT_FILE: TestResults/deployed/deployed-results.json
+        run: npx playwright test -c tools/acceptance/deployed/playwright.config.js
+      - name: Publish the deployed results and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployed-results
+          path: TestResults/deployed/
+          if-no-files-found: warn
+          retention-days: 90
 
   acceptance:
-    needs: [reuse, core, lock-gate, site, browser, live, wasm-smoke, preservation-gate, percepta, build-and-test, deploy, deployed-smoke]
+    needs: [reuse, core, lock-gate, site, browser, live, wasm-smoke, preservation-gate, preservation-adversarial, percepta, build-and-test, deploy, deployed-smoke]
     if: always() && needs.reuse.result != 'cancelled'
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -815,12 +889,13 @@ jobs:
       - name: Build the candidate and the plan verifier
         run: |
           dotnet build App.slnx -c Release
+          dotnet build tools/acceptance/Causa.Acceptance.RunTests -c Release
           mv .indy-init "$RUNNER_TEMP/indy-init"
           mv .causa-data "$RUNNER_TEMP/causa-data"
           (cd "$RUNNER_TEMP/indy-init" && dotnet build tools/requirements-compiler/src -c Release)
       - uses: actions/download-artifact@v4
         with:
-          pattern: "{core-results,browser-results,live-results,lock-gate,preservation-gate,percepta,wasm-smoke}"
+          pattern: "{core-results,browser-results,live-results,lock-gate,preservation-gate,percepta,wasm-smoke,deployed-results,preservation-adversarial-results}"
           path: collected
         continue-on-error: true
       - name: Collect the results of this run
@@ -835,6 +910,9 @@ jobs:
           [ -d collected/preservation-gate ] && cp -r collected/preservation-gate gate-records/ || true
           [ -d collected/percepta ] && cp -r collected/percepta gate-records/ || true
           [ -d collected/wasm-smoke ] && cp -r collected/wasm-smoke gate-records/ || true
+          [ -d collected/preservation-adversarial-results ] && mkdir -p TestResults/preservation-adversarial && cp -r collected/preservation-adversarial-results/. TestResults/preservation-adversarial/ || true
+          [ -d collected/deployed-results ] && mkdir -p TestResults/deployed && cp collected/deployed-results/deployed-results.json TestResults/deployed/ 2>/dev/null || true
+          [ -d collected/deployed-results/screenshots ] && cp -r collected/deployed-results/screenshots gate-records/deployed-screenshots || true
           find TestResults -type f | sort
       - name: Producers of this run
         env:
@@ -865,6 +943,35 @@ jobs:
             {id: "percepta-verify-app", status: $percepta, command: "percepta verify-app --base-url <built site> (\($run))", record: "gate-records/percepta/verify-app.json"}
           ]}' > "$RUNNER_TEMP/producers.json"
           cat "$RUNNER_TEMP/producers.json"
+      - name: The built site (the artifact Pages deploys)
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: site
+          path: ${{ runner.temp }}/site
+      # Tests of this run's evidence and of the pinned verifiers against it (tools/acceptance/Causa.Acceptance.RunTests):
+      # their TRX joins this run's results before the bundle is built. A failing test is evidence (its obligations
+      # FAIL); the job is failed at the end, after the evidence is published.
+      - name: Tests of this run's evidence and verifiers
+        id: runtests
+        env:
+          INDY_INIT: ${{ runner.temp }}/indy-init
+          CAUSA_DATA_DIR: ${{ runner.temp }}/causa-data
+          RESULTS: TestResults
+          PRODUCERS: ${{ runner.temp }}/producers.json
+          RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+          SOURCE_SHA: ${{ github.sha }}
+          DEPLOYED_SHA: ${{ needs.deployed-smoke.outputs.sha }}
+          GATE_RECORDS: gate-records
+          SITE_DIR: ${{ runner.temp }}/site
+          PLAN_ID: ${{ env.PLAN_ID }}
+          PLAN_PATH: ${{ env.PLAN_PATH }}
+        run: |
+          set +e
+          dotnet test tools/acceptance/Causa.Acceptance.RunTests -c Release --no-build --filter "job!=preservation" \
+            --logger "trx;LogFilePrefix=acceptance-run" --results-directory TestResults/acceptance-run
+          echo "status=$?" >> "$GITHUB_OUTPUT"
+          exit 0
       - name: Evidence bundle, ledger and computed verdict
         env:
           INDY_INIT: ${{ runner.temp }}/indy-init
@@ -889,3 +996,16 @@ jobs:
           path: evidence-out/
           if-no-files-found: warn
           retention-days: 90
+      - name: Publish the acceptance-run test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: acceptance-run-results
+          path: TestResults/acceptance-run/
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Fail when a test of this run's evidence failed
+        if: steps.runtests.outputs.status != '0'
+        run: |
+          echo "::error::tests of this run's evidence failed (exit ${{ steps.runtests.outputs.status }}); their obligations are FAIL in the ledger"
+          exit 1

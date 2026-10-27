@@ -1,0 +1,67 @@
+{
+  "name": "cycle",
+  "purpose": "Layout only: a permitted cycle (Causa\u0027s own graph is acyclic by construction).",
+  "synthetic": true,
+  "document": {
+    "format": "forma-workflow",
+    "formatVersion": "1.0.0",
+    "id": "layout-cycle",
+    "title": "Layout only: a permitted cycle",
+    "language": "en",
+    "forma": {
+      "version": "0.9.0"
+    },
+    "layout": {
+      "direction": "down"
+    },
+    "nodes": [
+      {
+        "id": "a",
+        "kind": "task",
+        "label": "Step A"
+      },
+      {
+        "id": "b",
+        "kind": "task",
+        "label": "Step B"
+      },
+      {
+        "id": "c",
+        "kind": "task",
+        "label": "Step C"
+      }
+    ],
+    "edges": [
+      {
+        "id": "ab",
+        "source": {
+          "node": "a"
+        },
+        "target": {
+          "node": "b"
+        },
+        "label": "a to b"
+      },
+      {
+        "id": "bc",
+        "source": {
+          "node": "b"
+        },
+        "target": {
+          "node": "c"
+        },
+        "label": "b to c"
+      },
+      {
+        "id": "ca",
+        "source": {
+          "node": "c"
+        },
+        "target": {
+          "node": "a"
+        },
+        "label": "c back to a"
+      }
+    ]
+  }
+}
