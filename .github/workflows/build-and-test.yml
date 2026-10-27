@@ -761,7 +761,7 @@ jobs:
     needs: deploy
     if: needs.deploy.result == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 25
     outputs:
       sha: ${{ steps.smoke.outputs.sha }}
     steps:
@@ -777,6 +777,39 @@ jobs:
           [ "$served" = "$GITHUB_SHA" ] || { echo "::error::deployment serves '$served', not $GITHUB_SHA"; exit 1; }
           curl -fsSL -o /dev/null "${URL%/}/"
           echo "sha=$served" >> "$GITHUB_OUTPUT"
+      # The deployed site at this exact SHA, in a browser, without credentials: every artifact file served byte for
+      # byte, the application starts, and screenshots at desktop, iPad portrait/landscape and mobile sizes
+      # (tools/acceptance/deployed). Published as deployed-results for the acceptance evidence.
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: The deployed site artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: ${{ runner.temp }}/site
+      - name: Install Playwright and Chromium
+        timeout-minutes: 10
+        run: |
+          npm ci
+          timeout 300 npx playwright install chromium
+      - name: Verify the deployment in a browser and capture screenshots
+        env:
+          DEPLOYED_URL: ${{ needs.deploy.outputs.url }}
+          EXPECTED_SHA: ${{ github.sha }}
+          SITE_DIR: ${{ runner.temp }}/site
+          SCREENSHOT_DIR: TestResults/deployed/screenshots
+          PLAYWRIGHT_JSON_OUTPUT_FILE: TestResults/deployed/deployed-results.json
+        run: npx playwright test -c tools/acceptance/deployed/playwright.config.js
+      - name: Publish the deployed results and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployed-results
+          path: TestResults/deployed/
+          if-no-files-found: warn
+          retention-days: 90
 
   acceptance:
     needs: [reuse, core, lock-gate, site, browser, live, wasm-smoke, preservation-gate, percepta, build-and-test, deploy, deployed-smoke]
@@ -821,7 +854,7 @@ jobs:
           (cd "$RUNNER_TEMP/indy-init" && dotnet build tools/requirements-compiler/src -c Release)
       - uses: actions/download-artifact@v4
         with:
-          pattern: "{core-results,browser-results,live-results,lock-gate,preservation-gate,percepta,wasm-smoke}"
+          pattern: "{core-results,browser-results,live-results,lock-gate,preservation-gate,percepta,wasm-smoke,deployed-results}"
           path: collected
         continue-on-error: true
       - name: Collect the results of this run
@@ -836,6 +869,8 @@ jobs:
           [ -d collected/preservation-gate ] && cp -r collected/preservation-gate gate-records/ || true
           [ -d collected/percepta ] && cp -r collected/percepta gate-records/ || true
           [ -d collected/wasm-smoke ] && cp -r collected/wasm-smoke gate-records/ || true
+          [ -d collected/deployed-results ] && mkdir -p TestResults/deployed && cp collected/deployed-results/deployed-results.json TestResults/deployed/ 2>/dev/null || true
+          [ -d collected/deployed-results/screenshots ] && cp -r collected/deployed-results/screenshots gate-records/deployed-screenshots || true
           find TestResults -type f | sort
       - name: Producers of this run
         env:
