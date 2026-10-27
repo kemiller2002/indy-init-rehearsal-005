@@ -49,6 +49,10 @@ module GitHub =
     let listDirectory (cred: Credential option) (t: Target) (commit: string) (path: string) =
         get cred false (repo t + "/contents/" + pathSegs path + "?ref=" + seg commit)
 
+    /// One file at an immutable commit (contents API; base64 body, files up to 1 MB: used for catalog pointers).
+    let getFile (cred: Credential option) (t: Target) (commit: string) (path: string) =
+        get cred false (repo t + "/contents/" + pathSegs path + "?ref=" + seg commit)
+
     /// A blob by id: immutable.
     let getBlob (cred: Credential option) (t: Target) (sha: string) = get cred false (repo t + "/git/blobs/" + seg sha)
 
@@ -151,6 +155,11 @@ module GitHub =
             try Ok(Convert.FromBase64String(content.Replace("\n", "")))
             with :? FormatException -> Error(Malformed "blob content is not base64")
         | _ -> Error(Malformed "blob answer is not base64")
+
+    let parseFile (v: JValue) : Result<byte[], ProviderFailure> =
+        match str [ "type" ] v with
+        | Some "file" -> parseBlob v
+        | _ -> Error(Malformed "the path is not a file")
 
     /// Interpret the createCommitOnBranch answer. GraphQL reports refusals with HTTP 200 and an `errors` array.
     let parseCommit (r: HttpResponse) : Result<string, ProviderFailure> =
