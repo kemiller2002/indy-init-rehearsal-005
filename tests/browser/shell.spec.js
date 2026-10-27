@@ -16,7 +16,8 @@ test.describe("loading experience (WASM-LOAD, T16)", () => {
     let release;
     const gate = new Promise((resolve) => { release = resolve; });
     await page.route("**/wasm/_framework/dotnet.js", async (route) => { await gate; await route.continue(); });
-    await page.goto("index.html");
+    // The held runtime request delays the load event (WebKit waits for it), so wait only for the document.
+    await page.goto("index.html", { waitUntil: "domcontentloaded" });
     const boot = page.locator("#causa-boot");
     await expect(boot).toBeVisible();
     await expect(boot).toHaveAttribute("role", "status");
