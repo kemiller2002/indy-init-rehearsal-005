@@ -1,0 +1,7 @@
+{
+  "name": "s24-legal",
+  "predicates": [],
+  "capabilities": {
+    "PinPolicyVersion": "legal"
+  }
+}

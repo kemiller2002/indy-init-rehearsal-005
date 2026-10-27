@@ -23,6 +23,60 @@
       ]
     },
     {
+      "contract": "S03-hypothesis-battlefield",
+      "appScreen": "investigation-hypotheses",
+      "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/hypotheses",
+      "fixtures": [
+        "fixtures/s03-blocked.json",
+        "fixtures/s03-legal.json"
+      ]
+    },
+    {
+      "contract": "S04-hypothesis-detail",
+      "appScreen": "hypothesis-detail",
+      "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/hypotheses?item=h-1",
+      "fixtures": [
+        "fixtures/s04-blocked.json",
+        "fixtures/s04-legal.json"
+      ]
+    },
+    {
+      "contract": "S08-epistemic-blocker-detail",
+      "appScreen": "epistemic-blocker-detail",
+      "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1?item=blocker-1",
+      "fixtures": [
+        "fixtures/s08-blocked.json",
+        "fixtures/s08-legal.json"
+      ]
+    },
+    {
+      "contract": "S11-cause-review",
+      "appScreen": "investigation-causal-analysis",
+      "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/causal-analysis",
+      "fixtures": [
+        "fixtures/s11-blocked.json",
+        "fixtures/s11-legal.json"
+      ]
+    },
+    {
+      "contract": "S12-corrective-action",
+      "appScreen": "investigation-corrective-actions",
+      "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/corrective-actions",
+      "fixtures": [
+        "fixtures/s12-blocked.json",
+        "fixtures/s12-legal.json"
+      ]
+    },
+    {
+      "contract": "S13-verification",
+      "appScreen": "verification",
+      "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/corrective-actions?item=cr-1",
+      "fixtures": [
+        "fixtures/s13-blocked.json",
+        "fixtures/s13-legal.json"
+      ]
+    },
+    {
       "contract": "S14-history-time-travel",
       "appScreen": "investigation-timeline",
       "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/timeline",
@@ -32,12 +86,39 @@
       ]
     },
     {
+      "contract": "S15-semantic-diff",
+      "appScreen": "semantic-diff",
+      "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/timeline?version=1",
+      "fixtures": [
+        "fixtures/s15-blocked.json",
+        "fixtures/s15-legal.json"
+      ]
+    },
+    {
       "contract": "S22-report-preview",
       "appScreen": "investigation-report",
       "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/report",
       "fixtures": [
         "fixtures/blocker-only.json",
         "fixtures/no-predicates.json"
+      ]
+    },
+    {
+      "contract": "S23-persistence-conflict-recovery",
+      "appScreen": "persistence-conflict-recovery",
+      "path": "index.html?percepta=conflict#/investigations/00000000-0000-4000-8000-0000000000f1",
+      "fixtures": [
+        "fixtures/s23-blocked.json",
+        "fixtures/s23-legal.json"
+      ]
+    },
+    {
+      "contract": "S24-settings-semantic-manifest",
+      "appScreen": "settings",
+      "path": "index.html?percepta=default#/settings",
+      "fixtures": [
+        "fixtures/s24-blocked.json",
+        "fixtures/s24-legal.json"
       ]
     },
     {

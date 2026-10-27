@@ -7,7 +7,7 @@
 import { readFileSync } from "node:fs";
 import { expect, test } from "./support/fixtures.js";
 
-const TEST_SITE = "http://127.0.0.1:4322/";
+const TEST_SITE = `http://127.0.0.1:${process.env.CAUSA_TEST_PORT ?? 4322}/`;
 
 async function started(page) {
   await expect(page.locator("#causa-boot")).toHaveCount(0, { timeout: 90_000 });

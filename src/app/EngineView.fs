@@ -107,6 +107,14 @@ let describe (inv: Investigation) (action: CapabilityAction) : (string * string 
     | Create RelateEvidenceKind -> Some("RelateEvidence", "RelateEvidence", "Link evidence to a hypothesis", Some formMarker)
     | Create RecordCauseKind -> Some("RecordCause", "RecordCause", "Record a causal relationship", Some formMarker)
     | Create RecordCorrectiveActionKind -> Some("RecordCorrectiveAction", "RecordCorrectiveAction", "Record a corrective action", Some formMarker)
+    | UnknownAction(u, ResolveUnknown) -> Some("ResolveUnknown:" + u.Text, "ResolveUnknown", "Mark the question answered", Some formMarker)
+    | ContradictionAction(c, ResolveContradiction) -> Some("ResolveContradiction:" + c.Text, "ResolveContradiction", "Mark the contradiction resolved", Some formMarker)
+    | Create RecordPredictionKind -> Some("RecordPrediction", "RecordPrediction", "Record a prediction", Some formMarker)
+    | Create RecordActionKind -> Some("RecordInvestigationAction", "RecordInvestigationAction", "Plan an investigation action", Some formMarker)
+    | RecordVerificationAction cr -> Some("RecordVerification:" + cr.Text, "RecordVerification", "Record a verification result", Some formMarker)
+    | CorrectionAction(c, MarkImplemented) ->
+        let what = inv.CorrectiveActions |> Map.tryFind c |> Option.map (fun x -> text x.Description) |> Option.defaultValue ""
+        Some("MarkCorrectiveActionImplemented:" + c.Text, "MarkCorrectiveActionImplemented", $"Mark implemented: {what}", None)
     | HypothesisAction(h, c) ->
         let cmd = hypothesisCommandKey c
         Some($"TransitionHypothesis:{h.Text}:{cmd}", "TransitionHypothesis", hypothesisCommandLabel c, Some formMarker)
@@ -209,8 +217,39 @@ let changeText (c: SemanticChange) =
     | StateMoved(r, b, a) -> $"{kindWord r.Kind} {r.Id.Substring(0, min 8 r.Id.Length)}: {Causa.App.Presentation.label b} → {Causa.App.Presentation.label a}"
     | FieldChanged(r, field, b, a) -> $"{kindWord r.Kind} {r.Id.Substring(0, min 8 r.Id.Length)}: {field} {shortJson b} → {shortJson a}"
 
+/// What blocks progress and what may be done, compared between two states of one investigation (S15). Both sides
+/// come from the engine's own obligations and capability probes; nothing here decides legality.
+let private historyActor = { ActorId = "history-comparison"; Kind = Human }
+
+let private blockerChanges (before: Investigation) (after: Investigation) =
+    let open' (i: Investigation) = Projection.obligations i |> List.map (fun o -> o.EntityId, o.Message) |> Map.ofList
+    let b = open' before
+    let a = open' after
+    [ for KeyValue(id, m) in a do
+          if not (b.ContainsKey id) then yield $"Opened since: {m}"
+      for KeyValue(id, m) in b do
+          if not (a.ContainsKey id) then yield $"No longer open: {m}" ]
+
+let private capabilityChanges (at: DateTimeOffset) (before: Investigation) (after: Investigation) =
+    let offered (i: Investigation) =
+        Projection.capabilities historyActor at i
+        |> List.choose (fun c -> describe i c.Action |> Option.map (fun (id, _, label, _) -> id, (label, c.Allowed)))
+        |> Map.ofList
+    let b = offered before
+    let a = offered after
+    let word allowed = if allowed then "available" else "not available"
+    [ for KeyValue(id, (label, now)) in a do
+          match b |> Map.tryFind id with
+          | Some(_, was) when was <> now -> yield $"{label}: {word was} then, {word now} now"
+          | None when now -> yield $"{label}: not offered then, available now"
+          | _ -> ()
+      for KeyValue(id, (label, was)) in b do
+          if was && not (a.ContainsKey id) then yield $"{label}: available then, no longer offered" ]
+
 /// The investigation at `version` (Timeline.view), with what that version changed and what changed since.
 let history (events: DomainEvent list) (version: int64) : A.HistoryView option =
+    let latest = events |> List.fold (fun m e -> max m e.Version) 0L |> Timeline.stateAt events
+    let at = events |> List.tryLast |> Option.map (fun e -> e.At) |> Option.defaultValue DateTimeOffset.UnixEpoch
     Timeline.view events version
     |> Option.map (fun v ->
         let s = v.State
@@ -223,7 +262,9 @@ let history (events: DomainEvent list) (version: int64) : A.HistoryView option =
             [ "Hypotheses", s.Hypotheses.Count; "Evidence items", s.Evidence.Count; "Open questions", s.Unknowns.Count
               "Causes", s.Causes.Count; "Proposals", s.Proposals.Count ]
           ChangesHere = Timeline.changesAt events v.AtVersion |> List.map changeText
-          ChangesSince = (if v.IsHistorical then Timeline.between events v.AtVersion v.LatestVersion |> List.map changeText else []) })
+          ChangesSince = (if v.IsHistorical then Timeline.between events v.AtVersion v.LatestVersion |> List.map changeText else [])
+          BlockerChanges = (match latest with Some l when v.IsHistorical -> blockerChanges s l | _ -> [])
+          CapabilityChanges = (match latest with Some l when v.IsHistorical -> capabilityChanges at s l | _ -> []) })
 
 let private strength =
     function
@@ -258,6 +299,67 @@ let reportView (inv: Investigation) : A.ReportView =
             let met = c.Criteria |> List.filter snd |> List.length
             c.Action.Description.Value,
             (if c.VerifiedEffective then "Verified effective" else $"Not verified effective ({met} of {c.Criteria.Length} criteria satisfied)")) }
+
+let private predictionStrengthText =
+    function
+    | Necessary -> "Necessary: if it fails, the hypothesis is falsified"
+    | Expected -> "Expected"
+    | DiscriminatingPrediction -> "Discriminating: separates this hypothesis from its alternatives"
+    | NonDiscriminating -> "Not discriminating"
+
+let private actionKindText =
+    function
+    | Test -> "Test"
+    | Inspection -> "Inspection"
+    | Query -> "Query"
+    | ActionKind.Comparison -> "Comparison"
+    | Experiment -> "Experiment"
+
+/// The records behind the analysis screens (S03, S04, S11, S12, S13), in words from the presentation language.
+let detail (p: InvestigationProjection) : A.InvestigationDetail =
+    let inv = p.State
+    let row id (t: string) st related : A.DetailRow = { Id = id; Text = t; State = st; Related = related }
+
+    { Contradictions =
+        values inv.Contradictions
+        |> List.map (fun c -> row c.Id.Text c.Statement.Value (Language.contradictionState c.State) (c.Evidence |> List.map (fun e -> e.Text)))
+      Assumptions =
+        values inv.Assumptions
+        |> List.map (fun a -> row a.Id.Text a.Proposition.Value $"{Language.assumptionState a.State} · {Language.materiality a.Materiality}" [])
+      Predictions =
+        values inv.Predictions
+        |> List.map (fun x -> row x.Id.Text x.Statement.Value (predictionStrengthText x.Strength) [ x.Hypothesis.Text ])
+      Actions =
+        values inv.Actions
+        |> List.map (fun a -> row a.Id.Text a.Purpose.Value $"{actionKindText a.Kind} · {Language.actionState a.State}" (a.Targets |> List.map (fun h -> h.Text)))
+      NegativeKnowledge =
+        values inv.NegativeKnowledge
+        |> List.map (fun n -> row n.Id.Text n.Statement.Value ("Scope: " + n.Scope.Value) (n.Basis |> List.map (fun e -> e.Text)))
+      Unknowns =
+        values inv.Unknowns
+        |> List.map (fun u -> row u.Id.Text u.Question.Value $"{Language.unknownState u.State} · {Language.materiality u.Materiality}" [])
+      CauseGates = p.CauseGates |> List.map (fun (c, errors) -> c.Text, errors |> List.map (fun e -> e.Message))
+      Corrections =
+        values inv.CorrectiveActions
+        |> List.map (fun c ->
+            ({ Id = c.Id.Text
+               Description = c.Description.Value
+               Kind = Language.correctiveKind c.Kind
+               State = Language.correctiveState c.State
+               Targets = c.Targets |> List.map (fun t -> t.Text) }: A.CorrectionRow))
+      Criteria =
+        values inv.Criteria
+        |> List.map (fun cr ->
+            ({ Id = cr.Id.Text
+               Correction = cr.CorrectiveAction.Text
+               Expected = cr.ExpectedOutcome.Value
+               Method = cr.Method |> Option.map (fun m -> m.Value)
+               Satisfied = Policy.criterionSatisfied inv cr
+               Results =
+                 values inv.Verifications
+                 |> List.filter (fun v -> v.Criterion = cr.Id)
+                 |> List.sortBy (fun v -> v.RecordedAtVersion)
+                 |> List.map (fun v -> Language.verificationOutcome v.Outcome, v.Evidence |> List.map (fun e -> e.Text)) }: A.CriterionRow)) }
 
 /// Boundary B -> the shell's investigation view.
 let ofProjection (writable: bool) (history: DomainEvent list) (p: InvestigationProjection) : A.InvestigationProjection =
@@ -360,7 +462,8 @@ let ofProjection (writable: bool) (history: DomainEvent list) (p: InvestigationP
             $"events SHA-256 {i.EventsSha256.Substring(0, min 12 i.EventsSha256.Length)}…, state SHA-256 {i.StateSha256.Substring(0, min 12 i.StateSha256.Length)}…, admissibility {checkedText}")
       Report = Some(reportView inv)
       Capabilities = capabilities
-      Typed = Some { Projection = p; History = history } }
+      Typed = Some { Projection = p; History = history }
+      Detail = detail p }
 
 /// The card for the investigation list: counts the engine state actually holds (never unknown-as-zero).
 let card (writable: bool) (p: InvestigationProjection) (history: DomainEvent list) : A.CardProjection =

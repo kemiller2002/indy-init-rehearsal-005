@@ -1,0 +1,9 @@
+{
+  "name": "s13-blocked",
+  "predicates": [
+    "material-blocker-exists"
+  ],
+  "capabilities": {
+    "RecordVerification": "illegal"
+  }
+}

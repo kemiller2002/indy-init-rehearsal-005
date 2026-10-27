@@ -1,0 +1,8 @@
+{
+  "name": "s12-legal",
+  "predicates": [],
+  "capabilities": {
+    "RecordCorrectiveAction": "legal",
+    "MarkCorrectiveActionImplemented": "legal"
+  }
+}

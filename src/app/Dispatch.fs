@@ -32,7 +32,7 @@ let private inject (e: SemanticEvent) (model: Model) =
         | Ok s when s.Name = "engine-memory" ->
             // The real kernel over an in-memory workspace (T17 checkpoint); nothing is saved anywhere.
             { model with Port = EnginePort.create (EnginePort.Persistence.memory Map.empty []); InjectedState = Some s.Name; Notice = None }
-        | Ok s -> { model with Port = Port.fixedAt (TestState.toProjection s); InjectedState = Some s.Name; Notice = None }
+        | Ok s -> { model with Port = TestState.port s; InjectedState = Some s.Name; Notice = None }
         | Error reason -> { model with InjectedState = Some("refused: " + reason) }
 
 let step (entropy: Entropy) (message: BrowserToEngineMessage) (model: Model) =
@@ -62,7 +62,7 @@ let handle (json: string) : string =
 
         state <- next
 
-        { View = View.project next
+        { View = View.project next |> AnalysisView.extend next
           Effects = effects
           Cancellations = []
           Handshake = handshake }

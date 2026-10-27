@@ -32,7 +32,8 @@ let private inv hypotheses causes =
       Integrity = None
       Report = None
       Capabilities = []
-      Typed = None }
+      Typed = None
+      Detail = noDetail }
 
 let private parse (doc: string) = JsonDocument.Parse(doc).RootElement
 
