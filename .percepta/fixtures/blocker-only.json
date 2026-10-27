@@ -1,0 +1,1 @@
+{ "name": "blocker-only", "predicates": ["material-blocker-exists"], "capabilities": {} }

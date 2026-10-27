@@ -101,5 +101,7 @@ let toProjection (s: Injected) : WorkspaceProjection =
                 Contradictions = Unknown } ]
       Opened = Map.ofList [ fixtureId, Loaded investigation ]
       Sync = NoChanges
+      Capabilities = capabilities
+      Blockers = blockers
       Message = None
-      Administration = [ { Id = "fixture"; Label = "Data provider"; Value = "Percepta fixture state " + s.Name; State = "Unknown" } ] }
+      Administration = [ { Id = "fixture"; Section = "persistence"; Label = "Data provider"; Value = "Percepta fixture state " + s.Name; State = "Unknown" } ] }

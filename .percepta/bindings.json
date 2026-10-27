@@ -4,10 +4,50 @@
   "stateInjection": true,
   "screens": [
     {
+      "contract": "S01-investigation-start",
+      "appScreen": "investigation-start",
+      "path": "index.html?percepta=default#/investigations/new",
+      "fixtures": [
+        "fixtures/start-blocked.json",
+        "fixtures/start-legal.json"
+      ]
+    },
+    {
       "contract": "S02-investigation-workspace",
       "appScreen": "investigation-overview",
       "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1",
-      "fixtures": ["fixtures/blocked.json", "fixtures/legal.json", "fixtures/all-illegal.json"]
+      "fixtures": [
+        "fixtures/blocked.json",
+        "fixtures/legal.json",
+        "fixtures/all-illegal.json"
+      ]
+    },
+    {
+      "contract": "S14-history-time-travel",
+      "appScreen": "investigation-timeline",
+      "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/timeline",
+      "fixtures": [
+        "fixtures/blocker-only.json",
+        "fixtures/no-predicates.json"
+      ]
+    },
+    {
+      "contract": "S22-report-preview",
+      "appScreen": "investigation-report",
+      "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/report",
+      "fixtures": [
+        "fixtures/blocker-only.json",
+        "fixtures/no-predicates.json"
+      ]
+    },
+    {
+      "contract": "S25-demo-health",
+      "appScreen": "administration",
+      "path": "index.html?percepta=default#/administration",
+      "fixtures": [
+        "fixtures/blocker-only.json",
+        "fixtures/no-predicates.json"
+      ]
     }
   ]
 }

@@ -1,0 +1,1 @@
+{ "name": "start-blocked", "predicates": ["material-blocker-exists"], "capabilities": { "StartInvestigation": "illegal" } }

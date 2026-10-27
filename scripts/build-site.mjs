@@ -36,6 +36,8 @@ cpSync(join(root, "node_modules/@echelon-foundry/forma-workflow/dist"), join(sit
   recursive: true,
   filter: (src) => !/\.(br|gz|pdb|map)$/.test(src),
 });
+mkdirSync(join(site, "vendor/folio"), { recursive: true });
+cpSync(join(root, "node_modules/@echelon-foundry/print-components/src/styles/print.css"), join(site, "vendor/folio/print.css"));
 for (const file of ["index.html", "causa.css", "causa-icon.svg"]) cpSync(join(root, "src/kernel", file), join(site, file));
 
 // The kernel composition root is TypeScript; compile it, then point package specifiers at the vendored copies.
@@ -65,11 +67,14 @@ writeFileSync(join(site, "build-info.json"), JSON.stringify({
   commit: process.env.GITHUB_SHA ?? (() => { try { return execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim(); } catch { return "unknown"; } })(),
   builtAt: new Date().toISOString(),
   configuration: test ? "test" : "production",
+  // Read from the page actually shipped, so Administration reports the policy in force rather than a claim.
+  "security.contentSecurityPolicy": (readFileSync(join(site, "index.html"), "utf8").match(/http-equiv="Content-Security-Policy" content="([^"]*)"/) ?? [, "none"])[1],
   components: {
     "limen (kernel)": version("@echelon-foundry/limen"),
     "limen-fsharp (contract, guest)": lockVersion("EchelonFoundry.Limen.Contract"),
     "forma (design system)": version("@echelon-foundry/design-system"),
     "forma-workflow (causal graph layout)": version("@echelon-foundry/forma-workflow"),
+    "folio (print components)": version("@echelon-foundry/print-components"),
   },
 }, null, 1) + "\n");
 

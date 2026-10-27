@@ -225,21 +225,64 @@ let project (model: Model) : ViewState =
         if blockedActions = 1 then "1 action is unavailable until it is answered; nothing it would establish is shown as settled."
         else $"{blockedActions} actions are unavailable until they are answered; nothing they would establish is shown as settled."
 
-    let adminRows =
-        let row id l v st = item [ "id", id; "label", l; "value", v; "state", st ]
+    // Administration (UI-018, S25): every fact in one of six sections, each with an explicit state. Only states that
+    // report an observed fact count as verified; everything else is listed as not verified (never implied).
+    let observedStates = set [ "Verified"; "Connected"; "Reported by the deployed build"; "Reported by the running application" ]
+
+    let facts =
+        let fact id sec l v st = { Id = id; Section = sec; Label = l; Value = v; State = st }
 
         let build =
             match model.Build with
             | NotRequested
-            | Loading -> [ row "build" "Deployed build" "Reading build-info.json" "Unknown" ]
-            | Failed e -> [ row "build" "Deployed build" e "Unavailable" ]
-            | Loaded pairs -> pairs |> List.mapi (fun i (k, v) -> row $"build-{i}" k v "Reported by the deployed build")
+            | Loading -> [ fact "build" "deployment" "Deployed build" "Reading build-info.json" "Unknown" ]
+            | Failed e -> [ fact "build" "deployment" "Deployed build" e "Unavailable" ]
+            | Loaded pairs ->
+                pairs
+                |> List.mapi (fun i (k, v) ->
+                    let sec = if k.StartsWith "security." then "security" else "deployment"
+                    fact $"build-{i}" sec (if k.StartsWith "security." then k.Substring 9 else k) v "Reported by the deployed build")
 
-        [ row "connection" "Provider connection" (connectionText ws.Connection) (if connected then "Connected" else "Not connected") ]
-        @ (ws.Administration |> List.map (fun f -> row f.Id f.Label f.Value f.State))
+        [ fact "connection" "persistence" "Provider connection" (connectionText ws.Connection) (if connected then "Connected" else "Not connected") ]
+        @ ws.Administration
         @ build
         // VER-007-O2: the runtime actually executing this projection, read from itself.
-        @ [ row "runtime" ".NET runtime (loaded)" (string System.Environment.Version) "Reported by the running application" ]
+        @ [ fact "runtime" "deployment" ".NET runtime (loaded)" (string System.Environment.Version) "Reported by the running application"
+            fact "ai" "ai" "AI assistance" "Not part of this build" "Unavailable"
+            fact "report-print" "report" "Report preview and print" "Rendered from the open investigation; print output is not verified here" "Unknown"
+            fact "token" "security" "Credential handling" "The token is held in this page's memory only and sent only in the Authorization header" "Design rule; not measured here"
+            fact "smoke" "smoke-tests" "Smoke tests at this commit" "Results are recorded by CI, not by the running application" "Unknown" ]
+
+    let adminRows sec =
+        facts
+        |> List.filter (fun f -> f.Section = sec)
+        |> List.map (fun f -> itemF [ "id", f.Id; "label", f.Label; "value", f.Value; "state", f.State ] [ "observed", observedStates.Contains f.State ])
+
+    let unverified = facts |> List.filter (fun f -> not (observedStates.Contains f.State))
+
+    let readiness =
+        match unverified.Length with
+        | 0 -> "Every item below reports an observed state."
+        | n -> $"Not confirmed ready to demonstrate: {n} item(s) are not verified."
+
+    // Starting an investigation (S01): only the capability the F# policy returned; none means not available.
+    let start =
+        ws.Capabilities
+        |> List.tryFind (fun c -> c.Id = "StartInvestigation")
+        |> Option.defaultValue
+            { Id = "StartInvestigation"; Label = "Start the investigation"; Legal = false; Reason = Some "Starting an investigation is not available in this build yet."; BlockerId = None }
+
+    let wsBlockers =
+        ws.Blockers |> List.map (fun b -> item [ "id", b.Id; "anchor", "ws-blocker-" + b.Id; "question", b.Question; "materiality", (if b.Material then "Material question" else "Not material") ])
+
+    let destination =
+        match ws.Connection with
+        | ConnectedTo(repo, branch, workspace) -> $"GitHub repository {repo}, branch {branch}, workspace {workspace}. Nothing is written until you save."
+        | _ -> "Not connected: there is nowhere to save an investigation yet."
+
+    // Report preview (S22, R12.3): an investigation that is not resolved or closed is shown as incomplete.
+    let complete = inv |> Option.exists (fun i -> i.Lifecycle = "resolved" || i.Lifecycle = "closed")
+    let confirmedCauses = inv |> Option.map (fun i -> i.Causes |> List.filter (fun c -> c.State = "confirmed")) |> Option.defaultValue []
 
     let notice, noticeTone =
         match model.Notice, ws.Message with
@@ -333,13 +376,46 @@ let project (model: Model) : ViewState =
       "attention.questions", text attentionQuestions
       "attention.blocked", flag (blockedActions > 0)
       "attention.blockedText", text attentionBlocked
+      "attention.material", flag (materialQuestions > 0)
+      "attention.first", text (inv |> Option.bind (fun i -> i.Blockers |> List.tryFind (fun b -> b.Material)) |> Option.map (fun b -> b.Question) |> Option.defaultValue "")
+      "attention.provisional", text "While a material question is open, nothing it affects is shown as settled."
+      "ws.questions", text (match ws.Blockers |> List.filter (fun b -> b.Material) |> List.length with 0 -> "None recorded." | 1 -> "1 material open question." | n -> $"{n} material open questions.")
+      "ws.material", flag (ws.Blockers |> List.exists (fun b -> b.Material))
+      "ws.first", text (ws.Blockers |> List.tryFind (fun b -> b.Material) |> Option.map (fun b -> b.Question) |> Option.defaultValue "")
+      "ws.provisional", text "Starting is blocked until it is answered; nothing has been created."
+      "start.availability", text (if start.Legal then "You can start an investigation here." else "Starting is unavailable: " + (start.Reason |> Option.defaultValue "no reason was given."))
       "attention.tone", text (if materialQuestions > 0 then "attention" else "neutral")
       "attention.href", text (inv |> Option.map (fun i -> Routes.formatItem (Investigation(i.Id, Overview)) (i.Blockers |> List.tryHead |> Option.map (fun b -> b.Id) |> Option.defaultValue "")) |> Option.defaultValue "#/")
+      "start.legal", flag start.Legal
+      "start.illegal", flag (not start.Legal)
+      "start.label", text start.Label
+      "start.reason", text (start.Reason |> Option.defaultValue "")
+      "start.hasBlocker", flag start.BlockerId.IsSome
+      "start.blockerHref", text (start.BlockerId |> Option.map (fun b -> Routes.formatItem NewInvestigation b) |> Option.defaultValue "#/investigations/new")
+      "draft.title", text model.Drafts.Title
+      "draft.statement", text model.Drafts.Statement
+      "destination", text destination
+      "wsBlockers", items wsBlockers
+      "wsBlockers.empty", flag wsBlockers.IsEmpty
+      "timeline.version", text (inv |> Option.map (fun i -> $"Showing the investigation as of version {i.Version}, the latest recorded version.") |> Option.defaultValue "")
+      "timeline.replay", text (inv |> Option.map (fun i -> $"{i.Timeline.Length} recorded events, in their recorded order.") |> Option.defaultValue "")
+      "report.incomplete", flag (inv.IsSome && not complete)
+      "report.status", text (if complete then "Complete" else "Incomplete: this investigation is not resolved, so the report is a working draft.")
+      "report.source", text (inv |> Option.map (fun i -> $"{i.Title}, version {i.Version}") |> Option.defaultValue "")
+      "report.conclusion", text (match confirmedCauses with [] -> "No cause has been confirmed. The report states no conclusion." | cs -> cs |> List.map (fun c -> c.Outcome) |> String.concat "; ")
+      "report.verification", text "Verification of corrective actions is not part of this report yet; nothing is reported as verified."
       "sync.text", text (syncText ws.Sync)
       "sync.tone", text (syncTone ws.Sync)
       // Administration (UI-018) and Settings (UI-019).
       "screen.admin", flag (screen = AdministrationScreen)
-      "admin", items adminRows
+      "admin.readiness", text readiness
+      "admin.unverified", items (unverified |> List.map (fun f -> item [ "id", f.Id; "text", $"{f.Label}: {f.State}" ]))
+      "admin.deployment", items (adminRows "deployment")
+      "admin.persistence", items (adminRows "persistence")
+      "admin.ai", items (adminRows "ai")
+      "admin.report", items (adminRows "report")
+      "admin.security", items (adminRows "security")
+      "admin.smoke", items (adminRows "smoke-tests")
       "screen.settings", flag (screen = SettingsScreen)
       "settings.textSize", text (if model.Settings.LargeText then "large" else "standard")
       "settings.motion", text (if model.Settings.ReducedMotion then "reduced" else "system")

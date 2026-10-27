@@ -11,6 +11,8 @@
   <link rel="icon" href="causa-icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="vendor/forma/all.css">
   <link rel="stylesheet" href="causa.css">
+  <!-- Folio print primitives apply only when printing; on screen the report is a styled preview. -->
+  <link rel="stylesheet" href="vendor/folio/print.css" media="print">
   <script type="module" src="main.js"></script>
 </head>
 <body class="ef-site causa" data-bind-data-text-size="text.size" data-bind-data-motion="motion" data-bind-data-screen="screen" data-bind-data-percepta-state="percepta.state">
@@ -76,22 +78,22 @@
         </template>
         <form class="ef-form causa-form" data-event="connect" aria-describedby="token-help">
           <div class="ef-field">
-            <label class="ef-field__label" for="token">Fine-grained GitHub token</label>
-            <input id="token" class="causa-input" type="password" autocomplete="off" spellcheck="false" required data-event="token">
+            <label class="ef-field__label" id="token-label" for="token">Fine-grained GitHub token</label>
+            <input id="token" aria-labelledby="token-label" class="causa-input" type="password" autocomplete="off" spellcheck="false" required data-event="token">
             <p id="token-help" class="ef-field__description">Kept in this page's memory only: never stored in the browser, never written to the repository or logs. Reloading the page forgets it.</p>
           </div>
           <div class="ef-field">
-            <label class="ef-field__label" for="repository">Repository (owner/name)</label>
-            <input id="repository" class="causa-input" type="text" autocomplete="off" spellcheck="false" required data-event="repository" data-on="input" data-bind-value="draft.repository">
+            <label class="ef-field__label" id="repository-label" for="repository">Repository (owner/name)</label>
+            <input id="repository" aria-labelledby="repository-label" class="causa-input" type="text" autocomplete="off" spellcheck="false" required data-event="repository" data-on="input" data-bind-value="draft.repository">
           </div>
           <div class="causa-form__row">
             <div class="ef-field">
-              <label class="ef-field__label" for="branch">Branch</label>
-              <input id="branch" class="causa-input" type="text" autocomplete="off" spellcheck="false" required data-event="branch" data-on="input" data-bind-value="draft.branch">
+              <label class="ef-field__label" id="branch-label" for="branch">Branch</label>
+              <input id="branch" aria-labelledby="branch-label" class="causa-input" type="text" autocomplete="off" spellcheck="false" required data-event="branch" data-on="input" data-bind-value="draft.branch">
             </div>
             <div class="ef-field">
-              <label class="ef-field__label" for="workspace">Workspace</label>
-              <input id="workspace" class="causa-input" type="text" autocomplete="off" spellcheck="false" required data-event="workspace" data-on="input" data-bind-value="draft.workspace">
+              <label class="ef-field__label" id="workspace-label" for="workspace">Workspace</label>
+              <input id="workspace" aria-labelledby="workspace-label" class="causa-input" type="text" autocomplete="off" spellcheck="false" required data-event="workspace" data-on="input" data-bind-value="draft.workspace">
             </div>
           </div>
           <button type="submit" class="ef-button" data-ef-variant="primary" data-bind-disabled="connect.busy">Connect</button>
@@ -124,8 +126,49 @@
 
     <template data-if="screen.new">
       <section aria-labelledby="new-heading" data-percepta-screen="investigation-start">
-        <h1 id="new-heading">New investigation</h1>
-        <p class="causa-muted">Starting an investigation is not available in this build yet.</p>
+        <h1 id="new-heading" data-percepta-observation="desktop-reference-semantic-priority">New investigation</h1>
+        <div class="causa-attention" data-percepta-observation="desktop-reference-blocked-state">
+          <strong data-percepta-observation="narrow-phone-blocked-state">Open questions:</strong>
+          <span data-text="ws.questions" data-percepta-observation="ipad-portrait-blocked-state"></span>
+          <template data-if="ws.material"><span class="causa-attention__question" data-text="ws.first" data-percepta-observation="blocker-visible"></span></template>
+          <template data-if="ws.material"><span class="causa-attention__blocked" data-text="ws.provisional" data-percepta-observation="no-false-authority"></span></template>
+          <span data-text="start.availability" data-percepta-observation="ipad-landscape-blocked-state"></span>
+        </div>
+        <ul class="causa-list">
+          <template data-each="wsBlockers" data-key="id">
+            <li class="causa-item causa-item--blocker" data-bind-id="anchor"><p data-text="question"></p><p class="causa-muted" data-text="materiality"></p></li>
+          </template>
+        </ul>
+        <form class="ef-form causa-form" data-event="start">
+          <fieldset class="causa-panel" data-percepta-region="problem-statement">
+            <legend data-percepta-observation="ipad-portrait-semantic-priority">What happened?</legend>
+            <div class="ef-field">
+              <label class="ef-field__label" id="new-title-label" for="new-title">Title</label>
+              <input id="new-title" aria-labelledby="new-title-label" class="causa-input" type="text" autocomplete="off" required data-event="title" data-on="input" data-bind-value="draft.title">
+            </div>
+            <div class="ef-field">
+              <label class="ef-field__label" id="new-statement-label" for="new-statement" data-percepta-observation="ipad-landscape-semantic-priority">Problem statement: what was observed, when and with what impact</label>
+              <textarea id="new-statement" aria-labelledby="new-statement-label" class="causa-input" rows="4" required data-event="statement" data-on="input" data-bind-value="draft.statement" aria-describedby="new-statement-help"></textarea>
+              <p id="new-statement-help" class="ef-field__description" data-percepta-observation="narrow-phone-semantic-priority">Record what was observed. A first statement is not treated as a cause.</p>
+            </div>
+          </fieldset>
+          <section class="causa-panel" aria-labelledby="new-destination" data-percepta-region="persistence-destination">
+            <h2 id="new-destination">Where it will be saved</h2>
+            <p data-text="destination"></p>
+          </section>
+          <div>
+            <template data-if="start.legal">
+              <button type="submit" class="ef-button" data-ef-variant="primary" data-percepta-capability="StartInvestigation" data-text="start.label"></button>
+            </template>
+            <template data-if="start.illegal"><div class="causa-capability">
+              <button type="submit" class="ef-button" disabled data-percepta-capability="StartInvestigation" aria-describedby="start-reason" data-text="start.label"></button>
+              <p id="start-reason" class="causa-capability__reason" data-percepta-unavailable-reason-for="StartInvestigation" data-text="start.reason"></p>
+              <template data-if="start.hasBlocker">
+                <a class="causa-related" data-bind-href="start.blockerHref" data-percepta-blocker-link-for="StartInvestigation">See the open question</a>
+              </template>
+            </div></template>
+          </div>
+        </form>
       </section>
     </template>
 
@@ -167,7 +210,16 @@
         <header class="causa-inv-header">
           <p class="causa-kind" data-text="inv.kind" data-percepta-observation="ipad-landscape-semantic-priority"></p>
           <h1 data-text="inv.title" data-percepta-observation="desktop-reference-semantic-priority"></h1>
-          <p class="causa-inv-meta">Status: <span class="causa-tag" data-bind-data-tone="inv.tone" data-text="inv.status" data-percepta-observation="ipad-portrait-semantic-priority"></span> <span class="causa-muted" data-text="inv.version"></span></p>
+          <p class="causa-inv-meta">Status: <span class="causa-tag" data-bind-data-tone="inv.tone" data-text="inv.status" data-percepta-observation="ipad-portrait-semantic-priority"></span> <span class="causa-muted" data-text="inv.version" data-percepta-observation="narrow-phone-semantic-priority"></span></p>
+          <!-- What blocks progress, in every section's primary flow (UI-032): counts and words, never colour alone. -->
+          <div class="causa-attention" data-bind-data-tone="attention.tone" data-percepta-observation="desktop-reference-blocked-state">
+            <strong data-percepta-observation="narrow-phone-blocked-state">Open questions:</strong>
+            <span data-text="attention.questions" data-percepta-observation="ipad-portrait-blocked-state"></span>
+            <template data-if="attention.material"><span class="causa-attention__question" data-text="attention.first" data-percepta-observation="blocker-visible"></span></template>
+            <template data-if="attention.material"><span class="causa-attention__blocked" data-text="attention.provisional" data-percepta-observation="no-false-authority"></span></template>
+            <template data-if="attention.blocked"><span class="causa-attention__blocked" data-text="attention.blockedText"></span></template>
+            <a class="causa-related" data-bind-href="attention.href" data-percepta-observation="ipad-landscape-blocked-state">See open questions</a>
+          </div>
         </header>
         <nav class="causa-sections" aria-label="Investigation sections">
           <ul>
@@ -180,16 +232,10 @@
         <template data-if="section.overview">
           <section class="causa-overview" aria-label="Overview" data-percepta-screen="investigation-overview">
             <h2>Overview</h2>
-            <!-- What blocks progress, always in the primary flow (UI-032): counts and words, never colour alone. -->
-            <p class="causa-attention" data-bind-data-tone="attention.tone" data-percepta-observation="desktop-reference-blocked-state">
-              <span data-text="attention.questions" data-percepta-observation="ipad-portrait-blocked-state"></span>
-              <template data-if="attention.blocked"><span class="causa-attention__blocked" data-text="attention.blockedText" data-percepta-observation="no-false-authority"></span></template>
-              <a class="causa-related" href="#ov-open" data-bind-href="attention.href" data-percepta-observation="ipad-landscape-blocked-state">See open questions</a>
-            </p>
             <div class="causa-overview-grid">
               <section class="causa-panel" aria-labelledby="ov-what" data-percepta-region="observation">
                 <h3 id="ov-what">What happened</h3>
-                <p class="causa-observation" data-text="inv.description" data-percepta-observation="narrow-phone-semantic-priority"></p>
+                <p class="causa-observation" data-text="inv.description"></p>
                 <h4>Evidence</h4>
                 <template data-if="evidence.empty"><p class="causa-muted">No evidence recorded yet.</p></template>
                 <ul class="causa-list">
@@ -208,11 +254,11 @@
                 </ul>
               </section>
               <section class="causa-panel" aria-labelledby="ov-open" data-percepta-region="blockers">
-                <h3 id="ov-open" data-percepta-observation="narrow-phone-blocked-state">Open questions</h3>
+                <h3 id="ov-open">Open questions</h3>
                 <template data-if="blockers.empty"><p class="causa-muted">No open questions recorded.</p></template>
                 <ul class="causa-list">
                   <template data-each="blockers" data-key="id">
-                    <li class="causa-item causa-item--blocker" data-bind-id="anchor" data-bind-data-selected="selected" tabindex="-1" data-percepta-observation="blocker-visible"><p data-text="question"></p><p class="causa-muted" data-text="materiality"></p></li>
+                    <li class="causa-item causa-item--blocker" data-bind-id="anchor" data-bind-data-selected="selected" tabindex="-1"><p data-text="question"></p><p class="causa-muted" data-text="materiality"></p></li>
                   </template>
                 </ul>
               </section>
@@ -288,12 +334,17 @@
         <template data-if="section.timeline">
           <section aria-labelledby="sec-timeline" data-percepta-screen="investigation-timeline">
             <h2 id="sec-timeline">Investigation history</h2>
-            <template data-if="timeline.empty"><p class="causa-muted">No recorded events.</p></template>
-            <ol class="causa-timeline">
-              <template data-each="timeline" data-key="id">
-                <li class="causa-timeline__entry"><span data-text="sequence"></span><span class="causa-timeline__type" data-text="type"></span><span data-text="occurred"></span><span class="causa-muted" data-text="recorded"></span><span class="causa-muted" data-text="actor"></span></li>
-              </template>
-            </ol>
+            <p class="causa-panel" data-percepta-region="version-state" data-text="timeline.version"></p>
+            <p class="causa-panel" data-percepta-region="policy-version">Policy version: not recorded for this investigation.</p>
+            <p class="causa-panel" data-percepta-region="replay" data-text="timeline.replay"></p>
+            <div data-percepta-region="timeline">
+              <template data-if="timeline.empty"><p class="causa-muted">No recorded events.</p></template>
+              <ol class="causa-timeline">
+                <template data-each="timeline" data-key="id">
+                  <li class="causa-timeline__entry"><span data-text="sequence"></span><span class="causa-timeline__type" data-text="type"></span><span data-text="occurred"></span><span class="causa-muted" data-text="recorded"></span><span class="causa-muted" data-text="actor"></span></li>
+                </template>
+              </ol>
+            </div>
           </section>
         </template>
         <template data-if="section.corrective">
@@ -305,7 +356,25 @@
         <template data-if="section.report">
           <section aria-labelledby="sec-report" data-percepta-screen="investigation-report">
             <h2 id="sec-report">Report</h2>
-            <p class="causa-muted">The report preview is not available in this build yet.</p>
+            <p><button type="button" class="ef-button" id="causa-print">Print the report</button></p>
+            <template data-if="report.incomplete"><p class="causa-report__incomplete" role="status" data-text="report.status"></p></template>
+            <div class="causa-panel causa-report-preview">
+              <section aria-labelledby="rp-source" data-percepta-region="source-version"><h3 id="rp-source">Source</h3><p data-text="report.source"></p></section>
+              <section aria-labelledby="rp-conclusion" data-percepta-region="conclusion"><h3 id="rp-conclusion">Conclusion</h3><p data-text="report.conclusion"></p></section>
+              <section aria-labelledby="rp-evidence" data-percepta-region="evidence"><h3 id="rp-evidence">Evidence</h3>
+                <template data-if="evidence.empty"><p class="causa-muted">No evidence recorded yet.</p></template>
+                <ul class="causa-report__list">
+                  <template data-each="evidence" data-key="id"><li><span data-text="content"></span> (<span data-text="source"></span>)</li></template>
+                </ul>
+              </section>
+              <section aria-labelledby="rp-uncertainty" data-percepta-region="uncertainty"><h3 id="rp-uncertainty">Open questions</h3>
+                <template data-if="blockers.empty"><p class="causa-muted">No open questions recorded.</p></template>
+                <ul class="causa-report__list">
+                  <template data-each="blockers" data-key="id"><li><span data-text="question"></span> (<span data-text="materiality"></span>)</li></template>
+                </ul>
+              </section>
+              <section aria-labelledby="rp-verification" data-percepta-region="verification"><h3 id="rp-verification">Verification</h3><p data-text="report.verification"></p></section>
+            </div>
           </section>
         </template>
       </div>
@@ -314,16 +383,85 @@
     <!-- Administration (UI-018, VER-007): read-only system information. -->
     <template data-if="screen.admin">
       <section aria-labelledby="admin-heading" data-percepta-screen="administration">
-        <h1 id="admin-heading">Administration</h1>
-        <p class="causa-muted">System information and diagnostics. Read-only. Tokens are never shown.</p>
-        <table class="causa-admin">
-          <thead><tr><th scope="col">Item</th><th scope="col">Value</th><th scope="col">State</th></tr></thead>
-          <tbody>
-            <template data-each="admin" data-key="id">
-              <tr><th scope="row" data-text="label"></th><td data-text="value"></td><td data-text="state"></td></tr>
-            </template>
-          </tbody>
-        </table>
+        <h1 id="admin-heading" data-percepta-observation="desktop-reference-semantic-priority">Administration</h1>
+        <p class="causa-muted" data-percepta-observation="ipad-portrait-semantic-priority">System information and diagnostics for this build. Read-only. Tokens are never shown.</p>
+        <div class="causa-attention" data-tone="attention" data-percepta-observation="desktop-reference-blocked-state">
+          <strong data-percepta-observation="narrow-phone-blocked-state">Readiness:</strong>
+          <span data-text="admin.readiness" data-percepta-observation="no-false-authority"></span>
+          <ul class="causa-admin-unverified" aria-label="Items not verified" data-percepta-observation="blocker-visible">
+            <template data-each="admin.unverified" data-key="id"><li data-text="text"></li></template>
+          </ul>
+          <span data-percepta-observation="ipad-portrait-blocked-state">Each section below lists its items with their state.</span>
+          <span data-percepta-observation="ipad-landscape-blocked-state">Smoke-test results are recorded by CI, not observed here.</span>
+        </div>
+        <section class="causa-panel" aria-labelledby="adm-deployment" data-percepta-region="deployment">
+          <h2 id="adm-deployment">Deployment</h2>
+          <table class="causa-admin">
+            <thead><tr><th scope="col">Item</th><th scope="col">Value</th><th scope="col">State</th></tr></thead>
+            <tbody>
+              <template data-each="admin.deployment" data-key="id">
+                <tr><th scope="row" data-text="label"></th><td data-text="value"></td><td data-text="state"></td></tr>
+              </template>
+            </tbody>
+          </table>
+        </section>
+        <section class="causa-panel" aria-labelledby="adm-persistence" data-percepta-region="persistence">
+          <h2 id="adm-persistence">Data and persistence</h2>
+          <table class="causa-admin">
+            <thead><tr><th scope="col">Item</th><th scope="col">Value</th><th scope="col">State</th></tr></thead>
+            <tbody>
+              <template data-each="admin.persistence" data-key="id">
+                <tr><th scope="row" data-text="label"></th><td data-text="value"></td><td data-text="state"></td></tr>
+              </template>
+            </tbody>
+          </table>
+        </section>
+        <section class="causa-panel" aria-labelledby="adm-ai" data-percepta-region="ai">
+          <h2 id="adm-ai">AI assistance</h2>
+          <table class="causa-admin">
+            <thead><tr><th scope="col">Item</th><th scope="col">Value</th><th scope="col">State</th></tr></thead>
+            <tbody>
+              <template data-each="admin.ai" data-key="id">
+                <tr><th scope="row" data-text="label"></th><td data-text="value"></td><td data-text="state"></td></tr>
+              </template>
+            </tbody>
+          </table>
+        </section>
+        <section class="causa-panel" aria-labelledby="adm-report" data-percepta-region="report">
+          <h2 id="adm-report">Report</h2>
+          <table class="causa-admin">
+            <thead><tr><th scope="col">Item</th><th scope="col">Value</th><th scope="col">State</th></tr></thead>
+            <tbody>
+              <template data-each="admin.report" data-key="id">
+                <tr><th scope="row" data-text="label"></th><td data-text="value"></td><td data-text="state"></td></tr>
+              </template>
+            </tbody>
+          </table>
+        </section>
+        <section class="causa-panel" aria-labelledby="adm-security" data-percepta-region="security">
+          <h2 id="adm-security">Security</h2>
+          <table class="causa-admin">
+            <thead><tr><th scope="col">Item</th><th scope="col">Value</th><th scope="col">State</th></tr></thead>
+            <tbody>
+              <template data-each="admin.security" data-key="id">
+                <tr><th scope="row" data-text="label"></th><td data-text="value"></td><td data-text="state"></td></tr>
+              </template>
+            </tbody>
+          </table>
+        </section>
+        <section class="causa-panel" aria-labelledby="adm-smoke-tests" data-percepta-region="smoke-tests">
+          <h2 id="adm-smoke-tests">Smoke tests</h2>
+          <table class="causa-admin">
+            <thead><tr><th scope="col">Item</th><th scope="col">Value</th><th scope="col">State</th></tr></thead>
+            <tbody>
+              <template data-each="admin.smoke" data-key="id">
+                <tr><th scope="row" data-text="label"></th><td data-text="value"></td><td data-text="state"></td></tr>
+              </template>
+            </tbody>
+          </table>
+        </section>
+        <p class="causa-muted" data-percepta-observation="ipad-landscape-semantic-priority">Unknown means not observed by this page; Unavailable means it could not be read or is not part of this build.</p>
+        <p class="causa-muted" data-percepta-observation="narrow-phone-semantic-priority">Nothing on this page changes an investigation.</p>
       </section>
     </template>
 
@@ -333,15 +471,15 @@
         <h1 id="settings-heading">Settings</h1>
         <p class="causa-muted">These preferences apply to this browser tab for this session only. They are not stored.</p>
         <div class="ef-field causa-filter">
-          <label class="ef-field__label" for="setting-text-size">Text size</label>
-          <select id="setting-text-size" class="causa-input" data-event="text-size" data-bind-value="settings.textSize">
+          <label class="ef-field__label" id="setting-text-size-label" for="setting-text-size">Text size</label>
+          <select id="setting-text-size" aria-labelledby="setting-text-size-label" class="causa-input" data-event="text-size" data-bind-value="settings.textSize">
             <option value="standard">Standard</option>
             <option value="large">Large</option>
           </select>
         </div>
         <div class="ef-field causa-filter">
-          <label class="ef-field__label" for="setting-motion">Motion</label>
-          <select id="setting-motion" class="causa-input" data-event="motion" data-bind-value="settings.motion">
+          <label class="ef-field__label" id="setting-motion-label" for="setting-motion">Motion</label>
+          <select id="setting-motion" aria-labelledby="setting-motion-label" class="causa-input" data-event="motion" data-bind-value="settings.motion">
             <option value="system">Follow the system setting</option>
             <option value="reduced">Reduce motion</option>
           </select>

@@ -93,14 +93,18 @@ type Connection =
     | ConnectedTo of repository: string * branch: string * workspace: string
     | ConnectionFailed of reason: string
 
-/// An Administration fact: state is one of Verified, Failed, Unknown or Unavailable (UI-018-O3).
-type AdminFact = { Id: string; Label: string; Value: string; State: string }
+/// An Administration fact: state is one of Verified, Failed, Unknown or Unavailable (UI-018-O3). Section is one of
+/// deployment, persistence, ai, report, security, smoke-tests.
+type AdminFact = { Id: string; Section: string; Label: string; Value: string; State: string }
 
 type WorkspaceProjection =
     { Connection: Connection
       Investigations: Loadable<CardProjection list>
       Opened: Map<string, Loadable<InvestigationProjection>>
       Sync: SyncStatus
+      /// Workspace-scoped capabilities decided by the F# policy (e.g. StartInvestigation), and what blocks them.
+      Capabilities: Capability list
+      Blockers: BlockerRow list
       /// A short, plain-language message for the person, when the adapter has one.
       Message: (string * string) option
       Administration: AdminFact list }
@@ -126,6 +130,8 @@ let emptyWorkspace =
       Investigations = NotRequested
       Opened = Map.empty
       Sync = NoChanges
+      Capabilities = []
+      Blockers = []
       Message = None
       Administration = [] }
 
@@ -137,8 +143,8 @@ module Port =
           Projection =
             { emptyWorkspace with
                 Administration =
-                    [ { Id = "engine"; Label = "Investigation engine"; Value = "Not composed into this build"; State = "Unavailable" }
-                      { Id = "provider"; Label = "Data provider"; Value = "Not composed into this build"; State = "Unavailable" } ] }
+                    [ { Id = "engine"; Section = "persistence"; Label = "Investigation engine"; Value = "Not composed into this build"; State = "Unavailable" }
+                      { Id = "provider"; Section = "persistence"; Label = "Data provider"; Value = "Not composed into this build"; State = "Unavailable" } ] }
           Handle =
             fun _ input ->
                 match input with

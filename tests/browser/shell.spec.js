@@ -274,3 +274,38 @@ test.describe("causal graph with the Forma workflow engine (T23)", () => {
     await expect(text).toContainText("Root cause: A seal lost resilience in the cold.");
   });
 });
+
+test.describe("report, timeline and administration views (T22, T26, T29)", () => {
+  test("an unresolved investigation's report says it is incomplete and states no conclusion it does not have [VPO-f97eb988899c23af] [VPO-e49834d009021cd0]", async ({ page }) => {
+    await page.goto(TEST_SITE + "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/report");
+    await started(page);
+    await expect(page.locator("[data-percepta-screen]")).toHaveAttribute("data-percepta-screen", "investigation-report");
+    await expect(page.locator(".causa-report__incomplete")).toContainText("Incomplete");
+    await expect(page.locator("[data-percepta-region=conclusion]")).toContainText("No cause has been confirmed.");
+    await expect(page.locator("[data-percepta-region=verification]")).toContainText("nothing is reported as verified.");
+    await expect(page.getByRole("button", { name: "Print the report" })).toBeVisible();
+  });
+
+  test("the timeline shows event time, recorded time and the version it was rendered from [VPO-33324aeb860bce06] [VPO-7fe0d0f0d00df8a0] [VPO-f1a416eaeec6c129]", async ({ page }) => {
+    await page.goto(TEST_SITE + "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/timeline");
+    await started(page);
+    const entry = page.locator(".causa-timeline__entry").first();
+    await expect(entry).toContainText("#1");
+    await expect(entry).toContainText("Event time 2026-01-01T00:00:00Z");
+    await expect(entry).toContainText("Recorded 2026-01-01T00:00:00Z");
+    await expect(page.locator("[data-percepta-region=version-state]")).toContainText("version 7");
+    await expect(page.locator(".causa-inv-meta")).toContainText("Version 7");
+  });
+
+  test("Administration groups facts by section and never presents an unverified item as passed [VPO-97a56b1abd22a396] [VPO-a74264901d267d03] [VPO-b27f3de8fd81d25c] [VPO-a4ab030e74ad080a]", async ({ page }) => {
+    await page.goto("index.html#/administration");
+    await started(page);
+    for (const name of ["Deployment", "Data and persistence", "AI assistance", "Report", "Security", "Smoke tests"]) await expect(page.getByRole("heading", { level: 2, name })).toBeVisible();
+    await expect(page.locator(".causa-attention")).toContainText("Not confirmed ready to demonstrate");
+    await expect(page.getByRole("list", { name: "Items not verified" })).toContainText("AI assistance: Unavailable");
+    await expect(page.getByRole("list", { name: "Items not verified" })).toContainText("Smoke tests at this commit: Unknown");
+    await expect(page.locator("[data-percepta-region=security]")).toContainText("default-src 'self'");
+    // Read-only: no form or action button on the page.
+    await expect(page.locator("[data-percepta-screen=administration] form, [data-percepta-screen=administration] button")).toHaveCount(0);
+  });
+});

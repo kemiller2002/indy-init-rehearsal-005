@@ -10,7 +10,7 @@ open Causa.App.Adapter
 
 type Notice = { Tone: string; Text: string }
 
-type Drafts = { Token: string; Repository: string; Branch: string; Workspace: string }
+type Drafts = { Token: string; Repository: string; Branch: string; Workspace: string; Title: string; Statement: string }
 
 /// Session-scope preferences (UI-019-O5): kept in this page's memory only, never in browser storage.
 type Settings = { LargeText: bool; ReducedMotion: bool }
@@ -33,7 +33,7 @@ type Model =
       /// The Percepta fixture state name currently shown, if any.
       InjectedState: string option }
 
-let initialDrafts = { Token = ""; Repository = ""; Branch = "main"; Workspace = "" }
+let initialDrafts = { Token = ""; Repository = ""; Branch = "main"; Workspace = ""; Title = ""; Statement = "" }
 
 let initial =
     { Route = Home
@@ -101,6 +101,12 @@ let private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
     | "repository" -> { model with Drafts = { d with Repository = value.Trim() } }, []
     | "branch" -> { model with Drafts = { d with Branch = value.Trim() } }, []
     | "workspace" -> { model with Drafts = { d with Workspace = value.Trim() } }, []
+    | "title" -> { model with Drafts = { d with Title = value } }, []
+    | "statement" -> { model with Drafts = { d with Statement = value } }, []
+    | "start" ->
+        // The engine decides whether it may start and validates the fields; the shell only forwards them (UI-004-O6).
+        let fields = Map.ofList [ "title", d.Title.Trim(); "problemStatement", d.Statement.Trim() ]
+        toPort entropy (Command("StartInvestigation", fields, 0L)) model
     | "connect" ->
         let request: ConnectRequest = { Token = d.Token; Repository = d.Repository; Branch = d.Branch; Workspace = d.Workspace }
         // The token leaves the shell's model as soon as it is handed to the port (memory only, OD-INDY-10).

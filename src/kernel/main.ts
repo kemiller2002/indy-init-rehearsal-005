@@ -233,6 +233,13 @@ new MutationObserver((records) => {
   }
 }).observe(document.body, { subtree: true, attributes: true, attributeFilter: ["data-selected"] });
 
+// ---- Report printing (T26) -------------------------------------------------------------------------------------------
+// Printing is a browser presentation action with no domain effect; the application renders the report it prints.
+document.addEventListener("click", (event) => {
+  const target = event.target instanceof Element ? event.target.closest("#causa-print") : null;
+  if (target !== null) window.print();
+});
+
 // ---- Percepta state injection (test build only) ----------------------------------------------------------------------
 // The state travels through the normal Limen event path (a hidden control) to the F# application, which projects it
 // with the same View code the person sees. Resolves once the DOM shows the state; throws when it was refused.
