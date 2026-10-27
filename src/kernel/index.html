@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <!-- The page runs only its own code and the .NET WebAssembly application; the only remote it may reach is GitHub's
-       API. No inline script, no eval, no base element. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://api.github.com; frame-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <!-- The page runs only its own code and the .NET WebAssembly application; the only remotes it may reach are
+       GitHub's API and, when the person asks for AI proposals with their own key, the Anthropic API. No inline script, no eval, no base element. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://api.github.com https://api.anthropic.com; frame-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="no-referrer">
   <title data-text="page.title">Causa</title>
   <link rel="icon" href="causa-icon.svg" type="image/svg+xml">
@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="vendor/folio/print.css" media="print">
   <script type="module" src="main.js"></script>
 </head>
-<body class="ef-site causa" data-bind-data-text-size="text.size" data-bind-data-motion="motion" data-bind-data-screen="screen" data-bind-data-percepta-state="percepta.state">
+<body class="ef-site causa" data-bind-data-text-size="text.size" data-bind-data-motion="motion" data-bind-data-screen="screen" data-bind-data-percepta-state="percepta.state" data-bind-data-secret-epoch="secrets.epoch">
   <p id="causa-ready" class="ef-visually-hidden" role="status" tabindex="-1"></p>
   <a class="ef-skip-link" href="#causa-main">Skip to main content</a>
 
@@ -63,6 +63,16 @@
       </div>
     </template>
 
+    <!-- UI-004-O3: a destructive or irreversible action waits here for an explicit confirmation. -->
+    <template data-if="confirm.show">
+      <div id="causa-confirm" class="ef-dialog causa-confirm" role="alertdialog" aria-modal="false" aria-labelledby="causa-confirm-title" aria-describedby="causa-confirm-text">
+        <h2 id="causa-confirm-title">Please confirm</h2>
+        <p id="causa-confirm-text" data-text="confirm.text"></p>
+        <button type="button" class="ef-button" data-ef-variant="primary" id="causa-confirm-yes" data-event="confirm-yes">Yes, continue</button>
+        <button type="button" class="ef-button" data-event="confirm-no">Cancel</button>
+      </div>
+    </template>
+
     <!-- Disconnected: the empty workspace and the explicit Connect action (UI-001-O1, EXT-DATA-002). -->
     <template data-if="screen.connect">
       <section class="causa-connect" aria-labelledby="connect-heading" data-percepta-screen="connect">
@@ -73,10 +83,13 @@
             <p class="causa-hint">Connect to open the page you asked for.</p>
           </template>
         </div>
+        <template data-if="connection.hasDetail">
+          <p class="causa-muted" role="status" data-text="connection.detail"></p>
+        </template>
         <template data-if="connect.failed">
           <p class="ef-alert causa-notice" data-tone="warning" role="alert" data-text="connect.failure"></p>
         </template>
-        <form class="ef-form causa-form" data-event="connect" aria-describedby="token-help">
+        <form class="ef-form causa-form" data-event="connect" data-clear-secrets aria-describedby="token-help">
           <div class="ef-field">
             <label class="ef-field__label" id="token-label" for="token">Fine-grained GitHub token</label>
             <input id="token" aria-labelledby="token-label" class="causa-input" type="password" autocomplete="off" spellcheck="false" required data-event="token">
@@ -211,6 +224,7 @@
           <p class="causa-kind" data-text="inv.kind" data-percepta-observation="ipad-landscape-semantic-priority"></p>
           <h1 data-text="inv.title" data-percepta-observation="desktop-reference-semantic-priority"></h1>
           <p class="causa-inv-meta">Status: <span class="causa-tag" data-bind-data-tone="inv.tone" data-text="inv.status" data-percepta-observation="ipad-portrait-semantic-priority"></span> <span class="causa-muted" data-text="inv.version" data-percepta-observation="narrow-phone-semantic-priority"></span></p>
+          <template data-if="findings.show"><p class="causa-findings"><span class="causa-label">Findings:</span> <span data-text="findings.text"></span></p></template>
           <!-- What blocks progress, in every section's primary flow (UI-032): counts and words, never colour alone. -->
           <div class="causa-attention" data-bind-data-tone="attention.tone" data-percepta-observation="desktop-reference-blocked-state">
             <strong data-percepta-observation="narrow-phone-blocked-state">Open questions:</strong>
@@ -289,7 +303,10 @@
               </section>
             </div>
             <div class="causa-sync" data-percepta-region="persistence-state" data-bind-data-tone="sync.tone"><p role="status"><span class="ef-visually-hidden">Save status: </span><span data-text="sync.text"></span></p>
-              <template data-if="sync.mayHaveSaved"><button type="button" class="ef-button" data-event="check-remote">Check now</button></template></div>
+              <template data-if="sync.mayHaveSaved"><button type="button" class="ef-button" data-event="check-remote">Check now</button></template>
+              <template data-if="sync.conflict"><div class="causa-conflict"><p>Someone else changed this investigation in GitHub. Your change is kept on this device until you choose.</p>
+                <button type="button" class="ef-button" data-event="reload-remote">Reload the version in GitHub (keep my change)</button>
+                <button type="button" class="ef-button" data-event="discard-local">Discard my local change</button></div></template></div>
           </section>
         </template>
 
@@ -313,6 +330,26 @@
                 <li class="causa-item causa-item--cause"><p><span class="causa-label">Outcome:</span> <span data-text="outcome"></span> <span class="causa-tag" data-bind-data-tone="tone" data-text="state"></span></p><p data-text="members"></p></li>
               </template>
             </ul>
+            <form class="ef-form causa-form causa-panel" data-event="submit-RecordCause" aria-labelledby="cause-form-heading">
+              <h3 id="cause-form-heading">Record a causal relationship</h3>
+              <div class="ef-field"><label class="ef-field__label" id="cause-outcome-label" for="cause-outcome">Outcome it explains</label>
+                <input id="cause-outcome" aria-labelledby="cause-outcome-label" class="causa-input" type="text" required data-event="field-RecordCause.outcome" data-on="input" data-bind-value="form.cause.outcome"></div>
+              <div class="causa-form__row">
+                <div class="ef-field"><label class="ef-field__label" id="cause-hypothesis-label" for="cause-hypothesis">Hypothesis</label>
+                  <select id="cause-hypothesis" aria-labelledby="cause-hypothesis-label" class="causa-input" required data-event="field-RecordCause.hypothesis">
+                    <option value="">Choose a hypothesis</option>
+                    <template data-each="hypotheses" data-key="id"><option data-bind-value="id" data-text="statement"></option></template>
+                  </select></div>
+                <div class="ef-field"><label class="ef-field__label" id="cause-role-label" for="cause-role">Role</label>
+                  <select id="cause-role" aria-labelledby="cause-role-label" class="causa-input" data-event="field-RecordCause.role">
+                    <option value="rootCause">Root cause</option><option value="trigger">Trigger</option><option value="contributingFactor">Contributing factor</option><option value="enablingCondition">Enabling condition</option>
+                  </select></div>
+              </div>
+              <div class="ef-field"><label class="ef-field__label" id="cause-mechanism-label" for="cause-mechanism">Mechanism (optional)</label>
+                <input id="cause-mechanism" aria-labelledby="cause-mechanism-label" class="causa-input" type="text" data-event="field-RecordCause.mechanism" data-on="input" data-bind-value="form.cause.mechanism"></div>
+              <button type="submit" class="ef-button" data-ef-variant="primary" data-bind-disabled="not.RecordCause" data-percepta-capability="RecordCause">Record</button>
+              <template data-if="not.RecordCause"><p class="causa-capability__reason" data-text="why.RecordCause"></p></template>
+            </form>
           </section>
         </template>
         <template data-if="section.evidence">
@@ -324,6 +361,44 @@
                 <li class="causa-item causa-item--evidence"><p data-text="content"></p><p class="causa-muted"><span data-text="category"></span> · <span data-text="source"></span> · <span data-text="recorded"></span></p></li>
               </template>
             </ul>
+            <form class="ef-form causa-form causa-panel" data-event="submit-AdmitEvidence" aria-labelledby="ev-form-heading">
+              <h3 id="ev-form-heading">Admit evidence</h3>
+              <div class="ef-field"><label class="ef-field__label" id="ev-content-label" for="ev-content">What the evidence shows, quoted as recorded</label>
+                <textarea id="ev-content" aria-labelledby="ev-content-label" class="causa-input" rows="3" required data-event="field-AdmitEvidence.content" data-on="input" data-bind-value="form.ev.content"></textarea></div>
+              <div class="causa-form__row">
+                <div class="ef-field"><label class="ef-field__label" id="ev-category-label" for="ev-category">Kind of evidence</label>
+                  <select id="ev-category" aria-labelledby="ev-category-label" class="causa-input" data-event="field-AdmitEvidence.category">
+                    <option value="directObservation">Direct observation</option><option value="measurement">Measurement</option><option value="log">Log</option><option value="document">Document</option><option value="experimentResult">Experiment result</option><option value="testimony">Testimony</option><option value="externalReference">External reference</option>
+                  </select></div>
+                <div class="ef-field"><label class="ef-field__label" id="ev-source-label" for="ev-source">Source</label>
+                  <input id="ev-source" aria-labelledby="ev-source-label" class="causa-input" type="text" required data-event="field-AdmitEvidence.source" data-on="input" data-bind-value="form.ev.source"></div>
+              </div>
+              <button type="submit" class="ef-button" data-ef-variant="primary" data-bind-disabled="not.AdmitEvidence" data-percepta-capability="AdmitEvidence">Admit evidence</button>
+              <template data-if="not.AdmitEvidence"><p class="causa-capability__reason" data-text="why.AdmitEvidence"></p></template>
+            </form>
+            <form class="ef-form causa-form causa-panel" data-event="submit-RelateEvidence" aria-labelledby="rel-form-heading">
+              <h3 id="rel-form-heading">Link evidence to a hypothesis</h3>
+              <div class="causa-form__row">
+                <div class="ef-field"><label class="ef-field__label" id="rel-evidence-label" for="rel-evidence">Evidence</label>
+                  <select id="rel-evidence" aria-labelledby="rel-evidence-label" class="causa-input" required data-event="field-RelateEvidence.evidence">
+                    <option value="">Choose evidence</option>
+                    <template data-each="evidence" data-key="id"><option data-bind-value="id" data-text="content"></option></template>
+                  </select></div>
+                <div class="ef-field"><label class="ef-field__label" id="rel-hypothesis-label" for="rel-hypothesis">Hypothesis</label>
+                  <select id="rel-hypothesis" aria-labelledby="rel-hypothesis-label" class="causa-input" required data-event="field-RelateEvidence.hypothesis">
+                    <option value="">Choose a hypothesis</option>
+                    <template data-each="hypotheses" data-key="id"><option data-bind-value="id" data-text="statement"></option></template>
+                  </select></div>
+                <div class="ef-field"><label class="ef-field__label" id="rel-kind-label" for="rel-kind">Relationship</label>
+                  <select id="rel-kind" aria-labelledby="rel-kind-label" class="causa-input" data-event="field-RelateEvidence.kind">
+                    <option value="supports">Supports</option><option value="contradicts">Contradicts</option><option value="discriminates">Discriminates</option><option value="insufficient">Insufficient</option>
+                  </select></div>
+              </div>
+              <div class="ef-field"><label class="ef-field__label" id="rel-rationale-label" for="rel-rationale">Why (optional)</label>
+                <input id="rel-rationale" aria-labelledby="rel-rationale-label" class="causa-input" type="text" data-event="field-RelateEvidence.rationale" data-on="input" data-bind-value="form.rel.rationale"></div>
+              <button type="submit" class="ef-button" data-ef-variant="primary" data-bind-disabled="not.RelateEvidence" data-percepta-capability="RelateEvidence">Link</button>
+              <template data-if="not.RelateEvidence"><p class="causa-capability__reason" data-text="why.RelateEvidence"></p></template>
+            </form>
           </section>
         </template>
         <template data-if="section.hypotheses">
@@ -332,22 +407,83 @@
             <template data-if="hypotheses.empty"><p class="causa-muted">No hypotheses recorded yet.</p></template>
             <ul class="causa-list">
               <template data-each="hypotheses" data-key="id">
-                <li class="causa-item causa-item--hypothesis"><p data-text="statement"></p><p><span class="causa-tag" data-bind-data-tone="tone" data-text="state"></span> <span class="causa-muted"><span data-text="supporting"></span>, <span data-text="contradicting"></span></span></p></li>
+                <li class="causa-item causa-item--hypothesis"><p data-text="statement"></p><p><span class="causa-tag" data-bind-data-tone="tone" data-text="state"></span> <span class="causa-muted"><span data-text="supporting"></span>, <span data-text="contradicting"></span></span></p><p class="causa-muted" data-text="changes"></p></li>
               </template>
             </ul>
+            <form class="ef-form causa-form causa-panel" data-event="submit-TransitionHypothesis" aria-labelledby="hyp-form-heading">
+              <h3 id="hyp-form-heading">Change a hypothesis's status</h3>
+              <div class="causa-form__row">
+                <div class="ef-field"><label class="ef-field__label" id="hyp-which-label" for="hyp-which">Hypothesis</label>
+                  <select id="hyp-which" aria-labelledby="hyp-which-label" class="causa-input" required data-event="field-TransitionHypothesis.hypothesis">
+                    <option value="">Choose a hypothesis</option>
+                    <template data-each="hypotheses" data-key="id"><option data-bind-value="id" data-text="statement"></option></template>
+                  </select></div>
+                <div class="ef-field"><label class="ef-field__label" id="hyp-change-label" for="hyp-change">Change</label>
+                  <select id="hyp-change" aria-labelledby="hyp-change-label" class="causa-input" required data-event="field-TransitionHypothesis.change">
+                    <option value="">Choose a change</option><option value="markPlausible">Mark plausible</option><option value="markSupported">Mark supported</option><option value="markWeakened">Mark weakened</option><option value="falsify">Falsify</option><option value="supersede">Supersede</option><option value="reopen">Reopen</option>
+                  </select></div>
+              </div>
+              <div class="ef-field"><label class="ef-field__label" id="hyp-evidence-label" for="hyp-evidence">Evidence that caused the change (required to falsify)</label>
+                <select id="hyp-evidence" aria-labelledby="hyp-evidence-label" class="causa-input" data-event="field-TransitionHypothesis.evidence">
+                  <option value="">None cited</option>
+                  <template data-each="evidence" data-key="id"><option data-bind-value="id" data-text="content"></option></template>
+                </select></div>
+              <div class="ef-field"><label class="ef-field__label" id="hyp-reason-label" for="hyp-reason">Reason</label>
+                <input id="hyp-reason" aria-labelledby="hyp-reason-label" class="causa-input" type="text" required data-event="field-TransitionHypothesis.reason" data-on="input" data-bind-value="form.hyp.reason"></div>
+              <button type="submit" class="ef-button" data-ef-variant="primary" data-bind-disabled="not.TransitionHypothesis" data-percepta-capability="TransitionHypothesis">Record the change</button>
+              <template data-if="not.TransitionHypothesis"><p class="causa-capability__reason" data-text="why.TransitionHypothesis"></p></template>
+            </form>
           </section>
         </template>
         <template data-if="section.timeline">
           <section aria-labelledby="sec-timeline" data-percepta-screen="investigation-timeline">
             <h2 id="sec-timeline">Investigation history</h2>
-            <p class="causa-panel" data-percepta-region="version-state" data-text="timeline.version"></p>
+            <p class="causa-panel causa-history-label" data-percepta-region="version-state" data-bind-data-historical="history.historical" role="status" data-text="timeline.version"></p>
+            <div class="causa-history-controls">
+              <div class="ef-field causa-filter">
+                <label class="ef-field__label" id="history-version-label" for="history-version">Show the investigation as it was at</label>
+                <select id="history-version" aria-labelledby="history-version-label" class="causa-input" data-event="history-version" data-bind-value="history.version">
+                  <option value="">The latest version</option>
+                  <template data-each="history.versions" data-key="id"><option data-bind-value="value" data-text="label"></option></template>
+                </select>
+              </div>
+              <div class="ef-field causa-filter">
+                <label class="ef-field__label" id="timeline-filter-label" for="timeline-filter">Show events about</label>
+                <select id="timeline-filter" aria-labelledby="timeline-filter-label" class="causa-input" data-event="timeline-filter" data-bind-value="timeline.filter">
+                  <template data-each="timeline.categories" data-key="id"><option data-bind-value="value" data-text="label"></option></template>
+                </select>
+              </div>
+            </div>
+            <template data-if="history.show">
+              <section class="causa-panel causa-history" aria-labelledby="history-heading" data-bind-data-historical="history.historical">
+                <h3 id="history-heading">State at the chosen version</h3>
+                <p><span class="causa-label">Title:</span> <span data-text="history.title"></span> · <span class="causa-label">Status:</span> <span data-text="history.status"></span></p>
+                <ul class="causa-inline-list"><template data-each="history.counts" data-key="id"><li data-text="text"></li></template></ul>
+                <h4>What this version changed</h4>
+                <template data-if="history.hereEmpty"><p class="causa-muted">No semantic change is recorded for this version.</p></template>
+                <ul class="causa-diff"><template data-each="history.here" data-key="id"><li data-text="text"></li></template></ul>
+                <template data-if="history.sinceShow"><div>
+                  <h4>Changed since, up to the latest version</h4>
+                  <ul class="causa-diff"><template data-each="history.since" data-key="id"><li data-text="text"></li></template></ul>
+                  <p><a class="causa-related" data-bind-href="history.latestHref">Back to the latest version</a></p>
+                </div></template>
+              </section>
+            </template>
             <p class="causa-panel" data-percepta-region="policy-version">Policy version: not recorded for this investigation.</p>
             <p class="causa-panel" data-percepta-region="replay" data-text="timeline.replay"></p>
             <div data-percepta-region="timeline">
               <template data-if="timeline.empty"><p class="causa-muted">No recorded events.</p></template>
               <ol class="causa-timeline">
                 <template data-each="timeline" data-key="id">
-                  <li class="causa-timeline__entry"><span data-text="sequence"></span><span class="causa-timeline__type" data-text="type"></span><span data-text="occurred"></span><span class="causa-muted" data-text="recorded"></span><span class="causa-muted" data-text="actor"></span></li>
+                  <li class="causa-timeline__entry" data-bind-data-current="current">
+                    <a data-bind-href="versionHref" data-text="sequence"></a>
+                    <span class="causa-timeline__type" data-text="type"></span>
+                    <span data-text="occurred"></span>
+                    <span class="causa-muted" data-text="recorded"></span>
+                    <span class="causa-muted" data-text="actor"></span>
+                    <template data-if="clockNote"><span class="causa-tag" data-tone="attention">Clock earlier than a previous event; ordered by sequence</span></template>
+                    <template data-if="hasAffected"><a class="causa-related" data-bind-href="affectedHref" data-text="affectedText"></a></template>
+                  </li>
                 </template>
               </ol>
             </div>
@@ -356,7 +492,76 @@
         <template data-if="section.corrective">
           <section aria-labelledby="sec-corrective" data-percepta-screen="investigation-corrective-actions">
             <h2 id="sec-corrective">Corrective actions</h2>
-            <p class="causa-muted">Corrective actions are not available in this build yet.</p>
+            <template data-if="corrections.empty"><p class="causa-muted">No corrective action recorded yet.</p></template>
+            <ul class="causa-list">
+              <template data-each="corrections" data-key="id"><li class="causa-item"><p data-text="text"></p><p class="causa-muted" data-text="state"></p></li></template>
+            </ul>
+            <form class="ef-form causa-form causa-panel" data-event="submit-RecordCorrectiveAction" aria-labelledby="ca-form-heading">
+              <h3 id="ca-form-heading">Record a corrective action</h3>
+              <div class="ef-field"><label class="ef-field__label" id="ca-description-label" for="ca-description">What will be done</label>
+                <input id="ca-description" aria-labelledby="ca-description-label" class="causa-input" type="text" required data-event="field-RecordCorrectiveAction.description" data-on="input" data-bind-value="form.ca.description"></div>
+              <div class="causa-form__row">
+                <div class="ef-field"><label class="ef-field__label" id="ca-kind-label" for="ca-kind">Kind</label>
+                  <select id="ca-kind" aria-labelledby="ca-kind-label" class="causa-input" data-event="field-RecordCorrectiveAction.kind">
+                    <option value="correction">Correction of the cause</option><option value="mitigation">Mitigation</option><option value="workaround">Workaround</option><option value="prevention">Prevention</option>
+                  </select></div>
+                <div class="ef-field"><label class="ef-field__label" id="ca-cause-label" for="ca-cause">Cause it addresses</label>
+                  <select id="ca-cause" aria-labelledby="ca-cause-label" class="causa-input" data-event="field-RecordCorrectiveAction.cause">
+                    <option value="">Choose a cause</option>
+                    <template data-each="causeOptions" data-key="id"><option data-bind-value="id" data-text="label"></option></template>
+                  </select></div>
+              </div>
+              <button type="submit" class="ef-button" data-ef-variant="primary" data-bind-disabled="not.RecordCorrectiveAction" data-percepta-capability="RecordCorrectiveAction">Record</button>
+              <template data-if="not.RecordCorrectiveAction"><p class="causa-capability__reason" data-text="why.RecordCorrectiveAction"></p></template>
+            </form>
+          </section>
+        </template>
+        <template data-if="section.proposals">
+          <section aria-labelledby="sec-proposals" data-percepta-screen="investigation-proposals">
+            <h2 id="sec-proposals">AI proposals</h2>
+            <p class="causa-muted">An AI assistant can only propose hypotheses, open questions or actions. Nothing it proposes changes the investigation until you accept it.</p>
+            <template data-if="ai.noKey"><p class="causa-notice" data-tone="warning">Enter your provider key in <a href="#/settings">Settings</a> to request proposals.</p></template>
+            <template data-if="ai.noModel"><p class="causa-notice" data-tone="warning">Set the AI model id in <a href="#/settings">Settings</a>; there is no default model.</p></template>
+            <form class="ef-form causa-form" data-event="ai-request">
+              <div class="ef-field">
+                <label class="ef-field__label" id="ai-task-label" for="ai-task">What should the assistant propose?</label>
+                <textarea id="ai-task" aria-labelledby="ai-task-label" class="causa-input" rows="2" required data-event="ai-task" data-on="input" data-bind-value="draft.aiTask"></textarea>
+              </div>
+              <button type="submit" class="ef-button" data-ef-variant="primary" data-bind-disabled="ai.requestDisabled">Request proposals</button>
+            </form>
+            <template data-if="ai.inFlight"><div class="causa-ai-status" role="status"><p>Waiting for the provider…</p><button type="button" class="ef-button" data-event="ai-cancel">Cancel the request</button></div></template>
+            <template data-if="ai.result.show"><div class="ef-alert causa-notice" role="status" data-bind-data-tone="ai.result.tone"><p class="causa-notice__text" data-text="ai.result.text"></p>
+              <template data-if="ai.retryable"><button type="button" class="ef-button" data-event="ai-retry">Try again</button></template></div></template>
+            <template data-if="ai.hasDrafts">
+              <section class="causa-panel" aria-labelledby="ai-drafts-heading">
+                <h3 id="ai-drafts-heading">Drafted proposals (not recorded)</h3>
+                <template data-if="ai.stale.show"><p class="causa-notice causa-stale" data-tone="warning" data-text="ai.stale.text"></p></template>
+                <ul class="causa-list">
+                  <template data-each="ai.drafts" data-key="id">
+                    <li class="causa-item causa-item--proposal"><p><span class="causa-tag" data-text="kind"></span> <span data-text="text"></span></p><p class="causa-muted" data-text="rationale"></p></li>
+                  </template>
+                </ul>
+                <p><button type="button" class="ef-button" data-ef-variant="primary" data-event="ai-record">Record as proposals for review</button> <button type="button" class="ef-button" data-event="ai-discard">Discard drafts</button></p>
+              </section>
+            </template>
+            <h3>Proposals awaiting a decision and decided</h3>
+            <template data-if="proposals.empty"><p class="causa-muted">No proposals have been recorded.</p></template>
+            <ul class="causa-list">
+              <template data-each="proposals" data-key="id">
+                <li class="causa-item causa-item--proposal">
+                  <p><span class="causa-tag" data-text="kind"></span> <span data-text="text"></span></p>
+                  <p class="causa-muted" data-text="rationale"></p>
+                  <p class="causa-muted"><span data-text="by"></span> · <strong data-text="state"></strong></p>
+                  <template data-if="canAccept"><button type="button" class="ef-button" data-ef-variant="primary" data-event="proposal-accept" data-percepta-capability="AcceptProposal">Accept</button></template>
+                  <template data-if="canReject"><div class="causa-capability causa-capability--input">
+                    <label class="ef-field__label" data-bind-id="reasonLabelId" data-bind-for="reasonInputId">Why it is rejected</label>
+                    <input class="causa-input" type="text" autocomplete="off" data-bind-id="reasonInputId" data-bind-aria-labelledby="reasonLabelId" data-event="proposal-reason" data-on="input" data-bind-value="reasonValue">
+                    <button type="button" class="ef-button" data-event="proposal-reject" data-percepta-capability="RejectProposal">Reject</button>
+                  </div></template>
+                  <template data-if="acceptBlocked"><p class="causa-capability__reason" data-text="acceptWhy"></p></template>
+                </li>
+              </template>
+            </ul>
           </section>
         </template>
         <template data-if="section.report">
@@ -371,7 +576,11 @@
                 <p data-text="report.status"></p>
               </ef-print-title-page>
               <ef-print-section aria-labelledby="rp-source" data-percepta-region="source-version"><h3 id="rp-source">Source</h3><p data-text="report.source"></p></ef-print-section>
-              <ef-print-section aria-labelledby="rp-conclusion" data-percepta-region="conclusion"><h3 id="rp-conclusion">Conclusion</h3><p data-text="report.conclusion"></p></ef-print-section>
+              <ef-print-section aria-labelledby="rp-conclusion" data-percepta-region="conclusion"><h3 id="rp-conclusion">Conclusion</h3><p data-text="report.conclusion"></p>
+                <template data-if="report.hasCauses"><div><h4>Causal relationships</h4><ul class="causa-report__list">
+                  <template data-each="report.causes" data-key="id"><li><span data-text="outcome"></span> — <strong data-text="state"></strong>. <span data-text="members"></span></li></template>
+                </ul></div></template>
+              </ef-print-section>
               <ef-print-section aria-labelledby="rp-evidence" data-percepta-region="evidence"><h3 id="rp-evidence">Evidence</h3>
                 <template data-if="evidence.empty"><p class="causa-muted">No evidence recorded yet.</p></template>
                 <ul class="causa-report__list">
@@ -379,12 +588,14 @@
                 </ul>
               </ef-print-section>
               <ef-print-section aria-labelledby="rp-uncertainty" data-percepta-region="uncertainty"><h3 id="rp-uncertainty">Open questions</h3>
-                <template data-if="blockers.empty"><p class="causa-muted">No open questions recorded.</p></template>
+                <template data-if="report.noOpen"><p class="causa-muted">No open question, contradiction or unverified assumption is recorded.</p></template>
                 <ul class="causa-report__list">
-                  <template data-each="blockers" data-key="id"><li><span data-text="question"></span> (<span data-text="materiality"></span>)</li></template>
+                  <template data-each="report.open" data-key="id"><li data-text="text"></li></template>
                 </ul>
               </ef-print-section>
-              <ef-print-section aria-labelledby="rp-verification" data-percepta-region="verification"><h3 id="rp-verification">Verification</h3><p data-text="report.verification"></p></ef-print-section>
+              <ef-print-section aria-labelledby="rp-verification" data-percepta-region="verification"><h3 id="rp-verification">Verification</h3><p data-text="report.verification"></p>
+                <ul class="causa-report__list"><template data-each="report.corrections" data-key="id"><li><span data-text="text"></span>: <strong data-text="state"></strong></li></template></ul>
+              </ef-print-section>
             </ef-print-document>
           </section>
         </template>
@@ -495,6 +706,23 @@
             <option value="reduced">Reduce motion</option>
           </select>
         </div>
+        <h2>AI assistance</h2>
+        <p class="causa-muted">Proposals are requested with your own provider key and the model you name. Both apply to this tab for this session only.</p>
+        <div class="ef-field causa-filter">
+          <label class="ef-field__label" id="setting-ai-model-label" for="setting-ai-model">AI model id</label>
+          <input id="setting-ai-model" aria-labelledby="setting-ai-model-label" class="causa-input" type="text" autocomplete="off" spellcheck="false" data-event="ai-model" data-on="input" data-bind-value="settings.aiModel" aria-describedby="setting-ai-model-help">
+          <p id="setting-ai-model-help" class="ef-field__description">There is no default: requests are refused until you enter one.</p>
+        </div>
+        <form class="ef-form causa-form" data-event="ai-key-set" data-clear-secrets aria-describedby="ai-key-help">
+          <div class="ef-field">
+            <label class="ef-field__label" id="ai-key-label" for="ai-key">Provider key</label>
+            <input id="ai-key" aria-labelledby="ai-key-label" class="causa-input" type="password" autocomplete="off" spellcheck="false" required data-event="ai-key">
+            <p id="ai-key-help" class="ef-field__description">Kept in this page's memory only: never stored in the browser, never shown, logged or written anywhere. Reloading the page forgets it.</p>
+          </div>
+          <button type="submit" class="ef-button" data-ef-variant="primary">Use this key</button>
+        </form>
+        <p data-text="settings.aiKey"></p>
+        <template data-if="ai.keyHeld"><button type="button" class="ef-button" data-event="ai-key-clear">Forget the key</button></template>
         <h2>Data repository connection</h2>
         <p data-text="settings.connection"></p>
       </section>
