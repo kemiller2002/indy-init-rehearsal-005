@@ -28,5 +28,7 @@
     <Compile Include="Storage.fs" />
     <Compile Include="Kernel.fs" />
     <Compile Include="Projection.fs" />
+    <Compile Include="Timeline.fs" />
+    <Compile Include="Proposals.fs" />
   </ItemGroup>
 </Project>
