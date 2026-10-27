@@ -79,10 +79,10 @@ RUN_ID=local SOURCE_SHA=$(git rev-parse HEAD) PRODUCERS=/tmp/producers.json OUT=
 
 | Path | What |
 | --- | --- |
-| `tools/acceptance/Causa.Acceptance` | F# tool `causa-acceptance`: `lock-gate`, `bind`, `ledger`, `reuse-request`, `reuse-decision`, `provenance`, `report` |
+| `tools/acceptance/Causa.Acceptance` | F# tool `causa-acceptance`: `lock-gate`, `bind`, `ledger`, `curation`, `reuse-request`, `reuse-decision`, `provenance`, `report` |
 | `tools/acceptance/ci/acceptance.sh` | bundle + ledger + both verifiers + report (pins: plan, baseline, approvals, operator) |
 | `tools/acceptance/ci/fingerprint.sh` | content fingerprint that lets Echelon foundations / Praxis validation skip an input that already passed |
-| `tools/acceptance/ci/install-dokimos.sh` | Dokimos 0.8.0 from the pinned channel, SHA-256 verified |
+| `tools/acceptance/ci/install-dokimos.sh`, `install-host-tool.sh` | host tools exactly as the pinned channel resolves them, SHA-256 verified |
 | `acceptance/stack/` | T11 pin: byte copy of the echelon-current 1.29.0 linux-x64 channel resolution |
 | `acceptance/reuse.json` | Dokimos test-to-input mappings; branches may skip unchanged producers, main never reuses, live never |
 | `acceptance/gates.json`, `acceptance/defect-classes.json` | gate producers, recurring defect classes |
@@ -95,4 +95,5 @@ Pinned inputs: Indy-init `459f65a` (verifiers, plan `VP-e77a2134e1b0`), baseline
 Known limit: `verify-plan` reports a requirement PASS only when the **plan** binds a test identity to every
 obligation (Indy-init `curation/verification-plan.json` `testBindings`, then recompilation: a new plan id). Until
 that curation is done from `acceptance/traceability.json`, a requirement whose tests all pass is `UNBOUND` there,
-and the combined result cannot be ACCEPTED.
+and the combined result cannot be ACCEPTED. Every CI run writes `curation-test-bindings.json` (the
+`testBindings` for that curation) into its `acceptance-evidence` artifact.
