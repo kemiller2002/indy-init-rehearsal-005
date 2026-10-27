@@ -1,0 +1,9 @@
+{
+  "name": "material-blocker",
+  "predicates": ["material-blocker-exists"],
+  "capabilities": {
+    "RecordObservation": "legal",
+    "RecordHypothesis": "legal",
+    "ConfirmCause": "illegal"
+  }
+}

@@ -211,6 +211,20 @@ let project (model: Model) : ViewState =
                       "members", (if members.IsEmpty then "No contributing hypotheses recorded." else String.concat "; " members) ]))
         |> Option.defaultValue []
 
+    // Counts of what the projection says blocks progress; derived only from the engine's blockers and legality.
+    let materialQuestions = inv |> Option.map (fun i -> i.Blockers |> List.filter (fun b -> b.Material) |> List.length) |> Option.defaultValue 0
+    let blockedActions = inv |> Option.map (fun i -> i.Capabilities |> List.filter (fun c -> not c.Legal && c.BlockerId.IsSome) |> List.length) |> Option.defaultValue 0
+
+    let attentionQuestions =
+        match materialQuestions with
+        | 0 -> "No material open questions are recorded."
+        | 1 -> "1 material open question."
+        | n -> $"{n} material open questions."
+
+    let attentionBlocked =
+        if blockedActions = 1 then "1 action is unavailable until it is answered; nothing it would establish is shown as settled."
+        else $"{blockedActions} actions are unavailable until they are answered; nothing they would establish is shown as settled."
+
     let adminRows =
         let row id l v st = item [ "id", id; "label", l; "value", v; "state", st ]
 
@@ -316,6 +330,11 @@ let project (model: Model) : ViewState =
       "graph.selection", text graphSelection
       "causes", items causes
       "causes.empty", flag (inv.IsSome && causes.IsEmpty)
+      "attention.questions", text attentionQuestions
+      "attention.blocked", flag (blockedActions > 0)
+      "attention.blockedText", text attentionBlocked
+      "attention.tone", text (if materialQuestions > 0 then "attention" else "neutral")
+      "attention.href", text (inv |> Option.map (fun i -> Routes.formatItem (Investigation(i.Id, Overview)) (i.Blockers |> List.tryHead |> Option.map (fun b -> b.Id) |> Option.defaultValue "")) |> Option.defaultValue "#/")
       "sync.text", text (syncText ws.Sync)
       "sync.tone", text (syncTone ws.Sync)
       // Administration (UI-018) and Settings (UI-019).

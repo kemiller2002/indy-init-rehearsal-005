@@ -1,0 +1,13 @@
+{
+  "schema": "percepta.screen-bindings/1",
+  "application": "causa",
+  "stateInjection": true,
+  "screens": [
+    {
+      "contract": "S02-investigation-workspace",
+      "appScreen": "investigation-overview",
+      "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1",
+      "fixtures": ["fixtures/blocked.json", "fixtures/legal.json", "fixtures/all-illegal.json"]
+    }
+  ]
+}

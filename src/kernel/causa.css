@@ -312,3 +312,7 @@ body[data-motion="reduced"] *, body[data-motion="reduced"] *::before { animation
 .causa-mark-img { width: 2rem; height: 2rem; margin-right: 0.5rem; vertical-align: middle; }
 .causa-boot__mark { width: 4rem; height: 4rem; display: block; margin: 0 auto 0.75rem; }
 .causa-item[data-selected="true"] { outline: 3px solid var(--causa-color-action); outline-offset: 2px; }
+.causa-attention { display: flex; flex-wrap: wrap; gap: 0.25rem 0.75rem; align-items: center; margin: 0 0 1rem; padding: 0.5rem 0.75rem; border-left: 4px solid var(--causa-color-structure); background: var(--causa-color-raised); }
+.causa-attention[data-tone="attention"] { border-left-color: var(--causa-color-attention); background: var(--causa-amber-wash); color: var(--causa-color-attention-ink); }
+.causa-attention__blocked { font-weight: 600; }
+.causa-attention .causa-related { display: inline-flex; align-items: center; min-height: 44px; }

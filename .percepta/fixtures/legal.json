@@ -1,0 +1,9 @@
+{
+  "name": "all-legal",
+  "predicates": [],
+  "capabilities": {
+    "RecordObservation": "legal",
+    "RecordHypothesis": "legal",
+    "ConfirmCause": "legal"
+  }
+}

@@ -165,9 +165,9 @@
       <div class="causa-investigation">
         <p><a class="causa-back" href="#/investigations">Investigations</a></p>
         <header class="causa-inv-header">
-          <p class="causa-kind" data-text="inv.kind"></p>
-          <h1 data-text="inv.title"></h1>
-          <p class="causa-inv-meta">Status: <span class="causa-tag" data-bind-data-tone="inv.tone" data-text="inv.status"></span> <span class="causa-muted" data-text="inv.version"></span></p>
+          <p class="causa-kind" data-text="inv.kind" data-percepta-observation="ipad-landscape-semantic-priority"></p>
+          <h1 data-text="inv.title" data-percepta-observation="desktop-reference-semantic-priority"></h1>
+          <p class="causa-inv-meta">Status: <span class="causa-tag" data-bind-data-tone="inv.tone" data-text="inv.status" data-percepta-observation="ipad-portrait-semantic-priority"></span> <span class="causa-muted" data-text="inv.version"></span></p>
         </header>
         <nav class="causa-sections" aria-label="Investigation sections">
           <ul>
@@ -180,10 +180,16 @@
         <template data-if="section.overview">
           <section class="causa-overview" aria-label="Overview" data-percepta-screen="investigation-overview">
             <h2>Overview</h2>
+            <!-- What blocks progress, always in the primary flow (UI-032): counts and words, never colour alone. -->
+            <p class="causa-attention" data-bind-data-tone="attention.tone" data-percepta-observation="desktop-reference-blocked-state">
+              <span data-text="attention.questions" data-percepta-observation="ipad-portrait-blocked-state"></span>
+              <template data-if="attention.blocked"><span class="causa-attention__blocked" data-text="attention.blockedText" data-percepta-observation="no-false-authority"></span></template>
+              <a class="causa-related" href="#ov-open" data-bind-href="attention.href" data-percepta-observation="ipad-landscape-blocked-state">See open questions</a>
+            </p>
             <div class="causa-overview-grid">
               <section class="causa-panel" aria-labelledby="ov-what" data-percepta-region="observation">
                 <h3 id="ov-what">What happened</h3>
-                <p class="causa-observation" data-text="inv.description"></p>
+                <p class="causa-observation" data-text="inv.description" data-percepta-observation="narrow-phone-semantic-priority"></p>
                 <h4>Evidence</h4>
                 <template data-if="evidence.empty"><p class="causa-muted">No evidence recorded yet.</p></template>
                 <ul class="causa-list">
@@ -202,7 +208,7 @@
                 </ul>
               </section>
               <section class="causa-panel" aria-labelledby="ov-open" data-percepta-region="blockers">
-                <h3 id="ov-open">Open questions</h3>
+                <h3 id="ov-open" data-percepta-observation="narrow-phone-blocked-state">Open questions</h3>
                 <template data-if="blockers.empty"><p class="causa-muted">No open questions recorded.</p></template>
                 <ul class="causa-list">
                   <template data-each="blockers" data-key="id">

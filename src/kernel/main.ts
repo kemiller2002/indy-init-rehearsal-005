@@ -126,6 +126,11 @@ Promise.race([kernel.start(), timeout]).then(
       return;
     }
     // WASM-LOAD-004: the shell leaves only once the application has rendered its first projection.
+    // Test build only: `?percepta=default` shows the fixture investigation with no predicates, so a Percepta run
+    // can establish the screen's identity before it injects its own fixtures.
+    if (TEST_BUILD && new URLSearchParams(location.search).get("percepta") === "default") {
+      void (Reflect.get(window, "__perceptaSetState") as (s: unknown) => Promise<void>)({ name: "default", predicates: [], capabilities: {} });
+    }
     if (boot !== null && boot.dataset.state !== "failed") {
       boot.remove();
       if (ready !== null) {
