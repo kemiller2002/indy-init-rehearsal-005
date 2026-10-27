@@ -106,7 +106,7 @@ function recordRequests(page, into) {
 const syncStatus = (page) => page.locator(".causa-sync [role=status]");
 
 test(
-  "DCT-LIVE-A create, write, reload, conflict and rejected token against the real test repository, each confirmed by an independent SHA re-read",
+  "DCT-LIVE-A create, write, reload, conflict (resolved by Reload) and rejected token against the real test repository, each confirmed by an independent SHA re-read",
   { tag: ["@live", "@VPO-05eeddad528e2cd4", "@VPO-c6c90d9f4acc5fe6", "@VPO-37d860d18826cf0a", "@VPO-d87bf2493f9268ae", "@VPO-6292ea3728a2532b", "@VPO-7672a3ef81f74ac5", "@VPO-903077d337faf198", "@VPO-d7fbd84e40ded145", "@VPO-61b2e81f99761d55", "@VPO-b3efad6eb85360be", "@VPO-34731ac9a977b818", "@VPO-89ed6170f531961e", "@VPO-4c06d10238d15c5c", "@VPO-54b0eef91ceeada4", "@VPO-2de744fb2c8bdc70", "@VPO-bb08b9a414ba4cd7", "@VPO-ca58030e3eecdf9b", "@VPO-c135d16c59f5baf8", "@VPO-57fe23e7c821450f", "@VPO-fbcff0eece408886", "@VPO-5581f11810c02191"] },
   async ({ page, browser }) => {
     test.setTimeout(300_000);
@@ -182,6 +182,16 @@ test(
     const afterConflict = await filesAt(testRepo, dir, moved);
     expect(afterConflict["events.ndjson"]).toBe(written["events.ndjson"]);
 
+    // Reload the repository's version, keeping the change: the other writer did not touch this investigation, so the
+    // change is reapplied on the new head and saved, parented by the other writer's commit (never re-targeted blind).
+    await page.locator(".causa-conflict").getByRole("button", { name: "Reload the version in GitHub (keep my change)" }).click();
+    await expect(syncStatus(page)).toContainText("Saved to GitHub", { timeout: 90_000 });
+    const afterReload = await head(testRepo, branch);
+    expect((await commit(testRepo, afterReload)).parents.map((p) => p.sha)).toEqual([moved]);
+    const rebased = await filesAt(testRepo, dir, afterReload);
+    expect(rebased["events.ndjson"].startsWith(written["events.ndjson"])).toBe(true);
+    expect(rebased["events.ndjson"]).toContain("A change decided before the other writer's commit.");
+
     // Rejected token: a second tab with a wrong token is refused and writes nothing.
     const other = await browser.newPage();
     const otherRequests = [];
@@ -192,7 +202,7 @@ test(
     await expect(other.getByRole("alert")).toContainText("rejected the credential", { timeout: 60_000 });
     await expect(other.locator(".causa-connection")).toContainText("Not connected");
     expect(otherRequests.filter((r) => r.method !== "GET")).toEqual([]);
-    expect(await head(testRepo, branch)).toBe(moved);
+    expect(await head(testRepo, branch)).toBe(afterReload);
 
     // DC-005 in the browser: every mutable read (branch head, repository) has a URL never used before, across the
     // reload and the second tab.
@@ -213,10 +223,10 @@ test(
     // Bounded writes: every commit of this run (its investigation id or its workspace in the message; other writers in
     // between do not count) changed only paths under this run's own live workspaces: nothing under catalog/ or
     // historical-v1.
-    const changed = await gh(`/repos/${testRepo}/compare/${headAtConnect}...${moved}`);
+    const changed = await gh(`/repos/${testRepo}/compare/${headAtConnect}...${afterReload}`);
     expect(changed.status).toBe(200);
     const mine = changed.json.commits.filter((c) => c.commit.message.includes(id) || c.commit.message.includes(workspace));
-    expect(mine.length).toBeGreaterThanOrEqual(3);
+    expect(mine.length).toBeGreaterThanOrEqual(4);
     for (const c of mine) {
       const detail = await gh(`/repos/${testRepo}/commits/${c.sha}`);
       for (const f of detail.json.files) {
@@ -226,7 +236,7 @@ test(
     }
 
     // Evidence (PF-014-O3): repository-neutral ids only; never the token.
-    test.info().annotations.push({ type: "live-evidence", description: JSON.stringify({ workspace, investigation: id, headAtConnect, afterCreate, afterWrite, moved, ...timings }) });
+    test.info().annotations.push({ type: "live-evidence", description: JSON.stringify({ workspace, investigation: id, headAtConnect, afterCreate, afterWrite, moved, afterReload, ...timings }) });
   },
 );
 
