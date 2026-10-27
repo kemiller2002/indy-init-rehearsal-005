@@ -123,7 +123,7 @@ test(
     await page.goto("index.html");
     await started(page);
     await connect(page, testRepo, branch, workspace);
-    await expect(page.locator(".causa-connection")).toContainText(testRepo, { timeout: 60_000 });
+    await expect(page.locator(".causa-connection")).toHaveText(/Data repository: Connected: the workspace has no investigation yet|Data repository: Connected$/, { timeout: 60_000 });
     const headAtConnect = await head(testRepo, branch);
 
     // Create: the person starts an investigation; the program saves it and claims "saved" only after the re-read.
@@ -165,7 +165,7 @@ test(
     await started(page);
     await expect(page.getByRole("main").getByLabel("Fine-grained GitHub token")).toHaveValue("");
     await connect(page, testRepo, branch, workspace);
-    await expect(page.locator(".causa-connection")).toContainText(testRepo, { timeout: 60_000 });
+    await expect(page.locator(".causa-connection")).toHaveText(/Data repository: Connected: the workspace has no investigation yet|Data repository: Connected$/, { timeout: 60_000 });
     await page.goto(`index.html#/investigations/${id}`);
     await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible({ timeout: 60_000 });
     await expect(syncStatus(page)).not.toContainText("unsaved");
@@ -277,7 +277,7 @@ test(
     await page.goto("index.html");
     await started(page);
     await connect(page, catalogRepo, branch, active.workspace.replace("workspaces/demo/", ""));
-    await expect(page.locator(".causa-connection")).toContainText(catalogRepo, { timeout: 120_000 });
+    await expect(page.locator(".causa-connection")).toHaveText(/Data repository: Connected$/, { timeout: 120_000 });
     await page.goto("index.html#/investigations");
     const cards = page.locator(".causa-card");
     await expect(cards).toHaveCount(3, { timeout: 120_000 });
