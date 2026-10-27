@@ -30,5 +30,6 @@
     <Compile Include="Projection.fs" />
     <Compile Include="Timeline.fs" />
     <Compile Include="Proposals.fs" />
+    <Compile Include="AiLoop.fs" />
   </ItemGroup>
 </Project>

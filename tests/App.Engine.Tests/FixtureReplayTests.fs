@@ -222,3 +222,33 @@ let ``T15 EXT-DATA-013 VPO-c81484cbcf203d4f VPO-4b4747eaff96e385 the active hist
             Assert.Equal(intField "expectedVersion" case, loaded.State.Version)
             Assert.Equal(strField "expectedLifecycle" case, Wire.lifecycle loaded.State.Lifecycle)
             Assert.Equal(strField "title" case, loaded.State.Title.Value)
+
+[<Fact>]
+[<Trait("obligation", "VPO-3d67d1f2b8287e39")>]
+[<Trait("obligation", "VPO-557743cb4997c484")>]
+[<Trait("task", "T15")>]
+let ``T15 VPO-3d67d1f2b8287e39 golden scenarios.json agrees with the replayed histories (no CAUSA.GOLDEN_MISMATCH)`` () =
+    let scenarios = arrField "scenarios" (json [ "contract"; "v1.0.0"; "golden"; "scenarios.json" ])
+    Assert.Equal(5, scenarios.Length)
+    let allTypes = Collections.Generic.HashSet<string>()
+    for s in scenarios do
+        match loadFixture (strField "investigationId" s) with
+        | Error e -> failwithf "%A" e
+        | Ok loaded ->
+            Assert.Equal(intField "events" s, int64 loaded.Events.Length)
+            let types = loaded.Events |> List.map (fun e -> Wire.eventType e.Body) |> List.distinct |> List.sortWith (fun a b -> String.CompareOrdinal(a, b))
+            Assert.Equal<string list>(arrField "eventTypes" s |> List.map (function JString t -> t | other -> failwithf "%A" other), types)
+            Assert.Equal(intField "events" s, int64 (History.groups loaded.Events |> List.collect id).Length)
+            for t in types do allTypes.Add t |> ignore
+    // together the valid fixtures exercise all 31 registered event types (contract §12.1)
+    Assert.Equal(31, allTypes.Count)
+
+[<Fact>]
+[<Trait("obligation", "VPO-c135d16c59f5baf8")>]
+[<Trait("task", "T15")>]
+let ``T15 VPO-c135d16c59f5baf8 concurrent readers all verify (regression: the schema regex cache raced under parallel reads)`` () =
+    let ids = arrField "investigations" (rootManifest ()) |> List.map (strField "investigationId")
+    let results =
+        [| for _ in 1..8 do yield! ids |]
+        |> Array.Parallel.map (fun id -> loadFixture id |> Result.map (fun l -> l.StateSha256))
+    Assert.All(results, fun r -> Assert.True(Result.isOk r, sprintf "%A" r))

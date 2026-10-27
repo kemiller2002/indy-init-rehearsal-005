@@ -41,21 +41,18 @@ module Schema =
                  | Error e -> failwith $"embedded schema {path} is not JSON: {e}")
              |> Map.ofList)
 
-    let private regexes = Dictionary<string, Regex>()
+    // Thread-safe: readers may validate concurrently (a plain Dictionary here corrupted under parallel tests).
+    let private regexes = Collections.Concurrent.ConcurrentDictionary<string, Regex>()
 
     /// ECMA-262 `$` matches only at the very end; .NET `$` also before a final LF (contract §2.13).
     let private regex (pattern: string) =
-        match regexes.TryGetValue pattern with
-        | true, r -> r
-        | _ ->
+        regexes.GetOrAdd(pattern, fun pattern ->
             let translated =
                 if pattern.EndsWith("$", StringComparison.Ordinal) && not (pattern.EndsWith("\\$", StringComparison.Ordinal)) then
                     pattern.Substring(0, pattern.Length - 1) + "\\z"
                 else
                     pattern
-            let r = Regex(translated, RegexOptions.CultureInvariant)
-            regexes[pattern] <- r
-            r
+            Regex(translated, RegexOptions.CultureInvariant))
 
     let private pointer (doc: Json) (fragment: string) =
         if String.IsNullOrEmpty fragment || fragment = "/" then Some doc

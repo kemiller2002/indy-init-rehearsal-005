@@ -23,6 +23,7 @@ decision and a new manifest version (REHEARSAL-AGENT-INTERFACE-FREEZE §5).
 | D — persistence write invariants | `Sync.step : Sync.State -> Sync.Event -> Result<Sync.State * Sync.Effect list, Sync.Fault>`; `Sync.status`, `Sync.canRetry`, `Sync.classify` | core (invariants); persistence owns the provider port and adapters | persistence, shell (save status) |
 | E — report | `Projection.report : Investigation -> ReportProjection` | core | shell / Folio |
 | A — AI proposal loop (T27) | `Proposals.parse : string -> Result<ProposalDraft list, AgentOutputError>` (closed shape, all or nothing); `Proposals.commands` (agent `RecordProposal` envelopes); `Proposals.pending`; `Proposals.context` (investigation as quoted data) | core | shell / AI tool agent |
+| A — AI provider call (T27) | `AiLoop.start : AiLoopState -> ProviderKey option -> AiProfile -> Investigation -> string -> Result<AiLoopState * AiHttpEffect, AiResult>`; `AiLoop.receive : AiLoopState -> AiHttpOutcome -> Result<AiLoopState * AiResult, AiLoopFault>`; `AiLoop.cancel`, `AiLoop.isStale`, `AiLoop.retryable`, `AiLoop.describe`, `AiLoop.redacted`; `ProviderKey.Create` (in memory only); `AiLoop.anthropic model` (profile; the model id is configuration) | core | shell (performs the effect via Limen Http) |
 | B — history and time travel (T28) | `Timeline.entries` (canonical sequence order, clock anomalies flagged); `Timeline.stateAt`, `Timeline.view` (historical label); `Timeline.changesAt`, `Timeline.between`, `Timeline.diff` (semantic diff from the projection) | core | shell (S14, S15) |
 
 ## Stable APIs (decision of the coordinator, R5)
@@ -47,6 +48,27 @@ Unknown: no Retry, reconcile first; connection attempts are dropped; pending and
 held changes are kept; the request counter is kept so no pre-reload answer can
 land), then `Sync.attach head` once the branch head has been read again.
 `Sync` does no IO.
+
+## AI proposal loop for the shell (T27)
+
+1. Hold the user's key as `ProviderKey.Create text` in memory only (never stored, logged or put in a URL or body).
+2. `AiLoop.start loop (Some key) (AiLoop.anthropic modelId) investigation task` returns an `AiHttpEffect`:
+   perform it with Limen's Http capability exactly as given (method, url, headers, body, timeout).
+   Log only `AiLoop.redacted effect`.
+3. Feed the result back with `AiLoop.receive loop outcome`: `Responded(request, status, headers, body)`,
+   `NetworkFailed`, `TimedOut`, `Cancelled` or `OutcomeUnknown` (Limen's OutcomeUnknown). An answer for any
+   other request id is refused (`StaleAnswer`) and changes nothing.
+4. `Drafted(drafts, contextVersion, usage)`: if `AiLoop.isStale currentVersion result`, label the drafts stale.
+   Record them with `Proposals.commands agent investigationId version now ids drafts` through `Kernel.submit`
+   (agent actor; they remain proposals until a human accepts them with `AcceptProposal`).
+   Every other `AiResult` records nothing: show `AiLoop.describe result`, and offer "try again" only when
+   `AiLoop.retryable result`. `KeyMissing`/`KeyRejected` ask for a key; `SpendCapReached` and `NotPermitted` are
+   account problems; `UnknownOutcome` means the provider may have charged for a lost answer.
+
+Open owner decision: the requirements name no AI provider, model or endpoint. The adapter implemented is the
+Anthropic Messages API (`https://api.anthropic.com/v1/messages`, `anthropic-version: 2023-06-01`, key in
+`x-api-key`, browser-direct header); the model id is configuration with no default. Contract v1 has no field
+for the prompt-policy version (`AiLoop.promptPolicyVersion`), so it is sent in the context but not persisted.
 
 ## WebAssembly
 
