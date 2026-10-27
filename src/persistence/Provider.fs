@@ -45,7 +45,7 @@ module Target =
         path.StartsWith(prefix, StringComparison.Ordinal)
         && (let rest = path.Substring prefix.Length
             match rest.Split('/') with
-            | [| id; file |] -> Uuid.isValid id && List.contains file FileSet.names
+            | [| id; file |] -> Uuid.isValid id && List.contains file Store.names
             | _ -> false)
 
 /// A credential held only in memory (EXT-DATA-004, SECURITY-THREAT-MODEL). It is never serialized, logged, put in a

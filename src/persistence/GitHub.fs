@@ -1,7 +1,6 @@
 namespace Causa.Persistence
 
 open System
-open System.Security.Cryptography
 open System.Text
 
 /// A directory entry as listed by the provider at an immutable commit.
@@ -53,6 +52,10 @@ module GitHub =
     let getFile (cred: Credential option) (t: Target) (commit: string) (path: string) =
         get cred false (repo t + "/contents/" + pathSegs path + "?ref=" + seg commit)
 
+    /// How `head` relates to `baseCommit` (both immutable ids): status and the commits after the base, oldest first.
+    let compare (cred: Credential option) (t: Target) (baseCommit: string) (head: string) =
+        get cred false (repo t + "/compare/" + seg baseCommit + "..." + seg head)
+
     /// A blob by id: immutable.
     let getBlob (cred: Credential option) (t: Target) (sha: string) = get cred false (repo t + "/git/blobs/" + seg sha)
 
@@ -60,14 +63,14 @@ module GitHub =
 
     /// One atomic commit of every file of a semantic transition, guarded by the head the change was decided on
     /// (GraphQL createCommitOnBranch with expectedHeadOid). A moved branch is refused by GitHub, never merged.
-    let createCommit (cred: Credential option) (t: Target) (expectedHead: string) (headline: string) (files: (string * byte[]) list) =
+    let createCommit (cred: Credential option) (t: Target) (expectedHead: string) (headline: string) (body: string) (files: (string * byte[]) list) =
         let additions =
             files
             |> List.map (fun (p, b) -> JObj [ "path", JStr p; "contents", JStr(Convert.ToBase64String b) ])
         let input =
             JObj
                 [ "branch", JObj [ "repositoryNameWithOwner", JStr(Target.fullName t); "branchName", JStr t.Branch ]
-                  "message", JObj [ "headline", JStr headline ]
+                  "message", JObj [ "headline", JStr headline; "body", JStr body ]
                   "expectedHeadOid", JStr expectedHead
                   "fileChanges", JObj [ "additions", JArr additions ] ]
         let body =
@@ -188,6 +191,50 @@ module GitHub =
                 elif kind = "RATE_LIMITED" then Error(RateLimited None)
                 else Error(Rejected(200, kind))
 
+    /// The trailer that carries a change's marker in its commit message (audit metadata only, CONTRACT §9.4.5).
+    let markerTrailer = "Causa-Marker: "
+
+    let markerOf (message: string) =
+        message.Split('\n')
+        |> Array.tryPick (fun l -> if l.StartsWith(markerTrailer, StringComparison.Ordinal) then Some(l.Substring(markerTrailer.Length).Trim()) else None)
+
+    /// One commit after the base: id, first parent and the marker from its message.
+    type ComparedCommit = { Sha: string; Parent: string; Marker: string option }
+
+    type Comparison =
+        /// The head is the base, or descends from it through these commits (oldest first).
+        | Descends of ComparedCommit list
+        /// The head does not descend from the base.
+        | Unrelated
+
+    let parseCompare (v: JValue) : Result<Comparison, ProviderFailure> =
+        match v with
+        | JObj o ->
+            match Json.str "status" o with
+            | Some "identical" -> Ok(Descends [])
+            | Some("behind" | "diverged") -> Ok Unrelated
+            | Some "ahead" ->
+                match Json.field "commits" o, Json.int "total_commits" o with
+                | Some(JArr commits), Some total when int64 commits.Length = total ->
+                    commits
+                    |> traverse (fun c ->
+                        let parent =
+                            match c with
+                            | JObj co ->
+                                match Json.field "parents" co with
+                                | Some(JArr(JObj p :: _)) -> Json.str "sha" p
+                                | _ -> None
+                            | _ -> None
+                        match str [ "sha" ] c, parent with
+                        | Some sha, Some p when isOid sha && isOid p ->
+                            Ok { Sha = sha; Parent = p; Marker = str [ "commit"; "message" ] c |> Option.bind markerOf }
+                        | _ -> Error(Malformed "compared commit lacks sha or parent"))
+                    |> Result.map Descends
+                | Some(JArr _), Some _ -> Error(Malformed "the comparison is truncated; ancestry cannot be decided")
+                | _ -> Error(Malformed "comparison lacks commits")
+            | _ -> Error(Malformed "comparison lacks a known status")
+        | _ -> Error(Malformed "comparison is not an object")
+
     /// DEC-025 / EXT-DATA-004-O4: a classic token granting repo or admin scopes is refused. GitHub reports a classic
     /// token's scopes in `X-OAuth-Scopes`; fine-grained and installation tokens send no such header.
     let broadClassicScopes (r: HttpResponse) =
@@ -202,4 +249,4 @@ module GitHub =
     /// commit without downloading them.
     let gitBlobSha (bytes: byte[]) =
         let header = Encoding.ASCII.GetBytes(sprintf "blob %d\000" bytes.Length)
-        Convert.ToHexStringLower(SHA1.HashData(Array.append header bytes))
+        IndyInitRootCauseInvestigator.Engine.Hashing.hex (IndyInitRootCauseInvestigator.Engine.Hashing.sha1 (Array.append header bytes))

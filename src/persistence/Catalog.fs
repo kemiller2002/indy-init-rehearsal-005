@@ -72,7 +72,7 @@ module Catalog =
             | Some key, Some id, Some title, Some path, Some version, Some lifecycle ->
                 let digests = [ "expectedStateSha256"; "eventsSha256"; "manifestSha256"; "snapshotSha256" ] |> List.map s
                 match digests with
-                | [ Some st; Some ev; Some mf; Some sn ] when digests |> List.forall (Option.exists Schema.isSha256) ->
+                | [ Some st; Some ev; Some mf; Some sn ] when digests |> List.forall (Option.exists Digest.isSha256) ->
                     if not (Uuid.isValid id) then bad "case investigationId is not a canonical UUID"
                     elif path <> workspace + "/investigations/" + id then bad "case path is not inside the catalog workspace"
                     else

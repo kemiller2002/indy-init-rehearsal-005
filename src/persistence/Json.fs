@@ -2,7 +2,6 @@ namespace Causa.Persistence
 
 open System
 open System.Globalization
-open System.Security.Cryptography
 open System.Text
 open System.Text.Json
 
@@ -171,7 +170,7 @@ module Json =
 
     let canonicalBytes (v: JValue) : Result<byte[], string> = canonical v |> Result.map strictUtf8.GetBytes
 
-    let sha256Hex (bytes: byte[]) = Convert.ToHexStringLower(SHA256.HashData bytes)
+    let sha256Hex (bytes: byte[]) = IndyInitRootCauseInvestigator.Engine.Hashing.sha256Hex bytes
 
     /// SHA-256 of the canonical (JCS) form, without the file's trailing LF.
     let digest (v: JValue) : Result<string, string> = canonicalBytes v |> Result.map sha256Hex

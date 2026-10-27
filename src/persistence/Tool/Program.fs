@@ -70,7 +70,122 @@ let private expect (ctx: Ctx) (scenario: string) (ok: bool) (detail: string) =
 
 let private now () = Timestamp.ofDateTimeOffset DateTimeOffset.UtcNow
 
-let private actor = JObj [ "actorId", JStr "causa-provider-recorder"; "kind", JStr "system" ]
+/// Commands are decided by the engine (Boundary A); nothing here builds events by hand.
+module private Cmd =
+    type E = IndyInitRootCauseInvestigator.Engine.CommandEnvelope
+    let actor: IndyInitRootCauseInvestigator.Engine.Actor = { ActorId = "causa-provider-recorder"; Kind = IndyInitRootCauseInvestigator.Engine.ActorKind.System }
+    let at () =
+        let n = DateTimeOffset.UtcNow
+        DateTimeOffset(n.Ticks - (n.Ticks % TimeSpan.TicksPerMillisecond), TimeSpan.Zero)
+    let envelope (iid: string) (expected: int64) (command: IndyInitRootCauseInvestigator.Engine.Command) : E =
+        { CommandId = Guid.NewGuid()
+          Investigation = IndyInitRootCauseInvestigator.Engine.Id (Guid iid)
+          ExpectedVersion = Some expected
+          Actor = actor
+          RequestedAt = at ()
+          Command = command }
+    let start (iid: string) (title: string) =
+        envelope iid 0L (IndyInitRootCauseInvestigator.Engine.StartInvestigation(title, IndyInitRootCauseInvestigator.Engine.Id (Guid(Uuid.v5 iid "observation")), "Synthetic investigation written by the provider recorder."))
+    let observe (iid: string) (expected: int64) (text: string) =
+        envelope iid expected (IndyInitRootCauseInvestigator.Engine.RecordObservation(IndyInitRootCauseInvestigator.Engine.Id (Guid.NewGuid()), text, None))
+
+/// Drive the real Sync program: dispatch, perform its effects against real GitHub, feed the answers back.
+/// `lose` marks requests whose answer is discarded after they were sent (a lost answer: outcome unknown).
+let private runWith (lose: HttpRequest -> bool) (env: Env) (model: Model) (msg: Msg) : Model * string list * string option =
+    let mutable m = model
+    let mutable refusals = []
+    let mutable stored = None
+    let mutable queue = [ msg ]
+    while not queue.IsEmpty do
+        let next = queue.Head
+        queue <- queue.Tail
+        match Sync.update env next m with
+        | Error r -> refusals <- refusals @ [ r.Reason ]
+        | Ok(m2, effects) ->
+            m <- m2
+            for e in effects do
+                match e with
+                | StoreLocal(writeId, _, value) ->
+                    stored <- Some value
+                    queue <- queue @ [ LocalStored(writeId, true) ]
+                | Send(id, request) ->
+                    match Transport.send request with
+                    | Ok _ when lose request -> queue <- queue @ [ HttpFailed(id, TransportFailure.OutcomeUnknown "answer discarded by the live check") ]
+                    | Ok r -> queue <- queue @ [ HttpAnswered(id, r) ]
+                    | Error f -> queue <- queue @ [ HttpFailed(id, f) ]
+    m, refusals, stored
+
+let private runProgram env model msg =
+    let m, refusals, _ = runWith (fun _ -> false) env model msg
+    m, refusals
+
+/// T21: the live write path through the application's own Sync program (connect, create, save, append, reload,
+/// conflict, unknown outcome, rejected credential) against the write-capable test repository.
+let private programLive (ctx: Ctx) (cred: Credential) (owner: string) (repo: string) (branch: string) (runId: string) =
+    match Target.create owner repo branch ("rec-" + runId + "-app") with
+    | Error _ -> expect ctx "live.app.target" false "the application target is invalid"
+    | Ok t ->
+        let env = { Now = now }
+        let mutable stored = None
+        let run lose m msg =
+            let m2, refusals, s = runWith lose env m msg
+            s |> Option.iter (fun v -> stored <- Some v)
+            m2, refusals
+        let status (m: Model) id = m.Documents |> Map.tryFind id |> Option.map (Sync.documentStatus m) |> Option.defaultValue "absent"
+        let isPost (r: HttpRequest) = r.Method = "POST"
+        let sw = Stopwatch.StartNew()
+        let m, _ = run (fun _ -> false) Sync.initial (Connect(t, cred))
+        expect ctx "live.app.connect" (Sync.connectionLabel m = "authorizedEmpty") ("a new workspace connects as " + Sync.connectionLabel m)
+        let iid = Uuid.v5 "6ba7b811-9dad-11d1-80b4-00c04fd430c8" ("causa-provider-recorder/app/" + runId)
+        let m, _ = run (fun _ -> false) m (Create(Cmd.start iid ("Application live check " + runId)))
+        let m, _ = run (fun _ -> false) m (Save iid)
+        sw.Stop()
+        expect ctx "live.app.create" (status m iid = "remotelySynced") (sprintf "create + save -> %s in %d ms (claimed only after the re-read)" (status m iid) sw.ElapsedMilliseconds)
+        let version (m: Model) = m.Documents |> Map.tryFind iid |> Option.map (fun d -> d.Local.Version) |> Option.defaultValue 0L
+        let m, _ = run (fun _ -> false) m (Submit(Cmd.observe iid (version m) "live append"))
+        let m, _ = run (fun _ -> false) m (Save iid)
+        expect ctx "live.app.append" (status m iid = "remotelySynced") ("append + save -> " + status m iid)
+        let digest = m.Documents |> Map.tryFind iid |> Option.map (fun d -> d.Local.EventsSha256)
+        // Reload: memory is gone; the stored record and a new Connect bring the investigation back from GitHub.
+        let r0, _ = run (fun _ -> false) Sync.initial (Restore stored)
+        let r1, _ = run (fun _ -> false) r0 (Connect(t, cred))
+        let reloaded = r1.Documents |> Map.tryFind iid
+        expect ctx "live.app.reload" (reloaded |> Option.exists (fun d -> Some d.Local.EventsSha256 = digest && d.Confirmed.IsSome) && Sync.connectionLabel r1 = "connected") ("after reload the investigation is " + status r1 iid)
+        // Conflict: another writer appends to the same investigation; this device's save must be refused.
+        let sw2 = Stopwatch.StartNew()
+        match reloaded, r1.Head with
+        | Some d, Some head ->
+            let theirs =
+                match Store.submit d.Local (Cmd.observe iid d.Local.Version "another writer") with
+                | Ok v -> v
+                | Error e -> failwithf "other writer refused: %s" e.Code
+            let files = Store.files theirs |> List.map (fun (n, b) -> Target.investigationDir t iid + "/" + n, b)
+            let other = Transport.send (GitHub.createCommit (Some cred) t head "causa: another writer (live check)" (GitHub.markerTrailer + "other-" + runId) files)
+            let otherHead = other |> Result.toOption |> Option.bind (GitHub.parseCommit >> Result.toOption)
+            let c1, _ = run (fun _ -> false) r1 (Submit(Cmd.observe iid d.Local.Version "mine, concurrently"))
+            let c2, _ = run (fun _ -> false) c1 (Save iid)
+            let headNow =
+                Transport.send (GitHub.getBranchHead (Some cred) t (Guid.NewGuid().ToString "N"))
+                |> Result.toOption
+                |> Option.bind (fun r -> GitHub.classify r |> Result.bind GitHub.parseHead |> Result.toOption)
+            let localKept = c2.Documents |> Map.tryFind iid |> Option.exists (fun d -> d.Local.Version = theirs.Version)
+            sw2.Stop()
+            expect ctx "live.app.conflict" (status c2 iid = "conflict" && otherHead.IsSome && headNow = otherHead && localKept) (sprintf "save after a concurrent write -> %s; remote head untouched; local change kept; %d ms" (status c2 iid) sw2.ElapsedMilliseconds)
+            let c3, _ = run (fun _ -> false) c2 (ReloadRemote iid)
+            let c4, _ = run (fun _ -> false) c3 (DiscardLocal iid)
+            expect ctx "live.app.conflict.resolve" (status c4 iid = "clean" && (c4.Documents |> Map.tryFind iid |> Option.exists (fun d -> d.Local.EventsSha256 = theirs.EventsSha256))) ("reload + discard adopts the other writer's copy -> " + status c4 iid)
+            // Unknown outcome: the answer to the save is lost after sending; only Reconcile settles it.
+            let u1, _ = run (fun _ -> false) c4 (Submit(Cmd.observe iid theirs.Version "answer will be lost"))
+            let u2, _ = run isPost u1 (Save iid)
+            let unknown = status u2 iid
+            let u3, refusals = run (fun _ -> false) u2 (Save iid)
+            let u4, _ = run (fun _ -> false) u3 (Reconcile iid)
+            expect ctx "live.app.unknown" (unknown = "unknown" && not refusals.IsEmpty && status u4 iid = "remotelySynced") (sprintf "lost answer -> %s, save refused, reconcile -> %s" unknown (status u4 iid))
+        | _ -> expect ctx "live.app.conflict" false "the reloaded investigation or head is missing"
+        // A rejected credential never shows a connection.
+        let bogus = Credential("causa-invalid-credential-for-recording")
+        let x, _ = run (fun _ -> false) Sync.initial (Connect(t, bogus))
+        expect ctx "live.app.rejectedToken" (Sync.connectionLabel x = "accessDenied") ("a rejected token connects as " + Sync.connectionLabel x)
 
 let private recordAll (token: string) (repoFull: string) (runId: string) =
     let ctx = { Secrets = [ token; repoFull ]; Failures = [] }
@@ -139,18 +254,14 @@ let private recordAll (token: string) (repoFull: string) (runId: string) =
             observe ctx "commits.read.missingSha" "GET /repos/{owner}/{repo}/commits/{missingSha}" { GitHub.getBlob (Some cred) t "x" with Url = GitHub.apiBase + "/repos/" + owner + "/" + repo + "/commits/" + String('0', 40) } (GitHub.classify >> classification) [] |> ignore
             // A new synthetic investigation, built and verified by the same writer the application uses.
             let iid = Uuid.v5 "6ba7b811-9dad-11d1-80b4-00c04fd430c8" ("causa-provider-recorder/" + runId)
-            let startedAt = now ()
-            let start =
-                FileSet.envelope iid 1L (Guid.NewGuid().ToString()) startedAt actor "InvestigationStarted"
-                    (JObj [ "title", JStr("Provider recording " + runId); "observationId", JStr(Uuid.v5 iid "observation"); "original", JStr "Synthetic investigation written by the provider recorder." ])
             let created =
-                match FileSet.append HistoryEngine.notWired iid None 0L [ start ] with
+                match Store.create (Cmd.start iid ("Provider recording " + runId)) with
                 | Ok v -> v
-                | Error e -> failwithf "synthetic file set invalid: %s" e.Code
-            let filesOf (v: Verified) = FileSet.files v |> List.map (fun (n, b) -> Target.investigationDir t iid + "/" + n, b)
+                | Error e -> failwithf "synthetic investigation refused: %s" e.Code
+            let filesOf (v: Verified) = Store.files v |> List.map (fun (n, b) -> Target.investigationDir t iid + "/" + n, b)
             let commitOf (r: HttpResponse) = GitHub.parseCommit r
             let write scenario expected headline (v: Verified) branch credential =
-                let req = GitHub.createCommit (Some credential) { t with Branch = branch } expected headline (filesOf v)
+                let req = GitHub.createCommit (Some credential) { t with Branch = branch } expected headline (GitHub.markerTrailer + "recorder-" + runId + "-" + scenario) (filesOf v)
                 observe ctx scenario "POST /graphql createCommitOnBranch" req (commitOf >> classification) []
             let sw = Stopwatch.StartNew()
             let oid1 = write "write.create" head0 ("causa: create investigation (recorder " + runId + ")") created t.Branch cred |> Option.bind (commitOf >> Result.toOption)
@@ -162,7 +273,7 @@ let private recordAll (token: string) (repoFull: string) (runId: string) =
                 match listing with
                 | Some entries ->
                     let found = entries |> List.map (fun e -> e.Name, e.Sha) |> Map.ofList
-                    FileSet.files v |> List.forall (fun (n, b) -> Map.tryFind n found = Some(GitHub.gitBlobSha b)) && entries.Length = 3
+                    Store.files v |> List.forall (fun (n, b) -> Map.tryFind n found = Some(GitHub.gitBlobSha b)) && entries.Length = 3
                 | None -> false
             match oid1 with
             | None ->
@@ -178,7 +289,7 @@ let private recordAll (token: string) (repoFull: string) (runId: string) =
                 // One file through the contents API (used for the catalog pointer and manifest), present and absent.
                 let fileOf (r: HttpResponse) = GitHub.classify r |> Result.bind GitHub.parseFile
                 let fileRead =
-                    observe ctx "contents.read.file" "GET /repos/{owner}/{repo}/contents/{path}?ref={commit}" (GitHub.getFile (Some cred) t oid1 (Target.investigationDir t iid + "/" + FileSet.manifestName)) (fileOf >> classification) []
+                    observe ctx "contents.read.file" "GET /repos/{owner}/{repo}/contents/{path}?ref={commit}" (GitHub.getFile (Some cred) t oid1 (Target.investigationDir t iid + "/" + Store.manifestName)) (fileOf >> classification) []
                     |> Option.bind (fileOf >> Result.toOption)
                 expect ctx "live.read.file" (fileRead = Some created.Manifest) "the file read through the contents API is byte-identical"
                 observe ctx "contents.read.file.missing" "GET /repos/{owner}/{repo}/contents/{path}?ref={commit}" (GitHub.getFile (Some cred) t oid1 "catalog/active.json") (fileOf >> classification) [] |> ignore
@@ -187,12 +298,9 @@ let private recordAll (token: string) (repoFull: string) (runId: string) =
                 expect ctx "live.reload.head" (headAfter = Some oid1) "the branch head is the acknowledged commit"
                 // Append: one more event decided at version 1, guarded by the head it was decided on.
                 let append (base': Verified) (version: int64) (title: string) =
-                    let e =
-                        FileSet.envelope iid version (Guid.NewGuid().ToString()) (now ()) actor "ObservationRecorded"
-                            (JObj [ "observationId", JStr(Uuid.v5 iid ("obs/" + title)); "original", JStr title; "observedAt", JNull ])
-                    match FileSet.append HistoryEngine.notWired iid (Some base') (version - 1L) [ e ] with
+                    match Store.submit base' (Cmd.observe iid (version - 1L) title) with
                     | Ok v -> v
-                    | Error e -> failwithf "append invalid: %s" e.Code
+                    | Error e -> failwithf "append refused: %s" e.Code
                 let second = append created 2L "second observation"
                 let oid2 = write "write.append" oid1 "causa: append (recorder)" second t.Branch cred |> Option.bind (commitOf >> Result.toOption)
                 match oid2 with
@@ -200,6 +308,20 @@ let private recordAll (token: string) (repoFull: string) (runId: string) =
                 | Some oid2 ->
                     emit ctx (JObj [ "oid", JStr "append"; "value", JStr oid2 ])
                     expect ctx "live.append" (confirm "write.append.confirm" oid2 second) "appended bytes re-read at the new commit"
+                    // Ancestry for reconciliation (core Sync.classify): the compare API, ahead / identical / behind.
+                    let compareOf (r: HttpResponse) = GitHub.classify r |> Result.bind GitHub.parseCompare
+                    let ahead =
+                        observe ctx "compare.ahead" "GET /repos/{owner}/{repo}/compare/{base}...{head}" (GitHub.compare (Some cred) t head0 oid2) (compareOf >> classification) []
+                        |> Option.bind (compareOf >> Result.toOption)
+                    let markersOk =
+                        match ahead with
+                        | Some(GitHub.Descends [ c1; c2 ]) ->
+                            c1.Sha = oid1 && c1.Parent = head0 && c2.Sha = oid2 && c2.Parent = oid1
+                            && c1.Marker = Some("recorder-" + runId + "-write.create") && c2.Marker = Some("recorder-" + runId + "-write.append")
+                        | _ -> false
+                    expect ctx "live.compare.ancestry" markersOk "the compare API gives first parents and commit markers, oldest first"
+                    observe ctx "compare.identical" "GET /repos/{owner}/{repo}/compare/{base}...{head}" (GitHub.compare (Some cred) t oid2 oid2) (compareOf >> classification) [] |> ignore
+                    observe ctx "compare.behind" "GET /repos/{owner}/{repo}/compare/{base}...{head}" (GitHub.compare (Some cred) t oid2 oid1) (compareOf >> classification) [] |> ignore
                     // Conflict: a concurrent change decided on oid1 (stale head). GitHub must refuse; the head must not move.
                     let sw2 = Stopwatch.StartNew()
                     let concurrent = append created 2L "concurrent observation"
@@ -215,13 +337,14 @@ let private recordAll (token: string) (repoFull: string) (runId: string) =
                     expect ctx "live.rejectedToken.head" (readHead "ref.read.afterRejected" = Some oid2) "the head did not move"
                     // Unknown outcome: send a write and discard its answer, then reconcile from a fresh head read only.
                     let third = append second 3L "third observation"
-                    Transport.send (GitHub.createCommit (Some cred) t oid2 "causa: unknown-outcome write (recorder)" (filesOf third)) |> ignore
+                    Transport.send (GitHub.createCommit (Some cred) t oid2 "causa: unknown-outcome write (recorder)" (GitHub.markerTrailer + "recorder-unknown-" + runId) (filesOf third)) |> ignore
                     emit ctx (JObj [ "scenario", JStr "write.unknownOutcome"; "note", JStr "answer deliberately discarded; outcome reconciled by re-reading" ])
                     match readHead "ref.read.reconcile" with
                     | Some h ->
                         let applied = h <> oid2 && confirm "write.reconcile.listing" h third
                         expect ctx "live.reconcile" applied "the discarded write was found applied by content at the re-read head"
                     | None -> expect ctx "live.reconcile" false "head could not be re-read"
+            programLive ctx cred owner repo t.Branch runId
             Console.Out.WriteLine endMarker
             if ctx.Failures.IsEmpty then
                 Console.Out.WriteLine "RESULT: PASS (live provider; no mocks)"
@@ -229,27 +352,6 @@ let private recordAll (token: string) (repoFull: string) (runId: string) =
             else
                 Console.Out.WriteLine("RESULT: FAIL " + String.Join(",", ctx.Failures))
                 1
-
-/// Drive the real Sync program: dispatch, perform its effects against real GitHub, feed the answers back.
-let private runProgram (env: Env) (model: Model) (msg: Msg) : Model * string list =
-    let mutable m = model
-    let mutable refusals = []
-    let mutable queue = [ msg ]
-    while not queue.IsEmpty do
-        let next = queue.Head
-        queue <- queue.Tail
-        match Sync.update env next m with
-        | Error r -> refusals <- refusals @ [ r.Reason ]
-        | Ok(m2, effects) ->
-            m <- m2
-            for e in effects do
-                match e with
-                | StoreLocal(writeId, _, _) -> queue <- queue @ [ LocalStored(writeId, true) ]
-                | Send(id, request) ->
-                    match Transport.send request with
-                    | Ok r -> queue <- queue @ [ HttpAnswered(id, r) ]
-                    | Error f -> queue <- queue @ [ HttpFailed(id, f) ]
-    m, refusals
 
 /// T25 / EXT-DATA-013 / PF-014: connect to the historical catalog's repository and workspace with a credential and
 /// load every case through the same program the application runs (no bundled record, no hardcoded id).
@@ -263,7 +365,7 @@ let private catalogLive (token: string) (repoFull: string) (branch: string) (wor
             Console.Out.WriteLine("RESULT: BLOCKED (" + String.Join(" ", p) + ")")
             2
         | Ok t ->
-            let env = { Engine = HistoryEngine.notWired; Now = now }
+            let env = { Now = now }
             let sw = Stopwatch.StartNew()
             let m, refusals = runProgram env Sync.initial (Connect(t, cred))
             sw.Stop()
@@ -283,14 +385,14 @@ let private catalogLive (token: string) (repoFull: string) (branch: string) (wor
                                   "stateSha256", JStr v.StateSha256
                                   "expectedStateSha256", JStr r.Case.ExpectedStateSha256
                                   "readOnly", JBool(m.Documents |> Map.tryFind v.InvestigationId |> Option.exists (fun d -> d.ReadOnly))
-                                  "admissibility", JStr(Sync.admissibilityLabel v) ]
+                                  "replayedBy", JStr "engine Storage.read (History.validate, stage 15)" ]
                         )
                     | Error e -> say (JObj [ "case", JStr r.Case.CaseKey; "error", JStr e.Code ])
                 let allOk = results |> List.forall (fun r -> Result.isOk r.Outcome)
                 let onlyCatalog = m.Documents |> Map.forall (fun _ d -> d.ReadOnly)
                 say (JObj [ "catalogId", JStr man.CatalogId; "catalogVersion", JStr man.CatalogVersion; "cases", JInt(int64 results.Length) ])
                 if allOk && onlyCatalog && results.Length = 3 && Sync.connectionLabel m = "connected" then
-                    Console.Out.WriteLine "RESULT: PASS (live catalog load; digests and replayed state digests match the catalog manifest; admissibility evaluated only if an engine is wired)"
+                    Console.Out.WriteLine "RESULT: PASS (live catalog load; digests and replayed state digests match the catalog manifest; every case admitted by the engine's History.validate)"
                     0
                 else
                     Console.Out.WriteLine "RESULT: FAIL"
@@ -312,8 +414,13 @@ let main argv =
     | [| "record" |] ->
         let env name = Environment.GetEnvironmentVariable name |> Option.ofObj |> Option.defaultValue ""
         let token = env "CAUSA_GITHUB_TOKEN"
-        let repo = env "CAUSA_TEST_REPO"
+        // The test repository: the secret first, then the repository variable; never a built-in default.
+        let fromSecret = env "CAUSA_TEST_REPO_SECRET"
+        let fromVar = env "CAUSA_TEST_REPO_VAR"
+        let repo, source = if fromSecret <> "" then fromSecret, "secret" elif fromVar <> "" then fromVar, "variable" else "", "none"
         let runId = env "GITHUB_RUN_ID"
+        Console.Out.WriteLine(if repo = "" then "test repo configured: no" else "test repo configured: yes (from the " + source + ")")
+        Console.Out.WriteLine(if token = "" then "test token configured: no" else "test token configured: yes")
         if String.IsNullOrEmpty token || String.IsNullOrEmpty repo then
             Console.Out.WriteLine "RESULT: BLOCKED (CAUSA_GITHUB_TOKEN or CAUSA_TEST_REPO is not available; a missing secret is never a pass)"
             2
