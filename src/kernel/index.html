@@ -650,9 +650,136 @@
           </template>
           </div>
         </template>
+        <!-- Investigation actions: the experiment designer (S09) and result capture for one action (S10). -->
+        <template data-if="an.section.actions">
+          <div>
+          <template data-if="an.actions.designer">
+          <section aria-labelledby="sec-actions" data-percepta-screen="action-experiment-designer">
+            <h2 id="sec-actions">Actions and experiments</h2>
+            <div class="causa-overview-grid">
+              <section class="causa-panel" aria-labelledby="ad-target" data-percepta-region="target">
+                <h3 id="ad-target">What is uncertain</h3>
+                <template data-if="an.actions.targets.empty"><p class="causa-muted">No hypothesis or open question is recorded yet.</p></template>
+                <ul class="causa-list" aria-label="Hypotheses and open questions"><template data-each="an.actions.targets" data-key="id"><li class="causa-item"><p data-text="text"></p><p class="causa-muted" data-text="state"></p></li></template></ul>
+              </section>
+              <section class="causa-panel" aria-labelledby="ad-pred" data-percepta-region="predictions">
+                <h3 id="ad-pred">What each hypothesis predicts</h3>
+                <template data-if="an.falsifiers.empty"><p class="causa-muted">No prediction is recorded yet.</p></template>
+                <ul class="causa-list" aria-label="Predictions"><template data-each="an.falsifiers" data-key="id"><li class="causa-item"><p data-text="text"></p><p class="causa-muted" data-text="state"></p></li></template></ul>
+              </section>
+              <section class="causa-panel" aria-labelledby="ad-proc" data-percepta-region="procedure">
+                <h3 id="ad-proc">Planned actions</h3>
+                <template data-if="an.actions.list.empty"><p class="causa-muted">No action is planned yet.</p></template>
+                <ul class="causa-list" aria-label="Planned actions"><template data-each="an.actions.list" data-key="id"><li class="causa-item"><p><a data-bind-href="href" data-text="text"></a></p><p class="causa-muted" data-text="state"></p></li></template></ul>
+              </section>
+              <section class="causa-panel" aria-labelledby="ad-cost" data-percepta-region="cost-risk">
+                <h3 id="ad-cost">Cost, time and risk</h3>
+                <p data-text="an.actions.cost"></p>
+              </section>
+              <section class="causa-panel" aria-labelledby="ad-prereg" data-percepta-region="preregistration">
+                <h3 id="ad-prereg">Pre-registration</h3>
+                <p data-text="an.actions.prereg"></p>
+              </section>
+            </div>
+            <form class="ef-form causa-form causa-panel" data-event="submit-RecordPrediction" aria-labelledby="ad-pred-form">
+              <h3 id="ad-pred-form">Record a prediction before the result</h3>
+              <div class="causa-form__row">
+                <div class="ef-field"><label class="ef-field__label" id="ad-pred-hyp-label" for="ad-pred-hyp">Hypothesis it follows from</label>
+                  <select id="ad-pred-hyp" aria-labelledby="ad-pred-hyp-label" class="causa-input" required data-event="field-RecordPrediction.hypothesis">
+                    <option value="">Choose a hypothesis</option>
+                    <template data-each="hypotheses" data-key="id"><option data-bind-value="id" data-text="statement"></option></template>
+                  </select></div>
+                <div class="ef-field"><label class="ef-field__label" id="ad-pred-strength-label" for="ad-pred-strength">Strength</label>
+                  <select id="ad-pred-strength" aria-labelledby="ad-pred-strength-label" class="causa-input" data-event="field-RecordPrediction.strength">
+                    <option value="expected">Expected</option><option value="necessary">Necessary (failure falsifies)</option><option value="discriminating">Discriminating</option><option value="nonDiscriminating">Not discriminating</option>
+                  </select></div>
+              </div>
+              <div class="ef-field"><label class="ef-field__label" id="ad-pred-statement-label" for="ad-pred-statement">What should be observed if the hypothesis holds</label>
+                <input id="ad-pred-statement" aria-labelledby="ad-pred-statement-label" class="causa-input" type="text" required data-event="field-RecordPrediction.statement" data-on="input" data-bind-value="an.form.pred.statement"></div>
+              <button type="submit" class="ef-button" data-ef-variant="primary" data-bind-disabled="an.pred.disabled" data-percepta-capability="RecordPrediction" aria-describedby="an-pred-reason-2">Record the prediction</button>
+              <p class="causa-capability__reason" id="an-pred-reason-2" data-percepta-unavailable-reason-for="RecordPrediction" data-text="an.pred.reason"></p>
+              <template data-if="an.pred.hasBlocker"><a class="causa-related" data-bind-href="an.pred.blockerHref" data-percepta-blocker-link-for="RecordPrediction">See the open question</a></template>
+            </form>
+            <form class="ef-form causa-form causa-panel" data-event="submit-RecordInvestigationAction" aria-labelledby="ad-act-form">
+              <h3 id="ad-act-form">Plan an action</h3>
+              <div class="causa-form__row">
+                <div class="ef-field"><label class="ef-field__label" id="ad-act-kind-label" for="ad-act-kind">Kind of action</label>
+                  <select id="ad-act-kind" aria-labelledby="ad-act-kind-label" class="causa-input" data-event="field-RecordInvestigationAction.kind">
+                    <option value="test">Test</option><option value="inspection">Inspection</option><option value="query">Query</option><option value="comparison">Comparison</option><option value="experiment">Experiment</option>
+                  </select></div>
+                <div class="ef-field"><label class="ef-field__label" id="ad-act-hyp-label" for="ad-act-hyp">Hypothesis it tests</label>
+                  <select id="ad-act-hyp" aria-labelledby="ad-act-hyp-label" class="causa-input" data-event="field-RecordInvestigationAction.hypothesis">
+                    <option value="">None</option>
+                    <template data-each="hypotheses" data-key="id"><option data-bind-value="id" data-text="statement"></option></template>
+                  </select></div>
+              </div>
+              <div class="ef-field"><label class="ef-field__label" id="ad-act-purpose-label" for="ad-act-purpose">Procedure and purpose</label>
+                <input id="ad-act-purpose" aria-labelledby="ad-act-purpose-label" class="causa-input" type="text" required data-event="field-RecordInvestigationAction.purpose" data-on="input" data-bind-value="an.form.act.purpose"></div>
+              <button type="submit" class="ef-button" data-ef-variant="primary" data-bind-disabled="an.act.disabled" data-percepta-capability="RecordInvestigationAction" aria-describedby="an-act-reason-2">Plan the action</button>
+              <p class="causa-capability__reason" id="an-act-reason-2" data-percepta-unavailable-reason-for="RecordInvestigationAction" data-text="an.act.reason"></p>
+              <template data-if="an.act.hasBlocker"><a class="causa-related" data-bind-href="an.act.blockerHref" data-percepta-blocker-link-for="RecordInvestigationAction">See the open question</a></template>
+            </form>
+          </section>
+          </template>
+          <template data-if="an.actions.capture">
+          <section aria-labelledby="sec-capture" data-percepta-screen="finding-result-capture">
+            <h2 id="sec-capture">Result of an action</h2>
+            <p><a class="causa-back" data-bind-href="an.capture.backHref">All actions</a></p>
+            <div class="causa-overview-grid">
+              <section class="causa-panel" aria-labelledby="rc-action" data-percepta-region="action">
+                <h3 id="rc-action">Action</h3>
+                <p data-text="an.capture.text"></p><p class="causa-muted" data-text="an.capture.state"></p>
+              </section>
+              <section class="causa-panel" aria-labelledby="rc-result" data-percepta-region="original-result">
+                <h3 id="rc-result">Recorded results, as originally stated</h3>
+                <template data-if="an.capture.results.empty"><p class="causa-muted">No result is recorded for this action yet.</p></template>
+                <ul class="causa-list" aria-label="Recorded results"><template data-each="an.capture.results" data-key="id"><li class="causa-item"><p data-text="text"></p><p class="causa-muted" data-text="state"></p></li></template></ul>
+              </section>
+              <section class="causa-panel" aria-labelledby="rc-anomalies" data-percepta-region="anomalies">
+                <h3 id="rc-anomalies">Anomalies</h3>
+                <p data-text="an.capture.anomalies"></p>
+              </section>
+              <section class="causa-panel" aria-labelledby="rc-evidence" data-percepta-region="evidence-proposal">
+                <h3 id="rc-evidence">Admitting it as evidence</h3>
+                <p data-text="an.capture.evidence"></p>
+                <p><a class="causa-related" data-bind-href="an.capture.evidenceHref">Go to Evidence</a></p>
+              </section>
+            </div>
+            <form class="ef-form causa-form causa-panel" data-event="submit-RecordFinding" aria-labelledby="rc-form">
+              <h3 id="rc-form">Record the result</h3>
+              <div class="ef-field"><label class="ef-field__label" id="rc-text-label" for="rc-text">What happened, as observed</label>
+                <textarea id="rc-text" aria-labelledby="rc-text-label" class="causa-input" rows="3" required data-event="field-RecordFinding.result" data-on="input" data-bind-value="an.form.finding.result"></textarea></div>
+              <div class="ef-field"><label class="ef-field__label" id="rc-interp-label" for="rc-interp">Interpretation (optional, kept separate)</label>
+                <input id="rc-interp" aria-labelledby="rc-interp-label" class="causa-input" type="text" data-event="field-RecordFinding.interpretation" data-on="input" data-bind-value="an.form.finding.interpretation"></div>
+              <button type="submit" class="ef-button" data-ef-variant="primary" data-bind-disabled="an.finding.disabled" data-percepta-capability="RecordFinding" aria-describedby="an-finding-reason-2">Record the result</button>
+              <p class="causa-capability__reason" id="an-finding-reason-2" data-percepta-unavailable-reason-for="RecordFinding" data-text="an.finding.reason"></p>
+              <template data-if="an.finding.hasBlocker"><a class="causa-related" data-bind-href="an.finding.blockerHref" data-percepta-blocker-link-for="RecordFinding">See the open question</a></template>
+            </form>
+          </section>
+          </template>
+          </div>
+        </template>
         <template data-if="section.timeline">
           <section aria-labelledby="sec-timeline" data-bind-data-percepta-screen="an.timeline.screen">
             <h2 id="sec-timeline">Investigation history</h2>
+            <template data-if="an.replay.show">
+              <section class="causa-panel causa-replay" aria-labelledby="rp-heading" data-historical="true">
+                <h3 id="rp-heading">Replay, one recorded event at a time (read-only)</h3>
+                <div class="causa-overview-grid">
+                  <div data-percepta-region="problem"><h4>Problem</h4><p data-text="an.replay.problem"></p></div>
+                  <div data-percepta-region="current-version"><h4>Where the replay is</h4><p role="status" data-text="an.replay.version"></p></div>
+                  <div data-percepta-region="hypotheses"><h4>Hypotheses at this point</h4>
+                    <template data-if="an.replay.hypotheses.empty"><p class="causa-muted">No hypothesis had been recorded yet.</p></template>
+                <ul class="causa-list" aria-label="Hypotheses at this version"><template data-each="an.replay.hypotheses" data-key="id"><li class="causa-item"><p data-text="text"></p><p class="causa-muted" data-text="state"></p></li></template></ul></div>
+                  <div data-percepta-region="event-step"><h4>This step</h4><p data-text="an.replay.event"></p>
+                    <ul class="causa-diff"><template data-each="an.replay.changes" data-key="id"><li data-text="text"></li></template></ul>
+                    <p><template data-if="an.replay.hasPrev"><a class="causa-related" data-bind-href="an.replay.prevHref">Previous step</a></template>
+                    <template data-if="an.replay.hasNext"><a class="causa-related" data-bind-href="an.replay.nextHref">Next step</a></template></p></div>
+                  <div data-percepta-region="next-action"><h4>What comes next</h4><p data-text="an.replay.next"></p></div>
+                </div>
+              </section>
+            </template>
+            <p><a class="causa-related" data-bind-href="an.replay.startHref">Replay from the first event</a></p>
             <p class="causa-panel causa-history-label" data-percepta-region="version-state" data-bind-data-historical="history.historical" role="status" data-text="timeline.version"></p>
             <div class="causa-history-controls">
               <div class="ef-field causa-filter">
