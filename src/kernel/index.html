@@ -340,14 +340,52 @@
         <template data-if="section.timeline">
           <section aria-labelledby="sec-timeline" data-percepta-screen="investigation-timeline">
             <h2 id="sec-timeline">Investigation history</h2>
-            <p class="causa-panel" data-percepta-region="version-state" data-text="timeline.version"></p>
+            <p class="causa-panel causa-history-label" data-percepta-region="version-state" data-bind-data-historical="history.historical" role="status" data-text="timeline.version"></p>
+            <div class="causa-history-controls">
+              <div class="ef-field causa-filter">
+                <label class="ef-field__label" id="history-version-label" for="history-version">Show the investigation as it was at</label>
+                <select id="history-version" aria-labelledby="history-version-label" class="causa-input" data-event="history-version" data-bind-value="history.version">
+                  <option value="">The latest version</option>
+                  <template data-each="history.versions" data-key="id"><option data-bind-value="value" data-text="label"></option></template>
+                </select>
+              </div>
+              <div class="ef-field causa-filter">
+                <label class="ef-field__label" id="timeline-filter-label" for="timeline-filter">Show events about</label>
+                <select id="timeline-filter" aria-labelledby="timeline-filter-label" class="causa-input" data-event="timeline-filter" data-bind-value="timeline.filter">
+                  <template data-each="timeline.categories" data-key="id"><option data-bind-value="value" data-text="label"></option></template>
+                </select>
+              </div>
+            </div>
+            <template data-if="history.show">
+              <section class="causa-panel causa-history" aria-labelledby="history-heading" data-bind-data-historical="history.historical">
+                <h3 id="history-heading">State at the chosen version</h3>
+                <p><span class="causa-label">Title:</span> <span data-text="history.title"></span> · <span class="causa-label">Status:</span> <span data-text="history.status"></span></p>
+                <ul class="causa-inline-list"><template data-each="history.counts" data-key="id"><li data-text="text"></li></template></ul>
+                <h4>What this version changed</h4>
+                <template data-if="history.hereEmpty"><p class="causa-muted">No semantic change is recorded for this version.</p></template>
+                <ul class="causa-diff"><template data-each="history.here" data-key="id"><li data-text="text"></li></template></ul>
+                <template data-if="history.sinceShow"><div>
+                  <h4>Changed since, up to the latest version</h4>
+                  <ul class="causa-diff"><template data-each="history.since" data-key="id"><li data-text="text"></li></template></ul>
+                  <p><a class="causa-related" data-bind-href="history.latestHref">Back to the latest version</a></p>
+                </div></template>
+              </section>
+            </template>
             <p class="causa-panel" data-percepta-region="policy-version">Policy version: not recorded for this investigation.</p>
             <p class="causa-panel" data-percepta-region="replay" data-text="timeline.replay"></p>
             <div data-percepta-region="timeline">
               <template data-if="timeline.empty"><p class="causa-muted">No recorded events.</p></template>
               <ol class="causa-timeline">
                 <template data-each="timeline" data-key="id">
-                  <li class="causa-timeline__entry"><span data-text="sequence"></span><span class="causa-timeline__type" data-text="type"></span><span data-text="occurred"></span><span class="causa-muted" data-text="recorded"></span><span class="causa-muted" data-text="actor"></span></li>
+                  <li class="causa-timeline__entry" data-bind-data-current="current">
+                    <a data-bind-href="versionHref" data-text="sequence"></a>
+                    <span class="causa-timeline__type" data-text="type"></span>
+                    <span data-text="occurred"></span>
+                    <span class="causa-muted" data-text="recorded"></span>
+                    <span class="causa-muted" data-text="actor"></span>
+                    <template data-if="clockNote"><span class="causa-tag" data-tone="attention">Clock earlier than a previous event; ordered by sequence</span></template>
+                    <template data-if="hasAffected"><a class="causa-related" data-bind-href="affectedHref" data-text="affectedText"></a></template>
+                  </li>
                 </template>
               </ol>
             </div>

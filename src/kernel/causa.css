@@ -328,3 +328,10 @@ fieldset.causa-panel legend { font-weight: 700; color: var(--causa-color-structu
 .causa-item--proposal { border-left-color: var(--causa-color-attention); }
 .causa-ai-status { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
 .causa-stale { font-weight: 600; }
+/* Time travel (T28): a historical view is labelled in words and set apart, never styled like the current state. */
+.causa-history-label[data-historical="true"], .causa-history[data-historical="true"] { border-left: 6px double var(--causa-color-attention); background: var(--causa-amber-wash); color: var(--causa-color-attention-ink); font-weight: 600; }
+.causa-history-controls { display: flex; flex-wrap: wrap; gap: 0 1rem; }
+.causa-inline-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; }
+.causa-diff { padding-left: 1.25rem; }
+.causa-timeline__entry[data-current="true"] { outline: 3px solid var(--causa-color-action); outline-offset: 2px; }
+.causa-timeline__entry a { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }

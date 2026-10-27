@@ -181,15 +181,43 @@ let project (model: Model) : ViewState =
         |> Option.map (fun i ->
             i.Timeline
             |> List.sortBy (fun t -> t.Sequence)
+            |> List.filter (fun t -> model.TimelineFilter = "all" || t.Category = model.TimelineFilter)
             |> List.map (fun t ->
-                item
+                let first = t.Affected |> List.tryHead
+                let sectionOf slug = Routes.sections |> List.tryFind (fun (_, s, _) -> s = slug) |> Option.map (fun (x, _, _) -> x)
+                itemF
                     [ "id", string t.Sequence
                       "sequence", $"#{t.Sequence}"
                       "type", t.EventType
                       "occurred", "Event time " + t.OccurredAt
                       "recorded", (t.RecordedAt |> Option.map (fun r -> "Recorded " + r) |> Option.defaultValue "Recorded time not available")
-                      "actor", (t.Actor |> Option.defaultValue "Actor not recorded") ]))
+                      "actor", (t.Actor |> Option.defaultValue "Actor not recorded")
+                      "versionHref", Routes.format (Investigation(i.Id, Timeline)) + $"?version={t.Sequence}"
+                      "affectedText", (first |> Option.map (fun (_, _, w) -> w) |> Option.defaultValue "")
+                      "affectedHref",
+                      (first
+                       |> Option.bind (fun (slug, id, _) -> sectionOf slug |> Option.map (fun sec -> Routes.formatItem (Investigation(i.Id, sec)) id))
+                       |> Option.defaultValue "")
+                      "current", (if model.HistoryVersion = Some t.Sequence then "true" else "false") ]
+                    [ "hasAffected", first.IsSome
+                      "clockNote", t.ClockBeforePrevious ]))
         |> Option.defaultValue []
+
+    // Time travel (T28): the state at the chosen version, derived by the engine and labelled historical.
+    let history =
+        match inv, model.HistoryVersion with
+        | Some i, Some v -> model.Port.History i.Id v
+        | _ -> None
+
+    let versions =
+        inv
+        |> Option.map (fun i ->
+            i.Timeline |> List.map (fun t -> item [ "id", string t.Sequence; "value", string t.Sequence; "label", $"Version {t.Sequence}: {t.EventType}" ]))
+        |> Option.defaultValue []
+
+    let categories =
+        item [ "id", "all"; "value", "all"; "label", "All events" ]
+        :: (EngineView.categoryLabels |> List.map (fun (k, l) -> item [ "id", k; "value", k; "label", l ]))
 
     let graphDoc = inv |> Option.map (fun i -> Graph.toDocument i.Title i.Id (Graph.ofInvestigation i)) |> Option.defaultValue ""
     let graphSelection = inv |> Option.map (fun i -> Graph.describeSelection i model.Selected) |> Option.defaultValue ""
@@ -442,7 +470,27 @@ let project (model: Model) : ViewState =
       "destination", text destination
       "wsBlockers", items wsBlockers
       "wsBlockers.empty", flag wsBlockers.IsEmpty
-      "timeline.version", text (inv |> Option.map (fun i -> $"Showing the investigation as of version {i.Version}, the latest recorded version.") |> Option.defaultValue "")
+      "timeline.version",
+      text (
+          match history, inv with
+          | Some h, _ when h.IsHistorical -> $"Historical view: version {h.AtVersion} of {h.LatestVersion}. This is not the current state."
+          | _, Some i -> $"Showing the investigation as of version {i.Version}, the latest recorded version."
+          | _ -> ""
+      )
+      "history.show", flag history.IsSome
+      "history.historical", flag (history |> Option.exists (fun h -> h.IsHistorical))
+      "history.version", text (match model.HistoryVersion with Some v -> string v | None -> "")
+      "history.versions", items versions
+      "history.title", text (history |> Option.map (fun h -> h.Title) |> Option.defaultValue "")
+      "history.status", text (history |> Option.map (fun h -> label h.Lifecycle) |> Option.defaultValue "")
+      "history.counts", items (history |> Option.map (fun h -> h.Counts |> List.map (fun (l, n) -> item [ "id", l; "text", $"{l}: {n}" ])) |> Option.defaultValue [])
+      "history.here", items (history |> Option.map (fun h -> h.ChangesHere |> List.mapi (fun k c -> item [ "id", string k; "text", c ])) |> Option.defaultValue [])
+      "history.hereEmpty", flag (history |> Option.exists (fun h -> h.ChangesHere.IsEmpty))
+      "history.since", items (history |> Option.map (fun h -> h.ChangesSince |> List.mapi (fun k c -> item [ "id", string k; "text", c ])) |> Option.defaultValue [])
+      "history.sinceShow", flag (history |> Option.exists (fun h -> h.IsHistorical))
+      "history.latestHref", text (inv |> Option.map (fun i -> Routes.format (Investigation(i.Id, Timeline))) |> Option.defaultValue "#/")
+      "timeline.filter", text model.TimelineFilter
+      "timeline.categories", items categories
       "timeline.replay", text (inv |> Option.map (fun i -> $"{i.Timeline.Length} recorded events, in their recorded order.") |> Option.defaultValue "")
       "report.incomplete", flag (inv.IsSome && not complete)
       "report.status", text (if complete then "Complete" else "Incomplete: this investigation is not resolved, so the report is a working draft.")

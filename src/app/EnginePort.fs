@@ -259,6 +259,11 @@ let private project (at: DateTimeOffset) (p: Persistence) (message: (string * st
 let rec private portOf (at: DateTimeOffset) (p: Persistence) (message: (string * string) option) (ai: Ai) : A.Port =
     { Name = "engine/" + p.Name
       Projection = project at p message (aiView p ai)
+      History =
+        fun id version ->
+            match p.Documents.TryFind id with
+            | Some(A.Loaded d) -> EngineView.history d.Session.History version
+            | _ -> None
       Handle = fun entropy input -> handle entropy input p ai }
 
 and private handle (entropy: A.Entropy) (input: A.AdapterInput) (p: Persistence) (ai: Ai) : A.Port * EffectRequest list =

@@ -3,7 +3,7 @@
 import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 
-const TEST_SITE = "http://127.0.0.1:4322/";
+const TEST_SITE = `http://127.0.0.1:${process.env.CAUSA_TEST_PORT ?? 4322}/`;
 
 /** Waits until the application has replaced the loading shell. */
 async function started(page) {

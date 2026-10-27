@@ -3,7 +3,7 @@
 // runs over the test build's in-memory workspace.
 import { expect, test } from "@playwright/test";
 
-const SITE = "http://127.0.0.1:4322/";
+const SITE = `http://127.0.0.1:${process.env.CAUSA_TEST_PORT ?? 4322}/`;
 const KEY = "sk-ant-test-" + "K".repeat(40);
 const ENDPOINT = "https://api.anthropic.com/v1/messages";
 const CORS = { "access-control-allow-origin": "*", "access-control-allow-headers": "*", "access-control-expose-headers": "retry-after" };
@@ -18,6 +18,8 @@ const answer = (proposals) => JSON.stringify({
 
 /** Settings: model and key; then a started investigation, on its AI proposals section. */
 async function setUp(page) {
+  // No real AI call from a non-live test: anything else sent to the provider host is refused here.
+  await page.route(/^https:\/\/api\.anthropic\.com\/(?!v1\/messages$)/, (route) => route.abort());
   await page.goto(SITE + "index.html#/settings");
   await started(page);
   await page.evaluate(() => window.__perceptaSetState({ name: "engine-memory", predicates: [], capabilities: {} }));

@@ -41,6 +41,10 @@ type Model =
       /// Correlation ids of requests the shell itself made; every other answer belongs to the port.
       ShellPending: Set<string>
       PageBase: string
+      /// The version the history screen shows (from `?version=` or the picker); None is the latest (T28).
+      HistoryVersion: int64 option
+      /// Timeline category filter ("all" or a category key, UI-003-O2).
+      TimelineFilter: string
       /// Bumped each time a token or key is taken, so the page can empty its password fields.
       SecretEpoch: int
       /// Text typed for a capability that needs one input, by capability id.
@@ -65,6 +69,8 @@ let initial =
       PageBase = ""
       CommandInputs = Map.empty
       SecretEpoch = 0
+      HistoryVersion = None
+      TimelineFilter = "all"
       TestHooks = false
       InjectedState = None }
 
@@ -145,6 +151,11 @@ let rec private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
     | "graph-select" when value = "" || Routes.selection ("?item=" + value) = value -> { model with Selected = value }, []
     | "text-size" -> { model with Settings = { model.Settings with LargeText = (value = "large") } }, []
     | "motion" -> { model with Settings = { model.Settings with ReducedMotion = (value = "reduced") } }, []
+    | "history-version" ->
+        match Int64.TryParse value with
+        | true, n when n >= 1L -> { model with HistoryVersion = Some n }, []
+        | _ -> { model with HistoryVersion = None }, []
+    | "timeline-filter" -> { model with TimelineFilter = (if value = "" then "all" else value) }, []
     | "ai-model" -> { model with Settings = { model.Settings with AiModel = value.Trim() } }, []
     | "ai-key" -> { model with Drafts = { d with AiKey = value } }, []
     | "ai-key-set" -> toPort entropy (SetAiKey d.AiKey) { model with Drafts = { d with AiKey = "" }; SecretEpoch = model.SecretEpoch + 1 }
@@ -206,11 +217,11 @@ let update (entropy: Entropy) (message: BrowserToEngineMessage) (model: Model) :
             | -1 -> "/"
             | i -> location.Path.Substring(0, i + 1)
 
-        let model, fx = readBuildInfo { model with Route = Routes.parse location.Hash; Selected = Routes.selection location.Hash; PageBase = location.Origin + dir }
+        let model, fx = readBuildInfo { model with Route = Routes.parse location.Hash; Selected = Routes.selection location.Hash; HistoryVersion = Routes.versionOf location.Hash; PageBase = location.Origin + dir }
         let model, more = openRoute entropy model
         model, fx @ more
     | BrowserToEngineMessage.LocationChanged location ->
-        openRoute entropy { model with Route = Routes.parse location.Hash; Selected = Routes.selection location.Hash; Notice = None }
+        openRoute entropy { model with Route = Routes.parse location.Hash; Selected = Routes.selection location.Hash; HistoryVersion = Routes.versionOf location.Hash; Notice = None }
     | BrowserToEngineMessage.Event e -> onEvent entropy e model
     | BrowserToEngineMessage.EffectResult(EffectResult.HttpResult(CorrelationId corr, outcome)) when model.ShellPending.Contains corr ->
         let model = { model with ShellPending = model.ShellPending.Remove corr }

@@ -10,7 +10,7 @@ test("every bound screen satisfies its Percepta contract (verify-app) [VPO-59c5c
   mkdirSync("obj", { recursive: true });
   const out = "obj/percepta-application-verification.json";
   try {
-    execFileSync("percepta", ["verify-app", "--base-url", "http://127.0.0.1:4322/", "--bindings", ".percepta/bindings.json", "--contracts", ".percepta/contracts", "--out", out], { stdio: "pipe", timeout: 580_000 });
+    execFileSync("percepta", ["verify-app", "--base-url", `http://127.0.0.1:${process.env.CAUSA_TEST_PORT ?? 4322}/`, "--bindings", ".percepta/bindings.json", "--contracts", ".percepta/contracts", "--out", out], { stdio: "pipe", timeout: 580_000 });
   } catch (error) {
     // Exit 3 means "incomplete" (unbound contracts remain); the per-screen verdicts below decide this test.
     if (error.status !== 3) throw error;

@@ -83,6 +83,119 @@ let describe (inv: Investigation) (action: CapabilityAction) : (string * string 
         Some("ConfirmCause:" + c.Text, "ConfirmCause", $"Confirm the cause of: {outcome}", None)
     | _ -> None
 
+let actorText (a: Actor) =
+    match a.Kind with
+    | Human -> a.ActorId
+    | System -> "System"
+    | Agent(provider, model) -> $"AI agent ({provider}, {model})"
+
+let categoryKey =
+    function
+    | LifecycleEvents -> "lifecycle"
+    | ObservationEvents -> "observations"
+    | HypothesisEvents -> "hypotheses"
+    | EvidenceEvents -> "evidence"
+    | UnknownEvents -> "unknowns"
+    | AssumptionEvents -> "assumptions"
+    | ContradictionEvents -> "contradictions"
+    | PredictionEvents -> "predictions"
+    | ActionEvents -> "actions"
+    | FindingEvents -> "findings"
+    | NegativeKnowledgeEvents -> "negative-knowledge"
+    | CauseEvents -> "causes"
+    | CorrectionEvents -> "corrective-actions"
+    | VerificationEvents -> "verifications"
+    | ConclusionEvents -> "conclusions"
+    | ProposalEvents -> "proposals"
+
+let categoryLabels =
+    [ "lifecycle", "Status and start"; "observations", "Observations"; "hypotheses", "Hypotheses"; "evidence", "Evidence"
+      "unknowns", "Open questions"; "assumptions", "Assumptions"; "contradictions", "Contradictions"; "predictions", "Predictions"
+      "actions", "Actions"; "findings", "Findings"; "negative-knowledge", "Ruled out"; "causes", "Causes"
+      "corrective-actions", "Corrective actions"; "verifications", "Verifications"; "conclusions", "Conclusions"; "proposals", "AI proposals" ]
+
+let private kindWord =
+    function
+    | "observations" -> "observation"
+    | "hypotheses" -> "hypothesis"
+    | "evidence" -> "evidence"
+    | "relationships" -> "evidence link"
+    | "unknowns" -> "open question"
+    | "assumptions" -> "assumption"
+    | "contradictions" -> "contradiction"
+    | "predictions" -> "prediction"
+    | "actions" -> "action"
+    | "findings" -> "finding"
+    | "negativeKnowledge" -> "ruled-out statement"
+    | "causes" -> "cause"
+    | "correctiveActions" -> "corrective action"
+    | "criteria" -> "criterion"
+    | "verifications" -> "verification"
+    | "conclusions" -> "conclusion"
+    | "proposals" -> "proposal"
+    | "investigation" -> "investigation"
+    | other -> other
+
+/// A record an event touched, as a link target: (section slug, id, words) from the current state's text.
+let private affectedLink (inv: Investigation) (r: EntityRef) : (string * string * string) option =
+    let find (m: Map<Id<'T>, 'V>) (text: 'V -> string) =
+        match Guid.TryParse r.Id with
+        | true, g -> m |> Map.tryFind (Id g) |> Option.map text
+        | _ -> None
+    let words =
+        match r.Kind with
+        | "hypotheses" -> find inv.Hypotheses (fun h -> h.Statement.Value)
+        | "evidence" -> find inv.Evidence (fun e -> e.Source.Value)
+        | "unknowns" -> find inv.Unknowns (fun u -> u.Question.Value)
+        | "causes" -> find inv.Causes (fun c -> c.Outcome.Value)
+        | "proposals" -> find inv.Proposals (fun p -> p.Text.Value)
+        | "observations" -> find inv.Observations (fun o -> o.Original.Value)
+        | _ -> None
+    let section =
+        match r.Kind with
+        | "hypotheses" -> Some "hypotheses"
+        | "evidence" | "relationships" -> Some "evidence"
+        | "causes" -> Some "causal-analysis"
+        | "correctiveActions" | "criteria" | "verifications" -> Some "corrective-actions"
+        | "proposals" -> Some "proposals"
+        | "unknowns" | "observations" | "investigation" -> Some "overview"
+        | _ -> None
+    match section with
+    | Some sec -> Some(sec, r.Id, kindWord r.Kind + (words |> Option.map (fun w -> ": " + w) |> Option.defaultValue ""))
+    | None -> None
+
+let private shortJson (j: Json) =
+    match j with
+    | JString s -> s
+    | JNull -> "none"
+    | other -> let t = Json.canonical other in if t.Length > 60 then t.Substring(0, 57) + "…" else t
+
+/// One semantic change in words (UI-003-O2: before and after, never invented).
+let changeText (c: SemanticChange) =
+    match c with
+    | TitleChanged(b, a) -> $"Title: {b} → {a}"
+    | LifecycleMoved(None, a) -> $"Status set to {Causa.App.Presentation.label (lifecycle a)}"
+    | LifecycleMoved(Some b, a) -> $"Status: {Causa.App.Presentation.label (lifecycle b)} → {Causa.App.Presentation.label (lifecycle a)}"
+    | EntityAdded r -> $"Added {kindWord r.Kind} {r.Id.Substring(0, min 8 r.Id.Length)}"
+    | StateMoved(r, b, a) -> $"{kindWord r.Kind} {r.Id.Substring(0, min 8 r.Id.Length)}: {Causa.App.Presentation.label b} → {Causa.App.Presentation.label a}"
+    | FieldChanged(r, field, b, a) -> $"{kindWord r.Kind} {r.Id.Substring(0, min 8 r.Id.Length)}: {field} {shortJson b} → {shortJson a}"
+
+/// The investigation at `version` (Timeline.view), with what that version changed and what changed since.
+let history (events: DomainEvent list) (version: int64) : A.HistoryView option =
+    Timeline.view events version
+    |> Option.map (fun v ->
+        let s = v.State
+        { AtVersion = v.AtVersion
+          LatestVersion = v.LatestVersion
+          IsHistorical = v.IsHistorical
+          Title = s.Title.Value
+          Lifecycle = lifecycle s.Lifecycle
+          Counts =
+            [ "Hypotheses", s.Hypotheses.Count; "Evidence items", s.Evidence.Count; "Open questions", s.Unknowns.Count
+              "Causes", s.Causes.Count; "Proposals", s.Proposals.Count ]
+          ChangesHere = Timeline.changesAt events v.AtVersion |> List.map changeText
+          ChangesSince = (if v.IsHistorical then Timeline.between events v.AtVersion v.LatestVersion |> List.map changeText else []) })
+
 /// Boundary B -> the shell's investigation view.
 let ofProjection (writable: bool) (history: DomainEvent list) (p: InvestigationProjection) : A.InvestigationProjection =
     let inv = p.State
@@ -142,15 +255,16 @@ let ofProjection (writable: bool) (history: DomainEvent list) (p: InvestigationP
                State = causeState c.State
                Members = c.Members |> List.map (fun m -> m.Hypothesis.Text, role m.Role) }: A.CauseRow))
       Timeline =
-        history
+        Timeline.entries history
         |> List.map (fun e ->
-            let name = Wire.eventType e.Body
-
             ({ Sequence = e.Version
-               EventType = name
-               OccurredAt = stamp e.At
+               EventType = e.EventType
+               OccurredAt = stamp e.OccurredAt
                RecordedAt = None
-               Actor = Some e.Actor.ActorId }: A.TimelineRow))
+               Actor = Some(actorText e.Actor)
+               Category = categoryKey e.Category
+               Affected = e.Affected |> List.choose (affectedLink inv)
+               ClockBeforePrevious = e.ClockBeforePrevious }: A.TimelineRow))
       Proposals =
         values inv.Proposals
         |> List.sortBy (fun p -> p.Provenance.RecordedAt, p.Id.Text)

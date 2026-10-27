@@ -55,7 +55,31 @@ type CardProjection =
 type HypothesisRow = { Id: string; Statement: string; State: string; Supporting: Count; Contradicting: Count }
 type EvidenceRow = { Id: string; Content: string; Source: string option; Category: string; RecordedAt: string option }
 type BlockerRow = { Id: string; Question: string; Material: bool }
-type TimelineRow = { Sequence: int64; EventType: string; OccurredAt: string; RecordedAt: string option; Actor: string option }
+type TimelineRow =
+    { Sequence: int64
+      EventType: string
+      OccurredAt: string
+      RecordedAt: string option
+      Actor: string option
+      /// The event's category (Timeline.category), as a filter key.
+      Category: string
+      /// Records the event touched, as (section slug, record id, words) for links (UI-003-O4).
+      Affected: (string * string * string) list
+      /// The event's clock is earlier than an event before it in sequence (UI-003-O3).
+      ClockBeforePrevious: bool }
+
+/// The investigation as it was at one version (time travel, T28). Never mixed with the current state.
+type HistoryView =
+    { AtVersion: int64
+      LatestVersion: int64
+      IsHistorical: bool
+      Title: string
+      Lifecycle: string
+      Counts: (string * int) list
+      /// What the command group at AtVersion changed (before -> after).
+      ChangesHere: string list
+      /// Everything that changed from AtVersion to the latest version.
+      ChangesSince: string list }
 
 type CauseRole =
     | RootCause
@@ -166,6 +190,8 @@ type AdapterInput =
 type Port =
     { Name: string
       Projection: WorkspaceProjection
+      /// The state of an open investigation at a version, when the port can derive it (T28).
+      History: string -> int64 -> HistoryView option
       Handle: Entropy -> AdapterInput -> Port * EffectRequest list }
 
 let emptyWorkspace =
@@ -182,27 +208,32 @@ let emptyWorkspace =
 module Port =
     /// The shell's stand-in until the engine and persistence ports are composed in. It refuses Connect in plain
     /// words and claims nothing: no connection, no investigation, no saved change.
-    let rec unavailable: Port =
+    let private unavailableProjection =
+        { emptyWorkspace with
+            Administration =
+                [ { Id = "engine"; Section = "persistence"; Label = "Investigation engine"; Value = "Not composed into this build"; State = "Unavailable" }
+                  { Id = "provider"; Section = "persistence"; Label = "Data provider"; Value = "Not composed into this build"; State = "Unavailable" } ] }
+
+    let rec private unavailableAt (projection: WorkspaceProjection) : Port =
         { Name = "unavailable"
-          Projection =
-            { emptyWorkspace with
-                Administration =
-                    [ { Id = "engine"; Section = "persistence"; Label = "Investigation engine"; Value = "Not composed into this build"; State = "Unavailable" }
-                      { Id = "provider"; Section = "persistence"; Label = "Data provider"; Value = "Not composed into this build"; State = "Unavailable" } ] }
+          History = fun _ _ -> None
+          Projection = projection
           Handle =
             fun _ input ->
                 match input with
                 | Connect _ ->
-                    { unavailable with
-                        Projection =
-                            { unavailable.Projection with
-                                Connection = ConnectionFailed "Connecting to a data repository is not available in this build yet. Nothing was sent."
-                                Message = Some("warning", "Connecting is not available in this build yet. Nothing was sent and nothing was stored.") } },
+                    unavailableAt
+                        { unavailableProjection with
+                            Connection = ConnectionFailed "Connecting to a data repository is not available in this build yet. Nothing was sent."
+                            Message = Some("warning", "Connecting is not available in this build yet. Nothing was sent and nothing was stored.") },
                     []
-                | _ -> unavailable, [] }
+                | _ -> unavailableAt unavailableProjection, [] }
+
+    let unavailable: Port = unavailableAt unavailableProjection
 
     /// A port that only shows a fixed projection (Percepta state injection and shell tests). Every input is refused.
     let rec fixedAt (projection: WorkspaceProjection) : Port =
         { Name = "fixture"
+          History = fun _ _ -> None
           Projection = projection
           Handle = fun _ _ -> fixedAt projection, [] }
