@@ -27,8 +27,8 @@ let gate (mutate: string -> unit) =
     let dir = scratch "preservation"
     copyDir (Path.Combine(repoRoot, "research/requirements")) (Path.Combine(dir, "research/requirements"))
     copyDir (Path.Combine(repoRoot, "research/requirements-preservation")) (Path.Combine(dir, "research/requirements-preservation"))
-    Directory.CreateSymbolicLink(Path.Combine(dir, "<indy-init>"), env "INDY_INIT") |> ignore
-    Directory.CreateSymbolicLink(Path.Combine(dir, "<indy-init@aab8f80>"), env "INDY_INIT_SOURCE") |> ignore
+    Directory.CreateSymbolicLink(Path.Combine(dir, "<indy-init>"), envPath "INDY_INIT") |> ignore
+    Directory.CreateSymbolicLink(Path.Combine(dir, "<indy-init@aab8f80>"), envPath "INDY_INIT_SOURCE") |> ignore
     mutate (Path.Combine(dir, "research/requirements"))
     let out = Path.Combine(dir, "gate.json")
     let command =

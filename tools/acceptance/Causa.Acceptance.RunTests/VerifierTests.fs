@@ -140,7 +140,7 @@ let ``AR-004 the acceptance step fails closed on an unpinned plan, baseline or a
     let out = scratch "acc-pin"
     let run extra =
         exec "sh" [ "tools/acceptance/ci/acceptance.sh" ] repoRoot
-            ([ "RUN_ID", "pin-check"; "SOURCE_SHA", env "SOURCE_SHA"; "PRODUCERS", env "PRODUCERS"; "OUT", out
+            ([ "RUN_ID", "pin-check"; "SOURCE_SHA", env "SOURCE_SHA"; "PRODUCERS", envPath "PRODUCERS"; "OUT", out
                "INDY_INIT", indyInit (); "COMPILER", compiler (); "RESULTS", results () ] @ extra)
     let wrongPlan = run [ "PLAN_ID", "VP-000000000000" ]
     Assert.NotEqual(0, wrongPlan.Code)

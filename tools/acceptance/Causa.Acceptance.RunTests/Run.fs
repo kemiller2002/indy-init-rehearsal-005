@@ -26,7 +26,11 @@ let repoRoot =
         else up d.Parent
     up (DirectoryInfo AppContext.BaseDirectory)
 
-let indyInit () = env "INDY_INIT"
+/// A path input: relative values are relative to the repository root (the job's working directory), not to the
+/// test host's directory.
+let envPath name = Path.GetFullPath(Path.Combine(repoRoot, env name))
+
+let indyInit () = envPath "INDY_INIT"
 let compiler () = envOr "COMPILER" (Path.Combine(indyInit (), "tools/requirements-compiler/src/bin/Release/net10.0/requirements-compiler.dll"))
 let results () = Path.Combine(repoRoot, envOr "RESULTS" "TestResults")
 
@@ -71,7 +75,7 @@ let baseline =
                  [ "RUN_ID", env "RUN_ID"
                    "SOURCE_SHA", sourceSha
                    "DEPLOYED_SHA", envOr "DEPLOYED_SHA" ""
-                   "PRODUCERS", env "PRODUCERS"
+                   "PRODUCERS", envPath "PRODUCERS"
                    "OUT", out
                    "INDY_INIT", indyInit ()
                    "COMPILER", compiler ()

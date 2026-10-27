@@ -140,7 +140,7 @@ let ``VER-006 the integrations were exercised in this run, not only compared as 
     Assert.True(passedTag "@stack-smoke-folio", "Folio")
     Assert.Contains(ui, fun r -> r.DisplayName.Contains "forma-workflow" && r.Outcome = Discovery.Passed)
     Assert.Contains(ui, fun r -> r.DisplayName.Contains "Percepta contract" && r.Outcome = Discovery.Passed)
-    let records = env "GATE_RECORDS"
+    let records = envPath "GATE_RECORDS"
     let preservation = load (Path.Combine(records, "preservation-gate/gate.json"))
     Assert.Equal(Some "pass", str "verdict" preservation)
     let wasm = File.ReadAllText(Path.Combine(records, "wasm-smoke/wasm-smoke.log"))
@@ -151,7 +151,7 @@ let ``VER-006 the integrations were exercised in this run, not only compared as 
 
 [<Fact; Trait("obligation", "VPO-b5f193731c58028b"); Trait("obligation", "VPO-b55ed2a4a2fd465c")>]
 let ``AR-002 WDL-015 every baseline obligation, WDL-001..WDL-015 included, maps to a derived criterion or a recorded disposition`` () =
-    let gate = load (Path.Combine(env "GATE_RECORDS", "preservation-gate/gate.json"))
+    let gate = load (Path.Combine(envPath "GATE_RECORDS", "preservation-gate/gate.json"))
     Assert.Equal(Some "pass", str "verdict" gate)
     let summary = (field "summary" gate).Value
     let baselineDoc = load (baselinePath ())
@@ -174,7 +174,7 @@ let ``AR-002 WDL-015 every baseline obligation, WDL-001..WDL-015 included, maps 
 // The built site carries no investigation records
 
 let private recordMarkers () =
-    let data = env "CAUSA_DATA_DIR"
+    let data = envPath "CAUSA_DATA_DIR"
     let fixtureIds = Directory.GetDirectories(Path.Combine(data, "fixtures/v1.0.0/investigations")) |> Array.map Path.GetFileName |> List.ofArray
     let active = load (Path.Combine(data, "catalog/active.json"))
     let catalog = load (Path.Combine(data, strOr "" "manifest" active))
@@ -199,7 +199,7 @@ let private scan (roots: string list) (needles: string list) =
 
 [<Fact; Trait("obligation", "VPO-f8cbaa452cd4eb0b"); Trait("obligation", "VPO-0304a8342e7147dd"); Trait("obligation", "VPO-77f6e22e08d5bba0")>]
 let ``EXT-DATA-001 EXT-DATA-013 the built site and application source contain none of the eight investigation records`` () =
-    let site = env "SITE_DIR"
+    let site = envPath "SITE_DIR"
     Assert.True(File.Exists(Path.Combine(site, "index.html")), "the built site (the artifact Pages deploys) is present")
     Assert.True(Directory.GetFiles(site, "*", SearchOption.AllDirectories).Length > 50)
     let fixtureIds, historicalIds, firstEvents = recordMarkers ()
