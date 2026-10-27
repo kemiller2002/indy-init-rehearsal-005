@@ -1,6 +1,6 @@
 # Deployment
 
-Conditor scaffolded a GitHub Pages deployment, `.github/workflows/deploy-pages.yml`.
+Conditor scaffolded a GitHub Pages deployment (`deploy-pages.yml`). It now runs as the `deploy` and `deployed-smoke` jobs of `.github/workflows/build-and-test.yml`, on main, when `vars.DEPLOY_TARGET` is `github-pages`.
 It stays inert until a deployment target is chosen.
 
 ## Status
