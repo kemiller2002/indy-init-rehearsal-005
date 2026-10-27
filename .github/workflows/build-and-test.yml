@@ -24,6 +24,15 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      # The engine's fixture-replay tests (T15) read the frozen Causa storage
+      # contract v1.0.0 fixtures and the historical-v1 workspace. Pinned to a
+      # commit whose frozen paths equal tag causa-storage-v1.0.0.
+      - uses: actions/checkout@v4
+        with:
+          repository: kemiller2002/causa-data
+          ref: 3d861bc181ad7f4f49d82c8147325737b6d3aa1c
+          path: causa-data
+          persist-credentials: false
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "10.0.x"
@@ -37,6 +46,8 @@ jobs:
         run: dotnet build App.slnx -c Release
       - name: Test
         shell: bash
+        env:
+          CAUSA_DATA_DIR: ${{ github.workspace }}/causa-data
         run: |
           set -uo pipefail
           output=$(dotnet test App.slnx -c Release --no-build 2>&1)
