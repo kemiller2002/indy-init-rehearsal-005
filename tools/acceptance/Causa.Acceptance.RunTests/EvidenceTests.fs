@@ -213,3 +213,13 @@ let ``EXT-DATA-001 EXT-DATA-013 the built site and application source contain no
     let replay = resultsOf "dotnet" |> List.filter (fun r -> r.TestId.StartsWith "dotnet:App.Engine.Tests.FixtureReplayTests.")
     Assert.NotEmpty replay
     Assert.All(replay, fun r -> Assert.Equal(Discovery.Passed, r.Outcome))
+
+[<Fact; Trait("obligation", "VPO-d8a63d43b7a2cf56")>]
+let ``EXT-DATA-010 R001 is unchanged: its repository head is still the commit Indy-init records as the R1 baseline`` () =
+    let sources = load (Path.Combine(indyInit (), "requirements-compiled/v1/curation/sources.json"))
+    let entries = items "repositories" sources
+    let recorded = entries |> List.find (fun e -> str "name" e = Some "indy-init-rehearsal-001") |> strOr "" "commit"
+    Assert.True(isHex 40 recorded)
+    let r = exec "git" [ "ls-remote"; "https://github.com/kemiller2002/indy-init-rehearsal-001.git"; "HEAD" ] repoRoot []
+    Assert.Equal(0, r.Code)
+    Assert.Equal(recorded, r.Out.Split('\t').[0].Trim())
