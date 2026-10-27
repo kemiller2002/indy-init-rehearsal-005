@@ -2,12 +2,12 @@
 // and answered by the recorded-behaviour GitHub through the same persistence program as real GitHub (PF-001). The
 // network guard (support/fixtures.js) fails any test that reaches the network; fixture mode sends nothing at all.
 //
-// The documented command: `npm run build:test && node scripts/serve.mjs obj/site-test 4322`, then Connect to the
+// The documented command: `npm run build:test && node scripts/serve.mjs obj/site-test 4822`, then Connect to the
 // repository `local/fixture` (branch `main`, workspace `synthetic-fixture`; the token field is not used).
 import { readFileSync } from "node:fs";
 import { expect, test } from "./support/fixtures.js";
 
-const TEST_SITE = "http://127.0.0.1:4322/";
+const TEST_SITE = `http://127.0.0.1:${process.env.CAUSA_TEST_PORT ?? 4822}/`;
 
 async function started(page) {
   await expect(page.locator("#causa-boot")).toHaveCount(0, { timeout: 90_000 });
