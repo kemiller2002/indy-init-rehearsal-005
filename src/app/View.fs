@@ -8,11 +8,18 @@ open Causa.App.Adapter
 open Causa.App.Presentation
 open Causa.App.Shell
 
+// Kept as calls (never inlined): inlined, each key's temporaries became locals of `project`, and the .NET
+// WebAssembly interpreter refuses a method whose locals exceed its limit ("locals size too big").
+[<System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)>]
 let private text (s: string) = ViewValue.Text s
+[<System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)>]
 let private flag (b: bool) = ViewValue.Flag b
+[<System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)>]
 let private items (xs: ViewItem list) = ViewValue.Items xs
+[<System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)>]
 let private item (fields: (string * string) list) : ViewItem = fields |> List.map (fun (k, v) -> k, ViewPrimitive.Text v) |> Map.ofList
 
+[<System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)>]
 let private itemF (fields: (string * string) list) (flags: (string * bool) list) : ViewItem =
     (fields |> List.map (fun (k, v) -> k, ViewPrimitive.Text v)) @ (flags |> List.map (fun (k, v) -> k, ViewPrimitive.Flag v)) |> Map.ofList
 
@@ -404,220 +411,234 @@ let project (model: Model) : ViewState =
 
     let connectFailure = match ws.Connection with ConnectionFailed r -> r | _ -> ""
 
-    [ "page.title", text pageTitle
-      "screen", text (screenName screen)
-      "secrets.epoch", text (string model.SecretEpoch)
-      "percepta.state", text (model.InjectedState |> Option.defaultValue "")
-      "text.size", text (if model.Settings.LargeText then "large" else "standard")
-      "motion", text (if model.Settings.ReducedMotion then "reduced" else "system")
-      "nav", items primaryNav
-      "connection.label", text (match ws.ConnectionStatus with Some(words, _) -> words | None -> connectionText ws.Connection)
-      "connection.detail", text (ws.ConnectionStatus |> Option.bind snd |> Option.defaultValue "")
-      "connection.hasDetail", flag ((ws.ConnectionStatus |> Option.bind snd |> Option.isSome) && (match ws.Connection with ConnectionFailed _ -> false | _ -> true))
-      "sync.conflict", flag (ws.Sync = Conflict)
-      "confirm.show", flag model.PendingConfirm.IsSome
-      "confirm.text", text (model.PendingConfirm |> Option.map snd |> Option.defaultValue "")
-      "connected", flag connected
-      "notice.show", flag notice.IsSome
-      "notice.text", text (notice |> Option.defaultValue "")
-      "notice.tone", text noticeTone
-      "notice.alert", flag (notice.IsSome && (noticeTone = "danger" || noticeTone = "warning"))
-      "notice.status", flag (notice.IsSome && not (noticeTone = "danger" || noticeTone = "warning"))
-      // Connect (UI-001-O1: empty, disconnected workspace with the explicit Connect action).
-      "screen.connect", flag (screen = ConnectScreen)
-      "draft.repository", text model.Drafts.Repository
-      "draft.branch", text model.Drafts.Branch
-      "draft.workspace", text model.Drafts.Workspace
-      "connect.busy", flag (ws.Connection = Connecting)
-      "connect.failed", flag (connectFailure <> "")
-      "connect.failure", text connectFailure
-      "route.pending", flag (match model.Route with Investigation _ | NewInvestigation -> true | _ -> false)
-      // Investigations (UI-001, UI-022).
-      "screen.list", flag (screen = ListScreen)
-      "list.loading", flag listLoading
-      "list.failed", flag listFailed
-      "list.failure", text listFailure
-      "list.empty", flag (match ws.Investigations with Loaded [] -> true | _ -> false)
-      "cards", items cards
-      "screen.new", flag (screen = NewScreen)
-      "screen.opening", flag (screen = OpeningScreen)
-      "screen.failed", flag (match screen with FailedScreen _ -> true | _ -> false)
-      "failed.text", text (match screen with FailedScreen r -> r | _ -> "")
-      "screen.missing", flag (screen = MissingScreen)
-      "screen.notfound", flag (screen = NotFoundScreen)
-      // An investigation (UI-025, UI-029-O2).
-      "screen.investigation", flag inv.IsSome
-      "inv.id", text invId
-      "inv.title", text (inv |> Option.map (fun i -> i.Title) |> Option.defaultValue "")
-      "inv.status", text (inv |> Option.map (fun i -> label i.Lifecycle) |> Option.defaultValue "")
-      "inv.tone", text (inv |> Option.map (fun i -> tone i.Lifecycle) |> Option.defaultValue "neutral")
-      "inv.kind", text (inv |> Option.map (fun i -> if i.Writable then "Your working copy" else "Read-only demonstration") |> Option.defaultValue "")
-      "inv.version", text (inv |> Option.map (fun i -> $"Version {i.Version}") |> Option.defaultValue "")
-      "inv.description", text (inv |> Option.bind (fun i -> i.Description) |> Option.defaultValue "What happened has not been recorded yet.")
-      "sections", items sectionNav
-      "section.overview", flag (on Overview)
-      "section.causal", flag (on CausalAnalysis)
-      "section.evidence", flag (on Evidence)
-      "section.hypotheses", flag (on Hypotheses)
-      "section.timeline", flag (on Timeline)
-      "section.corrective", flag (on CorrectiveActions)
-      "section.report", flag (on Report)
-      "section.proposals", flag (on AiProposals)
-      "hypotheses", items hypotheses
-      "hypotheses.empty", flag (inv.IsSome && hypotheses.IsEmpty)
-      "evidence", items evidence
-      "evidence.empty", flag (inv.IsSome && evidence.IsEmpty)
-      "blockers", items blockers
-      "blockers.empty", flag (inv.IsSome && blockers.IsEmpty)
-      "capabilities", items capabilities
-      "capabilities.empty", flag (inv.IsSome && capabilities.IsEmpty)
-      "timeline", items timeline
-      "timeline.empty", flag (inv.IsSome && timeline.IsEmpty)
-      "graph.any", flag (graphDoc <> "")
-      "graph.document", text graphDoc
-      "graph.selected", flag (graphSelection <> "")
-      "graph.selection", text graphSelection
-      "causes", items causes
-      "causes.empty", flag (inv.IsSome && causes.IsEmpty)
-      "attention.questions", text attentionQuestions
-      "attention.blocked", flag (blockedActions > 0)
-      "attention.blockedText", text attentionBlocked
-      "attention.material", flag (materialQuestions > 0)
-      "attention.first", text (inv |> Option.bind (fun i -> i.Blockers |> List.tryFind (fun b -> b.Material)) |> Option.map (fun b -> b.Question) |> Option.defaultValue "")
-      "attention.provisional", text "While a material question is open, nothing it affects is shown as settled."
-      "ws.questions", text (match ws.Blockers |> List.filter (fun b -> b.Material) |> List.length with 0 -> "None recorded." | 1 -> "1 material open question." | n -> $"{n} material open questions.")
-      "ws.material", flag (ws.Blockers |> List.exists (fun b -> b.Material))
-      "ws.first", text (ws.Blockers |> List.tryFind (fun b -> b.Material) |> Option.map (fun b -> b.Question) |> Option.defaultValue "")
-      "ws.provisional", text "Starting is blocked until it is answered; nothing has been created."
-      "start.availability", text (if start.Legal then "You can start an investigation here." else "Starting is unavailable: " + (start.Reason |> Option.defaultValue "no reason was given."))
-      "attention.tone", text (if materialQuestions > 0 then "attention" else "neutral")
-      "attention.href", text (inv |> Option.map (fun i -> Routes.formatItem (Investigation(i.Id, Overview)) (i.Blockers |> List.tryHead |> Option.map (fun b -> b.Id) |> Option.defaultValue "")) |> Option.defaultValue "#/")
-      "start.legal", flag start.Legal
-      "start.illegal", flag (not start.Legal)
-      "start.label", text start.Label
-      "start.reason", text (start.Reason |> Option.defaultValue "")
-      "start.hasBlocker", flag start.BlockerId.IsSome
-      "start.blockerHref", text (start.BlockerId |> Option.map (fun b -> Routes.formatItem NewInvestigation b) |> Option.defaultValue "#/investigations/new")
-      "draft.title", text model.Drafts.Title
-      "draft.statement", text model.Drafts.Statement
-      "destination", text destination
-      "wsBlockers", items wsBlockers
-      "wsBlockers.empty", flag wsBlockers.IsEmpty
-      "timeline.version",
-      text (
-          match history, inv with
-          | Some h, _ when h.IsHistorical -> $"Historical view: version {h.AtVersion} of {h.LatestVersion}. This is not the current state."
-          | _, Some i -> $"Showing the investigation as of version {i.Version}, the latest recorded version."
-          | _ -> ""
-      )
-      "history.show", flag history.IsSome
-      "history.historical", flag (history |> Option.exists (fun h -> h.IsHistorical))
-      "history.version", text (match model.HistoryVersion with Some v -> string v | None -> "")
-      "history.versions", items versions
-      "history.title", text (history |> Option.map (fun h -> h.Title) |> Option.defaultValue "")
-      "history.status", text (history |> Option.map (fun h -> label h.Lifecycle) |> Option.defaultValue "")
-      "history.counts", items (history |> Option.map (fun h -> h.Counts |> List.map (fun (l, n) -> item [ "id", l; "text", $"{l}: {n}" ])) |> Option.defaultValue [])
-      "history.here", items (history |> Option.map (fun h -> h.ChangesHere |> List.mapi (fun k c -> item [ "id", string k; "text", c ])) |> Option.defaultValue [])
-      "history.hereEmpty", flag (history |> Option.exists (fun h -> h.ChangesHere.IsEmpty))
-      "history.since", items (history |> Option.map (fun h -> h.ChangesSince |> List.mapi (fun k c -> item [ "id", string k; "text", c ])) |> Option.defaultValue [])
-      "history.sinceShow", flag (history |> Option.exists (fun h -> h.IsHistorical))
-      "history.latestHref", text (inv |> Option.map (fun i -> Routes.format (Investigation(i.Id, Timeline))) |> Option.defaultValue "#/")
-      "timeline.filter", text model.TimelineFilter
-      "timeline.categories", items categories
-      "timeline.replay", text (inv |> Option.map (fun i -> $"{i.Timeline.Length} recorded events, in their recorded order.") |> Option.defaultValue "")
-      "report.incomplete", flag (inv.IsSome && not complete)
-      "report.status", text (if complete then "Complete" else "Incomplete: this investigation is not resolved, so the report is a working draft.")
-      "report.source", text (inv |> Option.map (fun i -> $"{i.Title}, version {i.Version}") |> Option.defaultValue "")
-      "report.conclusion",
-      text (
-          match inv |> Option.bind (fun i -> i.Report) |> Option.bind (fun r -> r.Conclusion), confirmedCauses with
-          | Some c, _ -> c
-          | None, [] -> "No cause has been confirmed and no conclusion is recorded. The report states no conclusion."
-          | None, cs -> "No conclusion is recorded. Confirmed causes: " + (cs |> List.map (fun c -> c.Outcome) |> String.concat "; ")
-      )
-      "report.causes", items (report |> Option.map (fun r -> r.Causes |> List.mapi (fun k (o, confirmed, members) -> item [ "id", string k; "outcome", o; "state", (if confirmed then "Confirmed" else "Not confirmed"); "members", members ])) |> Option.defaultValue [])
-      "report.hasCauses", flag (report |> Option.exists (fun r -> not r.Causes.IsEmpty))
-      "report.open", items (report |> Option.map (fun r -> (r.OpenQuestions |> List.map (fun q -> "Open question: " + q)) @ (r.OpenContradictions |> List.map (fun c -> "Open contradiction: " + c)) @ (r.UnverifiedAssumptions |> List.map (fun a -> "Unverified assumption: " + a)) @ (r.AcceptedResiduals |> List.map (fun a -> "Accepted as residual: " + a)) |> List.mapi (fun k t -> item [ "id", string k; "text", t ])) |> Option.defaultValue [])
-      "report.engine", flag report.IsSome
-      "report.noOpen", flag (report |> Option.forall (fun r -> r.OpenQuestions.IsEmpty && r.OpenContradictions.IsEmpty && r.UnverifiedAssumptions.IsEmpty && r.AcceptedResiduals.IsEmpty))
-      "report.corrections", items (report |> Option.map (fun r -> r.Corrections |> List.mapi (fun k (d, st) -> item [ "id", string k; "text", d; "state", st ])) |> Option.defaultValue [])
-      "report.noCorrections", flag (report |> Option.forall (fun r -> r.Corrections.IsEmpty))
-      "findings.show", flag (inv |> Option.exists (fun i -> i.Findings.IsSome))
-      "findings.text",
-      text (
-          match inv |> Option.bind (fun i -> i.Findings) with
-          | Some f ->
-              let resolved = if f.Resolved then "Resolved" else "Not resolved"
-              $"Confirmed causes: {f.ConfirmedCauses} · Corrective actions verified effective: {f.VerifiedCorrections} · {resolved}"
-          | None -> ""
-      )
-      "report.verification", text (match report with Some r when not r.Corrections.IsEmpty -> "Corrective actions and whether each is verified effective:" | _ -> "No corrective action is recorded; nothing is reported as verified.")
-      "proposals", items proposals
-      "proposals.empty", flag (inv.IsSome && proposals.IsEmpty)
-      "ai.keyHeld", flag ai.KeyHeld
-      "ai.noKey", flag (not ai.KeyHeld)
-      "ai.modelSet", flag (model.Settings.AiModel <> "")
-      "ai.noModel", flag (model.Settings.AiModel = "")
-      "ai.model", text model.Settings.AiModel
-      "ai.canRequest", flag (ai.KeyHeld && model.Settings.AiModel <> "" && not ai.InFlight)
-      "ai.requestDisabled", flag (not (ai.KeyHeld && model.Settings.AiModel <> "") || ai.InFlight)
-      "ai.inFlight", flag (aiHere && ai.InFlight)
-      "ai.result.show", flag (aiHere && ai.Result.IsSome)
-      "ai.result.text", text (ai.Result |> Option.map (fun (t, _, _) -> t) |> Option.defaultValue "")
-      "ai.result.tone", text (ai.Result |> Option.map (fun (_, tone, _) -> tone) |> Option.defaultValue "info")
-      "ai.retryable", flag (aiHere && not ai.InFlight && ai.Result |> Option.exists (fun (_, _, r) -> r))
-      "ai.drafts", items (if aiHere then ai.Drafts |> List.mapi (fun i d -> item [ "id", string i; "kind", d.Kind; "text", d.Text; "rationale", (d.Rationale |> Option.defaultValue "No rationale given.") ]) else [])
-      "ai.hasDrafts", flag (aiHere && not ai.Drafts.IsEmpty)
-      "ai.stale.show", flag (aiHere && ai.Stale.IsSome)
-      "ai.stale.text", text (ai.Stale |> Option.defaultValue "")
-      "draft.aiTask", text model.Drafts.AiTask
-      "settings.aiModel", text model.Settings.AiModel
-      "settings.aiKey", text (if ai.KeyHeld then "A key is held in this page's memory for this session. It is never shown, stored or sent anywhere except the provider's authentication header." else "No key entered. Proposals cannot be requested without one.")
-      "can.AdmitEvidence", flag (can "AdmitEvidence")
-      "why.AdmitEvidence", text (why "AdmitEvidence")
-      "not.AdmitEvidence", flag (not (can "AdmitEvidence"))
-      "can.RelateEvidence", flag (can "RelateEvidence")
-      "why.RelateEvidence", text (why "RelateEvidence")
-      "not.RelateEvidence", flag (not (can "RelateEvidence"))
-      "can.TransitionHypothesis", flag (can "TransitionHypothesis")
-      "why.TransitionHypothesis", text (why "TransitionHypothesis")
-      "not.TransitionHypothesis", flag (not (can "TransitionHypothesis"))
-      "can.RecordCause", flag (can "RecordCause")
-      "why.RecordCause", text (why "RecordCause")
-      "not.RecordCause", flag (not (can "RecordCause"))
-      "can.RecordCorrectiveAction", flag (can "RecordCorrectiveAction")
-      "why.RecordCorrectiveAction", text (why "RecordCorrectiveAction")
-      "not.RecordCorrectiveAction", flag (not (can "RecordCorrectiveAction"))
-      "form.ev.content", text (field "AdmitEvidence.content")
-      "form.ev.source", text (field "AdmitEvidence.source")
-      "form.rel.rationale", text (field "RelateEvidence.rationale")
-      "form.hyp.reason", text (field "TransitionHypothesis.reason")
-      "form.cause.outcome", text (field "RecordCause.outcome")
-      "form.cause.mechanism", text (field "RecordCause.mechanism")
-      "form.ca.description", text (field "RecordCorrectiveAction.description")
-      "causeOptions", items (inv |> Option.map (fun i -> i.Causes |> List.map (fun c -> item [ "id", c.Id; "label", c.Outcome ])) |> Option.defaultValue [])
-      "corrections", items (report |> Option.map (fun r -> r.Corrections |> List.mapi (fun k (d, st) -> item [ "id", string k; "text", d; "state", st ])) |> Option.defaultValue [])
-      "corrections.empty", flag (report |> Option.forall (fun r -> r.Corrections.IsEmpty))
-      "sync.text", text (syncText ws.Sync)
-      "sync.tone", text (syncTone ws.Sync)
-      "sync.mayHaveSaved", flag (match ws.Sync with MayHaveSaved _ -> true | _ -> false)
-      // Administration (UI-018) and Settings (UI-019).
-      "screen.admin", flag (screen = AdministrationScreen)
-      "admin.readiness", text readiness
-      "admin.unverified", items (unverified |> List.map (fun f -> item [ "id", f.Id; "text", $"{f.Label}: {f.State}" ]))
-      "admin.deployment", items (adminRows "deployment")
-      "admin.persistence", items (adminRows "persistence")
-      "admin.ai", items (adminRows "ai")
-      "admin.report", items (adminRows "report")
-      "admin.security", items (adminRows "security")
-      "admin.smoke", items (adminRows "smoke-tests")
-      "screen.settings", flag (screen = SettingsScreen)
-      "settings.textSize", text (if model.Settings.LargeText then "large" else "standard")
-      "settings.motion", text (if model.Settings.ReducedMotion then "reduced" else "system")
-      "settings.connection",
-      text (
-          match ws.Connection with
-          | ConnectedTo(repo, branch, workspace) -> $"Connected to {repo}, branch {branch}, workspace {workspace}, for this session."
-          | _ -> "Not connected. The repository you enter on Connect is used for this session only and is not remembered."
-      ) ]
+    // The projection is assembled from several functions: one method holding every key exceeds the .NET
+    // WebAssembly interpreter's limit on a method's locals ("locals size too big").
+    let keys1 () : (string * ViewValue) list =
+        [ "page.title", text pageTitle
+          "screen", text (screenName screen)
+          "secrets.epoch", text (string model.SecretEpoch)
+          "percepta.state", text (model.InjectedState |> Option.defaultValue "")
+          "text.size", text (if model.Settings.LargeText then "large" else "standard")
+          "motion", text (if model.Settings.ReducedMotion then "reduced" else "system")
+          "nav", items primaryNav
+          "connection.label", text (match ws.ConnectionStatus with Some(words, _) -> words | None -> connectionText ws.Connection)
+          "connection.detail", text (ws.ConnectionStatus |> Option.bind snd |> Option.defaultValue "")
+          "connection.hasDetail", flag ((ws.ConnectionStatus |> Option.bind snd |> Option.isSome) && (match ws.Connection with ConnectionFailed _ -> false | _ -> true))
+          "sync.conflict", flag (ws.Sync = Conflict)
+          "confirm.show", flag model.PendingConfirm.IsSome
+          "confirm.text", text (model.PendingConfirm |> Option.map snd |> Option.defaultValue "")
+          "connected", flag connected
+          "notice.show", flag notice.IsSome
+          "notice.text", text (notice |> Option.defaultValue "")
+          "notice.tone", text noticeTone
+          "notice.alert", flag (notice.IsSome && (noticeTone = "danger" || noticeTone = "warning"))
+          "notice.status", flag (notice.IsSome && not (noticeTone = "danger" || noticeTone = "warning"))
+          // Connect (UI-001-O1: empty, disconnected workspace with the explicit Connect action).
+          "screen.connect", flag (screen = ConnectScreen)
+          "draft.repository", text model.Drafts.Repository
+          "draft.branch", text model.Drafts.Branch
+          "draft.workspace", text model.Drafts.Workspace
+          "connect.busy", flag (ws.Connection = Connecting)
+          "connect.failed", flag (connectFailure <> "")
+          "connect.failure", text connectFailure
+          "route.pending", flag (match model.Route with Investigation _ | NewInvestigation -> true | _ -> false)
+          // Investigations (UI-001, UI-022).
+          "screen.list", flag (screen = ListScreen)
+          "list.loading", flag listLoading
+          "list.failed", flag listFailed
+          "list.failure", text listFailure
+          "list.empty", flag (match ws.Investigations with Loaded [] -> true | _ -> false)
+          "cards", items cards
+          "screen.new", flag (screen = NewScreen)
+          "screen.opening", flag (screen = OpeningScreen)
+          "screen.failed", flag (match screen with FailedScreen _ -> true | _ -> false)
+          "failed.text", text (match screen with FailedScreen r -> r | _ -> "")
+          "screen.missing", flag (screen = MissingScreen)
+          "screen.notfound", flag (screen = NotFoundScreen)
+          // An investigation (UI-025, UI-029-O2).
+          "screen.investigation", flag inv.IsSome
+          "inv.id", text invId ]
+
+    let keys2 () : (string * ViewValue) list =
+        [ "inv.title", text (inv |> Option.map (fun i -> i.Title) |> Option.defaultValue "")
+          "inv.status", text (inv |> Option.map (fun i -> label i.Lifecycle) |> Option.defaultValue "")
+          "inv.tone", text (inv |> Option.map (fun i -> tone i.Lifecycle) |> Option.defaultValue "neutral")
+          "inv.kind", text (inv |> Option.map (fun i -> if i.Writable then "Your working copy" else "Read-only demonstration") |> Option.defaultValue "")
+          "inv.version", text (inv |> Option.map (fun i -> $"Version {i.Version}") |> Option.defaultValue "")
+          "inv.description", text (inv |> Option.bind (fun i -> i.Description) |> Option.defaultValue "What happened has not been recorded yet.")
+          "sections", items sectionNav
+          "section.overview", flag (on Overview)
+          "section.causal", flag (on CausalAnalysis)
+          "section.evidence", flag (on Evidence)
+          "section.hypotheses", flag (on Hypotheses)
+          "section.timeline", flag (on Timeline)
+          "section.corrective", flag (on CorrectiveActions)
+          "section.report", flag (on Report)
+          "section.proposals", flag (on AiProposals)
+          "hypotheses", items hypotheses
+          "hypotheses.empty", flag (inv.IsSome && hypotheses.IsEmpty)
+          "evidence", items evidence
+          "evidence.empty", flag (inv.IsSome && evidence.IsEmpty)
+          "blockers", items blockers
+          "blockers.empty", flag (inv.IsSome && blockers.IsEmpty)
+          "capabilities", items capabilities
+          "capabilities.empty", flag (inv.IsSome && capabilities.IsEmpty)
+          "timeline", items timeline
+          "timeline.empty", flag (inv.IsSome && timeline.IsEmpty)
+          "graph.any", flag (graphDoc <> "")
+          "graph.document", text graphDoc
+          "graph.selected", flag (graphSelection <> "")
+          "graph.selection", text graphSelection
+          "causes", items causes
+          "causes.empty", flag (inv.IsSome && causes.IsEmpty)
+          "attention.questions", text attentionQuestions
+          "attention.blocked", flag (blockedActions > 0)
+          "attention.blockedText", text attentionBlocked
+          "attention.material", flag (materialQuestions > 0)
+          "attention.first", text (inv |> Option.bind (fun i -> i.Blockers |> List.tryFind (fun b -> b.Material)) |> Option.map (fun b -> b.Question) |> Option.defaultValue "")
+          "attention.provisional", text "While a material question is open, nothing it affects is shown as settled."
+          "ws.questions", text (match ws.Blockers |> List.filter (fun b -> b.Material) |> List.length with 0 -> "None recorded." | 1 -> "1 material open question." | n -> $"{n} material open questions.")
+          "ws.material", flag (ws.Blockers |> List.exists (fun b -> b.Material))
+          "ws.first", text (ws.Blockers |> List.tryFind (fun b -> b.Material) |> Option.map (fun b -> b.Question) |> Option.defaultValue "")
+          "ws.provisional", text "Starting is blocked until it is answered; nothing has been created."
+          "start.availability", text (if start.Legal then "You can start an investigation here." else "Starting is unavailable: " + (start.Reason |> Option.defaultValue "no reason was given."))
+          "attention.tone", text (if materialQuestions > 0 then "attention" else "neutral")
+          "attention.href", text (inv |> Option.map (fun i -> Routes.formatItem (Investigation(i.Id, Overview)) (i.Blockers |> List.tryHead |> Option.map (fun b -> b.Id) |> Option.defaultValue "")) |> Option.defaultValue "#/") ]
+
+    let keys3 () : (string * ViewValue) list =
+        [ "start.legal", flag start.Legal
+          "start.illegal", flag (not start.Legal)
+          "start.label", text start.Label
+          "start.reason", text (start.Reason |> Option.defaultValue "")
+          "start.hasBlocker", flag start.BlockerId.IsSome
+          "start.blockerHref", text (start.BlockerId |> Option.map (fun b -> Routes.formatItem NewInvestigation b) |> Option.defaultValue "#/investigations/new")
+          "draft.title", text model.Drafts.Title
+          "draft.statement", text model.Drafts.Statement
+          "destination", text destination
+          "wsBlockers", items wsBlockers
+          "wsBlockers.empty", flag wsBlockers.IsEmpty
+          "timeline.version",
+          text (
+              match history, inv with
+              | Some h, _ when h.IsHistorical -> $"Historical view: version {h.AtVersion} of {h.LatestVersion}. This is not the current state."
+              | _, Some i -> $"Showing the investigation as of version {i.Version}, the latest recorded version."
+              | _ -> ""
+          )
+          "history.show", flag history.IsSome
+          "history.historical", flag (history |> Option.exists (fun h -> h.IsHistorical))
+          "history.version", text (match model.HistoryVersion with Some v -> string v | None -> "")
+          "history.versions", items versions
+          "history.title", text (history |> Option.map (fun h -> h.Title) |> Option.defaultValue "")
+          "history.status", text (history |> Option.map (fun h -> label h.Lifecycle) |> Option.defaultValue "")
+          "history.counts", items (history |> Option.map (fun h -> h.Counts |> List.map (fun (l, n) -> item [ "id", l; "text", $"{l}: {n}" ])) |> Option.defaultValue [])
+          "history.here", items (history |> Option.map (fun h -> h.ChangesHere |> List.mapi (fun k c -> item [ "id", string k; "text", c ])) |> Option.defaultValue [])
+          "history.hereEmpty", flag (history |> Option.exists (fun h -> h.ChangesHere.IsEmpty))
+          "history.since", items (history |> Option.map (fun h -> h.ChangesSince |> List.mapi (fun k c -> item [ "id", string k; "text", c ])) |> Option.defaultValue [])
+          "history.sinceShow", flag (history |> Option.exists (fun h -> h.IsHistorical))
+          "history.latestHref", text (inv |> Option.map (fun i -> Routes.format (Investigation(i.Id, Timeline))) |> Option.defaultValue "#/")
+          "timeline.filter", text model.TimelineFilter
+          "timeline.categories", items categories
+          "timeline.replay", text (inv |> Option.map (fun i -> $"{i.Timeline.Length} recorded events, in their recorded order.") |> Option.defaultValue "")
+          "report.incomplete", flag (inv.IsSome && not complete)
+          "report.status", text (if complete then "Complete" else "Incomplete: this investigation is not resolved, so the report is a working draft.")
+          "report.source", text (inv |> Option.map (fun i -> $"{i.Title}, version {i.Version}") |> Option.defaultValue "")
+          "report.conclusion",
+          text (
+              match inv |> Option.bind (fun i -> i.Report) |> Option.bind (fun r -> r.Conclusion), confirmedCauses with
+              | Some c, _ -> c
+              | None, [] -> "No cause has been confirmed and no conclusion is recorded. The report states no conclusion."
+              | None, cs -> "No conclusion is recorded. Confirmed causes: " + (cs |> List.map (fun c -> c.Outcome) |> String.concat "; ")
+          )
+          "report.causes", items (report |> Option.map (fun r -> r.Causes |> List.mapi (fun k (o, confirmed, members) -> item [ "id", string k; "outcome", o; "state", (if confirmed then "Confirmed" else "Not confirmed"); "members", members ])) |> Option.defaultValue []) ]
+
+    let keys4 () : (string * ViewValue) list =
+        [ "report.hasCauses", flag (report |> Option.exists (fun r -> not r.Causes.IsEmpty))
+          "report.open", items (report |> Option.map (fun r -> (r.OpenQuestions |> List.map (fun q -> "Open question: " + q)) @ (r.OpenContradictions |> List.map (fun c -> "Open contradiction: " + c)) @ (r.UnverifiedAssumptions |> List.map (fun a -> "Unverified assumption: " + a)) @ (r.AcceptedResiduals |> List.map (fun a -> "Accepted as residual: " + a)) |> List.mapi (fun k t -> item [ "id", string k; "text", t ])) |> Option.defaultValue [])
+          "report.engine", flag report.IsSome
+          "report.noOpen", flag (report |> Option.forall (fun r -> r.OpenQuestions.IsEmpty && r.OpenContradictions.IsEmpty && r.UnverifiedAssumptions.IsEmpty && r.AcceptedResiduals.IsEmpty))
+          "report.corrections", items (report |> Option.map (fun r -> r.Corrections |> List.mapi (fun k (d, st) -> item [ "id", string k; "text", d; "state", st ])) |> Option.defaultValue [])
+          "report.noCorrections", flag (report |> Option.forall (fun r -> r.Corrections.IsEmpty))
+          "findings.show", flag (inv |> Option.exists (fun i -> i.Findings.IsSome))
+          "findings.text",
+          text (
+              match inv |> Option.bind (fun i -> i.Findings) with
+              | Some f ->
+                  let resolved = if f.Resolved then "Resolved" else "Not resolved"
+                  $"Confirmed causes: {f.ConfirmedCauses} · Corrective actions verified effective: {f.VerifiedCorrections} · {resolved}"
+              | None -> ""
+          )
+          "report.verification", text (match report with Some r when not r.Corrections.IsEmpty -> "Corrective actions and whether each is verified effective:" | _ -> "No corrective action is recorded; nothing is reported as verified.")
+          "proposals", items proposals
+          "proposals.empty", flag (inv.IsSome && proposals.IsEmpty)
+          "ai.keyHeld", flag ai.KeyHeld
+          "ai.noKey", flag (not ai.KeyHeld)
+          "ai.modelSet", flag (model.Settings.AiModel <> "")
+          "ai.noModel", flag (model.Settings.AiModel = "")
+          "ai.model", text model.Settings.AiModel
+          "ai.canRequest", flag (ai.KeyHeld && model.Settings.AiModel <> "" && not ai.InFlight)
+          "ai.requestDisabled", flag (not (ai.KeyHeld && model.Settings.AiModel <> "") || ai.InFlight)
+          "ai.inFlight", flag (aiHere && ai.InFlight)
+          "ai.result.show", flag (aiHere && ai.Result.IsSome)
+          "ai.result.text", text (ai.Result |> Option.map (fun (t, _, _) -> t) |> Option.defaultValue "")
+          "ai.result.tone", text (ai.Result |> Option.map (fun (_, tone, _) -> tone) |> Option.defaultValue "info")
+          "ai.retryable", flag (aiHere && not ai.InFlight && ai.Result |> Option.exists (fun (_, _, r) -> r))
+          "ai.drafts", items (if aiHere then ai.Drafts |> List.mapi (fun i d -> item [ "id", string i; "kind", d.Kind; "text", d.Text; "rationale", (d.Rationale |> Option.defaultValue "No rationale given.") ]) else [])
+          "ai.hasDrafts", flag (aiHere && not ai.Drafts.IsEmpty)
+          "ai.stale.show", flag (aiHere && ai.Stale.IsSome)
+          "ai.stale.text", text (ai.Stale |> Option.defaultValue "")
+          "draft.aiTask", text model.Drafts.AiTask
+          "settings.aiModel", text model.Settings.AiModel
+          "settings.aiKey", text (if ai.KeyHeld then "A key is held in this page's memory for this session. It is never shown, stored or sent anywhere except the provider's authentication header." else "No key entered. Proposals cannot be requested without one.")
+          "can.AdmitEvidence", flag (can "AdmitEvidence")
+          "why.AdmitEvidence", text (why "AdmitEvidence")
+          "not.AdmitEvidence", flag (not (can "AdmitEvidence"))
+          "can.RelateEvidence", flag (can "RelateEvidence")
+          "why.RelateEvidence", text (why "RelateEvidence")
+          "not.RelateEvidence", flag (not (can "RelateEvidence"))
+          "can.TransitionHypothesis", flag (can "TransitionHypothesis") ]
+
+    let keys5 () : (string * ViewValue) list =
+        [ "why.TransitionHypothesis", text (why "TransitionHypothesis")
+          "not.TransitionHypothesis", flag (not (can "TransitionHypothesis"))
+          "can.RecordCause", flag (can "RecordCause")
+          "why.RecordCause", text (why "RecordCause")
+          "not.RecordCause", flag (not (can "RecordCause"))
+          "can.RecordCorrectiveAction", flag (can "RecordCorrectiveAction")
+          "why.RecordCorrectiveAction", text (why "RecordCorrectiveAction")
+          "not.RecordCorrectiveAction", flag (not (can "RecordCorrectiveAction"))
+          "form.ev.content", text (field "AdmitEvidence.content")
+          "form.ev.source", text (field "AdmitEvidence.source")
+          "form.rel.rationale", text (field "RelateEvidence.rationale")
+          "form.hyp.reason", text (field "TransitionHypothesis.reason")
+          "form.cause.outcome", text (field "RecordCause.outcome")
+          "form.cause.mechanism", text (field "RecordCause.mechanism")
+          "form.ca.description", text (field "RecordCorrectiveAction.description")
+          "causeOptions", items (inv |> Option.map (fun i -> i.Causes |> List.map (fun c -> item [ "id", c.Id; "label", c.Outcome ])) |> Option.defaultValue [])
+          "corrections", items (report |> Option.map (fun r -> r.Corrections |> List.mapi (fun k (d, st) -> item [ "id", string k; "text", d; "state", st ])) |> Option.defaultValue [])
+          "corrections.empty", flag (report |> Option.forall (fun r -> r.Corrections.IsEmpty))
+          "sync.text", text (syncText ws.Sync)
+          "sync.tone", text (syncTone ws.Sync)
+          "sync.mayHaveSaved", flag (match ws.Sync with MayHaveSaved _ -> true | _ -> false)
+          // Administration (UI-018) and Settings (UI-019).
+          "screen.admin", flag (screen = AdministrationScreen)
+          "admin.readiness", text readiness
+          "admin.unverified", items (unverified |> List.map (fun f -> item [ "id", f.Id; "text", $"{f.Label}: {f.State}" ]))
+          "admin.deployment", items (adminRows "deployment")
+          "admin.persistence", items (adminRows "persistence")
+          "admin.ai", items (adminRows "ai")
+          "admin.report", items (adminRows "report")
+          "admin.security", items (adminRows "security")
+          "admin.smoke", items (adminRows "smoke-tests")
+          "screen.settings", flag (screen = SettingsScreen)
+          "settings.textSize", text (if model.Settings.LargeText then "large" else "standard")
+          "settings.motion", text (if model.Settings.ReducedMotion then "reduced" else "system")
+          "settings.connection",
+          text (
+              match ws.Connection with
+              | ConnectedTo(repo, branch, workspace) -> $"Connected to {repo}, branch {branch}, workspace {workspace}, for this session."
+              | _ -> "Not connected. The repository you enter on Connect is used for this session only and is not remembered."
+          ) ]
+
+    // Passed as values, so the compiler keeps each one its own method rather than inlining it here.
+    [ keys1; keys2; keys3; keys4; keys5 ] |> List.collect (fun part -> part ())
     |> Map.ofList
