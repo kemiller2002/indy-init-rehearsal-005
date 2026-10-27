@@ -152,9 +152,9 @@ let ``T13 VPO-6886a2a6e612f704 VPO-199103f9166730e7 hypothesis transitions follo
 
 [<Fact>]
 [<Trait("obligation", "VPO-199103f9166730e7")>]
-[<Trait("obligation", "VPO-be22751d9b5b8098")>]
+[<Trait("engineEvidenceFor", "UI-004-O4")>]
 [<Trait("task", "T13")>]
-let ``T13 VPO-199103f9166730e7 VPO-be22751d9b5b8098 stale duplicate unauthorized and illegal submissions are typed rejections that change nothing`` () =
+let ``T13 VPO-199103f9166730e7 stale duplicate unauthorized and illegal submissions are typed rejections that change nothing`` () =
     let s = run (start ()) ActivateInvestigation
     let before = s.Session
     // stale version
@@ -206,10 +206,10 @@ let private forge (events: DomainEvent list) (version: int64) (body: EventBody) 
 
 [<Fact>]
 [<Trait("obligation", "VPO-199103f9166730e7")>]
-[<Trait("obligation", "VPO-c135d16c59f5baf8")>]
-[<Trait("obligation", "VPO-acd13bfa08dba51a")>]
+[<Trait("engineEvidenceFor", "EXT-DATA-005-O2")>]
+[<Trait("engineEvidenceFor", "PF-002-O2")>]
 [<Trait("task", "T13")>]
-let ``T13 G3 VPO-c135d16c59f5baf8 VPO-acd13bfa08dba51a forged histories are refused by replay with their domain code`` () =
+let ``T13 G3 forged histories are refused by replay with their domain code`` () =
     let history = (resolvedScript ()).Session.History
     Assert.Empty(History.validate history)
     let at (body: EventBody -> bool) = (history |> List.find (fun e -> body e.Body)).Version
@@ -259,11 +259,11 @@ let ``T13 G3 an ungated confirmation in a stored history is refused as HISTORY.U
 let private capability (caps: Capability list) action = caps |> List.find (fun c -> c.Action = action)
 
 [<Fact>]
-[<Trait("obligation", "VPO-be99a964783c59b5")>]
-[<Trait("obligation", "VPO-9659118aa1ef95ff")>]
-[<Trait("obligation", "VPO-04eb901270c2994a")>]
+[<Trait("engineEvidenceFor", "UI-004-O1")>]
+[<Trait("engineEvidenceFor", "UI-004-O2")>]
+[<Trait("engineEvidenceFor", "UI-004-O6")>]
 [<Trait("task", "T13")>]
-let ``T13 UI-004 VPO-be99a964783c59b5 VPO-9659118aa1ef95ff VPO-04eb901270c2994a capabilities come from the decision path with every blocking reason`` () =
+let ``T13 UI-004 capabilities come from the decision path with every blocking reason`` () =
     let s = run (start ()) ActivateInvestigation
     let s = run s (RecordHypothesis(id "h/a", "A", None))
     let s = run s (RecordHypothesis(id "h/b", "B", None))
@@ -297,13 +297,13 @@ let ``T13 UI-004 VPO-be99a964783c59b5 VPO-9659118aa1ef95ff VPO-04eb901270c2994a 
 // ---- report honesty (Boundary E, UI-023, UI-038) ----
 
 [<Fact>]
-[<Trait("obligation", "VPO-d0e33c8aaaf705f2")>]
-[<Trait("obligation", "VPO-f0256bc31283be14")>]
-[<Trait("obligation", "VPO-58231f4725864068")>]
-[<Trait("obligation", "VPO-f8666daf6fdf79d7")>]
-[<Trait("obligation", "VPO-ffda9fea0324a42e")>]
+[<Trait("engineEvidenceFor", "UI-023-O1")>]
+[<Trait("engineEvidenceFor", "UI-023-O3")>]
+[<Trait("engineEvidenceFor", "UI-023-O4")>]
+[<Trait("engineEvidenceFor", "UI-038-O1")>]
+[<Trait("engineEvidenceFor", "UI-038-O2")>]
 [<Trait("task", "T13")>]
-let ``T13 UI-023 VPO-d0e33c8aaaf705f2 VPO-f0256bc31283be14 VPO-58231f4725864068 a cleanly loaded investigation with disputed findings is not verified and nothing is elevated`` () =
+let ``T13 UI-023 a cleanly loaded investigation with disputed findings is not verified and nothing is elevated`` () =
     let s = run (start ()) ActivateInvestigation
     let s = run s (RecordHypothesis(id "h/a", "A", Some "m"))
     let s = run s (AdmitEvidence(id "e/1", TextInput "supports", Log, "log", None))
@@ -335,9 +335,9 @@ let ``T13 UI-023 VPO-d0e33c8aaaf705f2 VPO-f0256bc31283be14 VPO-58231f4725864068 
     Assert.True(report.Hypotheses |> List.forall (fun h -> h.Provenance.Actor = human))
 
 [<Fact>]
-[<Trait("obligation", "VPO-d0e33c8aaaf705f2")>]
+[<Trait("engineEvidenceFor", "UI-023-O1")>]
 [<Trait("task", "T13")>]
-let ``T13 UI-023 VPO-d0e33c8aaaf705f2 verification is asserted only by a resolved investigation with a verified-effective correction`` () =
+let ``T13 UI-023 verification is asserted only by a resolved investigation with a verified-effective correction`` () =
     let inv = state (resolvedScript ())
     let v = Projection.verification inv
     Assert.True(v.Resolved)
@@ -348,11 +348,11 @@ let ``T13 UI-023 VPO-d0e33c8aaaf705f2 verification is asserted only by a resolve
 // ---- engine-created file sets (EXT-DATA-008) ----
 
 [<Fact>]
-[<Trait("obligation", "VPO-61b2e81f99761d55")>]
+[<Trait("engineEvidenceFor", "EXT-DATA-008-O1")>]
 [<Trait("obligation", "VPO-9c6055c47e4eb07d")>]
 [<Trait("obligation", "VPO-5933d986a6ba6dc3")>]
 [<Trait("task", "T13")>]
-let ``T13 EXT-DATA-008 VPO-61b2e81f99761d55 VPO-9c6055c47e4eb07d a command-created investigation is schema-valid replayable and round-trips`` () =
+let ``T13 EXT-DATA-008 VPO-9c6055c47e4eb07d a command-created investigation is schema-valid replayable and round-trips`` () =
     // a new empty investigation
     let fresh = start ()
     let check (s: Script) =
@@ -371,10 +371,10 @@ let ``T13 EXT-DATA-008 VPO-61b2e81f99761d55 VPO-9c6055c47e4eb07d a command-creat
     check (resolvedScript ())
 
 [<Fact>]
-[<Trait("obligation", "VPO-d7fbd84e40ded145")>]
-[<Trait("obligation", "VPO-be22751d9b5b8098")>]
+[<Trait("engineEvidenceFor", "EXT-DATA-006-O2")>]
+[<Trait("engineEvidenceFor", "UI-004-O4")>]
 [<Trait("task", "T13")>]
-let ``T13 VPO-d7fbd84e40ded145 VPO-be22751d9b5b8098 an append decided against a stale version is refused and nothing is written`` () =
+let ``T13 an append decided against a stale version is refused and nothing is written`` () =
     let s = run (start ()) ActivateInvestigation
     let loaded =
         match Storage.write s.Session.History |> Result.bind (fun set -> Storage.read inv.Text (Storage.filesOf set)) with
@@ -475,3 +475,47 @@ let ``T13 D-001 D-002 VPO-5933d986a6ba6dc3 observations are kept verbatim with p
     Assert.Equal(verbatim, loaded.State.Title.Value)
     // observations and hypotheses are distinct record kinds
     Assert.Empty(loaded.State.Hypotheses)
+
+[<Fact>]
+[<Trait("obligation", "VPO-cc57508f3ac056de")>]
+[<Trait("invariant", "D-002")>]
+[<Trait("task", "T13")>]
+let ``T13 UI-005-O2 VPO-cc57508f3ac056de original evidence is never altered when its interpretation changes`` () =
+    let s = run (start ()) ActivateInvestigation
+    let s = run s (RecordHypothesis(id "h/a", "A", None))
+    let original = "  Gateway log: 12:01:07 timeout=2000ms  "
+    let captured = Some(t0.AddHours -1.0)
+    let s = run s (AdmitEvidence(id "e/1", TextInput original, Log, "gateway log export", captured))
+    let snapshot (s: Script) = (state s).Evidence[id "e/1"]
+    let before = snapshot s
+    // every way the interpretation of evidence can change
+    let s =
+        [ AssessEvidence(id "e/1", Verified)
+          RelateEvidence(id "r/1", id "e/1", id "h/a", Supports, Some "fits")
+          AssessEvidence(id "e/1", Invalidated)
+          RelateEvidence(id "r/2", id "e/1", id "h/a", Contradicts, Some "re-read: contradicts")
+          AdmitEvidence(id "e/2", TextInput "Corrected export", Log, "gateway log export v2", None)
+          SupersedeEvidence(id "e/1", id "e/2", "export was truncated") ]
+        |> List.fold run s
+    let after = snapshot s
+    Assert.Equal(before.Content, after.Content)
+    Assert.Equal(TextContent((Text.create original).Value), after.Content)
+    Assert.Equal(before.Source, after.Source)
+    Assert.Equal(before.CapturedAt, after.CapturedAt)
+    Assert.Equal(before.AdmittedAtVersion, after.AdmittedAtVersion)
+    Assert.Equal(before.Provenance, after.Provenance)
+    // only the interpretation fields moved, and the superseded original stays in the record
+    Assert.Equal(Invalidated, after.Verification)
+    Assert.Equal(Some(id<EvidenceTag> "e/2"), after.SupersededBy)
+    // no command can rewrite evidence content: the only evidence commands are admit, assess, relate, supersede
+    let evidenceCases =
+        Microsoft.FSharp.Reflection.FSharpType.GetUnionCases typeof<Command>
+        |> Array.map (fun c -> c.Name)
+        |> Array.filter (fun n -> n.Contains "Evidence")
+        |> Set.ofArray
+    // (MarkAwaitingEvidence is a lifecycle command and carries no evidence)
+    Assert.Equal<Set<string>>(set [ "AdmitEvidence"; "AssessEvidence"; "MarkAwaitingEvidence"; "RelateEvidence"; "SupersedeEvidence" ], evidenceCases)
+    // a second admit of the same id is refused rather than overwriting
+    match tryRun s human (AdmitEvidence(id "e/1", TextInput "rewritten", Log, "x", None)) with
+    | Error(Refused(e :: _)) -> Assert.Equal("DUPLICATE_ID", e.Code)
+    | other -> failwithf "%A" other

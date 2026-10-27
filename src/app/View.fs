@@ -411,6 +411,7 @@ let project (model: Model) : ViewState =
       "report.verification", text "Verification of corrective actions is not part of this report yet; nothing is reported as verified."
       "sync.text", text (syncText ws.Sync)
       "sync.tone", text (syncTone ws.Sync)
+      "sync.mayHaveSaved", flag (match ws.Sync with MayHaveSaved _ -> true | _ -> false)
       // Administration (UI-018) and Settings (UI-019).
       "screen.admin", flag (screen = AdministrationScreen)
       "admin.readiness", text readiness

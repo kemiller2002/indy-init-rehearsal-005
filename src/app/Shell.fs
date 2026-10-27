@@ -124,6 +124,7 @@ let private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
         toPort entropy (Connect request) { model with Drafts = { d with Token = "" }; Notice = None }
     | "disconnect" -> toPort entropy Disconnect { model with Notice = Some { Tone = "info"; Text = "Disconnected. The token was forgotten." } }
     | "dismiss" -> { model with Notice = None }, []
+    | "check-remote" -> toPort entropy CheckRemote model
     // The graph frame reports the node the person selected; the shell only remembers which (UI-026-O3).
     | "graph-select" when value = "" || Routes.selection ("?item=" + value) = value -> { model with Selected = value }, []
     | "text-size" -> { model with Settings = { model.Settings with LargeText = (value = "large") } }, []

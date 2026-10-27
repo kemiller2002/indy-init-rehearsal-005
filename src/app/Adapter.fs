@@ -90,6 +90,9 @@ type SyncStatus =
     | RemotelySynced of at: string option
     | Conflict
     | SaveFailed of reason: string
+    /// The provider's answer to a save was lost: it may or may not have reached GitHub. No Retry is offered (a
+    /// retry could write twice); only "check now", which re-reads the branch before anything else is sent.
+    | MayHaveSaved of detail: string
     | ReadOnly
 
 type Connection =
@@ -123,6 +126,8 @@ type AdapterInput =
     /// A semantic command with its form fields and the version the form was rendered from (Boundary A).
     | Command of investigation: string option * name: string * fields: Map<string, string> * expectedVersion: int64
     | Answer of correlation: string * EffectResult
+    /// "Check now": re-read the branch to settle a save whose outcome is unknown (MayHaveSaved).
+    | CheckRemote
 
 /// The engine and persistence as the shell sees them.
 type Port =

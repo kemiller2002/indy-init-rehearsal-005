@@ -288,7 +288,8 @@
                 </ul>
               </section>
             </div>
-            <p class="causa-sync" data-percepta-region="persistence-state" data-bind-data-tone="sync.tone" role="status"><span class="ef-visually-hidden">Save status: </span><span data-text="sync.text"></span></p>
+            <div class="causa-sync" data-percepta-region="persistence-state" data-bind-data-tone="sync.tone"><p role="status"><span class="ef-visually-hidden">Save status: </span><span data-text="sync.text"></span></p>
+              <template data-if="sync.mayHaveSaved"><button type="button" class="ef-button" data-event="check-remote">Check now</button></template></div>
           </section>
         </template>
 
@@ -363,23 +364,28 @@
             <h2 id="sec-report">Report</h2>
             <p><button type="button" class="ef-button" id="causa-print">Print the report</button></p>
             <template data-if="report.incomplete"><p class="causa-report__incomplete" role="status" data-text="report.status"></p></template>
-            <div class="causa-panel causa-report-preview">
-              <section aria-labelledby="rp-source" data-percepta-region="source-version"><h3 id="rp-source">Source</h3><p data-text="report.source"></p></section>
-              <section aria-labelledby="rp-conclusion" data-percepta-region="conclusion"><h3 id="rp-conclusion">Conclusion</h3><p data-text="report.conclusion"></p></section>
-              <section aria-labelledby="rp-evidence" data-percepta-region="evidence"><h3 id="rp-evidence">Evidence</h3>
+            <ef-print-document class="causa-panel causa-report-preview causa-report">
+              <ef-print-title-page class="causa-report__title-page">
+                <p class="causa-report__eyebrow">Causa investigation report</p>
+                <p class="causa-report__title" data-text="inv.title"></p>
+                <p data-text="report.status"></p>
+              </ef-print-title-page>
+              <ef-print-section aria-labelledby="rp-source" data-percepta-region="source-version"><h3 id="rp-source">Source</h3><p data-text="report.source"></p></ef-print-section>
+              <ef-print-section aria-labelledby="rp-conclusion" data-percepta-region="conclusion"><h3 id="rp-conclusion">Conclusion</h3><p data-text="report.conclusion"></p></ef-print-section>
+              <ef-print-section aria-labelledby="rp-evidence" data-percepta-region="evidence"><h3 id="rp-evidence">Evidence</h3>
                 <template data-if="evidence.empty"><p class="causa-muted">No evidence recorded yet.</p></template>
                 <ul class="causa-report__list">
                   <template data-each="evidence" data-key="id"><li><span data-text="content"></span> (<span data-text="source"></span>)</li></template>
                 </ul>
-              </section>
-              <section aria-labelledby="rp-uncertainty" data-percepta-region="uncertainty"><h3 id="rp-uncertainty">Open questions</h3>
+              </ef-print-section>
+              <ef-print-section aria-labelledby="rp-uncertainty" data-percepta-region="uncertainty"><h3 id="rp-uncertainty">Open questions</h3>
                 <template data-if="blockers.empty"><p class="causa-muted">No open questions recorded.</p></template>
                 <ul class="causa-report__list">
                   <template data-each="blockers" data-key="id"><li><span data-text="question"></span> (<span data-text="materiality"></span>)</li></template>
                 </ul>
-              </section>
-              <section aria-labelledby="rp-verification" data-percepta-region="verification"><h3 id="rp-verification">Verification</h3><p data-text="report.verification"></p></section>
-            </div>
+              </ef-print-section>
+              <ef-print-section aria-labelledby="rp-verification" data-percepta-region="verification"><h3 id="rp-verification">Verification</h3><p data-text="report.verification"></p></ef-print-section>
+            </ef-print-document>
           </section>
         </template>
       </div>

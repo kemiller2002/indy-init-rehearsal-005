@@ -61,11 +61,11 @@ let private classify (outcome: int64 -> AiHttpOutcome) =
     | Error f -> failwithf "%A" f
 
 [<Fact>]
-[<Trait("obligation", "VPO-2de744fb2c8bdc70")>]
-[<Trait("obligation", "VPO-c41f10e4ed8a086b")>]
-[<Trait("obligation", "VPO-bb08b9a414ba4cd7")>]
+[<Trait("engineEvidenceFor", "EXT-DATA-004-O1")>]
+[<Trait("engineEvidenceFor", "AR-014-O2")>]
+[<Trait("engineEvidenceFor", "UI-006-O6")>]
 [<Trait("task", "T27")>]
-let ``T27 VPO-2de744fb2c8bdc70 VPO-c41f10e4ed8a086b VPO-bb08b9a414ba4cd7 the key goes only in the auth header and is never printed`` () =
+let ``T27 the key goes only in the auth header and is never printed`` () =
     let _, _, effect = started ()
     Assert.Equal("POST", effect.Method)
     Assert.Equal(AiLoop.anthropicEndpoint, effect.Url)
@@ -147,7 +147,7 @@ let ``T27 D-004 VPO-199103f9166730e7 a successful answer yields drafts that are 
 
 [<Fact>]
 [<Trait("obligation", "VPO-199103f9166730e7")>]
-[<Trait("obligation", "VPO-2de744fb2c8bdc70")>]
+[<Trait("engineEvidenceFor", "EXT-DATA-004-O1")>]
 [<Trait("task", "T27")>]
 let ``T27 every provider outcome is classified and only the honest ones offer retry`` () =
     let cases: (string * (int64 -> AiHttpOutcome) * (AiResult -> bool) * bool) list =
@@ -176,10 +176,10 @@ let ``T27 every provider outcome is classified and only the honest ones offer re
         Assert.DoesNotContain(fakeKey, AiLoop.describe result)
 
 [<Fact>]
-[<Trait("obligation", "VPO-2d4b7557ce013e50")>]
-[<Trait("obligation", "VPO-8c435e1ebdf43e7c")>]
+[<Trait("engineEvidenceFor", "PF-009-O2")>]
+[<Trait("engineEvidenceFor", "PF-009-O3")>]
 [<Trait("task", "T27")>]
-let ``T27 VPO-2d4b7557ce013e50 VPO-8c435e1ebdf43e7c a late answer never lands on a newer request and one request runs at a time`` () =
+let ``T27 a late answer never lands on a newer request and one request runs at a time`` () =
     let session, state, first = started ()
     let inv = session.State |> Option.get
     match AiLoop.start state key profile inv "again" with

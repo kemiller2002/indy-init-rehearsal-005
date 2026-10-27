@@ -321,3 +321,7 @@ body[data-motion="reduced"] *, body[data-motion="reduced"] *::before { animation
 .causa .causa-panel + .causa-panel { margin-top: 1rem; }
 fieldset.causa-panel { border: 1px solid var(--ef-color-border-subtle); min-width: 0; }
 fieldset.causa-panel legend { font-weight: 700; color: var(--causa-color-structure); padding: 0 0.25rem; }
+.causa-sync p { margin: 0; }
+/* Outcome unknown: neither saved (teal) nor failed (coral); a dashed amber edge and its own words. */
+.causa-sync[data-tone="unknown"] { border-left: 4px dashed var(--causa-color-attention); background: var(--causa-amber-wash); color: var(--causa-color-attention-ink); }
+.causa-sync[data-tone="unknown"]::before { content: "? "; font-weight: 700; }
