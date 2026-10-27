@@ -71,10 +71,11 @@
       "title": "Persistence",
       "definition": "local vs remote truth, expected-version conflict, reload, no fixture mutation",
       "requires": [
+        "provider-conformance",
         "live"
       ],
       "evidenceType": "live",
-      "note": "the live provider suite (CAUSA_GITHUB_TOKEN / CAUSA_TEST_REPO), main pushes only"
+      "note": "provider-conformance (causa-persistence record + catalog against the real provider) and the live browser suite (CAUSA_GITHUB_TOKEN / CAUSA_TEST_REPO), main pushes only"
     },
     {
       "id": "G7",
@@ -95,6 +96,7 @@
         "site",
         "browser",
         "live",
+        "provider-conformance",
         "lock-gate",
         "traceability"
       ],
@@ -112,6 +114,7 @@
         "site",
         "browser",
         "live",
+        "provider-conformance",
         "lock-gate",
         "traceability"
       ],

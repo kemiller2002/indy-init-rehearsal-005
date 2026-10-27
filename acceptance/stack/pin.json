@@ -1,6 +1,6 @@
 {
   "schema": "causa.stack-pin/1",
-  "description": "T11 pin: the echelon-current 1.29.0 channel resolution for linux-x64, copied byte for byte from the Echelon Registry. The lock gate (causa-acceptance lock-gate) refuses a copy whose SHA-256 differs, and CI re-fetches the registry file at the pinned commit and compares it.",
+  "description": "T11 pin: the echelon-current 1.29.0 channel resolution for linux-x64, copied byte for byte from the Echelon Registry. The lock gate (causa-acceptance lock-gate) refuses a copy whose SHA-256 differs, and CI re-fetches the registry file at the pinned commit and compares it. Echelon packages outside the release set are listed in outsideChannel, each pinned by version and integrity against an accepted owner decision record; the gate reports them as such and fails on any Echelon package that is neither in the channel nor pinned there.",
   "registry": {
     "repository": "kemiller2002/echelon-registry",
     "commit": "402bec2197348daaac4beb77de7c6ac8a2019c30",
@@ -20,5 +20,18 @@
     "percepta": "0.1.0",
     "percepta-semantic": "0.3.0",
     "dokimos": "0.8.0"
-  }
+  },
+  "outsideChannel": [
+    {
+      "package": "@echelon-foundry/forma-workflow",
+      "version": "1.1.0",
+      "integrity": "sha512-20L1AeYGzqdXu9e2isuQSgvTdI8tRKROiUPpsn0oy/Y1SYSv/1PAtqRu1m3Ahf6Ez9+DyNqCU7bhclyr65Dslw==",
+      "source": "kemiller2002/forma packages/workflow, npm, gitHead e0b088dbbe98b05221c4bc5b5e2224e9bf470827",
+      "decision": {
+        "id": "DF-CAUSA-2026-0001",
+        "path": "research/decisions/DF-CAUSA-2026-0001--r5-dec-001-forma-workflow-1-1-0.md",
+        "title": "R5-DEC-001"
+      }
+    }
+  ]
 }

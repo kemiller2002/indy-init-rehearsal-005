@@ -1,0 +1,226 @@
+{
+  "name": "long-labels",
+  "purpose": "Very long hypothesis and outcome text, one beyond the 1000-character node label limit.",
+  "synthetic": true,
+  "document": {
+    "format": "forma-workflow",
+    "formatVersion": "1.0.0",
+    "id": "causal-00000000-0000-4000-8000-00000000a0a0",
+    "title": "Causal analysis: Long labels",
+    "language": "en",
+    "forma": {
+      "version": "0.9.0"
+    },
+    "palette": {
+      "navy": "#14283f",
+      "teal": "#087f8c",
+      "amber": "#e9a23b",
+      "coral": "#d66b58",
+      "ivory": "#f5f3ed"
+    },
+    "layout": {
+      "direction": "down"
+    },
+    "presentation": {
+      "legendTitle": "Key",
+      "legend": [
+        {
+          "id": "tone-teal",
+          "label": "Supported or confirmed",
+          "color": {
+            "stroke": "palette:teal"
+          }
+        },
+        {
+          "id": "tone-amber",
+          "label": "Open: proposed, plausible or awaiting work",
+          "color": {
+            "stroke": "palette:amber"
+          }
+        },
+        {
+          "id": "tone-coral",
+          "label": "Weakened or falsified",
+          "color": {
+            "stroke": "palette:coral"
+          }
+        },
+        {
+          "id": "tone-navy",
+          "label": "Other recorded states",
+          "color": {
+            "stroke": "palette:navy"
+          }
+        },
+        {
+          "id": "role-root-cause",
+          "label": "Root cause",
+          "line": "solid"
+        },
+        {
+          "id": "role-trigger",
+          "label": "Trigger",
+          "line": "solid"
+        },
+        {
+          "id": "role-contributing-factor",
+          "label": "Contributing factor",
+          "line": "dashed"
+        },
+        {
+          "id": "role-enabling-condition",
+          "label": "Enabling condition",
+          "line": "dotted"
+        }
+      ]
+    },
+    "nodes": [
+      {
+        "id": "h-h-1",
+        "kind": "org.causa.graph:hypothesis",
+        "kindLabel": "Hypothesis",
+        "label": "segment000 of a deliberately long synthetic hypothesis statement segment001 of a deliberately long synthetic hypothesis statement segment002 of a deliberately long synthetic hypothesis statement segment003 of a deliberately long synthetic hypothesis statement segment004 of a deliberately long synthetic hypothesis statement segment005 of a deliberately long synthetic hypothesis statement segment006 of a deliberately long synthetic hypothesis statement segment007 of a deliberately long synthetic hypothesis statement",
+        "description": "2 supporting, 0 contradicting evidence",
+        "variant": "rounded",
+        "color": {
+          "fill": "palette:ivory",
+          "stroke": "palette:teal",
+          "accent": "palette:teal"
+        },
+        "status": {
+          "state": "org.causa.state:supported",
+          "label": "Supported"
+        },
+        "accessibility": {
+          "name": "Hypothesis (Supported): segment000 of a deliberately long synthetic hypothesis statement segment001 of a deliberately long synthetic hypothesis statement segment002 of a deliberately long synthetic hypothesis statement segment003 of a deliberately long synthetic hypothesis statement segment004 of a deliberately long synthetic hypothesis statement segment005 of a deliberately long synthetic hypothesis statement segment006 of a deliberately long synthetic hypothesis statement segment007 of a deliberately long synthetic hypothesis statement",
+          "description": "segment000 of a deliberately long synthetic hypothesis statement segment001 of a deliberately long synthetic hypothesis statement segment002 of a deliberately long synthetic hypothesis statement segment003 of a deliberately long synthetic hypothesis statement segment004 of a deliberately long synthetic hypothesis statement segment005 of a deliberately long synthetic hypothesis statement segment006 of a deliberately long synthetic hypothesis statement segment007 of a deliberately long synthetic hypothesis statement \u00B7 2 supporting, 0 contradicting evidence"
+        },
+        "references": [
+          {
+            "id": "hypothesis",
+            "system": "org.causa",
+            "type": "hypothesis",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-1",
+            "label": "Hypothesis record",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-1"
+          }
+        ],
+        "interaction": {
+          "action": "navigate",
+          "target": {
+            "reference": "hypothesis"
+          },
+          "label": "Open Hypothesis record"
+        }
+      },
+      {
+        "id": "h-h-2",
+        "kind": "org.causa.graph:hypothesis",
+        "kindLabel": "Hypothesis",
+        "label": "segment000 of a deliberately long synthetic hypothesis statement segment001 of a deliberately long synthetic hypothesis statement segment002 of a deliberately long synthetic hypothesis statement segment003 of a deliberately long synthetic hypothesis statement segment004 of a deliberately long synthetic hypothesis statement segment005 of a deliberately long synthetic hypothesis statement segment006 of a deliberately long synthetic hypothesis statement segment007 of a deliberately long synthetic hypothesis statement segment008 of a deliberately long synthetic hypothesis statement segment009 of a deliberately long synthetic hypothesis statement segment010 of a deliberately long synthetic hypothesis statement segment011 of a deliberately long synthetic hypothesis statement segment012 of a deliberately long synthetic hypothesis statement segment013 of a deliberately long synthetic hypothesis statement segment014 of a deliberately long synthetic hypothesis statement segment015 of a delibera\u2026",
+        "description": "0 supporting, 1 contradicting evidence",
+        "variant": "rounded",
+        "color": {
+          "fill": "palette:ivory",
+          "stroke": "palette:amber",
+          "accent": "palette:amber"
+        },
+        "status": {
+          "state": "org.causa.state:plausible",
+          "label": "Plausible"
+        },
+        "accessibility": {
+          "name": "Hypothesis (Plausible): segment000 of a deliberately long synthetic hypothesis statement segment001 of a deliberately long synthetic hypothesis statement segment002 of a deliberately long synthetic hypothesis statement segment003 of a deliberately long synthetic hypothesis statement segment004 of a deliberately long synthetic hypothesis statement segment005 of a deliberately long synthetic hypothesis statement segment006 of a deliberately long synthetic hypothesis statement segment007 of a deliberately long synthetic hypothesis statement segment008 of a deliberately long synthetic hypothesis statement segment009 of a deliberately long synthetic hypothesis statement segment010 of a deliberately long synthetic hypothesis statement segment011 of a deliberately long synthetic hypothesis statement segment012 of a deliberately long synthetic hypothesis statement segment013 of a deliberately long synthetic hypothesis statement segment014 of a deliberately long synthetic hypothesis statement \u2026",
+          "description": "segment000 of a deliberately long synthetic hypothesis statement segment001 of a deliberately long synthetic hypothesis statement segment002 of a deliberately long synthetic hypothesis statement segment003 of a deliberately long synthetic hypothesis statement segment004 of a deliberately long synthetic hypothesis statement segment005 of a deliberately long synthetic hypothesis statement segment006 of a deliberately long synthetic hypothesis statement segment007 of a deliberately long synthetic hypothesis statement segment008 of a deliberately long synthetic hypothesis statement segment009 of a deliberately long synthetic hypothesis statement segment010 of a deliberately long synthetic hypothesis statement segment011 of a deliberately long synthetic hypothesis statement segment012 of a deliberately long synthetic hypothesis statement segment013 of a deliberately long synthetic hypothesis statement segment014 of a deliberately long synthetic hypothesis statement segment015 of a deliberately long synthetic hypothesis statement segment016 of a deliberately long synthetic hypothesis statement segment017 of a deliberately long synthetic hypothesis statement segment018 of a deliberately long synthetic hypothesis statement segment019 of a deliberately long synthetic hypothesis statement segment020 of a deliberately long synthetic hypothesis statement segment021 of a deliberately long synthetic hypothesis statement segment022 of a deliberately long synthetic hypothesis statement segment023 of a deliberately long synthetic hypothesis statement segment024 of a deliberately long synthetic hypothesis statement segment025 of a deliberately long synthetic hypothesis statement segment026 of a deliberately long synthetic hypothesis statement segment027 of a deliberately long synthetic hypothesis statement segment028 of a deliberately long synthetic hypothesis statement segment029 of a deliberately long synthetic hypothesis statement \u00B7 0 supporting, 1 contradicting evidence"
+        },
+        "references": [
+          {
+            "id": "hypothesis",
+            "system": "org.causa",
+            "type": "hypothesis",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-2",
+            "label": "Hypothesis record",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-2"
+          }
+        ],
+        "interaction": {
+          "action": "navigate",
+          "target": {
+            "reference": "hypothesis"
+          },
+          "label": "Open Hypothesis record"
+        }
+      },
+      {
+        "id": "c-c-1",
+        "kind": "org.causa.graph:outcome",
+        "kindLabel": "Outcome",
+        "label": "segment000 of a deliberately long synthetic hypothesis statement segment001 of a deliberately long synthetic hypothesis statement segment002 of a deliberately long synthetic hypothesis statement segment003 of a deliberately long synthetic hypothesis statement segment004 of a deliberately long synthetic hypothesis statement segment005 of a deliberately long synthetic hypothesis statement",
+        "description": "Causal relationship \u00B7 2 contributing hypotheses",
+        "variant": "pill",
+        "color": {
+          "fill": "palette:ivory",
+          "stroke": "palette:amber",
+          "accent": "palette:amber"
+        },
+        "status": {
+          "state": "org.causa.state:proposed",
+          "label": "Proposed"
+        },
+        "accessibility": {
+          "name": "Outcome (Proposed): segment000 of a deliberately long synthetic hypothesis statement segment001 of a deliberately long synthetic hypothesis statement segment002 of a deliberately long synthetic hypothesis statement segment003 of a deliberately long synthetic hypothesis statement segment004 of a deliberately long synthetic hypothesis statement segment005 of a deliberately long synthetic hypothesis statement",
+          "description": "segment000 of a deliberately long synthetic hypothesis statement segment001 of a deliberately long synthetic hypothesis statement segment002 of a deliberately long synthetic hypothesis statement segment003 of a deliberately long synthetic hypothesis statement segment004 of a deliberately long synthetic hypothesis statement segment005 of a deliberately long synthetic hypothesis statement \u00B7 Causal relationship \u00B7 2 contributing hypotheses"
+        },
+        "references": [
+          {
+            "id": "cause",
+            "system": "org.causa",
+            "type": "cause",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/causal-analysis?item=c-1",
+            "label": "Causal relationship record",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/causal-analysis?item=c-1"
+          }
+        ],
+        "interaction": {
+          "action": "navigate",
+          "target": {
+            "reference": "cause"
+          },
+          "label": "Open Causal relationship record"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e-c-1-h-1",
+        "source": {
+          "node": "h-h-1"
+        },
+        "target": {
+          "node": "c-c-1"
+        },
+        "label": "Root cause",
+        "line": "solid",
+        "width": 3,
+        "color": {
+          "stroke": "palette:navy"
+        }
+      },
+      {
+        "id": "e-c-1-h-2",
+        "source": {
+          "node": "h-h-2"
+        },
+        "target": {
+          "node": "c-c-1"
+        },
+        "label": "Contributing factor",
+        "line": "dashed",
+        "width": 2,
+        "color": {
+          "stroke": "palette:navy"
+        }
+      }
+    ]
+  }
+}

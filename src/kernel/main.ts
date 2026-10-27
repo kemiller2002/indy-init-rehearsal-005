@@ -127,6 +127,9 @@ Promise.race([kernel.start(), timeout]).then(
       startFailed("Causa could not start.", `kernel status ${kernel.status}`);
       return;
     }
+    // The .NET runtime publishes a global accessor for itself; the production page does not need it, so it is
+    // removed once the application has started (the kernel keeps its own reference to the exports).
+    if (!TEST_BUILD) Reflect.deleteProperty(globalThis, "getDotnetRuntime");
     // WASM-LOAD-004: the shell leaves only once the application has rendered its first projection.
     // Test build only: `?percepta=default` shows the fixture investigation with no predicates, so a Percepta run
     // can establish the screen's identity before it injects its own fixtures.
@@ -217,6 +220,18 @@ window.addEventListener("message", (event) => {
     if (input instanceof HTMLInputElement) {
       input.value = objects.length > 0 ? selectionId(objects[0]) : "";
       input.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  } else if (message.type === "event" && message.event && message.event.type === "intent" && message.event.action === "navigate") {
+    // Follow the record link Causa's graph put on the node (the application's own route). Decides nothing.
+    const nodeId = message.event.object && typeof message.event.object.id === "string" ? message.event.object.id : "";
+    const refId = message.event.target && typeof message.event.target.reference === "string" ? message.event.target.reference : "";
+    try {
+      const doc = JSON.parse(graph.sent);
+      const node = (doc.nodes ?? []).find((n: { id: string }) => n.id === nodeId);
+      const ref = node && (node.references ?? []).find((r: { id: string }) => r.id === refId);
+      if (ref && typeof ref.href === "string" && ref.href.startsWith("#/investigations/")) location.hash = ref.href;
+    } catch (error) {
+      diagnostics.push({ kind: "GraphIntent", detail: String(error) });
     }
   } else if (message.type === "reply" && message.ok === false) {
     diagnostics.push({ kind: "GraphRefused", detail: String(message.error) });

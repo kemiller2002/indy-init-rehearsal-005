@@ -1,0 +1,21 @@
+{
+  "schema": "causa.acceptance-fixtures/1",
+  "description": "Fixture sets this candidate's tests consume, at the causa-data commit CI pins, and the tests that read them at run time (by test identity prefix or tag). acceptance.sh joins this with the run's traceability into test-requirement-map.json (PF-018-O1); the acceptance-run tests check every consumer ran and passed and every fixture id exists at the pinned commit.",
+  "repository": "kemiller2002/causa-data",
+  "commit": "3d861bc181ad7f4f49d82c8147325737b6d3aa1c",
+  "sets": [
+    {
+      "id": "storage-v1.0.0",
+      "path": "fixtures/v1.0.0/investigations",
+      "requirements": ["EXT-DATA-013", "EXT-DATA-008"],
+      "consumers": ["dotnet:App.Engine.Tests.FixtureReplayTests."]
+    },
+    {
+      "id": "historical-v1",
+      "path": "workspaces/demo/historical-v1/investigations",
+      "manifest": "catalog/historical-v1/manifest.json",
+      "requirements": ["EXT-DATA-013"],
+      "consumers": ["dotnet:App.Engine.Tests.FixtureReplayTests.T15 EXT-DATA-013", "wasm-smoke"]
+    }
+  ]
+}

@@ -1,0 +1,832 @@
+{
+  "name": "dense-evidence",
+  "purpose": "Twelve hypotheses with large evidence counts across three outcomes, shared members included.",
+  "synthetic": true,
+  "document": {
+    "format": "forma-workflow",
+    "formatVersion": "1.0.0",
+    "id": "causal-00000000-0000-4000-8000-00000000a0a0",
+    "title": "Causal analysis: Dense evidence",
+    "language": "en",
+    "forma": {
+      "version": "0.9.0"
+    },
+    "palette": {
+      "navy": "#14283f",
+      "teal": "#087f8c",
+      "amber": "#e9a23b",
+      "coral": "#d66b58",
+      "ivory": "#f5f3ed"
+    },
+    "layout": {
+      "direction": "down"
+    },
+    "presentation": {
+      "legendTitle": "Key",
+      "legend": [
+        {
+          "id": "tone-teal",
+          "label": "Supported or confirmed",
+          "color": {
+            "stroke": "palette:teal"
+          }
+        },
+        {
+          "id": "tone-amber",
+          "label": "Open: proposed, plausible or awaiting work",
+          "color": {
+            "stroke": "palette:amber"
+          }
+        },
+        {
+          "id": "tone-coral",
+          "label": "Weakened or falsified",
+          "color": {
+            "stroke": "palette:coral"
+          }
+        },
+        {
+          "id": "tone-navy",
+          "label": "Other recorded states",
+          "color": {
+            "stroke": "palette:navy"
+          }
+        },
+        {
+          "id": "role-root-cause",
+          "label": "Root cause",
+          "line": "solid"
+        },
+        {
+          "id": "role-trigger",
+          "label": "Trigger",
+          "line": "solid"
+        },
+        {
+          "id": "role-contributing-factor",
+          "label": "Contributing factor",
+          "line": "dashed"
+        },
+        {
+          "id": "role-enabling-condition",
+          "label": "Enabling condition",
+          "line": "dotted"
+        }
+      ]
+    },
+    "nodes": [
+      {
+        "id": "h-h-01",
+        "kind": "org.causa.graph:hypothesis",
+        "kindLabel": "Hypothesis",
+        "label": "Dense hypothesis 01",
+        "description": "37 supporting, 1 contradicting evidence",
+        "variant": "rounded",
+        "color": {
+          "fill": "palette:ivory",
+          "stroke": "palette:amber",
+          "accent": "palette:amber"
+        },
+        "status": {
+          "state": "org.causa.state:plausible",
+          "label": "Plausible"
+        },
+        "accessibility": {
+          "name": "Hypothesis (Plausible): Dense hypothesis 01",
+          "description": "Dense hypothesis 01 \u00B7 37 supporting, 1 contradicting evidence"
+        },
+        "references": [
+          {
+            "id": "hypothesis",
+            "system": "org.causa",
+            "type": "hypothesis",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-01",
+            "label": "Hypothesis record",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-01"
+          }
+        ],
+        "interaction": {
+          "action": "navigate",
+          "target": {
+            "reference": "hypothesis"
+          },
+          "label": "Open Hypothesis record"
+        }
+      },
+      {
+        "id": "h-h-02",
+        "kind": "org.causa.graph:hypothesis",
+        "kindLabel": "Hypothesis",
+        "label": "Dense hypothesis 02",
+        "description": "74 supporting, 4 contradicting evidence",
+        "variant": "rounded",
+        "color": {
+          "fill": "palette:ivory",
+          "stroke": "palette:coral",
+          "accent": "palette:coral"
+        },
+        "status": {
+          "state": "org.causa.state:falsified",
+          "label": "Falsified"
+        },
+        "accessibility": {
+          "name": "Hypothesis (Falsified): Dense hypothesis 02",
+          "description": "Dense hypothesis 02 \u00B7 74 supporting, 4 contradicting evidence"
+        },
+        "references": [
+          {
+            "id": "hypothesis",
+            "system": "org.causa",
+            "type": "hypothesis",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-02",
+            "label": "Hypothesis record",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-02"
+          }
+        ],
+        "interaction": {
+          "action": "navigate",
+          "target": {
+            "reference": "hypothesis"
+          },
+          "label": "Open Hypothesis record"
+        }
+      },
+      {
+        "id": "h-h-03",
+        "kind": "org.causa.graph:hypothesis",
+        "kindLabel": "Hypothesis",
+        "label": "Dense hypothesis 03",
+        "description": "111 supporting, 9 contradicting evidence",
+        "variant": "rounded",
+        "color": {
+          "fill": "palette:ivory",
+          "stroke": "palette:teal",
+          "accent": "palette:teal"
+        },
+        "status": {
+          "state": "org.causa.state:supported",
+          "label": "Supported"
+        },
+        "accessibility": {
+          "name": "Hypothesis (Supported): Dense hypothesis 03",
+          "description": "Dense hypothesis 03 \u00B7 111 supporting, 9 contradicting evidence"
+        },
+        "references": [
+          {
+            "id": "hypothesis",
+            "system": "org.causa",
+            "type": "hypothesis",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-03",
+            "label": "Hypothesis record",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-03"
+          }
+        ],
+        "interaction": {
+          "action": "navigate",
+          "target": {
+            "reference": "hypothesis"
+          },
+          "label": "Open Hypothesis record"
+        }
+      },
+      {
+        "id": "h-h-04",
+        "kind": "org.causa.graph:hypothesis",
+        "kindLabel": "Hypothesis",
+        "label": "Dense hypothesis 04",
+        "description": "148 supporting, 16 contradicting evidence",
+        "variant": "rounded",
+        "color": {
+          "fill": "palette:ivory",
+          "stroke": "palette:amber",
+          "accent": "palette:amber"
+        },
+        "status": {
+          "state": "org.causa.state:plausible",
+          "label": "Plausible"
+        },
+        "accessibility": {
+          "name": "Hypothesis (Plausible): Dense hypothesis 04",
+          "description": "Dense hypothesis 04 \u00B7 148 supporting, 16 contradicting evidence"
+        },
+        "references": [
+          {
+            "id": "hypothesis",
+            "system": "org.causa",
+            "type": "hypothesis",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-04",
+            "label": "Hypothesis record",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-04"
+          }
+        ],
+        "interaction": {
+          "action": "navigate",
+          "target": {
+            "reference": "hypothesis"
+          },
+          "label": "Open Hypothesis record"
+        }
+      },
+      {
+        "id": "h-h-05",
+        "kind": "org.causa.graph:hypothesis",
+        "kindLabel": "Hypothesis",
+        "label": "Dense hypothesis 05",
+        "description": "185 supporting, 25 contradicting evidence",
+        "variant": "rounded",
+        "color": {
+          "fill": "palette:ivory",
+          "stroke": "palette:coral",
+          "accent": "palette:coral"
+        },
+        "status": {
+          "state": "org.causa.state:falsified",
+          "label": "Falsified"
+        },
+        "accessibility": {
+          "name": "Hypothesis (Falsified): Dense hypothesis 05",
+          "description": "Dense hypothesis 05 \u00B7 185 supporting, 25 contradicting evidence"
+        },
+        "references": [
+          {
+            "id": "hypothesis",
+            "system": "org.causa",
+            "type": "hypothesis",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-05",
+            "label": "Hypothesis record",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-05"
+          }
+        ],
+        "interaction": {
+          "action": "navigate",
+          "target": {
+            "reference": "hypothesis"
+          },
+          "label": "Open Hypothesis record"
+        }
+      },
+      {
+        "id": "h-h-06",
+        "kind": "org.causa.graph:hypothesis",
+        "kindLabel": "Hypothesis",
+        "label": "Dense hypothesis 06",
+        "description": "222 supporting, 36 contradicting evidence",
+        "variant": "rounded",
+        "color": {
+          "fill": "palette:ivory",
+          "stroke": "palette:teal",
+          "accent": "palette:teal"
+        },
+        "status": {
+          "state": "org.causa.state:supported",
+          "label": "Supported"
+        },
+        "accessibility": {
+          "name": "Hypothesis (Supported): Dense hypothesis 06",
+          "description": "Dense hypothesis 06 \u00B7 222 supporting, 36 contradicting evidence"
+        },
+        "references": [
+          {
+            "id": "hypothesis",
+            "system": "org.causa",
+            "type": "hypothesis",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-06",
+            "label": "Hypothesis record",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-06"
+          }
+        ],
+        "interaction": {
+          "action": "navigate",
+          "target": {
+            "reference": "hypothesis"
+          },
+          "label": "Open Hypothesis record"
+        }
+      },
+      {
+        "id": "h-h-07",
+        "kind": "org.causa.graph:hypothesis",
+        "kindLabel": "Hypothesis",
+        "label": "Dense hypothesis 07",
+        "description": "259 supporting, 49 contradicting evidence",
+        "variant": "rounded",
+        "color": {
+          "fill": "palette:ivory",
+          "stroke": "palette:amber",
+          "accent": "palette:amber"
+        },
+        "status": {
+          "state": "org.causa.state:plausible",
+          "label": "Plausible"
+        },
+        "accessibility": {
+          "name": "Hypothesis (Plausible): Dense hypothesis 07",
+          "description": "Dense hypothesis 07 \u00B7 259 supporting, 49 contradicting evidence"
+        },
+        "references": [
+          {
+            "id": "hypothesis",
+            "system": "org.causa",
+            "type": "hypothesis",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-07",
+            "label": "Hypothesis record",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-07"
+          }
+        ],
+        "interaction": {
+          "action": "navigate",
+          "target": {
+            "reference": "hypothesis"
+          },
+          "label": "Open Hypothesis record"
+        }
+      },
+      {
+        "id": "h-h-08",
+        "kind": "org.causa.graph:hypothesis",
+        "kindLabel": "Hypothesis",
+        "label": "Dense hypothesis 08",
+        "description": "296 supporting, 64 contradicting evidence",
+        "variant": "rounded",
+        "color": {
+          "fill": "palette:ivory",
+          "stroke": "palette:coral",
+          "accent": "palette:coral"
+        },
+        "status": {
+          "state": "org.causa.state:falsified",
+          "label": "Falsified"
+        },
+        "accessibility": {
+          "name": "Hypothesis (Falsified): Dense hypothesis 08",
+          "description": "Dense hypothesis 08 \u00B7 296 supporting, 64 contradicting evidence"
+        },
+        "references": [
+          {
+            "id": "hypothesis",
+            "system": "org.causa",
+            "type": "hypothesis",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-08",
+            "label": "Hypothesis record",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-08"
+          }
+        ],
+        "interaction": {
+          "action": "navigate",
+          "target": {
+            "reference": "hypothesis"
+          },
+          "label": "Open Hypothesis record"
+        }
+      },
+      {
+        "id": "h-h-09",
+        "kind": "org.causa.graph:hypothesis",
+        "kindLabel": "Hypothesis",
+        "label": "Dense hypothesis 09",
+        "description": "333 supporting, 81 contradicting evidence",
+        "variant": "rounded",
+        "color": {
+          "fill": "palette:ivory",
+          "stroke": "palette:teal",
+          "accent": "palette:teal"
+        },
+        "status": {
+          "state": "org.causa.state:supported",
+          "label": "Supported"
+        },
+        "accessibility": {
+          "name": "Hypothesis (Supported): Dense hypothesis 09",
+          "description": "Dense hypothesis 09 \u00B7 333 supporting, 81 contradicting evidence"
+        },
+        "references": [
+          {
+            "id": "hypothesis",
+            "system": "org.causa",
+            "type": "hypothesis",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-09",
+            "label": "Hypothesis record",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-09"
+          }
+        ],
+        "interaction": {
+          "action": "navigate",
+          "target": {
+            "reference": "hypothesis"
+          },
+          "label": "Open Hypothesis record"
+        }
+      },
+      {
+        "id": "h-h-10",
+        "kind": "org.causa.graph:hypothesis",
+        "kindLabel": "Hypothesis",
+        "label": "Dense hypothesis 10",
+        "description": "370 supporting, 100 contradicting evidence",
+        "variant": "rounded",
+        "color": {
+          "fill": "palette:ivory",
+          "stroke": "palette:amber",
+          "accent": "palette:amber"
+        },
+        "status": {
+          "state": "org.causa.state:plausible",
+          "label": "Plausible"
+        },
+        "accessibility": {
+          "name": "Hypothesis (Plausible): Dense hypothesis 10",
+          "description": "Dense hypothesis 10 \u00B7 370 supporting, 100 contradicting evidence"
+        },
+        "references": [
+          {
+            "id": "hypothesis",
+            "system": "org.causa",
+            "type": "hypothesis",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-10",
+            "label": "Hypothesis record",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-10"
+          }
+        ],
+        "interaction": {
+          "action": "navigate",
+          "target": {
+            "reference": "hypothesis"
+          },
+          "label": "Open Hypothesis record"
+        }
+      },
+      {
+        "id": "h-h-11",
+        "kind": "org.causa.graph:hypothesis",
+        "kindLabel": "Hypothesis",
+        "label": "Dense hypothesis 11",
+        "description": "407 supporting, 121 contradicting evidence",
+        "variant": "rounded",
+        "color": {
+          "fill": "palette:ivory",
+          "stroke": "palette:coral",
+          "accent": "palette:coral"
+        },
+        "status": {
+          "state": "org.causa.state:falsified",
+          "label": "Falsified"
+        },
+        "accessibility": {
+          "name": "Hypothesis (Falsified): Dense hypothesis 11",
+          "description": "Dense hypothesis 11 \u00B7 407 supporting, 121 contradicting evidence"
+        },
+        "references": [
+          {
+            "id": "hypothesis",
+            "system": "org.causa",
+            "type": "hypothesis",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-11",
+            "label": "Hypothesis record",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-11"
+          }
+        ],
+        "interaction": {
+          "action": "navigate",
+          "target": {
+            "reference": "hypothesis"
+          },
+          "label": "Open Hypothesis record"
+        }
+      },
+      {
+        "id": "h-h-12",
+        "kind": "org.causa.graph:hypothesis",
+        "kindLabel": "Hypothesis",
+        "label": "Dense hypothesis 12",
+        "description": "444 supporting, 144 contradicting evidence",
+        "variant": "rounded",
+        "color": {
+          "fill": "palette:ivory",
+          "stroke": "palette:teal",
+          "accent": "palette:teal"
+        },
+        "status": {
+          "state": "org.causa.state:supported",
+          "label": "Supported"
+        },
+        "accessibility": {
+          "name": "Hypothesis (Supported): Dense hypothesis 12",
+          "description": "Dense hypothesis 12 \u00B7 444 supporting, 144 contradicting evidence"
+        },
+        "references": [
+          {
+            "id": "hypothesis",
+            "system": "org.causa",
+            "type": "hypothesis",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-12",
+            "label": "Hypothesis record",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-12"
+          }
+        ],
+        "interaction": {
+          "action": "navigate",
+          "target": {
+            "reference": "hypothesis"
+          },
+          "label": "Open Hypothesis record"
+        }
+      },
+      {
+        "id": "c-c-1",
+        "kind": "org.causa.graph:outcome",
+        "kindLabel": "Outcome",
+        "label": "Dense outcome 1",
+        "description": "Causal relationship \u00B7 4 contributing hypotheses",
+        "variant": "pill",
+        "color": {
+          "fill": "palette:ivory",
+          "stroke": "palette:teal",
+          "accent": "palette:teal"
+        },
+        "status": {
+          "state": "org.causa.state:confirmed",
+          "label": "Confirmed"
+        },
+        "accessibility": {
+          "name": "Outcome (Confirmed): Dense outcome 1",
+          "description": "Dense outcome 1 \u00B7 Causal relationship \u00B7 4 contributing hypotheses"
+        },
+        "references": [
+          {
+            "id": "cause",
+            "system": "org.causa",
+            "type": "cause",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/causal-analysis?item=c-1",
+            "label": "Causal relationship record",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/causal-analysis?item=c-1"
+          }
+        ],
+        "interaction": {
+          "action": "navigate",
+          "target": {
+            "reference": "cause"
+          },
+          "label": "Open Causal relationship record"
+        }
+      },
+      {
+        "id": "c-c-2",
+        "kind": "org.causa.graph:outcome",
+        "kindLabel": "Outcome",
+        "label": "Dense outcome 2",
+        "description": "Causal relationship \u00B7 4 contributing hypotheses",
+        "variant": "pill",
+        "color": {
+          "fill": "palette:ivory",
+          "stroke": "palette:amber",
+          "accent": "palette:amber"
+        },
+        "status": {
+          "state": "org.causa.state:proposed",
+          "label": "Proposed"
+        },
+        "accessibility": {
+          "name": "Outcome (Proposed): Dense outcome 2",
+          "description": "Dense outcome 2 \u00B7 Causal relationship \u00B7 4 contributing hypotheses"
+        },
+        "references": [
+          {
+            "id": "cause",
+            "system": "org.causa",
+            "type": "cause",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/causal-analysis?item=c-2",
+            "label": "Causal relationship record",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/causal-analysis?item=c-2"
+          }
+        ],
+        "interaction": {
+          "action": "navigate",
+          "target": {
+            "reference": "cause"
+          },
+          "label": "Open Causal relationship record"
+        }
+      },
+      {
+        "id": "c-c-3",
+        "kind": "org.causa.graph:outcome",
+        "kindLabel": "Outcome",
+        "label": "Dense outcome 3",
+        "description": "Causal relationship \u00B7 4 contributing hypotheses",
+        "variant": "pill",
+        "color": {
+          "fill": "palette:ivory",
+          "stroke": "palette:amber",
+          "accent": "palette:amber"
+        },
+        "status": {
+          "state": "org.causa.state:proposed",
+          "label": "Proposed"
+        },
+        "accessibility": {
+          "name": "Outcome (Proposed): Dense outcome 3",
+          "description": "Dense outcome 3 \u00B7 Causal relationship \u00B7 4 contributing hypotheses"
+        },
+        "references": [
+          {
+            "id": "cause",
+            "system": "org.causa",
+            "type": "cause",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/causal-analysis?item=c-3",
+            "label": "Causal relationship record",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/causal-analysis?item=c-3"
+          }
+        ],
+        "interaction": {
+          "action": "navigate",
+          "target": {
+            "reference": "cause"
+          },
+          "label": "Open Causal relationship record"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e-c-1-h-01",
+        "source": {
+          "node": "h-h-01"
+        },
+        "target": {
+          "node": "c-c-1"
+        },
+        "label": "Trigger",
+        "line": "solid",
+        "width": 2,
+        "color": {
+          "stroke": "palette:navy"
+        }
+      },
+      {
+        "id": "e-c-1-h-04",
+        "source": {
+          "node": "h-h-04"
+        },
+        "target": {
+          "node": "c-c-1"
+        },
+        "label": "Root cause",
+        "line": "solid",
+        "width": 3,
+        "color": {
+          "stroke": "palette:navy"
+        }
+      },
+      {
+        "id": "e-c-1-h-07",
+        "source": {
+          "node": "h-h-07"
+        },
+        "target": {
+          "node": "c-c-1"
+        },
+        "label": "Enabling condition",
+        "line": "dotted",
+        "width": 2,
+        "color": {
+          "stroke": "palette:navy"
+        }
+      },
+      {
+        "id": "e-c-1-h-10",
+        "source": {
+          "node": "h-h-10"
+        },
+        "target": {
+          "node": "c-c-1"
+        },
+        "label": "Contributing factor",
+        "line": "dashed",
+        "width": 2,
+        "color": {
+          "stroke": "palette:navy"
+        }
+      },
+      {
+        "id": "e-c-2-h-02",
+        "source": {
+          "node": "h-h-02"
+        },
+        "target": {
+          "node": "c-c-2"
+        },
+        "label": "Contributing factor",
+        "line": "dashed",
+        "width": 2,
+        "color": {
+          "stroke": "palette:navy"
+        }
+      },
+      {
+        "id": "e-c-2-h-05",
+        "source": {
+          "node": "h-h-05"
+        },
+        "target": {
+          "node": "c-c-2"
+        },
+        "label": "Trigger",
+        "line": "solid",
+        "width": 2,
+        "color": {
+          "stroke": "palette:navy"
+        }
+      },
+      {
+        "id": "e-c-2-h-08",
+        "source": {
+          "node": "h-h-08"
+        },
+        "target": {
+          "node": "c-c-2"
+        },
+        "label": "Root cause",
+        "line": "solid",
+        "width": 3,
+        "color": {
+          "stroke": "palette:navy"
+        }
+      },
+      {
+        "id": "e-c-2-h-11",
+        "source": {
+          "node": "h-h-11"
+        },
+        "target": {
+          "node": "c-c-2"
+        },
+        "label": "Enabling condition",
+        "line": "dotted",
+        "width": 2,
+        "color": {
+          "stroke": "palette:navy"
+        }
+      },
+      {
+        "id": "e-c-3-h-03",
+        "source": {
+          "node": "h-h-03"
+        },
+        "target": {
+          "node": "c-c-3"
+        },
+        "label": "Enabling condition",
+        "line": "dotted",
+        "width": 2,
+        "color": {
+          "stroke": "palette:navy"
+        }
+      },
+      {
+        "id": "e-c-3-h-06",
+        "source": {
+          "node": "h-h-06"
+        },
+        "target": {
+          "node": "c-c-3"
+        },
+        "label": "Contributing factor",
+        "line": "dashed",
+        "width": 2,
+        "color": {
+          "stroke": "palette:navy"
+        }
+      },
+      {
+        "id": "e-c-3-h-09",
+        "source": {
+          "node": "h-h-09"
+        },
+        "target": {
+          "node": "c-c-3"
+        },
+        "label": "Trigger",
+        "line": "solid",
+        "width": 2,
+        "color": {
+          "stroke": "palette:navy"
+        }
+      },
+      {
+        "id": "e-c-3-h-12",
+        "source": {
+          "node": "h-h-12"
+        },
+        "target": {
+          "node": "c-c-3"
+        },
+        "label": "Root cause",
+        "line": "solid",
+        "width": 3,
+        "color": {
+          "stroke": "palette:navy"
+        }
+      }
+    ]
+  }
+}

@@ -124,6 +124,23 @@ engine), `@stack-smoke-forma` (a Forma `ef-*` component renders), `@stack-smoke-
 renders). Percepta runs against `dist/` as built by `npm run build`; if `window.__perceptaSetState` is only in a
 test build, make `npm run build` emit that build or say so to the acceptance stream.
 
+## Tests of the pipeline and of this run's evidence
+
+Pipeline obligations (AR-*, VER-*, PF-*, EXT-DATA-001/009/010/013, WDL-015) are proven by real tests of the pipeline,
+its tools and this run's evidence, tagged with their VPO ids like any other test:
+
+| Where | What | Runs in |
+| --- | --- | --- |
+| `tools/acceptance/Causa.Acceptance.Tests/PipelineTests.fs` | the committed workflow and reuse config: credentials scope, layers, triggers, mandatory checks, reuse, fail-closed live | core |
+| `tools/acceptance/Causa.Acceptance.RunTests/VerifierTests.fs` | the pinned verifiers over this run's bundle and adversarial copies (false accepted flag, forged rows, missing CI evidence, tampered baseline, self-approved exclusion, narrative report, stale evidence, unpinned plan) | acceptance (before the bundle is built; their TRX joins the run's results) |
+| `tools/acceptance/Causa.Acceptance.RunTests/EvidenceTests.fs` | this run's bundle citations, lock-gate record, per-layer results, preservation record, record-free site, R001 immutability | acceptance |
+| `tools/acceptance/Causa.Acceptance.RunTests/PreservationTests.fs` | the recorded preservation gate against omitted, negated, weakened and swapped derivations | preservation-adversarial (not required) |
+| `tools/acceptance/deployed/deployed.spec.js` | the Pages deployment at the exact SHA: every artifact file byte for byte, start-up without a test hook, screenshots at desktop / iPad portrait / iPad landscape / mobile | deployed-smoke (screenshots in `acceptance-evidence/gate-records/deployed-screenshots`) |
+
+Run the acceptance-job tests locally with the job's inputs: `INDY_INIT`, `CAUSA_DATA_DIR`, `RESULTS` (collected
+results), `PRODUCERS`, `SOURCE_SHA`, `RUN_ID`, `GATE_RECORDS`, `SITE_DIR`; the preservation tests with `INDY_INIT`
+and `INDY_INIT_SOURCE` (Indy-init at aab8f80) and Praxis on PATH.
+
 ## Plan curation (the path to ACCEPTED)
 
 `requirements-compiler verify-plan` reports a requirement PASS only when the **plan** gives every one of its

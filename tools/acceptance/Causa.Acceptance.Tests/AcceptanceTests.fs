@@ -85,20 +85,24 @@ let ``TRX results take obligations from the test name and from trait tags`` () =
                  <UnitTestResult testId="1" testName="M.%s named" outcome="Passed" />
                  <UnitTestResult testId="2" testName="M.traited" outcome="Failed" />
                  <UnitTestResult testId="3" testName="M.not run" outcome="NotExecuted" />
+                 <UnitTestResult testId="4" testName="M.contract 5.2 dotted" outcome="Passed" />
                </Results><TestDefinitions>
                  <UnitTest id="1"><TestMethod className="M" name="%s named" codeBase="x.dll" /></UnitTest>
                  <UnitTest id="2"><TestMethod className="M" name="traited" codeBase="x.dll" /></UnitTest>
                  <UnitTest id="3"><TestMethod className="M" name="not run" codeBase="x.dll" /></UnitTest>
+                 <UnitTest id="4"><TestMethod className="M.contract 5" name="2 dotted" codeBase="x.dll" /></UnitTest>
                </TestDefinitions></TestRun>"""
             o1
             o1
-    let traits = Map.ofList [ ("M", "traited"), [ o2 ] ]
+    let traits = Map.ofList [ ("M", "traited"), [ o2 ]; ("M", "contract 5.2 dotted"), [ o3 ] ]
     let rs = parseTrx "r.trx" traits (XDocument.Parse trx)
     Assert.Equal<string list>([ o1 ], rs[0].Obligations)
     Assert.Equal("dotnet:M." + o1 + " named", rs[0].TestId)
     Assert.Equal<string list>([ o2 ], rs[1].Obligations)
     Assert.Equal(Failed, rs[1].Outcome)
     Assert.Equal(Skipped, rs[2].Outcome)
+    // VSTest split the dotted method name at its '.'; the trait is still found by the full name.
+    Assert.Equal<string list>([ o3 ], rs[3].Obligations)
 
 // A private trait name, so this self-test's fake id never reaches the real binding.
 [<Fact; Trait("obligation-selftest", "VPO-00000000000000ff")>]
@@ -111,7 +115,7 @@ let ``trait tags are read from a test assembly's metadata without running it`` (
 // ---------------------------------------------------------------------------------------------------------------
 // Traceability: nothing is reported PASS unless it ran and passed
 
-[<Fact; Trait("obligation", "VPO-95819a9f20306ce1")>]
+[<Fact; Trait("obligation", "VPO-95819a9f20306ce1"); Trait("obligation", "VPO-fd43b3e4e7e02f59")>]
 let ``failing, missing, skipped or merely declared tests are never reported PASS`` () =
     let trace =
         build
@@ -156,14 +160,15 @@ let ledgerInputs trace producers gates : Ledger.Inputs =
       FrozenFixtureDigest = "f"
       DependencyLockSha = "l"
       InterfaceManifestSha = "i"
-      Command = "test" }
+      Command = "test"
+      Environment = [ "runner.os", "Linux" ] }
 
 let gate id requires : Ledger.GateRule = { Id = id; Title = id; Requires = requires; EvidenceType = "ci"; Note = "" }
 
 let rowStatus (ledger: Text.Json.Nodes.JsonNode) collection id =
     items collection ledger |> List.find (fun r -> str "id" r = Some id) |> strOr "" "status"
 
-[<Fact; Trait("obligation", "VPO-95819a9f20306ce1")>]
+[<Fact; Trait("obligation", "VPO-95819a9f20306ce1"); Trait("obligation", "VPO-2a6aa540f193ab6c")>]
 let ``gates pass only on producers that succeeded in this run; absent, reused or failed producers do not`` () =
     let trace = build plan [ result "a" Passed [ o1 ]; result "b" Passed [ o2 ] ] []
     let producers: Ledger.Producer list =
@@ -366,3 +371,38 @@ let ``curation bindings are applied to a copy only when every binding names a pl
     let applied = load out
     Assert.Equal<string list>([ "REQ-1-O1"; "REQ-1-O2" ], items "testBindings" applied |> List.map (strOr "" "obligation"))
     Assert.Equal("X", strOr "" "defaultPolicy" applied)
+
+[<Fact; Trait("obligation", "VPO-8deeef0ef7b7e4ab")>]
+let ``VER-005 an Echelon package outside the release set passes only when pinned against an accepted owner decision`` () =
+    let root = writeRepo "0.9.0" true
+    let w (rel: string) (text: string) =
+        let p = Path.Combine(root, rel)
+        Directory.CreateDirectory(Path.GetDirectoryName p) |> ignore
+        File.WriteAllText(p, text)
+    let pkg = parse (File.ReadAllText(Path.Combine(root, "package.json")))
+    pkg["dependencies"]["@echelon-foundry/forma-workflow"] <- jstr "1.1.0"
+    w "package.json" (serialize pkg)
+    let lock = parse (File.ReadAllText(Path.Combine(root, "package-lock.json")))
+    lock["packages"]["node_modules/@echelon-foundry/forma-workflow"] <- parse """{"version":"1.1.0","integrity":"sha512-abc"}"""
+    w "package-lock.json" (serialize lock)
+    w "node_modules/@echelon-foundry/forma-workflow/package.json" """{"version":"1.1.0"}"""
+    let decision status = sprintf "---\nid: DF-1\nstatus: %s\n---\n# Decision\n\n`@echelon-foundry/forma-workflow` 1.1.0 approved.\n" status
+    let pinWith (outside: string) =
+        parse (sprintf """{"channelSha256":"abc","profileVersion":"1.29.0","expected":{"limen":"0.9.0"},"outsideChannel":%s}""" outside)
+    let entry = """[{"package":"@echelon-foundry/forma-workflow","version":"1.1.0","integrity":"sha512-abc","decision":{"id":"DF-1","path":"decisions/DF-1.md"}}]"""
+    let outside (pin: Text.Json.Nodes.JsonNode) =
+        LockGate.evaluate { gateInputs root allTools [] with Pin = pin } |> List.filter (fun c -> c.Id.StartsWith "outside.")
+    // Not pinned at all: the gate fails rather than ignoring the package.
+    let unpinned = outside (pinWith "[]")
+    Assert.Contains(unpinned, fun c -> c.Status = LockGate.Fail && c.Id = "outside.unpinned.@echelon-foundry/forma-workflow")
+    // Pinned, but the decision is not accepted: fails.
+    w "decisions/DF-1.md" (decision "proposed")
+    Assert.Contains(outside (pinWith entry), fun c -> c.Id.StartsWith "outside.decision" && c.Status = LockGate.Fail)
+    // Accepted decision, matching version and integrity: every check passes and is labelled outside the channel.
+    w "decisions/DF-1.md" (decision "accepted")
+    let ok = outside (pinWith entry)
+    Assert.Equal(5, ok.Length)
+    Assert.All(ok, fun c -> Assert.Equal(LockGate.Pass, c.Status); Assert.Contains("outside echelon-current; owner-approved DF-1", c.Subject))
+    // A different integrity than the decision pinned fails.
+    let other = entry.Replace("sha512-abc", "sha512-other")
+    Assert.Contains(outside (pinWith other), fun c -> c.Id.StartsWith "outside.integrity" && c.Status = LockGate.Fail)
