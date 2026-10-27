@@ -890,6 +890,10 @@ jobs:
           retention-days: 90
 
   acceptance:
+    # actions: read only to record this run's per-layer job timings (PF-012-O3).
+    permissions:
+      contents: read
+      actions: read
     needs: [reuse, core, lock-gate, site, browser, live, provider-conformance, wasm-smoke, preservation-gate, preservation-adversarial, percepta, build-and-test, deploy, deployed-smoke]
     if: always() && needs.reuse.result != 'cancelled'
     runs-on: ubuntu-latest
@@ -932,7 +936,7 @@ jobs:
           (cd "$RUNNER_TEMP/indy-init" && dotnet build tools/requirements-compiler/src -c Release)
       - uses: actions/download-artifact@v4
         with:
-          pattern: "{core-results,browser-results,live-results,lock-gate,preservation-gate,percepta,wasm-smoke,deployed-results,preservation-adversarial-results}"
+          pattern: "{core-results,browser-results,live-results,lock-gate,preservation-gate,percepta,wasm-smoke,deployed-results,preservation-adversarial-results,reuse-plan}"
           path: collected
         continue-on-error: true
       - name: Collect the results of this run
@@ -947,6 +951,7 @@ jobs:
           [ -d collected/preservation-gate ] && cp -r collected/preservation-gate gate-records/ || true
           [ -d collected/percepta ] && cp -r collected/percepta gate-records/ || true
           [ -d collected/wasm-smoke ] && cp -r collected/wasm-smoke gate-records/ || true
+          [ -d collected/reuse-plan ] && cp -r collected/reuse-plan gate-records/ || true
           [ -d collected/preservation-adversarial-results ] && mkdir -p TestResults/preservation-adversarial && cp -r collected/preservation-adversarial-results/. TestResults/preservation-adversarial/ || true
           [ -d collected/deployed-results ] && mkdir -p TestResults/deployed && cp collected/deployed-results/deployed-results.json TestResults/deployed/ 2>/dev/null || true
           [ -d collected/deployed-results/screenshots ] && cp -r collected/deployed-results/screenshots gate-records/deployed-screenshots || true
@@ -982,6 +987,27 @@ jobs:
             {id: "percepta-verify-app", status: $percepta, command: "percepta verify-app --base-url <built site> (\($run))", record: "gate-records/percepta/verify-app.json"}
           ]}' > "$RUNNER_TEMP/producers.json"
           cat "$RUNNER_TEMP/producers.json"
+      # PF-012-O3: measured time and outcome of every layer's job in this run (from the run's own job records).
+      # Budgets are set only after a baseline of such measurements exists; none is invented here.
+      - name: Per-layer timing of this run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs?per_page=100" \
+            | jq --arg run "${{ github.run_id }}-${{ github.run_attempt }}" --arg sha "${{ github.sha }}" '
+              def layer: {"core":"domain","browser":"ui","site":"build","wasm-smoke":"wasm","lock-gate":"dependencies",
+                "provider-conformance":"provider-conformance","live":"live-integration","deployed-smoke":"deployed",
+                "preservation-gate":"requirements","preservation-adversarial":"requirements","percepta":"ui-contracts",
+                "reuse":"reuse","deploy":"deploy","build-and-test":"required-check"}[.] // "other";
+              {schema: "causa.layer-timings/1", run: $run, sourceSha: $sha, budgets: null,
+               budgetsNote: "no budget is set before a baseline of measured runs exists (PF-012-O3)",
+               jobs: [.jobs[] | select(.name != "acceptance") | {name, layer: (.name | layer), status, conclusion,
+                 startedAt: .started_at, completedAt: .completed_at,
+                 seconds: (if .started_at and .completed_at then ((.completed_at | fromdate) - (.started_at | fromdate)) else null end)}]}' \
+            > gate-records/layer-timings.json
+          jq -r '.jobs[] | "\(.layer)\t\(.name)\t\(.conclusion)\t\(.seconds)s"' gate-records/layer-timings.json | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Install Ordo (verified against the pinned channel) for the verification schedule
+        run: tools/acceptance/ci/install-host-tool.sh ordo ordo "$RUNNER_TEMP/host-tools" >> "$GITHUB_PATH"
       - name: The built site (the artifact Pages deploys)
         uses: actions/download-artifact@v4
         continue-on-error: true

@@ -223,3 +223,84 @@ let ``EXT-DATA-010 R001 is unchanged: its repository head is still the commit In
     let r = exec "git" [ "ls-remote"; "https://github.com/kemiller2002/indy-init-rehearsal-001.git"; "HEAD" ] repoRoot []
     Assert.Equal(0, r.Code)
     Assert.Equal(recorded, r.Out.Split('\t').[0].Trim())
+
+// ---------------------------------------------------------------------------------------------------------------
+// Layer timings, the cross-system integrations, and the test/fixture to requirement map
+
+[<Fact; Trait("obligation", "VPO-39d6eb77cb2097af")>]
+let ``PF-012 this run recorded each layer's measured time and outcome, and sets no budget before a baseline`` () =
+    let t = load (Path.Combine(envPath "GATE_RECORDS", "layer-timings.json"))
+    Assert.Equal(Some "causa.layer-timings/1", str "schema" t)
+    Assert.Equal(env "RUN_ID", strOr "" "run" t)
+    Assert.Null(t["budgets"])
+    let jobs = items "jobs" t
+    for layer, job in [ "domain", "core"; "ui", "browser"; "build", "site"; "dependencies", "lock-gate" ] do
+        let j = jobs |> List.find (fun j -> str "name" j = Some job)
+        Assert.Equal(Some layer, str "layer" j)
+        Assert.True((gi j["seconds"]) >= 0, job)
+        Assert.False(String.IsNullOrEmpty(strOr "" "conclusion" j), job)
+    // A failure is reported by its layer: every job carries its own conclusion.
+    Assert.All(jobs, fun j -> Assert.True((str "conclusion" j).IsSome || str "status" j <> Some "completed"))
+
+[<Fact; Trait("obligation", "VPO-4e417c6f238cb460")>]
+let ``VER-006 every integrated Echelon system accepted this candidate's real inputs in this run`` () =
+    let b = baseline.Value
+    // Ordo: the admitted plan scheduled over this run's evidence manifest, bound to this run and SHA.
+    Assert.Equal("0", File.ReadAllText(Path.Combine(b.Out, "verification-schedule.exit")).Trim())
+    let schedule = load (Path.Combine(b.Out, "verification-schedule.json"))
+    let plan = load (planPath ())
+    Assert.Contains(gs (plan["planIdentity"]["digest"]), strOr "" "planDigest" schedule)
+    Assert.Equal(0, gi (schedule["summary"]["staleEvidence"]))
+    Assert.Equal(items "requirements" plan |> List.length, gi (schedule["summary"]["requirements"]))
+    // Dokimos: this run's evidence plan decided every declared producer.
+    let reuse = load (Path.Combine(envPath "GATE_RECORDS", "reuse-plan/plan.json"))
+    for p in [ "core"; "site"; "browser"; "lock-gate" ] do
+        let t = items "Tests" reuse |> List.find (fun t -> str "TestId" t = Some p)
+        Assert.True((str "Decision" t).IsSome, p)
+    // Praxis: the preservation gate passed on this run's derived package.
+    Assert.Equal(Some "pass", str "verdict" (load (Path.Combine(envPath "GATE_RECORDS", "preservation-gate/gate.json"))))
+    // Percepta, Limen, Forma, workflow layout, Folio: exercised in the browser.
+    let ui = resultsOf "playwright"
+    let passed (f: Discovery.TestResult -> bool) = ui |> List.exists (fun r -> f r && r.Outcome = Discovery.Passed)
+    Assert.True(passed (fun r -> r.DisplayName.Contains "Percepta contract"), "Percepta")
+    Assert.True(passed (fun r -> r.Tags |> List.contains "@stack-smoke-limen"), "Limen")
+    Assert.True(passed (fun r -> r.Tags |> List.contains "@stack-smoke-forma"), "Forma")
+    Assert.True(passed (fun r -> r.DisplayName.Contains "forma-workflow"), "Forma workflow layout")
+    Assert.True(passed (fun r -> r.Tags |> List.contains "@stack-smoke-folio"), "Folio")
+    // The engine in .NET WebAssembly (Limen guest).
+    Assert.Contains("WASM SMOKE PASSED", File.ReadAllText(Path.Combine(envPath "GATE_RECORDS", "wasm-smoke/wasm-smoke.log")))
+
+[<Fact; Trait("obligation", "VPO-dfe1c434e9f7f329")>]
+let ``PF-018 every executed test and fixture set is mapped to its requirements and authoritative source commit`` () =
+    let b = baseline.Value
+    let map = load (Path.Combine(b.Out, "test-requirement-map.json"))
+    let plan = load (planPath ())
+    Assert.Equal(gs (plan["source"]["commit"]), gs (map["requirementsSource"]["commit"]))
+    Assert.Equal(gs (plan["source"]["repository"]), gs (map["requirementsSource"]["repository"]))
+    let planReqs = items "requirements" plan |> List.map (strOr "" "requirement") |> Set.ofList
+    let tests = items "tests" map
+    Assert.NotEmpty tests
+    for t in tests do
+        let reqs = strings "requirements" t
+        Assert.NotEmpty reqs
+        Assert.All(reqs, fun r -> Assert.Contains(r, planReqs))
+    // Fixture sets: present at the pinned causa-data commit, and every consumer test ran and passed in this run.
+    let fx = load (Path.Combine(repoRoot, "acceptance/fixtures.json"))
+    let data = envPath "CAUSA_DATA_DIR"
+    let head = (exec "git" [ "-C"; data; "rev-parse"; "HEAD" ] repoRoot []).Out.Trim()
+    Assert.Equal(strOr "" "commit" fx, head)
+    Assert.Equal(strOr "" "commit" fx, gs (map["fixturesSource"]["commit"]))
+    let dotnet = resultsOf "dotnet"
+    let records = envPath "GATE_RECORDS"
+    for set in items "fixtures" map do
+        let ids = strings "ids" set
+        Assert.NotEmpty ids
+        Assert.All(strings "requirements" set, fun r -> Assert.Contains(r, planReqs))
+        for c in strings "consumers" set do
+            if c = "wasm-smoke" then
+                let log = File.ReadAllText(Path.Combine(records, "wasm-smoke/wasm-smoke.log"))
+                Assert.Contains("WASM SMOKE PASSED", log)
+            else
+                let consumed = dotnet |> List.filter (fun r -> r.TestId.StartsWith c)
+                Assert.NotEmpty consumed
+                Assert.All(consumed, fun r -> Assert.Equal(Discovery.Passed, r.Outcome))

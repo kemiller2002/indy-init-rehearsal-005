@@ -58,7 +58,9 @@ let ``AR-014 PF-012 only the live provider jobs receive credentials; every other
         Assert.DoesNotContain("secrets.", job j)
     // Elevated permissions only where Pages deployment needs them.
     let elevated = jobs.Value |> Map.filter (fun _ t -> Regex.IsMatch(t, @"(?m)^    permissions:")) |> Map.keys |> List.ofSeq
-    Assert.Equal<string list>([ "deploy" ], elevated)
+    Assert.Equal<string list>([ "acceptance"; "deploy" ], elevated)
+    // The acceptance job reads its own run's job records (timings) and nothing more.
+    Assert.Matches(@"(?m)^    permissions:\s*\n      contents: read\s*\n      actions: read\s*$", job "acceptance")
     Assert.Matches(@"pages: write", job "deploy")
 
 [<Fact; Trait("obligation", "VPO-2f4beacb25bb0586"); Trait("obligation", "VPO-92aa50bd20b70eeb")>]
@@ -165,3 +167,24 @@ let ``PF-020 release acceptance requires domain, fixture UI, provider conformanc
     Assert.Contains("needs.build-and-test.result == 'success'", job "deploy")
     Assert.True(File.Exists(Path.Combine(repoRoot, "tools/acceptance/deployed/deployed.spec.js")))
     Assert.Contains("npx playwright test -c tools/acceptance/deployed/playwright.config.js", job "deployed-smoke")
+
+[<Fact; Trait("obligation", "VPO-89df49b291078827")>]
+let ``PF-012 the README documents one command for a populated fixture-backed UI and one for the fast offline checks`` () =
+    let readme = File.ReadAllText(Path.Combine(repoRoot, "README.md"))
+    Assert.Contains("## Run it", readme)
+    Assert.Contains("tools/acceptance/ci/fixture-ui.sh", readme)
+    Assert.Contains("tools/acceptance/ci/offline-checks.sh", readme)
+    let fixtureUi = File.ReadAllText(Path.Combine(repoRoot, "tools/acceptance/ci/fixture-ui.sh"))
+    Assert.Contains("node scripts/serve.mjs obj/site-test", fixtureUi)
+    Assert.Contains("?percepta=default", fixtureUi)
+    // The fixture investigation is rendered only by the test build's hook (main.ts), never by the deployed site.
+    let main = File.ReadAllText(Path.Combine(repoRoot, "src/kernel/main.ts"))
+    Assert.Contains(@"TEST_BUILD && new URLSearchParams(location.search).get(""percepta"") === ""default""", main)
+    let offline = File.ReadAllText(Path.Combine(repoRoot, "tools/acceptance/ci/offline-checks.sh"))
+    Assert.Contains("unset CAUSA_GITHUB_TOKEN CAUSA_TEST_REPO", offline)
+    Assert.Contains("dotnet test App.slnx", offline)
+    Assert.Contains("--grep-invert @live", offline)
+    Assert.Contains("grep -v '/live-'", offline)
+    for script in [ "fixture-ui.sh"; "offline-checks.sh" ] do
+        let mode = File.GetUnixFileMode(Path.Combine(repoRoot, "tools/acceptance/ci", script))
+        Assert.True(mode.HasFlag(UnixFileMode.UserExecute), script)
