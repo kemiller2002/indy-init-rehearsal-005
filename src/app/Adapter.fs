@@ -52,7 +52,15 @@ type CardProjection =
       Evidence: Count
       Contradictions: Count }
 
-type HypothesisRow = { Id: string; Statement: string; State: string; Supporting: Count; Contradicting: Count }
+type HypothesisRow =
+    { Id: string
+      Statement: string
+      State: string
+      Supporting: Count
+      Contradicting: Count
+      /// Ids of the evidence the domain relates to this hypothesis (any relationship kind), in admission order
+      /// (UI-005-O4, UI-033: the graph links a hypothesis to its own evidence records).
+      Evidence: string list }
 type EvidenceRow = { Id: string; Content: string; Source: string option; Category: string; RecordedAt: string option }
 type BlockerRow = { Id: string; Question: string; Material: bool }
 type TimelineRow =
@@ -158,6 +166,8 @@ type SyncStatus =
     /// The provider's answer to a save was lost: it may or may not have reached GitHub. No Retry is offered (a
     /// retry could write twice); only "check now", which re-reads the branch before anything else is sent.
     | MayHaveSaved of detail: string
+    /// Local fixture mode: the change is kept in this page only; nothing is saved to GitHub (PF-003-O4).
+    | LocalOnly of detail: string
     | ReadOnly
 
 type Connection =

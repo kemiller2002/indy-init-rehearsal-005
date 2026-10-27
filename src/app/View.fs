@@ -133,6 +133,7 @@ let private navKeys (model: Model) : (string * ViewValue) list =
       "connection.hasDetail", flag ((ws.ConnectionStatus |> Option.bind snd |> Option.isSome) && (match ws.Connection with ConnectionFailed _ -> false | _ -> true))
       "confirm.show", flag model.PendingConfirm.IsSome
       "confirm.text", text (model.PendingConfirm |> Option.map snd |> Option.defaultValue "")
+      "data.fixture", flag (model.Port.Name = "engine/fixture")
       "connected", flag connected
       "notice.show", flag notice.IsSome
       "notice.text", text (notice |> Option.defaultValue "")

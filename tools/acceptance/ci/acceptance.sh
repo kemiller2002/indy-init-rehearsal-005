@@ -69,6 +69,38 @@ manifest_sha=$($CA ledger --root . --plan "$plan" --results "$RESULTS" --sources
   --run-id "$RUN_ID" --source-sha "$SOURCE_SHA" $deployed_arg --out-dir "$OUT/bundle" \
   --command "tools/acceptance/ci/acceptance.sh (run $RUN_ID)" | tail -n 1)
 echo "$manifest_sha" > "$OUT/evidence-manifest.sha256"
+# Ordo (sde verification schedule): the deterministic schedule over the admitted plan, with every evidence entry's
+# bytes checked against the manifest, bound to this run and source SHA. Recorded, never a verdict input.
+if command -v ordo > /dev/null 2>&1; then
+  plan_abs=$(realpath "$plan"); out_abs=$(realpath "$OUT")
+  set +e
+  (cd "$OUT/bundle" && ordo verification schedule --plan "$plan_abs" \
+     --expected-digest "$plan_digest" --evidence-manifest evidence-manifest.json --source-sha "$SOURCE_SHA" \
+     --run-id "$RUN_ID" --output "$out_abs/verification-schedule.json") > "$OUT/verification-schedule.log" 2>&1
+  echo "$?" > "$OUT/verification-schedule.exit"
+  set -e
+else
+  echo "ordo is not on PATH; no verification schedule in this run" > "$OUT/verification-schedule.log"
+fi
+# PF-018-O1: every executed test and fixture set mapped to the requirements it serves and their authoritative source
+# (the plan's baseline repository and commit; the fixtures' causa-data commit).
+fixture_ids='[]'
+if [ -n "${CAUSA_DATA_DIR:-}" ]; then
+  fixture_ids=$(jq -c '.sets[]' acceptance/fixtures.json | while read -r set; do
+    dir="$CAUSA_DATA_DIR/$(echo "$set" | jq -r .path)"
+    ids=$(ls "$dir" 2>/dev/null | jq -R . | jq -s -c .)
+    echo "$set" | jq -c --argjson ids "$ids" '. + {ids: $ids}'
+  done | jq -s -c .)
+fi
+jq --arg sha "$SOURCE_SHA" --argjson sets "$fixture_ids" --slurpfile fx acceptance/fixtures.json --slurpfile plan "$plan" '
+  {schema: "causa.test-requirement-map/1", sourceSha: $sha,
+   requirementsSource: {planId: $plan[0].planIdentity.planId, repository: $plan[0].source.repository, commit: $plan[0].source.commit,
+                        baselineSha256: $plan[0].source.baselineSha256},
+   fixturesSource: {repository: $fx[0].repository, commit: $fx[0].commit},
+   tests: ([.obligations[] | . as $o | .tests[] | {testId, outcome, resultFile, obligation: $o.id, requirement: $o.requirement}]
+           | group_by(.testId) | map({testId: .[0].testId, outcome: .[0].outcome, resultFile: .[0].resultFile,
+               obligations: (map(.obligation) | unique), requirements: (map(.requirement) | unique)})),
+   fixtures: $sets}' "$OUT/bundle/traceability.json" > "$OUT/test-requirement-map.json"
 # Input for the requirements owner's plan curation (testBindings); never applied here.
 $CA curation --traceability "$OUT/bundle/traceability.json" --out "$OUT/curation-test-bindings.json"
 

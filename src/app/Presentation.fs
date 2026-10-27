@@ -82,6 +82,7 @@ let syncText (s: Adapter.SyncStatus) =
     | Adapter.Conflict -> "Not saved: someone else changed the repository. Your changes are kept."
     | Adapter.SaveFailed reason -> "Not saved. " + reason
     | Adapter.MayHaveSaved _ -> "Your changes may or may not have reached GitHub; checking the branch before anything else is sent."
+    | Adapter.LocalOnly detail -> detail
     | Adapter.ReadOnly -> "Read-only demonstration"
 
 let syncTone (s: Adapter.SyncStatus) =
@@ -93,6 +94,7 @@ let syncTone (s: Adapter.SyncStatus) =
     | Adapter.Saving -> "attention"
     | Adapter.RemotelySynced _ -> "action"
     | Adapter.NoChanges
+    | Adapter.LocalOnly _
     | Adapter.ReadOnly -> "neutral"
 
 let connectionText (c: Adapter.Connection) =
