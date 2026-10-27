@@ -208,6 +208,52 @@ let commandFor (entropy: A.Entropy) (name: string) (fields: Map<string, string>)
             | _ -> Correction
         let targets = match Guid.TryParse(text fields "cause") with | true, c -> [ Id.ofGuid c ] | _ -> []
         Ok(RecordCorrectiveAction(Id.ofGuid (fresh 2), kind, text fields "description", targets))
+    | [| "ResolveUnknown" |] ->
+        match Guid.TryParse(text fields "item") with
+        | true, u -> Ok(TransitionUnknown(Id.ofGuid u, ResolveUnknown, text fields "basis"))
+        | _ -> Error "That open question is not in this investigation."
+    | [| "ResolveContradiction" |] ->
+        match Guid.TryParse(text fields "item") with
+        | true, c -> Ok(TransitionContradiction(Id.ofGuid c, ResolveContradiction, text fields "basis"))
+        | _ -> Error "That contradiction is not in this investigation."
+    | [| "RecordPrediction" |] ->
+        match Guid.TryParse(text fields "hypothesis") with
+        | true, h ->
+            let strength =
+                match text fields "strength" with
+                | "necessary" -> Necessary
+                | "discriminating" -> DiscriminatingPrediction
+                | "nonDiscriminating" -> NonDiscriminating
+                | _ -> Expected
+            let timing = if text fields "timing" = "retrospective" then Retrospective else Prospective
+            Ok(RecordPrediction(Id.ofGuid (fresh 2), Id.ofGuid h, text fields "statement", strength, timing))
+        | _ -> Error "Choose the hypothesis the prediction follows from."
+    | [| "RecordInvestigationAction" |] ->
+        let kind =
+            match text fields "kind" with
+            | "inspection" -> Inspection
+            | "query" -> Query
+            | "comparison" -> ActionKind.Comparison
+            | "experiment" -> Experiment
+            | _ -> Test
+        let targets = match Guid.TryParse(text fields "hypothesis") with | true, h -> [ Id.ofGuid h ] | _ -> []
+        Ok(RecordAction(Id.ofGuid (fresh 2), kind, text fields "purpose", targets))
+    | [| "MarkCorrectiveActionImplemented"; id |] ->
+        match Guid.TryParse id with
+        | true, g -> Ok(TransitionCorrection(Id.ofGuid g, MarkImplemented))
+        | _ -> Error "That corrective action is not in this investigation."
+    | [| "RecordVerification" |] ->
+        let criterion = match text fields "criterion" with "" -> text fields "item" | c -> c
+        match Guid.TryParse criterion with
+        | true, c ->
+            let outcome =
+                match text fields "outcome" with
+                | "satisfied" -> Satisfied
+                | "failed" -> VerificationOutcome.Failed
+                | _ -> Inconclusive
+            let cited = match Guid.TryParse(text fields "evidence") with | true, e -> [ Id.ofGuid e ] | _ -> []
+            Ok(RecordVerification(Id.ofGuid (fresh 2), Id.ofGuid c, outcome, cited))
+        | _ -> Error "Choose the criterion this result is for."
     | [| "ConfirmCause"; id |] ->
         match Guid.TryParse id with
         | true, g -> Ok(ConfirmCause(Id.ofGuid g))

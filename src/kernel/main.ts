@@ -132,9 +132,12 @@ Promise.race([kernel.start(), timeout]).then(
     if (!TEST_BUILD) Reflect.deleteProperty(globalThis, "getDotnetRuntime");
     // WASM-LOAD-004: the shell leaves only once the application has rendered its first projection.
     // Test build only: `?percepta=default` shows the fixture investigation with no predicates, so a Percepta run
-    // can establish the screen's identity before it injects its own fixtures.
-    if (TEST_BUILD && new URLSearchParams(location.search).get("percepta") === "default") {
-      void (Reflect.get(window, "__perceptaSetState") as (s: unknown) => Promise<void>)({ name: "default", predicates: [], capabilities: {} });
+    // can establish the screen's identity before it injects its own fixtures. `?percepta=conflict` is the same state
+    // with a persistence conflict held, for the conflict-recovery screen (S23).
+    const perceptaDefault = new URLSearchParams(location.search).get("percepta");
+    if (TEST_BUILD && (perceptaDefault === "default" || perceptaDefault === "conflict")) {
+      void (Reflect.get(window, "__perceptaSetState") as (s: unknown) => Promise<void>)(
+        perceptaDefault === "conflict" ? { name: "conflict", predicates: [], capabilities: {}, sync: "conflict" } : { name: "default", predicates: [], capabilities: {} });
     }
     if (boot !== null && boot.dataset.state !== "failed") {
       boot.remove();

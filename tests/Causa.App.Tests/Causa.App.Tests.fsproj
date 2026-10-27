@@ -8,10 +8,14 @@
     <ProjectReference Include="../../src/app/Causa.App.fsproj" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SyntheticCase.fs" />
     <Compile Include="RouteTests.fs" />
     <Compile Include="ProjectionTests.fs" />
     <Compile Include="GraphTests.fs" />
+    <Compile Include="AnalysisViewTests.fs" />
     <Compile Include="EnginePortTests.fs" />
+    <Compile Include="LanguageTests.fs" />
+    <Compile Include="RecordsTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />

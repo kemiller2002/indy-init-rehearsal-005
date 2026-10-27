@@ -87,7 +87,11 @@ type HistoryView =
       /// What the command group at AtVersion changed (before -> after).
       ChangesHere: string list
       /// Everything that changed from AtVersion to the latest version.
-      ChangesSince: string list }
+      ChangesSince: string list
+      /// Open questions that differ between AtVersion and the latest version (S15).
+      BlockerChanges: string list
+      /// Actions whose availability differs between AtVersion and the latest version (S15).
+      CapabilityChanges: string list }
 
 type CauseRole =
     | RootCause
@@ -133,6 +137,47 @@ type ReportView =
       UnverifiedAssumptions: string list
       Corrections: (string * string) list }
 
+/// One record the analysis screens list (S03, S04, S11): its words, the engine's state for it, and the ids of the
+/// entities it concerns (hypotheses for predictions and actions, evidence for contradictions and negative knowledge).
+type DetailRow = { Id: string; Text: string; State: string; Related: string list }
+
+/// A corrective action as the corrective-action screen shows it (S12).
+type CorrectionRow = { Id: string; Description: string; Kind: string; State: string; Targets: string list }
+
+/// A verification criterion with what was recorded against it (S13). `Satisfied` is the engine's policy answer.
+type CriterionRow =
+    { Id: string
+      Correction: string
+      Expected: string
+      Method: string option
+      Satisfied: bool
+      /// Each recorded verification: outcome and the evidence ids it cites.
+      Results: (string * string list) list }
+
+/// The records behind the analysis screens. Text and states only; legality stays in Capabilities.
+type InvestigationDetail =
+    { Contradictions: DetailRow list
+      Assumptions: DetailRow list
+      Predictions: DetailRow list
+      Actions: DetailRow list
+      NegativeKnowledge: DetailRow list
+      Unknowns: DetailRow list
+      /// Per cause id: what the confirmation gate still requires (empty = the gate is open).
+      CauseGates: (string * string list) list
+      Corrections: CorrectionRow list
+      Criteria: CriterionRow list }
+
+let noDetail =
+    { Contradictions = []
+      Assumptions = []
+      Predictions = []
+      Actions = []
+      NegativeKnowledge = []
+      Unknowns = []
+      CauseGates = []
+      Corrections = []
+      Criteria = [] }
+
 type InvestigationProjection =
     { Id: string
       Title: string
@@ -153,7 +198,9 @@ type InvestigationProjection =
       /// Technical integrity of how the data was obtained, for Administration only (UI-023-O2).
       Integrity: string option
       Report: ReportView option
-      Capabilities: Capability list }
+      Capabilities: Capability list
+      /// Records behind the analysis screens (S03, S04, S11, S12, S13).
+      Detail: InvestigationDetail }
 
 /// Distinct save and sync states (UI-006-O1). Only `RemotelySynced` may say the provider holds the change.
 type SyncStatus =

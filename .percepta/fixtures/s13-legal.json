@@ -1,0 +1,7 @@
+{
+  "name": "s13-legal",
+  "predicates": [],
+  "capabilities": {
+    "RecordVerification": "legal"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "s04-blocked",
+  "predicates": [
+    "material-blocker-exists"
+  ],
+  "capabilities": {
+    "FalsifyHypothesis": "illegal",
+    "ReopenHypothesis": "illegal"
+  }
+}
