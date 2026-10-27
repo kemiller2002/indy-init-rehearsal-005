@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Causa persistence: storage-contract reader/writer, the Sync state machine (connection, loading, local
+       durability, remote publication), the GitHub provider as request/response data, and the historical catalog
+       reader. Pure: no I/O, no HttpClient, no package dependencies, so it runs unchanged in the browser (WASM),
+       where the Limen kernel performs the effects it describes. -->
+  <PropertyGroup>
+    <AssemblyName>Causa.Persistence</AssemblyName>
+    <RootNamespace>Causa.Persistence</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Json.fs" />
+    <Compile Include="Contract.fs" />
+    <Compile Include="Projection.fs" />
+    <Compile Include="FileSet.fs" />
+  </ItemGroup>
+</Project>

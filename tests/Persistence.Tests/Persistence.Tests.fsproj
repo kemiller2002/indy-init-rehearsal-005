@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Application-level and contract tests for src/persistence. Offline and deterministic: no network, no
+       credentials (PF-003-O2, PF-005-O1, PF-012-O2). Each test names the VPO obligation(s) it proves. -->
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/persistence/Causa.Persistence.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Synthetic.fs" />
+    <Compile Include="FileSetTests.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+</Project>
