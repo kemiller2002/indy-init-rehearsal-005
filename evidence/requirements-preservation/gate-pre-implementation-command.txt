@@ -1,0 +1,26 @@
+# T08 / PRE-REQ-04 (2026-10-27), Praxis 3.22.0 (praxis-linux-x64.tar.gz sha256 36edb44b058e417b2e8e6ad321f9f9090ed408b32921ed36489b81cc085745c0)
+# Exit 0, verdict pass: 461 requirements, 2293 obligations (1449 verbatim, 775 review, 69 tokens),
+# 0 exclusions, 0 fail/drift/blocked/needs-review, 775 info (equivalence-reviewed).
+# Approvals and reviews: Indy-init kickoff/rehearsal-005 (approvals.json: no approvals; equivalence-reviews.json
+# sha256 7dba9c655e3c39b69862cb6da08d33e8b2152e9b0f391a893a0747cdc1f0f80a, agent transcription of the
+# owner's chat approval; see its README). <indy-init> is a checkout of kemiller2002/indy-init branch
+# claude/rehearsal-5-reviews at 0bc45d400ac049adf0946ebb6690a4dad5a75de7; <indy-init@aab8f80> a checkout at
+# aab8f80c7743392e794b3b631542903ed4ed6f64 (both run as these literal relative paths).
+# The derivation applies a review only to a review-requested obligation whose criterion is byte-identical
+# to its text, and fails otherwise.
+dotnet tools/derive-requirements/bin/Release/net10.0/derive-requirements.dll \
+  --baseline '<indy-init>/requirements/causa-requirements-baseline.json' \
+  --normalized '<indy-init>/requirements-compiled/v1/normalized-requirements.json' \
+  --source '<indy-init@aab8f80>' \
+  --reviews '<indy-init>/kickoff/rehearsal-005/equivalence-reviews.json' \
+  --reviews-ref 'kemiller2002/indy-init 0bc45d400ac049adf0946ebb6690a4dad5a75de7:kickoff/rehearsal-005/equivalence-reviews.json' \
+  --out research
+praxis requirements preservation verify \
+  --baseline '<indy-init>/requirements/causa-requirements-baseline.json' \
+  --source '<indy-init@aab8f80>' \
+  --derived research/requirements \
+  --disposition research/requirements-preservation/disposition.json \
+  --approvals '<indy-init>/kickoff/rehearsal-005/approvals.json' \
+  --approvals-sha256 711859d610ee6af1174aa33ebc6455ec77a7d107af02aa3fe80da0003616c011 \
+  --trusted-approver kemiller2002 \
+  --output evidence/requirements-preservation/gate-pre-implementation.json --json

@@ -8,13 +8,17 @@
     "sha256": "621e2f960038dcfb0daa2a9fe18a0c1c350faed297ba2856da1236a0360857b9"
   },
   "inputs": {
-    "normalizedRequirementsSha256": "9fea70e7cc8edf5ec6dfd72a6269284003e6d8ef30e4ccc390c7c68576f861da"
+    "normalizedRequirementsSha256": "9fea70e7cc8edf5ec6dfd72a6269284003e6d8ef30e4ccc390c7c68576f861da",
+    "reviews": {
+      "ref": "kemiller2002/indy-init 0bc45d400ac049adf0946ebb6690a4dad5a75de7:kickoff/rehearsal-005/equivalence-reviews.json",
+      "sha256": "7dba9c655e3c39b69862cb6da08d33e8b2152e9b0f391a893a0747cdc1f0f80a"
+    }
   },
   "outputs": {
     "derivedDocuments": 461,
     "derivedDocumentsSha256": "ad31cb2488deb2e34f4315be036534f51f8f214c2c3166837967da8dfef0c4c2",
     "derivedDocumentsDigestMethod": "sha256 of the lines '<sha256>  <file name>\\n' for every research/requirements/*.md, ordinal by file name",
-    "dispositionSha256": "1b56008f90724e21e37eeb82d2e4514c5cf3495adc13477c3f85cef8ae5cf7ae",
+    "dispositionSha256": "325d3acdb726590dcd673d6c9e3b498d62ab637b65e7209272c6cf0ec395537e",
     "reviewRequestsSha256": "1e98c9234b30173616e3aec77e0ac54633a92acb5dfe60895b24668423254dd5"
   },
   "counts": {
@@ -25,7 +29,7 @@
     "exclusions": 0,
     "reviewsRequested": 775,
     "reviewsRequestedByteIdentical": 775,
-    "reviewsApplied": 0,
+    "reviewsApplied": 775,
     "approvalsWritten": 0
   },
   "sourceTextChecked": true
