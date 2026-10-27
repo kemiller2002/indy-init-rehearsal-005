@@ -223,5 +223,23 @@ let merge (model: Shell.Model) (inv: InvestigationProjection option) (view: Map<
         @ (if detailShown then [ "inspector.show", flag false; "section.evidence", flag false; "section.evidenceDetail", flag true ]
            else [ "section.evidenceDetail", flag false ])
         @ [ "legal.RelateEvidence", flag (view.TryFind "not.RelateEvidence" = Some(ViewValue.Flag false)) ]
-    extra |> List.fold (fun (m: Map<string, ViewValue>) (k, v) -> m.Add(k, v)) view
+    // Record rows the shell projects gain their selection state and a "Details" address (the inspector's entry).
+    let augment key (more: ViewItem -> (string * string) list) (m: Map<string, ViewValue>) =
+        match m.TryFind key with
+        | Some(ViewValue.Items rows) ->
+            m.Add(key, ViewValue.Items(rows |> List.map (fun r -> more r |> List.fold (fun (row: ViewItem) (k, v) -> row.Add(k, ViewPrimitive.Text v)) r)))
+        | _ -> m
+    let str (r: ViewItem) k = match r.TryFind k with Some(ViewPrimitive.Text t) -> t | _ -> ""
+    let row id label = [ "selected", selectionState model.Selected id; "detailsLabel", "Details: " + label ]
+    extra
+    |> List.fold (fun (m: Map<string, ViewValue>) (k, v) -> m.Add(k, v)) view
+    |> augment "hypotheses" (fun r -> row (str r "id") (str r "statement"))
+    |> augment "evidence" (fun r -> row (str r "id") (str r "content"))
+    |> augment "causes" (fun r ->
+        ("href", Routes.formatItem (Investigation(invId, CausalAnalysis)) (str r "id")) :: row (str r "id") (str r "outcome"))
+    |> augment "timeline" (fun r ->
+        let ev = "event-" + str r "id"
+        [ "eventHref", Routes.formatItem (Investigation(invId, Timeline)) ev
+          "eventLabel", "Details of event " + str r "id"
+          "selected", selectionState model.Selected ev ])
 

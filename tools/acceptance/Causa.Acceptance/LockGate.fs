@@ -178,6 +178,63 @@ let evaluate (i: Inputs) : Check list =
               | None -> yield gap (sprintf "npm.installed.%s" sys) (sprintf "node_modules/%s" name) (v sys) "not installed in this checkout"
               | Some installed -> yield check (sprintf "npm.installed.%s" sys) (sprintf "node_modules/%s" name) (v sys) (strOr "" "version" installed) "installed version" ]
 
+    // Echelon packages outside the release set, each pinned in pin.json against an accepted owner decision record:
+    // reported as such, version- and integrity-checked like the channel set, never silently ignored. An Echelon
+    // package that is neither in the channel mapping nor pinned this way fails the gate.
+    let outsideChannelChecks =
+        let pkg = Json.tryLoad (Path.Combine(root, "package.json"))
+        let deps =
+            pkg
+            |> Option.map (fun p -> [ "dependencies"; "devDependencies" ] |> List.collect (fun k -> field k p |> Option.map props |> Option.defaultValue []) |> List.map (fun (k, n) -> k, n.GetValue<string>()))
+            |> Option.defaultValue []
+            |> Map.ofList
+        let packageLock = if i.PackageLockCommitted then Json.tryLoad (Path.Combine(root, "package-lock.json")) else None
+        let pinned = items "outsideChannel" i.Pin
+        let pinnedNames = pinned |> List.map (strOr "" "package") |> Set.ofList
+        let channelNames = npmPackages |> List.map fst |> Set.ofList
+        [ for entry in pinned do
+              let name = strOr "" "package" entry
+              let version = strOr "" "version" entry
+              let decision = field "decision" entry
+              let decisionId = decision |> Option.bind (str "id") |> Option.defaultValue ""
+              let decisionPath = decision |> Option.bind (str "path") |> Option.defaultValue ""
+              let subject what = sprintf "%s %s (outside echelon-current; owner-approved %s)" what name decisionId
+              let id what = sprintf "outside.%s.%s" what name
+              let record = readText root decisionPath |> Option.defaultValue ""
+              let accepted =
+                  record.Contains(sprintf "id: %s" decisionId)
+                  && Regex.IsMatch(record, @"(?m)^status: accepted\s*$")
+                  && record.Contains(sprintf "`%s` %s" name version)
+              yield
+                  { Id = id "decision"
+                    Subject = subject "decision record"
+                    Expected = sprintf "%s accepted for %s %s" decisionId name version
+                    Actual = (if record = "" then "absent" elif accepted then sprintf "%s accepted for %s %s" decisionId name version else "not an accepted decision for this version")
+                    Status = (if accepted then Pass else Fail)
+                    Detail = decisionPath }
+              match deps.TryFind name with
+              | None -> yield { (gap (id "declared") (subject "package.json") version "not declared") with Status = Fail }
+              | Some spec -> yield check (id "declared") (subject "package.json") version (declaredNpmVersion spec |> Option.defaultValue spec) spec
+              match packageLock with
+              | None -> yield gap (id "lock") (subject "package-lock.json") version "package-lock.json is not committed"
+              | Some l ->
+                  let e = field "packages" l |> Option.bind (field ("node_modules/" + name))
+                  let integrity = e |> Option.bind (str "integrity") |> Option.defaultValue "no integrity recorded"
+                  yield check (id "lock") (subject "package-lock.json") version (e |> Option.bind (str "version") |> Option.defaultValue "absent") integrity
+                  yield check (id "integrity") (subject "package-lock.json integrity") (strOr "" "integrity" entry) integrity integrity
+              match Json.tryLoad (Path.Combine(root, "node_modules", name, "package.json")) with
+              | None -> yield gap (id "installed") (subject "node_modules") version "not installed in this checkout"
+              | Some installed -> yield check (id "installed") (subject "node_modules") version (strOr "" "version" installed) "installed version"
+          for name in deps |> Map.keys do
+              if name.StartsWith "@echelon-foundry/" && not (channelNames.Contains name) && not (pinnedNames.Contains name) then
+                  yield
+                      { Id = sprintf "outside.unpinned.%s" name
+                        Subject = sprintf "package.json %s" name
+                        Expected = "in echelon-current, or pinned against an accepted owner decision"
+                        Actual = deps[name]
+                        Status = Fail
+                        Detail = "an Echelon package outside the verified release set without an owner decision" } ]
+
     let nugetChecks =
         let packages = nugetPackages i.Channel
         let projects =
@@ -223,7 +280,7 @@ let evaluate (i: Inputs) : Check list =
                   let g = gap (sprintf "host.%s" exe) (sprintf "%s --version" exe) (v sys) "not on PATH in this environment"
                   yield (if List.contains exe i.RequiredHostTools then { g with Status = Fail; Detail = "required here, but not on PATH" } else g) ]
 
-    pinChecks @ lockChecks @ npmChecks @ nugetChecks @ praxisPin @ hostChecks
+    pinChecks @ lockChecks @ npmChecks @ outsideChannelChecks @ nugetChecks @ praxisPin @ hostChecks
 
 let verdict (checks: Check list) =
     if checks |> List.exists (fun c -> c.Status = Fail) then "FAIL"

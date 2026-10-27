@@ -4,7 +4,7 @@
 import { readFileSync } from "node:fs";
 import { expect, test } from "./support/fixtures.js";
 
-const SITE = `http://127.0.0.1:${process.env.CAUSA_TEST_PORT ?? 4322}/`;
+const SITE = `http://127.0.0.1:${process.env.CAUSA_TEST_PORT ?? 4822}/`;
 const started = (page) => expect(page.locator("#causa-boot")).toHaveCount(0, { timeout: 60_000 });
 const section = (page, name) => page.getByRole("navigation", { name: "Investigation sections" }).getByRole("link", { name }).click();
 

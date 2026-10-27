@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 // Non-live specs use the network guard: GitHub is answered from recordings, any other host fails the test.
 import { expect, test } from "./support/fixtures.js";
 
-const TEST_SITE = `http://127.0.0.1:${process.env.CAUSA_TEST_PORT ?? 4322}/`;
+const TEST_SITE = `http://127.0.0.1:${process.env.CAUSA_TEST_PORT ?? 4822}/`;
 
 /** Waits until the application has replaced the loading shell. */
 async function started(page) {

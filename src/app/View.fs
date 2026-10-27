@@ -8,11 +8,18 @@ open Causa.App.Adapter
 open Causa.App.Presentation
 open Causa.App.Shell
 
+// Kept as calls (never inlined): inlined, each key's temporaries became locals of `project`, and the .NET
+// WebAssembly interpreter refuses a method whose locals exceed its limit ("locals size too big").
+[<System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)>]
 let private text (s: string) = ViewValue.Text s
+[<System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)>]
 let private flag (b: bool) = ViewValue.Flag b
+[<System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)>]
 let private items (xs: ViewItem list) = ViewValue.Items xs
+[<System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)>]
 let private item (fields: (string * string) list) : ViewItem = fields |> List.map (fun (k, v) -> k, ViewPrimitive.Text v) |> Map.ofList
 
+[<System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)>]
 let private itemF (fields: (string * string) list) (flags: (string * bool) list) : ViewItem =
     (fields |> List.map (fun (k, v) -> k, ViewPrimitive.Text v)) @ (flags |> List.map (fun (k, v) -> k, ViewPrimitive.Flag v)) |> Map.ofList
 
@@ -74,7 +81,7 @@ let private screenName =
     | SettingsScreen -> "settings"
     | NotFoundScreen -> "not-found"
 
-let project (model: Model) : ViewState =
+let private navKeys (model: Model) : (string * ViewValue) list =
     let ws = model.Port.Projection
     let screen = screenOf model
     let connected = match ws.Connection with ConnectedTo _ -> true | _ -> false
@@ -95,14 +102,63 @@ let project (model: Model) : ViewState =
           "settings", "Settings", "#/settings", area = SettingsArea ]
         |> List.map (fun (id, l, href, cur) -> item [ "id", id; "label", l; "href", href; "current", current cur ])
 
+    let notice, noticeTone =
+        match model.Notice, ws.Message with
+        | Some n, _ -> Some n.Text, n.Tone
+        | None, Some(t, m) -> Some m, t
+        | None, None -> None, "info"
+
+    let pageTitle =
+        match screen with
+        | AdministrationScreen -> "Administration · Causa"
+        | SettingsScreen -> "Settings · Causa"
+        | ConnectScreen -> "Connect · Causa"
+        | ListScreen -> "Investigations · Causa"
+        | NewScreen -> "New investigation · Causa"
+        | InvestigationScreen(i, s) -> $"{i.Title} · {sectionLabel s} · Causa"
+        | OpeningScreen -> "Opening investigation · Causa"
+        | FailedScreen _ -> "Investigation unavailable · Causa"
+        | MissingScreen -> "Investigation not found · Causa"
+        | NotFoundScreen -> "Page not found · Causa"
+
+    [ "page.title", text pageTitle
+      "screen", text (screenName screen)
+      "secrets.epoch", text (string model.SecretEpoch)
+      "percepta.state", text (model.InjectedState |> Option.defaultValue "")
+      "text.size", text (if model.Settings.LargeText then "large" else "standard")
+      "motion", text (if model.Settings.ReducedMotion then "reduced" else "system")
+      "nav", items primaryNav
+      "connection.label", text (match ws.ConnectionStatus with Some(words, _) -> words | None -> connectionText ws.Connection)
+      "connection.detail", text (ws.ConnectionStatus |> Option.bind snd |> Option.defaultValue "")
+      "connection.hasDetail", flag ((ws.ConnectionStatus |> Option.bind snd |> Option.isSome) && (match ws.Connection with ConnectionFailed _ -> false | _ -> true))
+      "confirm.show", flag model.PendingConfirm.IsSome
+      "confirm.text", text (model.PendingConfirm |> Option.map snd |> Option.defaultValue "")
+      "data.fixture", flag (model.Port.Name = "engine/fixture")
+      "connected", flag connected
+      "notice.show", flag notice.IsSome
+      "notice.text", text (notice |> Option.defaultValue "")
+      "notice.tone", text noticeTone
+      "notice.alert", flag (notice.IsSome && (noticeTone = "danger" || noticeTone = "warning"))
+      "notice.status", flag (notice.IsSome && not (noticeTone = "danger" || noticeTone = "warning"))
+      "route.pending", flag (match model.Route with Investigation _ | NewInvestigation -> true | _ -> false) ]
+
+let private invKeys (model: Model) : (string * ViewValue) list =
+    let ws = model.Port.Projection
+    let screen = screenOf model
+    let connected = match ws.Connection with ConnectedTo _ -> true | _ -> false
+
+    let inv, section =
+        match screen with
+        | InvestigationScreen(inv, section) -> Some inv, section
+        | _ -> None, Overview
+
+    let invId = inv |> Option.map (fun i -> i.Id) |> Option.defaultValue ""
+    let on s = (match screen with InvestigationScreen(_, x) -> x = s | _ -> false)
+
     let sectionNav =
         Routes.sections
         |> List.map (fun (sec, slug, name) ->
             item [ "id", slug; "label", name; "href", Routes.format (Investigation(invId, sec)); "current", current (inv.IsSome && sec = section) ])
-
-    let listLoading = match ws.Investigations with Loading | NotRequested -> true | _ -> false
-    let listFailed = match ws.Investigations with Failed _ -> true | _ -> false
-    let listFailure = match ws.Investigations with Failed r -> r | _ -> ""
 
     let hypotheses =
         inv
@@ -117,8 +173,6 @@ let project (model: Model) : ViewState =
                       "supporting", count h.Supporting "supporting"
                       "contradicting", count h.Contradicting "contradicting"
                       "href", Routes.formatItem (Investigation(i.Id, Hypotheses)) h.Id
-                      "selected", (UxView.selectionState model.Selected h.Id)
-                      "detailsLabel", "Details: " + h.Statement
                       "changes",
                       (match i.Capabilities |> List.filter (fun c -> c.Legal && c.Id.StartsWith("TransitionHypothesis:" + h.Id + ":")) with
                        | [] -> "No change is allowed now."
@@ -136,9 +190,7 @@ let project (model: Model) : ViewState =
                       "source", (e.Source |> Option.defaultValue "Source not recorded")
                       "category", label e.Category
                       "recorded", (e.RecordedAt |> Option.map (fun t -> "Recorded " + t) |> Option.defaultValue "Recording time not recorded")
-                      "href", Routes.formatItem (Investigation(i.Id, Evidence)) e.Id
-                      "selected", (UxView.selectionState model.Selected e.Id)
-                      "detailsLabel", "Details: " + e.Content ]))
+                      "href", Routes.formatItem (Investigation(i.Id, Evidence)) e.Id ]))
         |> Option.defaultValue []
 
     let blockers =
@@ -146,19 +198,6 @@ let project (model: Model) : ViewState =
         |> Option.map (fun i ->
             i.Blockers |> List.map (fun b -> item [ "id", b.Id; "anchor", "blocker-" + b.Id; "selected", (if model.Selected = b.Id then "true" else "false"); "question", b.Question; "materiality", (if b.Material then "Material question" else "Not material") ]))
         |> Option.defaultValue []
-
-    let formCapability (name: string) =
-        inv |> Option.map (fun i -> i.Capabilities |> List.filter (fun c -> c.Name = name)) |> Option.defaultValue []
-
-    let can name = formCapability name |> List.exists (fun c -> c.Legal)
-
-    let why name =
-        match formCapability name with
-        | [] -> "Not available for this investigation."
-        | cs when cs |> List.exists (fun c -> c.Legal) -> ""
-        | c :: _ -> c.Reason |> Option.defaultValue "Not allowed in the current status."
-
-    let field (key: string) = model.CommandInputs |> Map.tryFind key |> Option.defaultValue ""
 
     let capabilities =
         inv
@@ -179,52 +218,6 @@ let project (model: Model) : ViewState =
                       "blockerHref", (c.BlockerId |> Option.map (fun b -> Routes.formatItem (Investigation(i.Id, Overview)) b) |> Option.defaultValue "") ]
                     [ "legal", c.Legal && c.Input.IsNone; "legalInput", c.Legal && c.Input.IsSome; "illegal", not c.Legal; "hasBlocker", c.BlockerId.IsSome ]))
         |> Option.defaultValue []
-
-    let timeline =
-        inv
-        |> Option.map (fun i ->
-            i.Timeline
-            |> List.sortBy (fun t -> t.Sequence)
-            |> List.filter (fun t -> model.TimelineFilter = "all" || t.Category = model.TimelineFilter)
-            |> List.map (fun t ->
-                let first = t.Affected |> List.tryHead
-                let sectionOf slug = Routes.sections |> List.tryFind (fun (_, s, _) -> s = slug) |> Option.map (fun (x, _, _) -> x)
-                itemF
-                    [ "id", string t.Sequence
-                      "sequence", $"#{t.Sequence}"
-                      "type", t.EventType
-                      "occurred", "Event time " + t.OccurredAt
-                      "recorded", (t.RecordedAt |> Option.map (fun r -> "Recorded " + r) |> Option.defaultValue "Recorded time not available")
-                      "actor", (t.Actor |> Option.defaultValue "Actor not recorded")
-                      "versionHref", Routes.format (Investigation(i.Id, Timeline)) + $"?version={t.Sequence}"
-                      "affectedText", (first |> Option.map (fun (_, _, w) -> w) |> Option.defaultValue "")
-                      "affectedHref",
-                      (first
-                       |> Option.bind (fun (slug, id, _) -> sectionOf slug |> Option.map (fun sec -> Routes.formatItem (Investigation(i.Id, sec)) id))
-                       |> Option.defaultValue "")
-                      "current", (if model.HistoryVersion = Some t.Sequence then "true" else "false")
-                      "eventHref", Routes.formatItem (Investigation(i.Id, Timeline)) $"event-{t.Sequence}"
-                      "eventLabel", $"Details of event {t.Sequence}"
-                      "selected", (UxView.selectionState model.Selected $"event-{t.Sequence}") ]
-                    [ "hasAffected", first.IsSome
-                      "clockNote", t.ClockBeforePrevious ]))
-        |> Option.defaultValue []
-
-    // Time travel (T28): the state at the chosen version, derived by the engine and labelled historical.
-    let history =
-        match inv, model.HistoryVersion with
-        | Some i, Some v -> model.Port.History i.Id v
-        | _ -> None
-
-    let versions =
-        inv
-        |> Option.map (fun i ->
-            i.Timeline |> List.map (fun t -> item [ "id", string t.Sequence; "value", string t.Sequence; "label", $"Version {t.Sequence}: {t.EventType}" ]))
-        |> Option.defaultValue []
-
-    let categories =
-        item [ "id", "all"; "value", "all"; "label", "All events" ]
-        :: (EngineView.categoryLabels |> List.map (fun (k, l) -> item [ "id", k; "value", k; "label", l ]))
 
     let graphDoc = inv |> Option.map (fun i -> Graph.toDocument i.Title i.Id (Graph.ofInvestigation i)) |> Option.defaultValue ""
     let graphSelection = inv |> Option.map (fun i -> Graph.describeSelection i model.Selected) |> Option.defaultValue ""
@@ -249,10 +242,7 @@ let project (model: Model) : ViewState =
                       "outcome", c.Outcome
                       "state", label c.State
                       "tone", tone c.State
-                      "members", (if members.IsEmpty then "No contributing hypotheses recorded." else String.concat "; " members)
-                      "href", Routes.formatItem (Investigation(i.Id, CausalAnalysis)) c.Id
-                      "selected", (UxView.selectionState model.Selected c.Id)
-                      "detailsLabel", "Details: " + c.Outcome ]))
+                      "members", (if members.IsEmpty then "No contributing hypotheses recorded." else String.concat "; " members) ]))
         |> Option.defaultValue []
 
     // Counts of what the projection says blocks progress; derived only from the engine's blockers and legality.
@@ -271,6 +261,498 @@ let project (model: Model) : ViewState =
 
     // Administration (UI-018, S25): every fact in one of six sections, each with an explicit state. Only states that
     // report an observed fact count as verified; everything else is listed as not verified (never implied).
+    let report = inv |> Option.bind (fun i -> i.Report)
+    [ "sync.conflict", flag (ws.Sync = Conflict)
+      "failed.text", text (match screen with FailedScreen r -> r | _ -> "")
+      "inv.id", text invId
+      "inv.title", text (inv |> Option.map (fun i -> i.Title) |> Option.defaultValue "")
+      "inv.status", text (inv |> Option.map (fun i -> label i.Lifecycle) |> Option.defaultValue "")
+      "inv.tone", text (inv |> Option.map (fun i -> tone i.Lifecycle) |> Option.defaultValue "neutral")
+      "inv.kind", text (inv |> Option.map (fun i -> if i.Writable then "Your working copy" else "Read-only demonstration") |> Option.defaultValue "")
+      "inv.version", text (inv |> Option.map (fun i -> $"Version {i.Version}") |> Option.defaultValue "")
+      "inv.description", text (inv |> Option.bind (fun i -> i.Description) |> Option.defaultValue "What happened has not been recorded yet.")
+      "sections", items sectionNav
+      "section.overview", flag (on Overview)
+      "section.causal", flag (on CausalAnalysis)
+      "section.evidence", flag (on Evidence)
+      "section.hypotheses", flag (on Hypotheses)
+      "section.timeline", flag (on Timeline)
+      "section.corrective", flag (on CorrectiveActions)
+      "section.report", flag (on Report)
+      "section.proposals", flag (on AiProposals)
+      "hypotheses", items hypotheses
+      "hypotheses.empty", flag (inv.IsSome && hypotheses.IsEmpty)
+      "evidence", items evidence
+      "evidence.empty", flag (inv.IsSome && evidence.IsEmpty)
+      "blockers", items blockers
+      "blockers.empty", flag (inv.IsSome && blockers.IsEmpty)
+      "capabilities", items capabilities
+      "capabilities.empty", flag (inv.IsSome && capabilities.IsEmpty)
+      "graph.any", flag (graphDoc <> "")
+      "graph.document", text graphDoc
+      "graph.selected", flag (graphSelection <> "")
+      "graph.selection", text graphSelection
+      "causes", items causes
+      "causes.empty", flag (inv.IsSome && causes.IsEmpty)
+      "attention.questions", text attentionQuestions
+      "attention.blocked", flag (blockedActions > 0)
+      "attention.blockedText", text attentionBlocked
+      "attention.material", flag (materialQuestions > 0)
+      "attention.first", text (inv |> Option.bind (fun i -> i.Blockers |> List.tryFind (fun b -> b.Material)) |> Option.map (fun b -> b.Question) |> Option.defaultValue "")
+      "attention.provisional", text "While a material question is open, nothing it affects is shown as settled."
+      "attention.tone", text (if materialQuestions > 0 then "attention" else "neutral")
+      "attention.href", text (inv |> Option.map (fun i -> Routes.formatItem (Investigation(i.Id, Overview)) (i.Blockers |> List.tryHead |> Option.map (fun b -> b.Id) |> Option.defaultValue "")) |> Option.defaultValue "#/")
+      "sync.text", text (syncText ws.Sync)
+      "sync.tone", text (syncTone ws.Sync)
+      "sync.mayHaveSaved", flag (match ws.Sync with MayHaveSaved _ -> true | _ -> false) ]
+
+let private screensKeys (model: Model) : (string * ViewValue) list =
+    let ws = model.Port.Projection
+    let screen = screenOf model
+    let connected = match ws.Connection with ConnectedTo _ -> true | _ -> false
+
+    let inv, section =
+        match screen with
+        | InvestigationScreen(inv, section) -> Some inv, section
+        | _ -> None, Overview
+
+    let invId = inv |> Option.map (fun i -> i.Id) |> Option.defaultValue ""
+    let on s = (match screen with InvestigationScreen(_, x) -> x = s | _ -> false)
+
+    let formCapability (name: string) =
+        inv |> Option.map (fun i -> i.Capabilities |> List.filter (fun c -> c.Name = name)) |> Option.defaultValue []
+
+    let can name = formCapability name |> List.exists (fun c -> c.Legal)
+
+    let start =
+        ws.Capabilities
+        |> List.tryFind (fun c -> c.Id = "StartInvestigation")
+        |> Option.defaultValue
+            { Id = "StartInvestigation"; Name = "StartInvestigation"; Input = None; Label = "Start the investigation"; Legal = false; Reason = Some "Starting an investigation is not available in this build yet."; BlockerId = None }
+
+    let wsBlockers =
+        ws.Blockers |> List.map (fun b -> item [ "id", b.Id; "anchor", "ws-blocker-" + b.Id; "question", b.Question; "materiality", (if b.Material then "Material question" else "Not material") ])
+
+    let destination =
+        match ws.Connection with
+        | ConnectedTo(repo, branch, workspace) -> $"GitHub repository {repo}, branch {branch}, workspace {workspace}. Nothing is written until you save."
+        | _ -> "Not connected: there is nowhere to save an investigation yet."
+
+    // Report preview (S22, R12.3): an investigation that is not resolved or closed is shown as incomplete.
+    let connectFailure = match ws.Connection with ConnectionFailed r -> r | _ -> ""
+
+    [ "screen.connect", flag (screen = ConnectScreen)
+      "draft.repository", text model.Drafts.Repository
+      "draft.branch", text model.Drafts.Branch
+      "draft.workspace", text model.Drafts.Workspace
+      "connect.busy", flag (ws.Connection = Connecting)
+      "connect.failed", flag (connectFailure <> "")
+      "connect.failure", text connectFailure
+      "screen.list", flag (screen = ListScreen)
+      "screen.new", flag (screen = NewScreen)
+      "screen.opening", flag (screen = OpeningScreen)
+      "screen.failed", flag (match screen with FailedScreen _ -> true | _ -> false)
+      "screen.missing", flag (screen = MissingScreen)
+      "screen.notfound", flag (screen = NotFoundScreen)
+      "screen.investigation", flag inv.IsSome
+      "ws.questions", text (match ws.Blockers |> List.filter (fun b -> b.Material) |> List.length with 0 -> "None recorded." | 1 -> "1 material open question." | n -> $"{n} material open questions.")
+      "ws.material", flag (ws.Blockers |> List.exists (fun b -> b.Material))
+      "ws.first", text (ws.Blockers |> List.tryFind (fun b -> b.Material) |> Option.map (fun b -> b.Question) |> Option.defaultValue "")
+      "ws.provisional", text "Starting is blocked until it is answered; nothing has been created."
+      "start.availability", text (if start.Legal then "You can start an investigation here." else "Starting is unavailable: " + (start.Reason |> Option.defaultValue "no reason was given."))
+      "start.legal", flag start.Legal
+      "start.illegal", flag (not start.Legal)
+      "start.label", text start.Label
+      "start.reason", text (start.Reason |> Option.defaultValue "")
+      "start.hasBlocker", flag start.BlockerId.IsSome
+      "start.blockerHref", text (start.BlockerId |> Option.map (fun b -> Routes.formatItem NewInvestigation b) |> Option.defaultValue "#/investigations/new")
+      "draft.title", text model.Drafts.Title
+      "draft.statement", text model.Drafts.Statement
+      "destination", text destination
+      "wsBlockers", items wsBlockers
+      "wsBlockers.empty", flag wsBlockers.IsEmpty
+      "draft.aiTask", text model.Drafts.AiTask
+      "screen.admin", flag (screen = AdministrationScreen)
+      "screen.settings", flag (screen = SettingsScreen) ]
+
+let private listKeys (model: Model) : (string * ViewValue) list =
+    let ws = model.Port.Projection
+    let screen = screenOf model
+    let connected = match ws.Connection with ConnectedTo _ -> true | _ -> false
+
+    let inv, section =
+        match screen with
+        | InvestigationScreen(inv, section) -> Some inv, section
+        | _ -> None, Overview
+
+    let invId = inv |> Option.map (fun i -> i.Id) |> Option.defaultValue ""
+    let on s = (match screen with InvestigationScreen(_, x) -> x = s | _ -> false)
+
+    let cards =
+        match ws.Investigations with
+        | Loaded cs ->
+            cs
+            |> List.map (fun c ->
+                item
+                    [ "id", c.Id
+                      "title", c.Title
+                      "status", label c.Lifecycle
+                      "tone", tone c.Lifecycle
+                      "kind", (if c.Writable then "Your working copy" else "Read-only demonstration")
+                      "activity", (c.LastActivity |> Option.map (fun a -> "Latest activity " + a) |> Option.defaultValue "Latest activity not recorded")
+                      "hypotheses", count c.Hypotheses "hypotheses"
+                      "evidence", count c.Evidence "evidence items"
+                      "contradictions", count c.Contradictions "unresolved contradictions"
+                      "href", Routes.format (Investigation(c.Id, Overview)) ])
+        | _ -> []
+
+    let listLoading = match ws.Investigations with Loading | NotRequested -> true | _ -> false
+    let listFailed = match ws.Investigations with Failed _ -> true | _ -> false
+    let listFailure = match ws.Investigations with Failed r -> r | _ -> ""
+
+    let hypotheses =
+        inv
+        |> Option.map (fun i ->
+            i.Hypotheses
+            |> List.map (fun h ->
+                item
+                    [ "id", h.Id
+                      "statement", h.Statement
+                      "state", label h.State
+                      "tone", tone h.State
+                      "supporting", count h.Supporting "supporting"
+                      "contradicting", count h.Contradicting "contradicting"
+                      "href", Routes.formatItem (Investigation(i.Id, Hypotheses)) h.Id
+                      "changes",
+                      (match i.Capabilities |> List.filter (fun c -> c.Legal && c.Id.StartsWith("TransitionHypothesis:" + h.Id + ":")) with
+                       | [] -> "No change is allowed now."
+                       | cs -> "Allowed changes: " + (cs |> List.map (fun c -> c.Label) |> String.concat ", ")) ]))
+        |> Option.defaultValue []
+
+    let evidence =
+        inv
+        |> Option.map (fun i ->
+            i.Evidence
+            |> List.map (fun e ->
+                item
+                    [ "id", e.Id
+                      "content", e.Content
+                      "source", (e.Source |> Option.defaultValue "Source not recorded")
+                      "category", label e.Category
+                      "recorded", (e.RecordedAt |> Option.map (fun t -> "Recorded " + t) |> Option.defaultValue "Recording time not recorded")
+                      "href", Routes.formatItem (Investigation(i.Id, Evidence)) e.Id ]))
+        |> Option.defaultValue []
+
+    [ "list.loading", flag listLoading
+      "list.failed", flag listFailed
+      "list.failure", text listFailure
+      "list.empty", flag (match ws.Investigations with Loaded [] -> true | _ -> false)
+      "cards", items cards ]
+
+let private historyKeys (model: Model) : (string * ViewValue) list =
+    let ws = model.Port.Projection
+    let screen = screenOf model
+    let connected = match ws.Connection with ConnectedTo _ -> true | _ -> false
+
+    let inv, section =
+        match screen with
+        | InvestigationScreen(inv, section) -> Some inv, section
+        | _ -> None, Overview
+
+    let invId = inv |> Option.map (fun i -> i.Id) |> Option.defaultValue ""
+    let on s = (match screen with InvestigationScreen(_, x) -> x = s | _ -> false)
+
+    let timeline =
+        inv
+        |> Option.map (fun i ->
+            i.Timeline
+            |> List.sortBy (fun t -> t.Sequence)
+            |> List.filter (fun t -> model.TimelineFilter = "all" || t.Category = model.TimelineFilter)
+            |> List.map (fun t ->
+                let first = t.Affected |> List.tryHead
+                let sectionOf slug = Routes.sections |> List.tryFind (fun (_, s, _) -> s = slug) |> Option.map (fun (x, _, _) -> x)
+                itemF
+                    [ "id", string t.Sequence
+                      "sequence", $"#{t.Sequence}"
+                      "type", t.EventType
+                      "occurred", "Event time " + t.OccurredAt
+                      "recorded", (t.RecordedAt |> Option.map (fun r -> "Recorded " + r) |> Option.defaultValue "Recorded time not available")
+                      "actor", (t.Actor |> Option.defaultValue "Actor not recorded")
+                      "versionHref", Routes.format (Investigation(i.Id, Timeline)) + $"?version={t.Sequence}"
+                      "affectedText", (first |> Option.map (fun (_, _, w) -> w) |> Option.defaultValue "")
+                      "affectedHref",
+                      (first
+                       |> Option.bind (fun (slug, id, _) -> sectionOf slug |> Option.map (fun sec -> Routes.formatItem (Investigation(i.Id, sec)) id))
+                       |> Option.defaultValue "")
+                      "current", (if model.HistoryVersion = Some t.Sequence then "true" else "false") ]
+                    [ "hasAffected", first.IsSome
+                      "clockNote", t.ClockBeforePrevious ]))
+        |> Option.defaultValue []
+
+    // Time travel (T28): the state at the chosen version, derived by the engine and labelled historical.
+    let history =
+        match inv, model.HistoryVersion with
+        | Some i, Some v -> model.Port.History i.Id v
+        | _ -> None
+
+    let versions =
+        inv
+        |> Option.map (fun i ->
+            i.Timeline |> List.map (fun t -> item [ "id", string t.Sequence; "value", string t.Sequence; "label", $"Version {t.Sequence}: {t.EventType}" ]))
+        |> Option.defaultValue []
+
+    let categories =
+        item [ "id", "all"; "value", "all"; "label", "All events" ]
+        :: (EngineView.categoryLabels |> List.map (fun (k, l) -> item [ "id", k; "value", k; "label", l ]))
+
+    [ "timeline", items timeline
+      "timeline.empty", flag (inv.IsSome && timeline.IsEmpty)
+      "timeline.version",
+      text (
+          match history, inv with
+          | Some h, _ when h.IsHistorical -> $"Historical view: version {h.AtVersion} of {h.LatestVersion}. This is not the current state."
+          | _, Some i -> $"Showing the investigation as of version {i.Version}, the latest recorded version."
+          | _ -> ""
+      )
+      "history.show", flag history.IsSome
+      "history.historical", flag (history |> Option.exists (fun h -> h.IsHistorical))
+      "history.version", text (match model.HistoryVersion with Some v -> string v | None -> "")
+      "history.versions", items versions
+      "history.title", text (history |> Option.map (fun h -> h.Title) |> Option.defaultValue "")
+      "history.status", text (history |> Option.map (fun h -> label h.Lifecycle) |> Option.defaultValue "")
+      "history.counts", items (history |> Option.map (fun h -> h.Counts |> List.map (fun (l, n) -> item [ "id", l; "text", $"{l}: {n}" ])) |> Option.defaultValue [])
+      "history.here", items (history |> Option.map (fun h -> h.ChangesHere |> List.mapi (fun k c -> item [ "id", string k; "text", c ])) |> Option.defaultValue [])
+      "history.hereEmpty", flag (history |> Option.exists (fun h -> h.ChangesHere.IsEmpty))
+      "history.since", items (history |> Option.map (fun h -> h.ChangesSince |> List.mapi (fun k c -> item [ "id", string k; "text", c ])) |> Option.defaultValue [])
+      "history.sinceShow", flag (history |> Option.exists (fun h -> h.IsHistorical))
+      "history.latestHref", text (inv |> Option.map (fun i -> Routes.format (Investigation(i.Id, Timeline))) |> Option.defaultValue "#/")
+      "timeline.filter", text model.TimelineFilter
+      "timeline.categories", items categories
+      "timeline.replay", text (inv |> Option.map (fun i -> $"{i.Timeline.Length} recorded events, in their recorded order.") |> Option.defaultValue "") ]
+
+let private reportKeys (model: Model) : (string * ViewValue) list =
+    let ws = model.Port.Projection
+    let screen = screenOf model
+    let connected = match ws.Connection with ConnectedTo _ -> true | _ -> false
+
+    let inv, section =
+        match screen with
+        | InvestigationScreen(inv, section) -> Some inv, section
+        | _ -> None, Overview
+
+    let invId = inv |> Option.map (fun i -> i.Id) |> Option.defaultValue ""
+    let on s = (match screen with InvestigationScreen(_, x) -> x = s | _ -> false)
+
+    let hypotheses =
+        inv
+        |> Option.map (fun i ->
+            i.Hypotheses
+            |> List.map (fun h ->
+                item
+                    [ "id", h.Id
+                      "statement", h.Statement
+                      "state", label h.State
+                      "tone", tone h.State
+                      "supporting", count h.Supporting "supporting"
+                      "contradicting", count h.Contradicting "contradicting"
+                      "href", Routes.formatItem (Investigation(i.Id, Hypotheses)) h.Id
+                      "changes",
+                      (match i.Capabilities |> List.filter (fun c -> c.Legal && c.Id.StartsWith("TransitionHypothesis:" + h.Id + ":")) with
+                       | [] -> "No change is allowed now."
+                       | cs -> "Allowed changes: " + (cs |> List.map (fun c -> c.Label) |> String.concat ", ")) ]))
+        |> Option.defaultValue []
+
+    let blockers =
+        inv
+        |> Option.map (fun i ->
+            i.Blockers |> List.map (fun b -> item [ "id", b.Id; "anchor", "blocker-" + b.Id; "selected", (if model.Selected = b.Id then "true" else "false"); "question", b.Question; "materiality", (if b.Material then "Material question" else "Not material") ]))
+        |> Option.defaultValue []
+
+    let formCapability (name: string) =
+        inv |> Option.map (fun i -> i.Capabilities |> List.filter (fun c -> c.Name = name)) |> Option.defaultValue []
+
+    let why name =
+        match formCapability name with
+        | [] -> "Not available for this investigation."
+        | cs when cs |> List.exists (fun c -> c.Legal) -> ""
+        | c :: _ -> c.Reason |> Option.defaultValue "Not allowed in the current status."
+
+    let hypothesisText =
+        inv |> Option.map (fun i -> i.Hypotheses |> List.map (fun h -> h.Id, h.Statement) |> Map.ofList) |> Option.defaultValue Map.empty
+
+    // The same causal structure as text (UI-011-O5, UI-026-O4): the graph is never the only way to read it.
+    let causes =
+        inv
+        |> Option.map (fun i ->
+            i.Causes
+            |> List.sortBy (fun c -> c.Id)
+            |> List.map (fun c ->
+                let members =
+                    c.Members
+                    |> List.sortBy fst
+                    |> List.map (fun (h, role) -> $"""{roleLabel role}: {hypothesisText |> Map.tryFind h |> Option.defaultValue "a hypothesis not in this view"}""")
+
+                item
+                    [ "id", c.Id
+                      "outcome", c.Outcome
+                      "state", label c.State
+                      "tone", tone c.State
+                      "members", (if members.IsEmpty then "No contributing hypotheses recorded." else String.concat "; " members) ]))
+        |> Option.defaultValue []
+
+    // Counts of what the projection says blocks progress; derived only from the engine's blockers and legality.
+    let report = inv |> Option.bind (fun i -> i.Report)
+    let complete = inv |> Option.exists (fun i -> i.Lifecycle = "resolved" || i.Lifecycle = "closed")
+    let confirmedCauses = inv |> Option.map (fun i -> i.Causes |> List.filter (fun c -> c.State = "confirmed")) |> Option.defaultValue []
+
+    // AI proposals (T27): recorded proposals with the engine's accept/reject legality, and the loop's state.
+    let capability id = inv |> Option.bind (fun i -> i.Capabilities |> List.tryFind (fun c -> c.Id = id))
+
+    let proposals =
+        inv
+        |> Option.map (fun i ->
+            i.Proposals
+            |> List.map (fun p ->
+                let accept = capability ("AcceptProposal:" + p.Id)
+                let reject = capability ("RejectProposal:" + p.Id)
+                let legal (c: Capability option) = c |> Option.exists (fun c -> c.Legal)
+                let why (c: Capability option) = c |> Option.bind (fun c -> c.Reason) |> Option.defaultValue ""
+
+                itemF
+                    [ "id", p.Id
+                      "kind", p.Kind
+                      "text", p.Text
+                      "rationale", (p.Rationale |> Option.defaultValue "No rationale given.")
+                      "state", p.State
+                      "by", p.By
+                      "reasonInputId", "reject-reason-" + p.Id
+                      "reasonLabelId", "reject-label-" + p.Id
+                      "reasonValue", (model.CommandInputs |> Map.tryFind ("RejectProposal:" + p.Id) |> Option.defaultValue "")
+                      "acceptWhy", why accept
+                      "rejectWhy", why reject ]
+                    [ "canAccept", legal accept
+                      "canReject", legal reject
+                      "decided", not (legal accept || legal reject)
+                      "acceptBlocked", (accept.IsSome && not (legal accept))
+                      "rejectBlocked", (reject.IsSome && not (legal reject)) ]))
+        |> Option.defaultValue []
+
+    [ "report.incomplete", flag (inv.IsSome && not complete)
+      "report.status", text (if complete then "Complete" else "Incomplete: this investigation is not resolved, so the report is a working draft.")
+      "report.source", text (inv |> Option.map (fun i -> $"{i.Title}, version {i.Version}") |> Option.defaultValue "")
+      "report.conclusion",
+      text (
+          match inv |> Option.bind (fun i -> i.Report) |> Option.bind (fun r -> r.Conclusion), confirmedCauses with
+          | Some c, _ -> c
+          | None, [] -> "No cause has been confirmed and no conclusion is recorded. The report states no conclusion."
+          | None, cs -> "No conclusion is recorded. Confirmed causes: " + (cs |> List.map (fun c -> c.Outcome) |> String.concat "; ")
+      )
+      "report.causes", items (report |> Option.map (fun r -> r.Causes |> List.mapi (fun k (o, confirmed, members) -> item [ "id", string k; "outcome", o; "state", (if confirmed then "Confirmed" else "Not confirmed"); "members", members ])) |> Option.defaultValue [])
+      "report.hasCauses", flag (report |> Option.exists (fun r -> not r.Causes.IsEmpty))
+      "report.open", items (report |> Option.map (fun r -> (r.OpenQuestions |> List.map (fun q -> "Open question: " + q)) @ (r.OpenContradictions |> List.map (fun c -> "Open contradiction: " + c)) @ (r.UnverifiedAssumptions |> List.map (fun a -> "Unverified assumption: " + a)) @ (r.AcceptedResiduals |> List.map (fun a -> "Accepted as residual: " + a)) |> List.mapi (fun k t -> item [ "id", string k; "text", t ])) |> Option.defaultValue [])
+      "report.engine", flag report.IsSome
+      "report.noOpen", flag (report |> Option.forall (fun r -> r.OpenQuestions.IsEmpty && r.OpenContradictions.IsEmpty && r.UnverifiedAssumptions.IsEmpty && r.AcceptedResiduals.IsEmpty))
+      "report.corrections", items (report |> Option.map (fun r -> r.Corrections |> List.mapi (fun k (d, st) -> item [ "id", string k; "text", d; "state", st ])) |> Option.defaultValue [])
+      "report.noCorrections", flag (report |> Option.forall (fun r -> r.Corrections.IsEmpty))
+      "findings.show", flag (inv |> Option.exists (fun i -> i.Findings.IsSome))
+      "findings.text",
+      text (
+          match inv |> Option.bind (fun i -> i.Findings) with
+          | Some f ->
+              let resolved = if f.Resolved then "Resolved" else "Not resolved"
+              $"Confirmed causes: {f.ConfirmedCauses} · Corrective actions verified effective: {f.VerifiedCorrections} · {resolved}"
+          | None -> ""
+      )
+      "report.verification", text (match report with Some r when not r.Corrections.IsEmpty -> "Corrective actions and whether each is verified effective:" | _ -> "No corrective action is recorded; nothing is reported as verified.") ]
+
+let private aiKeys (model: Model) : (string * ViewValue) list =
+    let ws = model.Port.Projection
+    let screen = screenOf model
+    let connected = match ws.Connection with ConnectedTo _ -> true | _ -> false
+
+    let inv, section =
+        match screen with
+        | InvestigationScreen(inv, section) -> Some inv, section
+        | _ -> None, Overview
+
+    let invId = inv |> Option.map (fun i -> i.Id) |> Option.defaultValue ""
+    let on s = (match screen with InvestigationScreen(_, x) -> x = s | _ -> false)
+
+    let formCapability (name: string) =
+        inv |> Option.map (fun i -> i.Capabilities |> List.filter (fun c -> c.Name = name)) |> Option.defaultValue []
+
+    let why name =
+        match formCapability name with
+        | [] -> "Not available for this investigation."
+        | cs when cs |> List.exists (fun c -> c.Legal) -> ""
+        | c :: _ -> c.Reason |> Option.defaultValue "Not allowed in the current status."
+
+    let capability id = inv |> Option.bind (fun i -> i.Capabilities |> List.tryFind (fun c -> c.Id = id))
+
+    let proposals =
+        inv
+        |> Option.map (fun i ->
+            i.Proposals
+            |> List.map (fun p ->
+                let accept = capability ("AcceptProposal:" + p.Id)
+                let reject = capability ("RejectProposal:" + p.Id)
+                let legal (c: Capability option) = c |> Option.exists (fun c -> c.Legal)
+                let why (c: Capability option) = c |> Option.bind (fun c -> c.Reason) |> Option.defaultValue ""
+
+                itemF
+                    [ "id", p.Id
+                      "kind", p.Kind
+                      "text", p.Text
+                      "rationale", (p.Rationale |> Option.defaultValue "No rationale given.")
+                      "state", p.State
+                      "by", p.By
+                      "reasonInputId", "reject-reason-" + p.Id
+                      "reasonLabelId", "reject-label-" + p.Id
+                      "reasonValue", (model.CommandInputs |> Map.tryFind ("RejectProposal:" + p.Id) |> Option.defaultValue "")
+                      "acceptWhy", why accept
+                      "rejectWhy", why reject ]
+                    [ "canAccept", legal accept
+                      "canReject", legal reject
+                      "decided", not (legal accept || legal reject)
+                      "acceptBlocked", (accept.IsSome && not (legal accept))
+                      "rejectBlocked", (reject.IsSome && not (legal reject)) ]))
+        |> Option.defaultValue []
+
+    let ai = ws.Ai
+    let aiHere = inv.IsSome && ai.Investigation = (inv |> Option.map (fun i -> i.Id))
+
+    [ "proposals", items proposals
+      "proposals.empty", flag (inv.IsSome && proposals.IsEmpty)
+      "ai.keyHeld", flag ai.KeyHeld
+      "ai.noKey", flag (not ai.KeyHeld)
+      "ai.modelSet", flag (model.Settings.AiModel <> "")
+      "ai.noModel", flag (model.Settings.AiModel = "")
+      "ai.model", text model.Settings.AiModel
+      "ai.canRequest", flag (ai.KeyHeld && model.Settings.AiModel <> "" && not ai.InFlight)
+      "ai.requestDisabled", flag (not (ai.KeyHeld && model.Settings.AiModel <> "") || ai.InFlight)
+      "ai.inFlight", flag (aiHere && ai.InFlight)
+      "ai.result.show", flag (aiHere && ai.Result.IsSome)
+      "ai.result.text", text (ai.Result |> Option.map (fun (t, _, _) -> t) |> Option.defaultValue "")
+      "ai.result.tone", text (ai.Result |> Option.map (fun (_, tone, _) -> tone) |> Option.defaultValue "info")
+      "ai.retryable", flag (aiHere && not ai.InFlight && ai.Result |> Option.exists (fun (_, _, r) -> r))
+      "ai.drafts", items (if aiHere then ai.Drafts |> List.mapi (fun i d -> item [ "id", string i; "kind", d.Kind; "text", d.Text; "rationale", (d.Rationale |> Option.defaultValue "No rationale given.") ]) else [])
+      "ai.hasDrafts", flag (aiHere && not ai.Drafts.IsEmpty)
+      "ai.stale.show", flag (aiHere && ai.Stale.IsSome)
+      "ai.stale.text", text (ai.Stale |> Option.defaultValue "") ]
+
+let private adminKeys (model: Model) : (string * ViewValue) list =
+    let ws = model.Port.Projection
+    let screen = screenOf model
+    let connected = match ws.Connection with ConnectedTo _ -> true | _ -> false
+
+    let inv, section =
+        match screen with
+        | InvestigationScreen(inv, section) -> Some inv, section
+        | _ -> None, Overview
+
+    let invId = inv |> Option.map (fun i -> i.Id) |> Option.defaultValue ""
+    let on s = (match screen with InvestigationScreen(_, x) -> x = s | _ -> false)
+
     let observedStates = set [ "Verified"; "Connected"; "Reported by the deployed build"; "Reported by the running application"; "Integrity check passed" ]
 
     let facts =
@@ -321,251 +803,57 @@ let project (model: Model) : ViewState =
         | n -> $"Not confirmed ready to demonstrate: {n} item(s) are not verified."
 
     // Starting an investigation (S01): only the capability the F# policy returned; none means not available.
-    let start =
-        ws.Capabilities
-        |> List.tryFind (fun c -> c.Id = "StartInvestigation")
-        |> Option.defaultValue
-            { Id = "StartInvestigation"; Name = "StartInvestigation"; Input = None; Label = "Start the investigation"; Legal = false; Reason = Some "Starting an investigation is not available in this build yet."; BlockerId = None }
-
-    let wsBlockers =
-        ws.Blockers |> List.map (fun b -> item [ "id", b.Id; "anchor", "ws-blocker-" + b.Id; "question", b.Question; "materiality", (if b.Material then "Material question" else "Not material") ])
-
-    let destination =
-        match ws.Connection with
-        | ConnectedTo(repo, branch, workspace) -> $"GitHub repository {repo}, branch {branch}, workspace {workspace}. Nothing is written until you save."
-        | _ -> "Not connected: there is nowhere to save an investigation yet."
-
-    // Report preview (S22, R12.3): an investigation that is not resolved or closed is shown as incomplete.
     let report = inv |> Option.bind (fun i -> i.Report)
-    let complete = inv |> Option.exists (fun i -> i.Lifecycle = "resolved" || i.Lifecycle = "closed")
-    let confirmedCauses = inv |> Option.map (fun i -> i.Causes |> List.filter (fun c -> c.State = "confirmed")) |> Option.defaultValue []
-
-    // AI proposals (T27): recorded proposals with the engine's accept/reject legality, and the loop's state.
     let capability id = inv |> Option.bind (fun i -> i.Capabilities |> List.tryFind (fun c -> c.Id = id))
 
-    let proposals =
-        inv
-        |> Option.map (fun i ->
-            i.Proposals
-            |> List.map (fun p ->
-                let accept = capability ("AcceptProposal:" + p.Id)
-                let reject = capability ("RejectProposal:" + p.Id)
-                let legal (c: Capability option) = c |> Option.exists (fun c -> c.Legal)
-                let why (c: Capability option) = c |> Option.bind (fun c -> c.Reason) |> Option.defaultValue ""
-
-                itemF
-                    [ "id", p.Id
-                      "kind", p.Kind
-                      "text", p.Text
-                      "rationale", (p.Rationale |> Option.defaultValue "No rationale given.")
-                      "state", p.State
-                      "by", p.By
-                      "reasonInputId", "reject-reason-" + p.Id
-                      "reasonLabelId", "reject-label-" + p.Id
-                      "reasonValue", (model.CommandInputs |> Map.tryFind ("RejectProposal:" + p.Id) |> Option.defaultValue "")
-                      "acceptWhy", why accept
-                      "rejectWhy", why reject ]
-                    [ "canAccept", legal accept
-                      "canReject", legal reject
-                      "decided", not (legal accept || legal reject)
-                      "acceptBlocked", (accept.IsSome && not (legal accept))
-                      "rejectBlocked", (reject.IsSome && not (legal reject)) ]))
-        |> Option.defaultValue []
-
     let ai = ws.Ai
-    let aiHere = inv.IsSome && ai.Investigation = (inv |> Option.map (fun i -> i.Id))
-
-    let notice, noticeTone =
-        match model.Notice, ws.Message with
-        | Some n, _ -> Some n.Text, n.Tone
-        | None, Some(t, m) -> Some m, t
-        | None, None -> None, "info"
-
-    let pageTitle =
-        match screen with
-        | AdministrationScreen -> "Administration · Causa"
-        | SettingsScreen -> "Settings · Causa"
-        | ConnectScreen -> "Connect · Causa"
-        | ListScreen -> "Investigations · Causa"
-        | NewScreen -> "New investigation · Causa"
-        | InvestigationScreen(i, s) -> $"{i.Title} · {sectionLabel s} · Causa"
-        | OpeningScreen -> "Opening investigation · Causa"
-        | FailedScreen _ -> "Investigation unavailable · Causa"
-        | MissingScreen -> "Investigation not found · Causa"
-        | NotFoundScreen -> "Page not found · Causa"
-
-    let connectFailure = match ws.Connection with ConnectionFailed r -> r | _ -> ""
-
-    [ "page.title", text pageTitle
-      "screen", text (screenName screen)
-      "secrets.epoch", text (string model.SecretEpoch)
-      "percepta.state", text (model.InjectedState |> Option.defaultValue "")
-      "text.size", text (if model.Settings.LargeText then "large" else "standard")
-      "motion", text (if model.Settings.ReducedMotion then "reduced" else "system")
-      "nav", items primaryNav
-      "connection.label", text (match ws.ConnectionStatus with Some(words, _) -> words | None -> connectionText ws.Connection)
-      "connection.detail", text (ws.ConnectionStatus |> Option.bind snd |> Option.defaultValue "")
-      "connection.hasDetail", flag ((ws.ConnectionStatus |> Option.bind snd |> Option.isSome) && (match ws.Connection with ConnectionFailed _ -> false | _ -> true))
-      "sync.conflict", flag (ws.Sync = Conflict)
-      "confirm.show", flag model.PendingConfirm.IsSome
-      "confirm.text", text (model.PendingConfirm |> Option.map snd |> Option.defaultValue "")
-      "data.fixture", flag (model.Port.Name = "engine/fixture")
-      "connected", flag connected
-      "notice.show", flag notice.IsSome
-      "notice.text", text (notice |> Option.defaultValue "")
-      "notice.tone", text noticeTone
-      "notice.alert", flag (notice.IsSome && (noticeTone = "danger" || noticeTone = "warning"))
-      "notice.status", flag (notice.IsSome && not (noticeTone = "danger" || noticeTone = "warning"))
-      // Connect (UI-001-O1: empty, disconnected workspace with the explicit Connect action).
-      "screen.connect", flag (screen = ConnectScreen)
-      "draft.repository", text model.Drafts.Repository
-      "draft.branch", text model.Drafts.Branch
-      "draft.workspace", text model.Drafts.Workspace
-      "connect.busy", flag (ws.Connection = Connecting)
-      "connect.failed", flag (connectFailure <> "")
-      "connect.failure", text connectFailure
-      "route.pending", flag (match model.Route with Investigation _ | NewInvestigation -> true | _ -> false)
-      // Investigations (UI-001, UI-022).
-      "screen.list", flag (screen = ListScreen)
-      "list.loading", flag listLoading
-      "list.failed", flag listFailed
-      "list.failure", text listFailure
-      "list.empty", flag (match ws.Investigations with Loaded [] -> true | _ -> false)
-      "screen.new", flag (screen = NewScreen)
-      "screen.opening", flag (screen = OpeningScreen)
-      "screen.failed", flag (match screen with FailedScreen _ -> true | _ -> false)
-      "failed.text", text (match screen with FailedScreen r -> r | _ -> "")
-      "screen.missing", flag (screen = MissingScreen)
-      "screen.notfound", flag (screen = NotFoundScreen)
-      // An investigation (UI-025, UI-029-O2).
-      "screen.investigation", flag inv.IsSome
-      "inv.id", text invId
-      "inv.title", text (inv |> Option.map (fun i -> i.Title) |> Option.defaultValue "")
-      "inv.status", text (inv |> Option.map (fun i -> label i.Lifecycle) |> Option.defaultValue "")
-      "inv.tone", text (inv |> Option.map (fun i -> tone i.Lifecycle) |> Option.defaultValue "neutral")
-      "inv.kind", text (inv |> Option.map (fun i -> if i.Writable then "Your working copy" else "Read-only demonstration") |> Option.defaultValue "")
-      "inv.version", text (inv |> Option.map (fun i -> $"Version {i.Version}") |> Option.defaultValue "")
-      "inv.description", text (inv |> Option.bind (fun i -> i.Description) |> Option.defaultValue "What happened has not been recorded yet.")
-      "sections", items sectionNav
-      "section.overview", flag (on Overview)
-      "section.causal", flag (on CausalAnalysis)
-      "section.evidence", flag (on Evidence)
-      "section.hypotheses", flag (on Hypotheses)
-      "section.timeline", flag (on Timeline)
-      "section.corrective", flag (on CorrectiveActions)
-      "section.report", flag (on Report)
-      "section.proposals", flag (on AiProposals)
-      "hypotheses", items hypotheses
-      "hypotheses.empty", flag (inv.IsSome && hypotheses.IsEmpty)
-      "evidence", items evidence
-      "evidence.empty", flag (inv.IsSome && evidence.IsEmpty)
-      "blockers", items blockers
-      "blockers.empty", flag (inv.IsSome && blockers.IsEmpty)
-      "capabilities", items capabilities
-      "capabilities.empty", flag (inv.IsSome && capabilities.IsEmpty)
-      "timeline", items timeline
-      "timeline.empty", flag (inv.IsSome && timeline.IsEmpty)
-      "graph.any", flag (graphDoc <> "")
-      "graph.document", text graphDoc
-      "graph.selected", flag (graphSelection <> "")
-      "graph.selection", text graphSelection
-      "causes", items causes
-      "causes.empty", flag (inv.IsSome && causes.IsEmpty)
-      "attention.questions", text attentionQuestions
-      "attention.blocked", flag (blockedActions > 0)
-      "attention.blockedText", text attentionBlocked
-      "attention.material", flag (materialQuestions > 0)
-      "attention.first", text (inv |> Option.bind (fun i -> i.Blockers |> List.tryFind (fun b -> b.Material)) |> Option.map (fun b -> b.Question) |> Option.defaultValue "")
-      "attention.provisional", text "While a material question is open, nothing it affects is shown as settled."
-      "ws.questions", text (match ws.Blockers |> List.filter (fun b -> b.Material) |> List.length with 0 -> "None recorded." | 1 -> "1 material open question." | n -> $"{n} material open questions.")
-      "ws.material", flag (ws.Blockers |> List.exists (fun b -> b.Material))
-      "ws.first", text (ws.Blockers |> List.tryFind (fun b -> b.Material) |> Option.map (fun b -> b.Question) |> Option.defaultValue "")
-      "ws.provisional", text "Starting is blocked until it is answered; nothing has been created."
-      "start.availability", text (if start.Legal then "You can start an investigation here." else "Starting is unavailable: " + (start.Reason |> Option.defaultValue "no reason was given."))
-      "attention.tone", text (if materialQuestions > 0 then "attention" else "neutral")
-      "attention.href", text (inv |> Option.map (fun i -> Routes.formatItem (Investigation(i.Id, Overview)) (i.Blockers |> List.tryHead |> Option.map (fun b -> b.Id) |> Option.defaultValue "")) |> Option.defaultValue "#/")
-      "start.legal", flag start.Legal
-      "start.illegal", flag (not start.Legal)
-      "start.label", text start.Label
-      "start.reason", text (start.Reason |> Option.defaultValue "")
-      "start.hasBlocker", flag start.BlockerId.IsSome
-      "start.blockerHref", text (start.BlockerId |> Option.map (fun b -> Routes.formatItem NewInvestigation b) |> Option.defaultValue "#/investigations/new")
-      "draft.title", text model.Drafts.Title
-      "draft.statement", text model.Drafts.Statement
-      "destination", text destination
-      "wsBlockers", items wsBlockers
-      "wsBlockers.empty", flag wsBlockers.IsEmpty
-      "timeline.version",
-      text (
-          match history, inv with
-          | Some h, _ when h.IsHistorical -> $"Historical view: version {h.AtVersion} of {h.LatestVersion}. This is not the current state."
-          | _, Some i -> $"Showing the investigation as of version {i.Version}, the latest recorded version."
-          | _ -> ""
-      )
-      "history.show", flag history.IsSome
-      "history.historical", flag (history |> Option.exists (fun h -> h.IsHistorical))
-      "history.version", text (match model.HistoryVersion with Some v -> string v | None -> "")
-      "history.versions", items versions
-      "history.title", text (history |> Option.map (fun h -> h.Title) |> Option.defaultValue "")
-      "history.status", text (history |> Option.map (fun h -> label h.Lifecycle) |> Option.defaultValue "")
-      "history.counts", items (history |> Option.map (fun h -> h.Counts |> List.map (fun (l, n) -> item [ "id", l; "text", $"{l}: {n}" ])) |> Option.defaultValue [])
-      "history.here", items (history |> Option.map (fun h -> h.ChangesHere |> List.mapi (fun k c -> item [ "id", string k; "text", c ])) |> Option.defaultValue [])
-      "history.hereEmpty", flag (history |> Option.exists (fun h -> h.ChangesHere.IsEmpty))
-      "history.since", items (history |> Option.map (fun h -> h.ChangesSince |> List.mapi (fun k c -> item [ "id", string k; "text", c ])) |> Option.defaultValue [])
-      "history.sinceShow", flag (history |> Option.exists (fun h -> h.IsHistorical))
-      "history.latestHref", text (inv |> Option.map (fun i -> Routes.format (Investigation(i.Id, Timeline))) |> Option.defaultValue "#/")
-      "timeline.filter", text model.TimelineFilter
-      "timeline.categories", items categories
-      "timeline.replay", text (inv |> Option.map (fun i -> $"{i.Timeline.Length} recorded events, in their recorded order.") |> Option.defaultValue "")
-      "report.incomplete", flag (inv.IsSome && not complete)
-      "report.status", text (if complete then "Complete" else "Incomplete: this investigation is not resolved, so the report is a working draft.")
-      "report.source", text (inv |> Option.map (fun i -> $"{i.Title}, version {i.Version}") |> Option.defaultValue "")
-      "report.conclusion",
-      text (
-          match inv |> Option.bind (fun i -> i.Report) |> Option.bind (fun r -> r.Conclusion), confirmedCauses with
-          | Some c, _ -> c
-          | None, [] -> "No cause has been confirmed and no conclusion is recorded. The report states no conclusion."
-          | None, cs -> "No conclusion is recorded. Confirmed causes: " + (cs |> List.map (fun c -> c.Outcome) |> String.concat "; ")
-      )
-      "report.causes", items (report |> Option.map (fun r -> r.Causes |> List.mapi (fun k (o, confirmed, members) -> item [ "id", string k; "outcome", o; "state", (if confirmed then "Confirmed" else "Not confirmed"); "members", members ])) |> Option.defaultValue [])
-      "report.hasCauses", flag (report |> Option.exists (fun r -> not r.Causes.IsEmpty))
-      "report.open", items (report |> Option.map (fun r -> (r.OpenQuestions |> List.map (fun q -> "Open question: " + q)) @ (r.OpenContradictions |> List.map (fun c -> "Open contradiction: " + c)) @ (r.UnverifiedAssumptions |> List.map (fun a -> "Unverified assumption: " + a)) @ (r.AcceptedResiduals |> List.map (fun a -> "Accepted as residual: " + a)) |> List.mapi (fun k t -> item [ "id", string k; "text", t ])) |> Option.defaultValue [])
-      "report.engine", flag report.IsSome
-      "report.noOpen", flag (report |> Option.forall (fun r -> r.OpenQuestions.IsEmpty && r.OpenContradictions.IsEmpty && r.UnverifiedAssumptions.IsEmpty && r.AcceptedResiduals.IsEmpty))
-      "report.corrections", items (report |> Option.map (fun r -> r.Corrections |> List.mapi (fun k (d, st) -> item [ "id", string k; "text", d; "state", st ])) |> Option.defaultValue [])
-      "report.noCorrections", flag (report |> Option.forall (fun r -> r.Corrections.IsEmpty))
-      "findings.show", flag (inv |> Option.exists (fun i -> i.Findings.IsSome))
-      "findings.text",
-      text (
-          match inv |> Option.bind (fun i -> i.Findings) with
-          | Some f ->
-              let resolved = if f.Resolved then "Resolved" else "Not resolved"
-              $"Confirmed causes: {f.ConfirmedCauses} · Corrective actions verified effective: {f.VerifiedCorrections} · {resolved}"
-          | None -> ""
-      )
-      "report.verification", text (match report with Some r when not r.Corrections.IsEmpty -> "Corrective actions and whether each is verified effective:" | _ -> "No corrective action is recorded; nothing is reported as verified.")
-      "proposals", items proposals
-      "proposals.empty", flag (inv.IsSome && proposals.IsEmpty)
-      "ai.keyHeld", flag ai.KeyHeld
-      "ai.noKey", flag (not ai.KeyHeld)
-      "ai.modelSet", flag (model.Settings.AiModel <> "")
-      "ai.noModel", flag (model.Settings.AiModel = "")
-      "ai.model", text model.Settings.AiModel
-      "ai.canRequest", flag (ai.KeyHeld && model.Settings.AiModel <> "" && not ai.InFlight)
-      "ai.requestDisabled", flag (not (ai.KeyHeld && model.Settings.AiModel <> "") || ai.InFlight)
-      "ai.inFlight", flag (aiHere && ai.InFlight)
-      "ai.result.show", flag (aiHere && ai.Result.IsSome)
-      "ai.result.text", text (ai.Result |> Option.map (fun (t, _, _) -> t) |> Option.defaultValue "")
-      "ai.result.tone", text (ai.Result |> Option.map (fun (_, tone, _) -> tone) |> Option.defaultValue "info")
-      "ai.retryable", flag (aiHere && not ai.InFlight && ai.Result |> Option.exists (fun (_, _, r) -> r))
-      "ai.drafts", items (if aiHere then ai.Drafts |> List.mapi (fun i d -> item [ "id", string i; "kind", d.Kind; "text", d.Text; "rationale", (d.Rationale |> Option.defaultValue "No rationale given.") ]) else [])
-      "ai.hasDrafts", flag (aiHere && not ai.Drafts.IsEmpty)
-      "ai.stale.show", flag (aiHere && ai.Stale.IsSome)
-      "ai.stale.text", text (ai.Stale |> Option.defaultValue "")
-      "draft.aiTask", text model.Drafts.AiTask
-      "settings.aiModel", text model.Settings.AiModel
+    [ "settings.aiModel", text model.Settings.AiModel
       "settings.aiKey", text (if ai.KeyHeld then "A key is held in this page's memory for this session. It is never shown, stored or sent anywhere except the provider's authentication header." else "No key entered. Proposals cannot be requested without one.")
-      "can.AdmitEvidence", flag (can "AdmitEvidence")
+      "admin.readiness", text readiness
+      "admin.unverified", items (unverified |> List.map (fun f -> item [ "id", f.Id; "text", $"{f.Label}: {f.State}" ]))
+      "admin.deployment", items (adminRows "deployment")
+      "admin.persistence", items (adminRows "persistence")
+      "admin.ai", items (adminRows "ai")
+      "admin.report", items (adminRows "report")
+      "admin.security", items (adminRows "security")
+      "admin.smoke", items (adminRows "smoke-tests")
+      "settings.textSize", text (if model.Settings.LargeText then "large" else "standard")
+      "settings.motion", text (if model.Settings.ReducedMotion then "reduced" else "system")
+      "settings.connection",
+      text (
+          match ws.Connection with
+          | ConnectedTo(repo, branch, workspace) -> $"Connected to {repo}, branch {branch}, workspace {workspace}, for this session."
+          | _ -> "Not connected. The repository you enter on Connect is used for this session only and is not remembered."
+      ) ]
+
+let private formsKeys (model: Model) : (string * ViewValue) list =
+    let ws = model.Port.Projection
+    let screen = screenOf model
+    let connected = match ws.Connection with ConnectedTo _ -> true | _ -> false
+
+    let inv, section =
+        match screen with
+        | InvestigationScreen(inv, section) -> Some inv, section
+        | _ -> None, Overview
+
+    let invId = inv |> Option.map (fun i -> i.Id) |> Option.defaultValue ""
+    let on s = (match screen with InvestigationScreen(_, x) -> x = s | _ -> false)
+
+    let formCapability (name: string) =
+        inv |> Option.map (fun i -> i.Capabilities |> List.filter (fun c -> c.Name = name)) |> Option.defaultValue []
+
+    let can name = formCapability name |> List.exists (fun c -> c.Legal)
+
+    let why name =
+        match formCapability name with
+        | [] -> "Not available for this investigation."
+        | cs when cs |> List.exists (fun c -> c.Legal) -> ""
+        | c :: _ -> c.Reason |> Option.defaultValue "Not allowed in the current status."
+
+    let field (key: string) = model.CommandInputs |> Map.tryFind key |> Option.defaultValue ""
+
+    let report = inv |> Option.bind (fun i -> i.Report)
+    [ "can.AdmitEvidence", flag (can "AdmitEvidence")
       "why.AdmitEvidence", text (why "AdmitEvidence")
       "not.AdmitEvidence", flag (not (can "AdmitEvidence"))
       "can.RelateEvidence", flag (can "RelateEvidence")
@@ -589,29 +877,11 @@ let project (model: Model) : ViewState =
       "form.ca.description", text (field "RecordCorrectiveAction.description")
       "causeOptions", items (inv |> Option.map (fun i -> i.Causes |> List.map (fun c -> item [ "id", c.Id; "label", c.Outcome ])) |> Option.defaultValue [])
       "corrections", items (report |> Option.map (fun r -> r.Corrections |> List.mapi (fun k (d, st) -> item [ "id", string k; "text", d; "state", st ])) |> Option.defaultValue [])
-      "corrections.empty", flag (report |> Option.forall (fun r -> r.Corrections.IsEmpty))
-      "sync.text", text (syncText ws.Sync)
-      "sync.tone", text (syncTone ws.Sync)
-      "sync.mayHaveSaved", flag (match ws.Sync with MayHaveSaved _ -> true | _ -> false)
-      // Administration (UI-018) and Settings (UI-019).
-      "screen.admin", flag (screen = AdministrationScreen)
-      "admin.readiness", text readiness
-      "admin.unverified", items (unverified |> List.map (fun f -> item [ "id", f.Id; "text", $"{f.Label}: {f.State}" ]))
-      "admin.deployment", items (adminRows "deployment")
-      "admin.persistence", items (adminRows "persistence")
-      "admin.ai", items (adminRows "ai")
-      "admin.report", items (adminRows "report")
-      "admin.security", items (adminRows "security")
-      "admin.smoke", items (adminRows "smoke-tests")
-      "screen.settings", flag (screen = SettingsScreen)
-      "settings.textSize", text (if model.Settings.LargeText then "large" else "standard")
-      "settings.motion", text (if model.Settings.ReducedMotion then "reduced" else "system")
-      "settings.connection",
-      text (
-          match ws.Connection with
-          | ConnectedTo(repo, branch, workspace) -> $"Connected to {repo}, branch {branch}, workspace {workspace}, for this session."
-          | _ -> "Not connected. The repository you enter on Connect is used for this session only and is not remembered."
-      ) ]
-    |> Map.ofList
-    // Catalog, inspector, next steps and record links (stream ux), merged after: kept out of this function's body.
-    |> UxView.merge model inv
+      "corrections.empty", flag (report |> Option.forall (fun r -> r.Corrections.IsEmpty)) ]
+
+/// The projection, assembled from one function per area: a single method holding every key exceeded the .NET
+/// WebAssembly interpreter's per-method limit ("locals size too big") once its optimizer passes are off.
+let project (model: Model) : ViewState =
+    [ navKeys; invKeys; screensKeys; listKeys; historyKeys; reportKeys; aiKeys; adminKeys; formsKeys ] |> List.collect (fun part -> part model) |> Map.ofList
+    // Catalog, inspector, evidence detail, next steps and record links (stream ux), merged after.
+    |> UxView.merge model (match screenOf model with InvestigationScreen(i, _) -> Some i | _ -> None)

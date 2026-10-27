@@ -1,1 +1,37 @@
-[]
+[
+  {
+    "created": "2026-10-27",
+    "id": "DF-CAUSA-2026-0001",
+    "owners": [
+      "indy-init-rehearsal-005"
+    ],
+    "path": "research/decisions/DF-CAUSA-2026-0001--r5-dec-001-forma-workflow-1-1-0.md",
+    "provenance": {
+      "contributions": {
+        "EXE-20261027T204350795Z-d44bb1b9": {
+          "actor": {
+            "id": "claude",
+            "kind": "agent",
+            "model": "unknown",
+            "provider": "anthropic",
+            "runtime": "claude-code"
+          },
+          "at": "2026-10-27T22:56:37.689Z",
+          "operations": [
+            "created"
+          ],
+          "reason": "Owner decision transcribed by the coordinating agent"
+        }
+      }
+    },
+    "status": "accepted",
+    "tags": [
+      "rehearsal-005",
+      "dependency",
+      "owner-decision"
+    ],
+    "title": "R5-DEC-001 Owner approves @echelon-foundry/forma-workflow 1.1.0 for Rehearsal 5",
+    "updated": "2026-10-27",
+    "version": "1.0.0"
+  }
+]

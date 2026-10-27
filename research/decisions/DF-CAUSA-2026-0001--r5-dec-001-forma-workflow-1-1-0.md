@@ -1,3 +1,26 @@
+---
+id: DF-CAUSA-2026-0001
+title: "R5-DEC-001 Owner approves @echelon-foundry/forma-workflow 1.1.0 for Rehearsal 5"
+status: accepted
+version: 1.0.0
+owners: [indy-init-rehearsal-005]
+created: 2026-10-27
+updated: 2026-10-27
+tags: [rehearsal-005, dependency, owner-decision]
+provenance:
+  contributions:
+    EXE-20261027T204350795Z-d44bb1b9:
+      operations: [created]
+      at: 2026-10-27T22:56:37.689Z
+      actor:
+        kind: agent
+        id: claude
+        provider: anthropic
+        model: unknown
+        runtime: claude-code
+      reason: "Owner decision transcribed by the coordinating agent"
+---
+
 # R5-DEC-001: `@echelon-foundry/forma-workflow` 1.1.0
 
 - **Decision:** approved. Rehearsal 5 uses `@echelon-foundry/forma-workflow` 1.1.0 as the causal graph's workflow layout engine (WDL-001, T23/T24).

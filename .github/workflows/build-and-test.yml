@@ -333,6 +333,16 @@ jobs:
           name: site
           path: dist/
           retention-days: 7
+      # `npm run build` also writes the test configuration (its own .NET publish with the test-only exports and the
+      # Percepta state hook). Never deployed; the browser, live and percepta jobs serve it on 4322.
+      - name: Publish the test configuration
+        if: steps.build.outputs.built == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-test
+          path: obj/site-test/
+          if-no-files-found: error
+          retention-days: 7
 
   browser:
     needs: [reuse, site]
@@ -370,10 +380,13 @@ jobs:
         with:
           name: site
           path: dist
-      # The test configuration (Percepta state hook enabled) is built from dist/'s WebAssembly output, no .NET SDK.
-      - name: Build the test configuration (obj/site-test)
-        if: needs.reuse.outputs.browser != 'reuse'
-        run: npm run build:test
+      # The test configuration, as the site job built it (its own .NET publish; never deployed).
+      - name: Built test configuration
+        if: needs.reuse.outputs.browser != 'reuse' && needs.site.outputs.built == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: site-test
+          path: obj/site-test
       # percepta.spec.js runs `percepta verify-app`: the CLI exactly as the pinned channel resolves it (SHA-256 verified).
       - name: Install the Percepta CLI and its browser
         if: needs.reuse.outputs.browser != 'reuse'
@@ -491,10 +504,13 @@ jobs:
         with:
           name: site
           path: dist
-      # Playwright serves both builds (dist/ on 4321, obj/site-test/ on 4322).
-      - name: Build the test configuration (obj/site-test)
+      # Playwright serves both builds (dist/ on 4321, obj/site-test/ on 4322), as the site job built them.
+      - name: Built test configuration
         if: needs.site.outputs.built == 'true'
-        run: npm run build:test
+        uses: actions/download-artifact@v4
+        with:
+          name: site-test
+          path: obj/site-test
       - name: Install the browsers
         timeout-minutes: 15
         run: |
@@ -700,6 +716,12 @@ jobs:
         with:
           name: site
           path: dist
+      - name: Built test configuration
+        if: needs.site.outputs.built == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: site-test
+          path: obj/site-test
       - name: percepta verify-app
         id: verify
         timeout-minutes: 20
@@ -713,7 +735,7 @@ jobs:
             exit 0
           fi
           npm ci
-          npm run build:test
+          test -f obj/site-test/index.html || { echo "::error::the site job published no test configuration"; exit 1; }
           export PATH="$(tools/acceptance/ci/install-host-tool.sh percepta-semantic percepta "$RUNNER_TEMP/host-tools"):$PATH"
           percepta version | tee TestResults/percepta/percepta-version.txt
           timeout 600 percepta install-browser
@@ -747,11 +769,101 @@ jobs:
           if-no-files-found: ignore
           retention-days: 30
 
+  # The provider-conformance layer (PF-011-O3/O5, T18/T21): the persistence tool (src/persistence/Tool, owned by the
+  # persist stream) records real GitHub behaviour against CAUSA_TEST_REPO (create, append, re-read, conflict, rejected
+  # credential, unknown-outcome reconciliation; writes only under workspaces/demo/rec-<run id>/) and loads the
+  # historical catalog with the workflow's read-only token. Main pushes and manual runs only, required on main like
+  # live. Secrets are given to the one step that needs them; a missing secret is BLOCKED (non-zero), never a pass.
+  # The tool sanitizes its own output by an allow-list; nothing is uploaded.
+  provider-conformance:
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    # Shared with persist's persistence-provider.yml: no two runs write to the test repository at once.
+    concurrency:
+      group: persistence-provider
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - name: Build the recorder
+        run: dotnet build src/persistence/Tool/Causa.Persistence.Tool.fsproj -c Release
+      # Exit 0 PASS, 1 FAIL, 2 BLOCKED (missing secret or variable, or the canonical data repository as target),
+      # 3 aborted before printing a secret. Writes only workspaces/demo/rec-<run id>[-app]/ on CAUSA_TEST_REPO.
+      - name: Record provider behaviour and run the live write path
+        id: record
+        env:
+          CAUSA_GITHUB_TOKEN: ${{ secrets.CAUSA_GITHUB_TOKEN }}
+          CAUSA_TEST_REPO_SECRET: ${{ secrets.CAUSA_TEST_REPO }}
+          CAUSA_TEST_REPO_VAR: ${{ vars.CAUSA_TEST_REPO }}
+          # DC-004: the workflow's own read-only token, which cannot write to the test repository.
+          CAUSA_READONLY_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/provider"
+          set +e
+          dotnet src/persistence/Tool/bin/Release/net10.0/causa-persistence.dll record | tee "$RUNNER_TEMP/provider/record.log"
+          status=${PIPESTATUS[0]}
+          set -e
+          echo "$status" > "$RUNNER_TEMP/provider/record.exit"
+          exit "$status"
+      # T25 / EXT-DATA-013 / PF-014: the active historical catalog through the application's own Sync program, with
+      # the workflow's read-only token (DEC-025: no anonymous mode); nothing is written.
+      - name: Load the historical catalog live
+        if: always()
+        env:
+          CAUSA_CATALOG_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/provider"
+          set +e
+          dotnet src/persistence/Tool/bin/Release/net10.0/causa-persistence.dll catalog | tee "$RUNNER_TEMP/provider/catalog.log"
+          status=${PIPESTATUS[0]}
+          set -e
+          echo "$status" > "$RUNNER_TEMP/provider/catalog.exit"
+          exit "$status"
+      # The evidence record, parsed from the tool's own sanitized output: the observation and check lines between its
+      # markers, the catalog case lines and both RESULT lines. Never the environment. A record that contains the
+      # token is deleted and fails the job (PF-015).
+      - name: Provider-conformance evidence record
+        if: always()
+        env:
+          CAUSA_GITHUB_TOKEN: ${{ secrets.CAUSA_GITHUB_TOKEN }}
+        run: |
+          d="$RUNNER_TEMP/provider"; mkdir -p TestResults/provider-conformance
+          out=TestResults/provider-conformance/provider-conformance.json
+          obs=$(sed -n '/^=== CAUSA-PROVIDER-OBSERVATIONS BEGIN ===$/,/^=== CAUSA-PROVIDER-OBSERVATIONS END ===$/p' "$d/record.log" 2>/dev/null | grep '^{' | jq -s -c '.' 2>/dev/null || echo '[]')
+          cases=$(grep '^{' "$d/catalog.log" 2>/dev/null | jq -s -c 'map(select(has("case")))' 2>/dev/null || echo '[]')
+          jq -n --arg run "${{ github.run_id }}-${{ github.run_attempt }}" --arg sha "${{ github.sha }}" \
+            --arg recordExit "$(cat "$d/record.exit" 2>/dev/null || echo none)" --arg catalogExit "$(cat "$d/catalog.exit" 2>/dev/null || echo none)" \
+            --arg recordResult "$(grep '^RESULT: ' "$d/record.log" 2>/dev/null | tail -n 1)" \
+            --arg catalogResult "$(grep '^RESULT: ' "$d/catalog.log" 2>/dev/null | tail -n 1)" \
+            --argjson observations "$obs" --argjson cases "$cases" \
+            '{schema: "causa.provider-conformance/1", run: $run, sourceSha: $sha,
+              record: {exit: $recordExit, result: $recordResult,
+                       checks: [$observations[] | select(.check? // "" | startswith("live."))],
+                       observations: [$observations[] | select((.check? // "" | startswith("live.")) | not)]},
+              catalog: {exit: $catalogExit, result: $catalogResult, cases: $cases}}' > "$out"
+          jq -r '.record.result, .catalog.result, (.record.checks[] | "\(.check) \(.passed)")' "$out"
+          if [ -n "$CAUSA_GITHUB_TOKEN" ] && grep -qF -- "$CAUSA_GITHUB_TOKEN" "$out"; then
+            rm -f "$out"; echo "::error::the record contained the token and was deleted"; exit 1
+          fi
+      - name: Publish the evidence record (parsed record only; no log, no trace)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: provider-conformance
+          path: TestResults/provider-conformance/provider-conformance.json
+          if-no-files-found: ignore
+          retention-days: 30
+
   # The required check. Passes only when every mandatory job passed: core, lock-gate, site, browser, and on main
   # pushes the live suite. A job that reused an identical earlier pass (branches only) counts as passed here and as
   # not produced in the acceptance ledger. (The persistence-provider workflow is deliberately not required here.)
   build-and-test:
-    needs: [reuse, core, lock-gate, site, browser, live, wasm-smoke]
+    needs: [reuse, core, lock-gate, site, browser, live, provider-conformance, wasm-smoke]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -764,10 +876,11 @@ jobs:
           BROWSER: ${{ needs.browser.result }}
           LIVE: ${{ needs.live.result }}
           WASM: ${{ needs.wasm-smoke.result }}
+          PROVIDER: ${{ needs.provider-conformance.result }}
         run: |
           echo "reuse=$REUSE core=$CORE lock-gate=$LOCK site=$SITE browser=$BROWSER wasm-smoke=$WASM live=$LIVE (live required: $IS_MAIN)"
           for r in "$REUSE" "$CORE" "$LOCK" "$SITE" "$BROWSER" "$WASM"; do [ "$r" = success ] || exit 1; done
-          if [ "$IS_MAIN" = true ]; then [ "$LIVE" = success ] || exit 1; fi
+          if [ "$IS_MAIN" = true ]; then [ "$LIVE" = success ] || exit 1; [ "$PROVIDER" = success ] || exit 1; fi
 
   deploy:
     needs: [build-and-test, site]
@@ -853,7 +966,11 @@ jobs:
           retention-days: 90
 
   acceptance:
-    needs: [reuse, core, lock-gate, site, browser, live, wasm-smoke, preservation-gate, preservation-adversarial, percepta, build-and-test, deploy, deployed-smoke]
+    # actions: read only to record this run's per-layer job timings (PF-012-O3).
+    permissions:
+      contents: read
+      actions: read
+    needs: [reuse, core, lock-gate, site, browser, live, provider-conformance, wasm-smoke, preservation-gate, preservation-adversarial, percepta, build-and-test, deploy, deployed-smoke]
     if: always() && needs.reuse.result != 'cancelled'
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -895,7 +1012,7 @@ jobs:
           (cd "$RUNNER_TEMP/indy-init" && dotnet build tools/requirements-compiler/src -c Release)
       - uses: actions/download-artifact@v4
         with:
-          pattern: "{core-results,browser-results,live-results,lock-gate,preservation-gate,percepta,wasm-smoke,deployed-results,preservation-adversarial-results}"
+          pattern: "{core-results,browser-results,live-results,lock-gate,preservation-gate,percepta,wasm-smoke,deployed-results,preservation-adversarial-results,reuse-plan,provider-conformance}"
           path: collected
         continue-on-error: true
       - name: Collect the results of this run
@@ -910,6 +1027,8 @@ jobs:
           [ -d collected/preservation-gate ] && cp -r collected/preservation-gate gate-records/ || true
           [ -d collected/percepta ] && cp -r collected/percepta gate-records/ || true
           [ -d collected/wasm-smoke ] && cp -r collected/wasm-smoke gate-records/ || true
+          [ -d collected/reuse-plan ] && cp -r collected/reuse-plan gate-records/ || true
+          [ -d collected/provider-conformance ] && cp -r collected/provider-conformance gate-records/ || true
           [ -d collected/preservation-adversarial-results ] && mkdir -p TestResults/preservation-adversarial && cp -r collected/preservation-adversarial-results/. TestResults/preservation-adversarial/ || true
           [ -d collected/deployed-results ] && mkdir -p TestResults/deployed && cp collected/deployed-results/deployed-results.json TestResults/deployed/ 2>/dev/null || true
           [ -d collected/deployed-results/screenshots ] && cp -r collected/deployed-results/screenshots gate-records/deployed-screenshots || true
@@ -924,12 +1043,13 @@ jobs:
           DEPLOY: ${{ needs.deploy.result == 'success' && 'success' || needs.deploy.result == 'failure' && 'failure' || 'not-produced' }}
           SMOKE: ${{ needs.deployed-smoke.result == 'success' && 'success' || needs.deployed-smoke.result == 'failure' && 'failure' || 'not-produced' }}
           WASM: ${{ needs.wasm-smoke.result == 'success' && 'success' || needs.wasm-smoke.result == 'failure' && 'failure' || 'not-produced' }}
+          PROVIDER: ${{ needs.provider-conformance.result == 'success' && 'success' || needs.provider-conformance.result == 'failure' && 'failure' || 'not-produced' }}
           PRESERVATION: ${{ needs.preservation-gate.outputs.status == 'success' && 'success' || needs.preservation-gate.result == 'failure' && 'failure' || 'not-produced' }}
           PERCEPTA: ${{ needs.percepta.outputs.status == 'success' && 'success' || needs.percepta.result == 'failure' && 'failure' || 'not-produced' }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           jq -n --arg core "$CORE" --arg lock "$LOCK" --arg site "$SITE" --arg browser "$BROWSER" --arg live "$LIVE" \
-                --arg deploy "$DEPLOY" --arg smoke "$SMOKE" --arg pres "$PRESERVATION" --arg percepta "$PERCEPTA" --arg wasm "$WASM" \
+                --arg deploy "$DEPLOY" --arg smoke "$SMOKE" --arg pres "$PRESERVATION" --arg percepta "$PERCEPTA" --arg wasm "$WASM" --arg provider "$PROVIDER" \
                 --arg run "$RUN" '{producers: [
             {id: "core", status: $core, command: "dotnet test App.slnx -c Release (\($run))", record: "TestResults/dotnet"},
             {id: "lock-gate", status: $lock, command: "causa-acceptance lock-gate (\($run))", record: "TestResults/lock-gate/lock-gate.json"},
@@ -938,11 +1058,33 @@ jobs:
             {id: "live", status: $live, command: "npx playwright test --grep @live (\($run))", record: "TestResults/live/live-results.json"},
             {id: "deploy", status: $deploy, command: "actions/deploy-pages (\($run))"},
             {id: "deployed-smoke", status: $smoke, command: "version.json at the deployed URL equals the source SHA (\($run))"},
+            {id: "provider-conformance", status: $provider, command: "causa-persistence record && causa-persistence catalog (\($run))", record: "gate-records/provider-conformance/provider-conformance.json"},
             {id: "wasm-smoke", status: $wasm, command: "dotnet build -c Release tests/Engine.WasmSmoke && node tests/Engine.WasmSmoke/run.mjs (\($run))", record: "gate-records/wasm-smoke/wasm-smoke.log"},
             {id: "preservation-gate", status: $pres, command: "tools/acceptance/ci/preservation-gate.sh: praxis requirements preservation verify as recorded (\($run))", record: "gate-records/preservation-gate/gate.json"},
             {id: "percepta-verify-app", status: $percepta, command: "percepta verify-app --base-url <built site> (\($run))", record: "gate-records/percepta/verify-app.json"}
           ]}' > "$RUNNER_TEMP/producers.json"
           cat "$RUNNER_TEMP/producers.json"
+      # PF-012-O3: measured time and outcome of every layer's job in this run (from the run's own job records).
+      # Budgets are set only after a baseline of such measurements exists; none is invented here.
+      - name: Per-layer timing of this run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}/jobs?per_page=100" \
+            | jq --arg run "${{ github.run_id }}-${{ github.run_attempt }}" --arg sha "${{ github.sha }}" '
+              def layer: {"core":"domain","browser":"ui","site":"build","wasm-smoke":"wasm","lock-gate":"dependencies",
+                "provider-conformance":"provider-conformance","live":"live-integration","deployed-smoke":"deployed",
+                "preservation-gate":"requirements","preservation-adversarial":"requirements","percepta":"ui-contracts",
+                "reuse":"reuse","deploy":"deploy","build-and-test":"required-check"}[.] // "other";
+              {schema: "causa.layer-timings/1", run: $run, sourceSha: $sha, budgets: null,
+               budgetsNote: "no budget is set before a baseline of measured runs exists (PF-012-O3)",
+               jobs: [.jobs[] | select(.name != "acceptance") | {name, layer: (.name | layer), status, conclusion,
+                 startedAt: .started_at, completedAt: .completed_at,
+                 seconds: (if .started_at and .completed_at then ((.completed_at | fromdate) - (.started_at | fromdate)) else null end)}]}' \
+            > gate-records/layer-timings.json
+          jq -r '.jobs[] | "\(.layer)\t\(.name)\t\(.conclusion)\t\(.seconds)s"' gate-records/layer-timings.json | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Install Ordo (verified against the pinned channel) for the verification schedule
+        run: tools/acceptance/ci/install-host-tool.sh ordo ordo "$RUNNER_TEMP/host-tools" >> "$GITHUB_PATH"
       - name: The built site (the artifact Pages deploys)
         uses: actions/download-artifact@v4
         continue-on-error: true

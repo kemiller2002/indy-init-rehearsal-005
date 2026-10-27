@@ -371,3 +371,38 @@ let ``curation bindings are applied to a copy only when every binding names a pl
     let applied = load out
     Assert.Equal<string list>([ "REQ-1-O1"; "REQ-1-O2" ], items "testBindings" applied |> List.map (strOr "" "obligation"))
     Assert.Equal("X", strOr "" "defaultPolicy" applied)
+
+[<Fact; Trait("obligation", "VPO-8deeef0ef7b7e4ab")>]
+let ``VER-005 an Echelon package outside the release set passes only when pinned against an accepted owner decision`` () =
+    let root = writeRepo "0.9.0" true
+    let w (rel: string) (text: string) =
+        let p = Path.Combine(root, rel)
+        Directory.CreateDirectory(Path.GetDirectoryName p) |> ignore
+        File.WriteAllText(p, text)
+    let pkg = parse (File.ReadAllText(Path.Combine(root, "package.json")))
+    pkg["dependencies"]["@echelon-foundry/forma-workflow"] <- jstr "1.1.0"
+    w "package.json" (serialize pkg)
+    let lock = parse (File.ReadAllText(Path.Combine(root, "package-lock.json")))
+    lock["packages"]["node_modules/@echelon-foundry/forma-workflow"] <- parse """{"version":"1.1.0","integrity":"sha512-abc"}"""
+    w "package-lock.json" (serialize lock)
+    w "node_modules/@echelon-foundry/forma-workflow/package.json" """{"version":"1.1.0"}"""
+    let decision status = sprintf "---\nid: DF-1\nstatus: %s\n---\n# Decision\n\n`@echelon-foundry/forma-workflow` 1.1.0 approved.\n" status
+    let pinWith (outside: string) =
+        parse (sprintf """{"channelSha256":"abc","profileVersion":"1.29.0","expected":{"limen":"0.9.0"},"outsideChannel":%s}""" outside)
+    let entry = """[{"package":"@echelon-foundry/forma-workflow","version":"1.1.0","integrity":"sha512-abc","decision":{"id":"DF-1","path":"decisions/DF-1.md"}}]"""
+    let outside (pin: Text.Json.Nodes.JsonNode) =
+        LockGate.evaluate { gateInputs root allTools [] with Pin = pin } |> List.filter (fun c -> c.Id.StartsWith "outside.")
+    // Not pinned at all: the gate fails rather than ignoring the package.
+    let unpinned = outside (pinWith "[]")
+    Assert.Contains(unpinned, fun c -> c.Status = LockGate.Fail && c.Id = "outside.unpinned.@echelon-foundry/forma-workflow")
+    // Pinned, but the decision is not accepted: fails.
+    w "decisions/DF-1.md" (decision "proposed")
+    Assert.Contains(outside (pinWith entry), fun c -> c.Id.StartsWith "outside.decision" && c.Status = LockGate.Fail)
+    // Accepted decision, matching version and integrity: every check passes and is labelled outside the channel.
+    w "decisions/DF-1.md" (decision "accepted")
+    let ok = outside (pinWith entry)
+    Assert.Equal(5, ok.Length)
+    Assert.All(ok, fun c -> Assert.Equal(LockGate.Pass, c.Status); Assert.Contains("outside echelon-current; owner-approved DF-1", c.Subject))
+    // A different integrity than the decision pinned fails.
+    let other = entry.Replace("sha512-abc", "sha512-other")
+    Assert.Contains(outside (pinWith other), fun c -> c.Id.StartsWith "outside.integrity" && c.Status = LockGate.Fail)
