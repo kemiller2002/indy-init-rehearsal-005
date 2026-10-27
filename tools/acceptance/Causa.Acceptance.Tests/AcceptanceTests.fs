@@ -111,7 +111,7 @@ let ``trait tags are read from a test assembly's metadata without running it`` (
 // ---------------------------------------------------------------------------------------------------------------
 // Traceability: nothing is reported PASS unless it ran and passed
 
-[<Fact; Trait("obligation", "VPO-95819a9f20306ce1")>]
+[<Fact; Trait("obligation", "VPO-95819a9f20306ce1"); Trait("obligation", "VPO-fd43b3e4e7e02f59")>]
 let ``failing, missing, skipped or merely declared tests are never reported PASS`` () =
     let trace =
         build
@@ -163,7 +163,7 @@ let gate id requires : Ledger.GateRule = { Id = id; Title = id; Requires = requi
 let rowStatus (ledger: Text.Json.Nodes.JsonNode) collection id =
     items collection ledger |> List.find (fun r -> str "id" r = Some id) |> strOr "" "status"
 
-[<Fact; Trait("obligation", "VPO-95819a9f20306ce1")>]
+[<Fact; Trait("obligation", "VPO-95819a9f20306ce1"); Trait("obligation", "VPO-2a6aa540f193ab6c")>]
 let ``gates pass only on producers that succeeded in this run; absent, reused or failed producers do not`` () =
     let trace = build plan [ result "a" Passed [ o1 ]; result "b" Passed [ o2 ] ] []
     let producers: Ledger.Producer list =
