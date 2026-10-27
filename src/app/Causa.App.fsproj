@@ -29,6 +29,7 @@
     <Compile Include="Shell.fs" />
     <Compile Include="TestState.fs" />
     <Compile Include="View.fs" />
+    <Compile Include="AnalysisView.fs" />
     <Compile Include="Dispatch.fs" />
   </ItemGroup>
 </Project>

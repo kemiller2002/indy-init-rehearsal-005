@@ -1,0 +1,159 @@
+/// The analysis screens bound to Percepta contracts (S03, S04, S11, S12, S13, S15, S23, S24): commands cross the real
+/// engine port, legality is only ever the engine's (or the injected fixture's), and every screen key is present.
+module Causa.App.Tests.AnalysisViewTests
+
+open System
+open Xunit
+open Limen.Contract.Core
+open Causa.App
+open Causa.App.Adapter
+
+let private entropy () = { Now = DateTime(2026, 10, 27, 12, 0, 0, DateTimeKind.Utc); Ids = List.init 4 (fun _ -> Guid.NewGuid()); Nonce = "n" }
+
+let private opened (port: Port) id =
+    match port.Projection.Opened.TryFind id with
+    | Some(Loaded inv) -> inv
+    | other -> failwithf "not loaded: %A" other
+
+let private send (port: Port) id name fields =
+    let version = (opened port id).Version
+    let port, _ = port.Handle (entropy ()) (Command(Some id, name, Map.ofList fields, version))
+    Assert.True((opened port id).Version = version + 1L, sprintf "%s was not recorded: %A" name port.Projection.Message)
+    port
+
+/// An active investigation with one hypothesis, from the real kernel over an in-memory workspace.
+let private active () =
+    let port = EnginePort.create (EnginePort.Persistence.memory Map.empty [])
+    let port, _ = port.Handle (entropy ()) (Command(None, "StartInvestigation", Map.ofList [ "title", "Valve leak"; "problemStatement", "Coolant found under valve 3." ], 0L))
+    let id = match port.Projection.Investigations with Loaded [ c ] -> c.Id | other -> failwithf "%A" other
+    let port = send port id "ActivateInvestigation" []
+    let port = send port id "RecordHypothesis" [ "text", "The valve seal is worn." ]
+    port, id, (opened port id).Hypotheses.Head.Id
+
+let private view (port: Port) route selected =
+    View.project { Shell.initial with Route = route; Port = port; Selected = selected }
+    |> AnalysisView.extend { Shell.initial with Route = route; Port = port; Selected = selected }
+
+let private textOf (v: ViewState) k = match v |> Map.tryFind k with Some(ViewValue.Text t) -> t | other -> failwithf "%s: %A" k other
+let private flagOf (v: ViewState) k = match v |> Map.tryFind k with Some(ViewValue.Flag b) -> b | other -> failwithf "%s: %A" k other
+
+[<Fact>]
+let ``S03 a prediction recorded through the form reaches the engine and is shown as what would falsify the hypothesis`` () =
+    let port, id, h = active ()
+    let before = view port (Routes.Investigation(id, Routes.Hypotheses)) ""
+    Assert.False(flagOf before "an.pred.disabled")
+    let port = send port id "RecordPrediction" [ "hypothesis", h; "statement", "The seal shows wear marks."; "strength", "necessary" ]
+    let inv = opened port id
+    Assert.Equal("The seal shows wear marks.", inv.Detail.Predictions.Head.Text)
+    Assert.Equal<string list>([ h ], inv.Detail.Predictions.Head.Related)
+    let after = view port (Routes.Investigation(id, Routes.Hypotheses)) ""
+    Assert.True(flagOf after "an.hyp.battlefield")
+    Assert.Contains("The seal shows wear marks.", sprintf "%A" (after |> Map.find "an.falsifiers"))
+
+[<Fact>]
+let ``S03 an investigation action is planned through the engine against a hypothesis`` () =
+    let port, id, h = active ()
+    let port = send port id "RecordInvestigationAction" [ "purpose", "Inspect the seal."; "kind", "inspection"; "hypothesis", h ]
+    let a = (opened port id).Detail.Actions.Head
+    Assert.Equal("Inspect the seal.", a.Text)
+    Assert.StartsWith("Inspection", a.State)
+
+[<Fact>]
+let ``S03 an illegal prediction is disabled with its reason and a link to the blocking question`` () =
+    let s = match TestState.parse """{ "name": "b", "predicates": ["material-blocker-exists"], "capabilities": { "RecordPrediction": "illegal", "RecordInvestigationAction": "legal" } }""" with Ok s -> s | Error e -> failwith e
+    let v = view (TestState.port s) (Routes.Investigation(TestState.fixtureId, Routes.Hypotheses)) ""
+    Assert.True(flagOf v "an.pred.disabled")
+    Assert.Equal("An open material question must be answered first.", textOf v "an.pred.reason")
+    Assert.True(flagOf v "an.pred.hasBlocker")
+    Assert.EndsWith("?item=blocker-1", textOf v "an.pred.blockerHref")
+    Assert.False(flagOf v "an.act.disabled")
+    Assert.Equal("", textOf v "an.act.reason")
+
+[<Fact>]
+let ``S04 a selected hypothesis shows its detail screen with the engine's falsify and reopen legality`` () =
+    let port, id, h = active ()
+    let v = view port (Routes.Investigation(id, Routes.Hypotheses)) h
+    Assert.True(flagOf v "an.hyp.detail")
+    Assert.False(flagOf v "an.hyp.battlefield")
+    Assert.Equal("The valve seal is worn.", textOf v "an.h.statement")
+    let caps = (opened port id).Capabilities
+    let legal cmd = caps |> List.exists (fun c -> c.Id = $"TransitionHypothesis:{h}:{cmd}" && c.Legal)
+    Assert.Equal(not (legal "falsify"), flagOf v "an.falsify.disabled")
+    // A proposed hypothesis is not falsified, so reopening it is not available, and the reason says why.
+    Assert.True(flagOf v "an.reopen.disabled")
+    Assert.NotEqual<string>("", textOf v "an.reopen.reason")
+
+[<Fact>]
+let ``S04 falsifying from the detail screen is the selected hypothesis's own transition and waits for confirmation`` () =
+    let port, id, h = active ()
+    let ev name value: SemanticEvent = { Name = name; Key = None; Value = Some value; Checked = None; Values = None; Submitter = None }
+    let model = { Shell.initial with Route = Routes.Investigation(id, Routes.Hypotheses); Port = port; Selected = h }
+    let model, _ = Shell.update (entropy ()) (BrowserToEngineMessage.Event(ev "field-FalsifyHypothesis.reason" "Wear marks absent.")) model
+    let model, fx = Shell.update (entropy ()) (BrowserToEngineMessage.Event(ev "submit-FalsifyHypothesis" "")) model
+    Assert.Empty(fx)
+    match model.PendingConfirm with
+    | Some(Command(Some i, name, fields, _), _) ->
+        Assert.Equal(id, i)
+        Assert.Equal($"TransitionHypothesis:{h}:falsify", name)
+        Assert.Equal(Some "Wear marks absent.", fields.TryFind "reason")
+    | other -> failwithf "%A" other
+
+[<Fact>]
+let ``S11 S12 S13 cause review and corrective action show the engine's records and gates`` () =
+    let port, id, h = active ()
+    let port = send port id "RecordCause" [ "outcome", "Coolant leaked."; "hypothesis", h; "role", "rootCause" ]
+    let inv = opened port id
+    let cause = inv.Causes.Head
+    let v = view port (Routes.Investigation(id, Routes.CausalAnalysis)) ""
+    Assert.Equal("Coolant leaked.", textOf v "an.cause.outcome")
+    let confirm = inv.Capabilities |> List.find (fun c -> c.Id = "ConfirmCause:" + cause.Id)
+    Assert.Contains((if confirm.Legal then "\"legal\", Flag true" else "\"illegal\", Flag true"), sprintf "%A" (v |> Map.find "an.confirm"))
+    let gate = inv.Detail.CauseGates |> List.find (fun (c, _) -> c = cause.Id) |> snd
+    Assert.Equal(confirm.Legal, gate.IsEmpty)
+    let port = send port id "RecordCorrectiveAction" [ "description", "Replace the seal."; "kind", "correction"; "cause", cause.Id ]
+    let ca = (opened port id).Detail.Corrections.Head
+    Assert.Equal<string list>([ cause.Id ], ca.Targets)
+    let v = view port (Routes.Investigation(id, Routes.CorrectiveActions)) ""
+    Assert.True(flagOf v "an.corr.action")
+    Assert.Equal("Root-cause correction", textOf v "an.ca.kind")
+    let mark = (opened port id).Capabilities |> List.find (fun c -> c.Id = "MarkCorrectiveActionImplemented:" + ca.Id)
+    Assert.Contains((if mark.Legal then "\"legal\", Flag true" else "\"illegal\", Flag true"), sprintf "%A" (v |> Map.find "an.markImplemented"))
+    // No criterion is recorded: the verification screen is not shown and nothing is called verified.
+    Assert.False(flagOf v "an.corr.verification")
+    Assert.True(flagOf v "an.ca.criteria.empty")
+
+[<Fact>]
+let ``S15 a past version is compared with the latest: open questions and action availability that changed`` () =
+    let port, id, _ = active ()
+    let port = send port id "IdentifyUnknown" [ "text", "Was the valve replaced last month?" ]
+    let model = { Shell.initial with Route = Routes.Investigation(id, Routes.Timeline); Port = port; HistoryVersion = Some 2L }
+    let v = View.project model |> AnalysisView.extend model
+    Assert.Equal("semantic-diff", textOf v "an.timeline.screen")
+    Assert.Contains("Opened since: Was the valve replaced last month?", sprintf "%A" (v |> Map.find "an.diff.blockers"))
+    let latest = { model with HistoryVersion = None }
+    Assert.Equal("investigation-timeline", textOf (View.project latest |> AnalysisView.extend latest) "an.timeline.screen")
+
+[<Fact>]
+let ``S23 a held persistence conflict shows the recovery screen; S24 an absent policy pin is explained, never offered`` () =
+    let s = match TestState.parse """{ "name": "c", "predicates": [], "capabilities": {}, "sync": "conflict" }""" with Ok s -> s | Error e -> failwith e
+    let port = TestState.port s
+    Assert.Equal(Conflict, port.Projection.Sync)
+    let route = Routes.Investigation(TestState.fixtureId, Routes.Overview)
+    let model = { Shell.initial with Route = route; Port = port }
+    let v = View.project model |> AnalysisView.extend model
+    Assert.Equal("persistence-conflict-recovery", textOf v "an.overview.screen")
+    let settings = { model with Route = Routes.Settings }
+    let sv = View.project settings |> AnalysisView.extend settings
+    let pin = sprintf "%A" (sv |> Map.find "an.pin")
+    Assert.Contains("\"illegal\", Flag true", pin)
+    Assert.Contains("no other version to pin", pin)
+
+[<Fact>]
+let ``every analysis key is present on every screen`` () =
+    let port, id, _ = active ()
+    let keysOn route =
+        let m = { Shell.initial with Route = route; Port = port }
+        View.project m |> AnalysisView.extend m |> Map.keys |> Seq.filter (fun k -> k.StartsWith "an.") |> Set.ofSeq
+    let reference = keysOn Routes.Settings
+    for route in [ Routes.Investigations; Routes.Investigation(id, Routes.Overview); Routes.Investigation(id, Routes.Hypotheses); Routes.Investigation(id, Routes.Timeline) ] do
+        Assert.Equal<Set<string>>(reference, keysOn route)
