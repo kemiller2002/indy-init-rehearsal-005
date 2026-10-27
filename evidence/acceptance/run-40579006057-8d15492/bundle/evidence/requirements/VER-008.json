@@ -1,0 +1,35 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40579006057-1",
+  "source_sha": "8d154928196bc95dcc6656d483c4acd13e909b6f",
+  "subject_type": "requirement",
+  "subject_id": "VER-008",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40579006057-1)",
+  "obligations": [
+    {
+      "id": "VPO-e49383126481c2f7",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.Acceptance.Tests.AcceptanceTests.the lock gate fails when an installed artifact differs from the locked set",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261027203345.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-22f350dce03290a4",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.Acceptance.Tests.AcceptanceTests.missing dependencies or unverifiable artifacts never yield PASS",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261027203345.trx"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "schema": "causa.stack-pin/1",
+  "description": "T11 pin: the echelon-current 1.29.0 channel resolution for linux-x64, copied byte for byte from the Echelon Registry. The lock gate (causa-acceptance lock-gate) refuses a copy whose SHA-256 differs, and CI re-fetches the registry file at the pinned commit and compares it.",
+  "registry": {
+    "repository": "kemiller2002/echelon-registry",
+    "commit": "402bec2197348daaac4beb77de7c6ac8a2019c30",
+    "path": "channels/echelon-current/linux-x64.json"
+  },
+  "channelFile": "acceptance/stack/echelon-current-1.29.0.linux-x64.json",
+  "channelSha256": "d3774e7a24c0df9728ec2fcec197aa2582cfc612c642342c800d64aa4583a290",
+  "profileVersion": "1.29.0",
+  "profileSha256": "e2dd7b788e47ad628868a19052c7d88f429f572644f11310d018dd0b682107bf",
+  "expected": {
+    "praxis": "3.22.0",
+    "ordo": "1.18.0",
+    "limen": "0.9.0",
+    "forma": "0.9.0",
+    "folio": "0.4.1",
+    "aegis": "1.0.0",
+    "percepta": "0.1.0",
+    "percepta-semantic": "0.3.0",
+    "dokimos": "0.8.0"
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "schema": "causa.acceptance-defect-classes/1",
+  "description": "Recurring defect classes of Rehearsals 1-4 (Indy-init requirements-compiled/v1/curation/defect-class-tests.json). Treated as HIGH: G7 blocks on critical and recurring classes. A class is closed (PASS) only by the independent reviewer recording fixSha and reviewerEvidence (a bundle path) here; the failing-first tests listed must exist and pass.",
+  "source": {
+    "repository": "kemiller2002/indy-init",
+    "commit": "459f65ac1aa5569d05c0e7a4096ada277dbabc91",
+    "path": "requirements-compiled/v1/curation/defect-class-tests.json"
+  },
+  "defectClasses": [
+    {
+      "id": "DC-001",
+      "severity": "HIGH",
+      "tests": [
+        "DCT-001-A",
+        "DCT-001-B"
+      ],
+      "status": "NOT_RUN",
+      "fixSha": null,
+      "reviewerEvidence": null
+    },
+    {
+      "id": "DC-002",
+      "severity": "HIGH",
+      "tests": [
+        "DCT-002-A",
+        "DCT-002-B"
+      ],
+      "status": "NOT_RUN",
+      "fixSha": null,
+      "reviewerEvidence": null
+    },
+    {
+      "id": "DC-003",
+      "severity": "HIGH",
+      "tests": [
+        "DCT-003-A"
+      ],
+      "status": "NOT_RUN",
+      "fixSha": null,
+      "reviewerEvidence": null
+    },
+    {
+      "id": "DC-004",
+      "severity": "HIGH",
+      "tests": [
+        "DCT-004-A"
+      ],
+      "status": "NOT_RUN",
+      "fixSha": null,
+      "reviewerEvidence": null
+    },
+    {
+      "id": "DC-005",
+      "severity": "HIGH",
+      "tests": [
+        "DCT-005-A"
+      ],
+      "status": "NOT_RUN",
+      "fixSha": null,
+      "reviewerEvidence": null
+    },
+    {
+      "id": "DC-006",
+      "severity": "HIGH",
+      "tests": [
+        "DCT-006-A"
+      ],
+      "status": "NOT_RUN",
+      "fixSha": null,
+      "reviewerEvidence": null
+    },
+    {
+      "id": "R3-LESSON-3",
+      "severity": "HIGH",
+      "tests": [
+        "DCT-INPUT-A"
+      ],
+      "status": "NOT_RUN",
+      "fixSha": null,
+      "reviewerEvidence": null
+    },
+    {
+      "id": "DC-001..DC-005",
+      "severity": "HIGH",
+      "tests": [
+        "DCT-LIVE-A"
+      ],
+      "status": "NOT_RUN",
+      "fixSha": null,
+      "reviewerEvidence": null
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "description": "Declared test-to-input mappings for `dokimos evidence plan` (dokimos.evidence-reuse-request/1 without Revision, ChangedPaths and PriorEvidence, which CI adds). Reuse only lets a branch or pull-request run skip re-running an unchanged producer; acceptance evidence is always produced by the candidate run itself, main always runs everything, and live is never reused. A changed path that no mapping, global input or ignored pattern covers makes every producer run. Over-broad mappings only cost reruns; keep them broad.",
+  "GlobalInputs": [
+    ".github/workflows/build-and-test.yml",
+    "acceptance/reuse.json",
+    "Directory.Build.props",
+    "App.slnx",
+    "package.json",
+    ".conditor/lock.json"
+  ],
+  "IgnoredPaths": [
+    "docs/**",
+    "research/**",
+    "**/*.md",
+    "acceptance/traceability.json",
+    "evidence/**",
+    ".ros/**",
+    ".praxis/**",
+    "registries/**",
+    "telemetry/**",
+    "missions/**",
+    "context/**",
+    "framework/**",
+    "templates/**",
+    "kickoff/**",
+    "requirements/**"
+  ],
+  "Tests": [
+    {
+      "TestId": "core",
+      "Description": ".NET build and every xunit test in App.slnx",
+      "Freshness": "content-addressed",
+      "Inputs": {
+        "Sources": ["src/**", "tests/**", "tools/**"],
+        "TestContract": ".github/workflows/build-and-test.yml",
+        "ToolVersion": "dotnet-sdk 10.0.x"
+      }
+    },
+    {
+      "TestId": "site",
+      "Description": "npm install, kernel type-check, site build",
+      "Freshness": "content-addressed",
+      "Inputs": {
+        "Sources": ["src/**", "tests/**", "tools/**", "playwright.config.js", "tsconfig.json"],
+        "TestContract": ".github/workflows/build-and-test.yml",
+        "ToolVersion": "node 22; dotnet-sdk 10.0.x"
+      }
+    },
+    {
+      "TestId": "browser",
+      "Description": "Playwright suite without @live tests",
+      "Freshness": "content-addressed",
+      "Inputs": {
+        "Sources": ["src/**", "tests/**", "tools/**", "playwright.config.js", "tsconfig.json"],
+        "TestContract": ".github/workflows/build-and-test.yml",
+        "ToolVersion": "node 22; playwright (package.json)"
+      }
+    },
+    {
+      "TestId": "lock-gate",
+      "Description": "T11 stack lock and compatibility gate",
+      "Freshness": "content-addressed",
+      "Inputs": {
+        "Sources": ["acceptance/stack/**", "conditor.json", "ros.json", ".echelon/ros.json", "src/**", "tests/**", "tools/**"],
+        "TestContract": "acceptance/stack/pin.json",
+        "ToolVersion": "causa-acceptance lock-gate"
+      }
+    },
+    {
+      "TestId": "live",
+      "Description": "Playwright @live suite against the real provider (never reused)",
+      "Freshness": "live"
+    }
+  ]
+}
