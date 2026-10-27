@@ -72,11 +72,11 @@ echo "$manifest_sha" > "$OUT/evidence-manifest.sha256"
 # Ordo (sde verification schedule): the deterministic schedule over the admitted plan, with every evidence entry's
 # bytes checked against the manifest, bound to this run and source SHA. Recorded, never a verdict input.
 if command -v ordo > /dev/null 2>&1; then
-  plan_abs=$(realpath "$plan")
+  plan_abs=$(realpath "$plan"); out_abs=$(realpath "$OUT")
   set +e
   (cd "$OUT/bundle" && ordo verification schedule --plan "$plan_abs" \
      --expected-digest "$plan_digest" --evidence-manifest evidence-manifest.json --source-sha "$SOURCE_SHA" \
-     --run-id "$RUN_ID" --output "$OUT/verification-schedule.json") > "$OUT/verification-schedule.log" 2>&1
+     --run-id "$RUN_ID" --output "$out_abs/verification-schedule.json") > "$OUT/verification-schedule.log" 2>&1
   echo "$?" > "$OUT/verification-schedule.exit"
   set -e
 else
