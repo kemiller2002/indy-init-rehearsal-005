@@ -3,6 +3,8 @@
 // DC-006) and, in the test build only, the Percepta state hook.
 import { BrowserKernel } from "@echelon-foundry/limen/kernel";
 import { DotnetWasmTransport } from "@echelon-foundry/limen/hosts/dotnet-wasm";
+// Folio's print elements (passive: registering the element names is all it does).
+import "@echelon-foundry/print-components";
 
 /** Replaced with `true` by scripts/build-site.mjs --test. Never true in the deployed site. */
 const TEST_BUILD = false;

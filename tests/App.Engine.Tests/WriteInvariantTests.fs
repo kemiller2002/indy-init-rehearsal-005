@@ -84,10 +84,10 @@ let private retargetingDefect: Stepper =
         | _ -> Sync.step state event
 
 [<Fact>]
-[<Trait("obligation", "VPO-d7fbd84e40ded145")>]
-[<Trait("obligation", "VPO-34731ac9a977b818")>]
+[<Trait("engineEvidenceFor", "EXT-DATA-006-O2")>]
+[<Trait("engineEvidenceFor", "UI-006-O4")>]
 [<Trait("defectClass", "DC-001")>]
-let ``DCT-001-A VPO-d7fbd84e40ded145 VPO-34731ac9a977b818 publication is parented by the decided-at head and a moved branch is a held conflict`` () =
+let ``DCT-001-A publication is parented by the decided-at head and a moved branch is a held conflict`` () =
     Assert.True(parentedByDecidedHead real)
 
 [<Fact>]
@@ -147,9 +147,9 @@ let private refEqualityDefect: Stepper =
         | _ -> Sync.step state event
 
 [<Fact>]
-[<Trait("obligation", "VPO-d7fbd84e40ded145")>]
+[<Trait("engineEvidenceFor", "EXT-DATA-006-O2")>]
 [<Trait("defectClass", "DC-001")>]
-let ``DCT-001-B VPO-d7fbd84e40ded145 reconciliation classifies a head reached through another writer as concurrent`` () =
+let ``DCT-001-B reconciliation classifies a head reached through another writer as concurrent`` () =
     Assert.True(classifiesByAncestry real)
 
 [<Fact>]
@@ -205,11 +205,11 @@ let private ignoresRequestIdentity: Stepper =
         Sync.step state e
 
 [<Fact>]
-[<Trait("obligation", "VPO-2d4b7557ce013e50")>]
-[<Trait("obligation", "VPO-8c435e1ebdf43e7c")>]
-[<Trait("obligation", "VPO-cd9dd8ec730c3d3e")>]
+[<Trait("engineEvidenceFor", "PF-009-O2")>]
+[<Trait("engineEvidenceFor", "PF-009-O3")>]
+[<Trait("engineEvidenceFor", "PF-009-O1")>]
 [<Trait("defectClass", "DC-002")>]
-let ``DCT-002-A VPO-2d4b7557ce013e50 VPO-8c435e1ebdf43e7c VPO-cd9dd8ec730c3d3e a late answer for a replaced write is discarded`` () =
+let ``DCT-002-A a late answer for a replaced write is discarded`` () =
     Assert.True(lateAnswersDiscarded real)
 
 [<Fact>]
@@ -237,10 +237,10 @@ let private reconnectIdentity (stepper: Stepper) =
     stale && own
 
 [<Fact>]
-[<Trait("obligation", "VPO-8c435e1ebdf43e7c")>]
-[<Trait("obligation", "VPO-2d4b7557ce013e50")>]
+[<Trait("engineEvidenceFor", "PF-009-O3")>]
+[<Trait("engineEvidenceFor", "PF-009-O2")>]
 [<Trait("defectClass", "REQUEST-IDENTITY")>]
-let ``REQUEST-IDENTITY VPO-8c435e1ebdf43e7c VPO-2d4b7557ce013e50 an answer to an earlier connection never lands on a newer one`` () =
+let ``REQUEST-IDENTITY an answer to an earlier connection never lands on a newer one`` () =
     Assert.True(reconnectIdentity real)
 
 [<Fact>]
@@ -277,12 +277,13 @@ let private legal (event: Event) (phase: Phase) =
     | Connect, (Disconnected | ConnectRefused _) -> true
     | Write, (Idle(_, Some _) | Held(_, _, NotWritten _)) -> true
     | (Edit _ | Reapply _), Idle _ -> true
-    | Discard, Held _ -> true
+    | Discard, (Held _ | Idle(_, Some _)) -> true
+    | Reloaded _, (Idle _ | Held(_, _, HeldReason.Conflict _)) -> true
     | Reconcile, Unknown _ -> true
     | _ -> false
 
 let private userEventsGuarded (stepper: Stepper) =
-    let events = [ Connect; Write; Edit sample; Reapply sample; Discard; Reconcile ]
+    let events = [ Connect; Write; Edit sample; Reapply sample; Discard; Reconcile; Reloaded B ]
     everyPhase stepper
     |> List.forall (fun state ->
         events
@@ -388,16 +389,16 @@ let private stageBlindClassification: Stepper =
         | _ -> Sync.step state event
 
 [<Fact>]
-[<Trait("obligation", "VPO-b3efad6eb85360be")>]
-[<Trait("obligation", "VPO-89ed6170f531961e")>]
+[<Trait("engineEvidenceFor", "UI-006-O2")>]
+[<Trait("engineEvidenceFor", "UI-006-O1")>]
 [<Trait("defectClass", "DC-003")>]
-let ``DCT-003-A VPO-b3efad6eb85360be VPO-89ed6170f531961e a failure after send is unknown with no retry and reconcile reads the head first`` () =
+let ``DCT-003-A a failure after send is unknown with no retry and reconcile reads the head first`` () =
     Assert.True(sentFailuresAreUnknown real)
 
 [<Fact>]
-[<Trait("obligation", "VPO-b3efad6eb85360be")>]
+[<Trait("engineEvidenceFor", "UI-006-O2")>]
 [<Trait("defectClass", "DC-003")>]
-let ``DCT-003-A VPO-b3efad6eb85360be saved is claimed only after the read-back matches`` () =
+let ``DCT-003-A saved is claimed only after the read-back matches`` () =
     Assert.True(readBackMismatchIsUnknown real)
 
 [<Fact>]
@@ -408,9 +409,9 @@ let ``DCT-003-A negative control VPO-821ce84e76d497b9 VPO-7b54ff75e3784cae the c
     Assert.False(sentFailuresAreUnknown stageBlindClassification)
 
 [<Fact>]
-[<Trait("obligation", "VPO-89ed6170f531961e")>]
+[<Trait("engineEvidenceFor", "UI-006-O1")>]
 [<Trait("defectClass", "DC-003")>]
-let ``UI-006 VPO-89ed6170f531961e pending sending conflicted unknown and failed are distinct statuses`` () =
+let ``UI-006 pending sending conflicted unknown and failed are distinct statuses`` () =
     let statuses = everyPhase real |> List.map (fun s -> Sync.status s.Phase) |> List.distinct
     for expected in [ Unsaved; Saving; Verifying; MayHaveSaved; Checking; Conflicted; Failed; Clean; NotConnected ] do
         Assert.Contains(expected, statuses)
@@ -419,9 +420,9 @@ let ``UI-006 VPO-89ed6170f531961e pending sending conflicted unknown and failed 
 // Durable per-document state (persistence embeds one Sync.State per investigation).
 
 [<Fact>]
-[<Trait("obligation", "VPO-34731ac9a977b818")>]
+[<Trait("engineEvidenceFor", "UI-006-O4")>]
 [<Trait("boundary", "D")>]
-let ``SYNC-DURABLE VPO-34731ac9a977b818 every phase survives encode and decode exactly`` () =
+let ``SYNC-DURABLE every phase survives encode and decode exactly`` () =
     for state in everyPhase real do
         let text = Json.canonical (Sync.encode state)
         match Json.parse text |> Result.bind Sync.decode with
@@ -431,11 +432,11 @@ let ``SYNC-DURABLE VPO-34731ac9a977b818 every phase survives encode and decode e
     Assert.True(Result.isError (Sync.decode (JObject [ "schema", JString "causa.sync-state/9"; "issued", JInt 0L; "state", JObject [] ])))
 
 [<Fact>]
-[<Trait("obligation", "VPO-b3efad6eb85360be")>]
-[<Trait("obligation", "VPO-34731ac9a977b818")>]
-[<Trait("obligation", "VPO-8c435e1ebdf43e7c")>]
+[<Trait("engineEvidenceFor", "UI-006-O2")>]
+[<Trait("engineEvidenceFor", "UI-006-O4")>]
+[<Trait("engineEvidenceFor", "PF-009-O3")>]
 [<Trait("boundary", "D")>]
-let ``SYNC-DURABLE VPO-b3efad6eb85360be VPO-34731ac9a977b818 VPO-8c435e1ebdf43e7c restore after reload never loses a change or forgets a possible write`` () =
+let ``SYNC-DURABLE restore after reload never loses a change or forgets a possible write`` () =
     for state in everyPhase real do
         let restored = Sync.restore state
         Assert.Equal(None, inFlight restored.Phase)
@@ -460,3 +461,90 @@ let ``SYNC-DURABLE VPO-b3efad6eb85360be VPO-34731ac9a977b818 VPO-8c435e1ebdf43e7
         | None -> ()
     // a restored disconnected document is re-attached at the freshly read head
     Assert.Equal(Idle(B, None), (Sync.attach B (Sync.restore Sync.initial)).Phase)
+
+// ---------------------------------------------------------------------------------------------------------------
+// Hooks for persistence's outer machine (Boundary D).
+
+[<Fact>]
+[<Trait("engineEvidenceFor", "UI-006-O2")>]
+[<Trait("engineEvidenceFor", "PF-009-O3")>]
+[<Trait("engineEvidenceFor", "PF-009-O2")>]
+[<Trait("boundary", "D")>]
+let ``SYNC-HOOK restoreUnknown is Unknown with no retry and no pre-reload answer can apply`` () =
+    let c = change A "m-reload"
+    let s = Sync.restoreUnknown A c
+    match s.Phase with
+    | Unknown(h, a) ->
+        Assert.Equal(A, h)
+        Assert.Equal(c, a.Change)
+    | other -> failwithf "%A" other
+    Assert.False(canRetry s.Phase)
+    Assert.Equal(MayHaveSaved, Sync.status s.Phase)
+    match real s Write with
+    | Error f -> Assert.Equal(OutcomeUnknown, f.Code)
+    | Ok _ -> failwith "write accepted while the outcome is unknown"
+    // reconcile re-reads the head first, with a request id outside any pre-reload book's range
+    let s, fx = run' real s [ Reconcile ]
+    match fx with
+    | [ ReadHead(RequestId r, since) ] ->
+        Assert.Equal(A, since)
+        Assert.True(r > (1L <<< 32))
+    | other -> failwithf "%A" other
+    for old in 1L .. 2000L do
+        match real s (HeadObserved(RequestId old, B, Descends [])) with
+        | Error f -> Assert.Equal(StaleAnswer, f.Code)
+        | Ok _ -> failwithf "pre-reload answer %d applied" old
+    // different changes get different bands
+    Assert.NotEqual((Sync.restoreUnknown A (change A "x")).Issued, (Sync.restoreUnknown A (change A "y")).Issued)
+
+[<Fact>]
+[<Trait("engineEvidenceFor", "UI-006-O4")>]
+[<Trait("engineEvidenceFor", "EXT-DATA-006-O2")>]
+[<Trait("boundary", "D")>]
+let ``SYNC-HOOK Reloaded re-observes the head and keeps the book and the change`` () =
+    let s = connectedAt real A
+    // idle, nothing pending: follow the head
+    let s1, fx = run' real s [ Reloaded B ]
+    Assert.Equal(Idle(B, None), s1.Phase)
+    Assert.Empty(fx)
+    Assert.Equal(s.Issued, s1.Issued)
+    // pending change, head unchanged: still publishable
+    let p, _ = run' real s [ Edit(change A "m") ]
+    let p1, _ = run' real p [ Reloaded A ]
+    Assert.Equal(p.Phase, p1.Phase)
+    // pending change, head moved: a held conflict, never re-targeted (DC-001)
+    let p2, _ = run' real p [ Reloaded B ]
+    match p2.Phase with
+    | Held(h, c, HeldReason.Conflict(Some remote)) ->
+        Assert.Equal(A, h)
+        Assert.Equal("m", c.Marker)
+        Assert.Equal(B, remote)
+    | other -> failwithf "%A" other
+    // held conflict: the remote head is updated, the change kept
+    let p3, _ = run' real p2 [ Reloaded C ]
+    match p3.Phase with
+    | Held(_, c, HeldReason.Conflict(Some remote)) ->
+        Assert.Equal("m", c.Marker)
+        Assert.Equal(C, remote)
+    | other -> failwithf "%A" other
+    Assert.Equal(p.Issued, p3.Issued)
+    // illegal while a write is in flight
+    let w, _ = run' real p [ Write ]
+    match real w (Reloaded B) with
+    | Error f -> Assert.Equal(IllegalInState, f.Code)
+    | Ok _ -> failwith "Reloaded accepted while writing"
+
+[<Fact>]
+[<Trait("obligation", "VPO-199103f9166730e7")>]
+[<Trait("boundary", "D")>]
+let ``SYNC-HOOK Discard VPO-199103f9166730e7 a local unsent change can be discarded and is handed back`` () =
+    let s = connectedAt real A
+    let p, _ = run' real s [ Edit(change A "m") ]
+    match real p Discard with
+    | Ok(d, [ Released c ]) ->
+        Assert.Equal(Idle(A, None), d.Phase)
+        Assert.Equal("m", c.Marker)
+    | other -> failwithf "%A" other
+    match real s Discard with
+    | Error f -> Assert.Equal(IllegalInState, f.Code)
+    | Ok _ -> failwith "discard of nothing accepted"

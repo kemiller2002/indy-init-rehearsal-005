@@ -31,6 +31,9 @@ export default defineConfig({
     { name: "ipad-portrait", grep: /@responsive/, use: { ...devices["Desktop Chrome"], viewport: { width: 820, height: 1180 }, hasTouch: true, launchOptions } },
     { name: "ipad-landscape", grep: /@responsive/, use: { ...devices["Desktop Chrome"], viewport: { width: 1180, height: 820 }, hasTouch: true, launchOptions } },
     { name: "phone-320", grep: /@responsive/, use: { ...devices["Desktop Chrome"], viewport: { width: 320, height: 640 }, hasTouch: true, launchOptions } },
+    // T17: the checkpoint and the shell smoke also run in WebKit (Safari's engine, as on iPad). Enabled in CI and with
+    // CAUSA_WEBKIT=1; CI must install it (`npx playwright install webkit`).
+    ...(process.env.CI || process.env.CAUSA_WEBKIT ? [{ name: "webkit", grep: /@webkit/, use: { ...devices["Desktop Safari"] } }] : []),
   ],
   webServer: deployed ? undefined : [
     { command: `node scripts/serve.mjs dist ${port}`, url: `${origin}/index.html`, reuseExistingServer: !process.env.CI, timeout: 60_000 },

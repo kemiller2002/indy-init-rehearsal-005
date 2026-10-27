@@ -109,6 +109,8 @@ type Event =
     | Reapply of Change
     | Discard
     | Reconcile
+    /// The outer machine re-read the branch head (after a reload): legal in Idle and in Held(Conflict).
+    | Reloaded of head: Oid
     // provider answers, each naming the request instance it answers
     | Connected of RequestId * head: Oid
     | ConnectFailed of RequestId * ConnectFailure
@@ -168,6 +170,7 @@ let eventName =
     | Reapply _ -> "Reapply"
     | Discard -> "Discard"
     | Reconcile -> "Reconcile"
+    | Reloaded _ -> "Reloaded"
     | Connected _ -> "Connected"
     | ConnectFailed _ -> "ConnectFailed"
     | PublicationSent _ -> "PublicationSent"
@@ -213,7 +216,8 @@ let answerOf =
     | Write
     | Reapply _
     | Discard
-    | Reconcile -> None
+    | Reconcile
+    | Reloaded _ -> None
 
 /// The request instance the current phase is waiting on.
 let inFlight =
@@ -272,6 +276,16 @@ let step (state: State) (event: Event) : Result<State * Effect list, Fault> =
             let effects = [ Released change ] @ (remote |> Option.map ReloadRequired |> Option.toList)
             go (Idle(defaultArg remote head, None)) effects
         | Held(head, change, NotWritten _), Discard -> go (Idle(head, None)) [ Released change ]
+        // a local, unsent change may be discarded; it is handed back so it can be reapplied
+        | Idle(head, Some change), Discard -> go (Idle(head, None)) [ Released change ]
+
+        // re-observing the branch head after a reload, without rebuilding the book (the counter is kept)
+        | Idle(_, None), Reloaded observed -> go (Idle(observed, None)) []
+        | Idle(_, Some change), Reloaded observed ->
+            // a pending change stays publishable only on the head it was decided at; otherwise it is a held conflict
+            if observed = change.DecidedAt then go (Idle(observed, Some change)) []
+            else go (Held(change.DecidedAt, change, Conflict(Some observed))) []
+        | Held(head, change, Conflict _), Reloaded observed -> go (Held(head, change, Conflict(Some observed))) []
 
         // the write in flight
         | Writing(head, attempt), PublicationSent _ ->
@@ -347,6 +361,20 @@ let status =
 /// After a reload from a local durable copy nothing is in flight any more: a request that may have left is Unknown
 /// (DC-003), connection attempts are dropped (credentials are in memory only), held and pending changes are kept.
 /// The request counter is kept, so no answer to a request issued before the reload can ever match.
+/// The request-counter band for a document restored without its saved book: derived from the change marker, so
+/// request ids issued after the reload lie in a band (>= 2^32) that a pre-reload book counting from 0 never reaches,
+/// and differ between changes. Prefer `restore` (it keeps the exact counter) when the saved State is available.
+let private bandOf (marker: string) =
+    let h = System.Text.Encoding.UTF8.GetBytes marker |> Hashing.sha256
+    let high = (int64 h[0] <<< 22) ||| (int64 h[1] <<< 14) ||| (int64 h[2] <<< 6) ||| (int64 h[3] >>> 2)
+    (high + 1L) <<< 32
+
+/// An explicit Unknown after a reload, when only the change and the head it was decided on survived: the change may
+/// have been published (DC-003), so it can only leave Unknown through Reconcile, which re-reads the head first.
+let restoreUnknown (head: Oid) (change: Change) : State =
+    { Phase = Unknown(head, { Request = RequestId 0L; Change = change; Stage = Sent })
+      Issued = bandOf change.Marker }
+
 let restore (state: State) : State =
     let phase =
         match state.Phase with

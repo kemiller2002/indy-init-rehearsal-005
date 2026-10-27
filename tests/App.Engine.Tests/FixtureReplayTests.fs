@@ -74,13 +74,13 @@ let ``T15 STORAGE-007 VPO-5933d986a6ba6dc3 VPO-2d84a4c6df612b0d the three releas
         Assert.Equal<byte[]>(bytes [ "contract"; "v1.0.0"; "schemas"; yield! name.Split('/') |> List.ofArray ], embedded)
 
 [<Fact>]
-[<Trait("obligation", "VPO-acd13bfa08dba51a")>]
-[<Trait("obligation", "VPO-c90593e00b2dae72")>]
-[<Trait("obligation", "VPO-557743cb4997c484")>]
+[<Trait("engineEvidenceFor", "PF-002-O2")>]
+[<Trait("engineEvidenceFor", "PF-002-O1")>]
+[<Trait("engineEvidenceFor", "PF-004-O1")>]
 [<Trait("obligation", "VPO-3d67d1f2b8287e39")>]
 [<Trait("obligation", "VPO-f00be0cb5a2bb0f8")>]
 [<Trait("task", "T15")>]
-let ``T15 VPO-acd13bfa08dba51a VPO-c90593e00b2dae72 VPO-557743cb4997c484 VPO-3d67d1f2b8287e39 five golden scenarios replay through the engine to their pinned digests and golden states`` () =
+let ``T15 VPO-3d67d1f2b8287e39 five golden scenarios replay through the engine to their pinned digests and golden states`` () =
     let entries = arrField "investigations" (rootManifest ())
     Assert.Equal(5, entries.Length)
     for entry in entries do
@@ -102,9 +102,9 @@ let ``T15 VPO-acd13bfa08dba51a VPO-c90593e00b2dae72 VPO-557743cb4997c484 VPO-3d6
 
 [<Fact>]
 [<Trait("obligation", "VPO-9c6055c47e4eb07d")>]
-[<Trait("obligation", "VPO-61b2e81f99761d55")>]
+[<Trait("engineEvidenceFor", "EXT-DATA-008-O1")>]
 [<Trait("task", "T15")>]
-let ``T15 VPO-9c6055c47e4eb07d VPO-61b2e81f99761d55 the writer reproduces every frozen file set byte for byte from the decoded events`` () =
+let ``T15 VPO-9c6055c47e4eb07d the writer reproduces every frozen file set byte for byte from the decoded events`` () =
     for entry in arrField "investigations" (rootManifest ()) do
         let id = strField "investigationId" entry
         match loadFixture id with
@@ -161,12 +161,12 @@ let private outcome (fixture: Json) : (string * string option) option =
 
 [<Fact>]
 [<Trait("obligation", "VPO-f52d9071426e82b3")>]
-[<Trait("obligation", "VPO-c135d16c59f5baf8")>]
+[<Trait("engineEvidenceFor", "EXT-DATA-005-O2")>]
 [<Trait("obligation", "VPO-2d84a4c6df612b0d")>]
-[<Trait("obligation", "VPO-9d59cc57fd44b927")>]
+[<Trait("engineEvidenceFor", "PF-007-O1")>]
 [<Trait("obligation", "VPO-821ce84e76d497b9")>]
 [<Trait("task", "T15")>]
-let ``T15 VPO-f52d9071426e82b3 VPO-c135d16c59f5baf8 VPO-9d59cc57fd44b927 all 90 negative fixtures are refused with their expected code and domain code`` () =
+let ``T15 VPO-f52d9071426e82b3 all 90 negative fixtures are refused with their expected code and domain code`` () =
     let listed = arrField "negativeFixtures" (rootManifest ())
     Assert.Equal(90, listed.Length)
     let mismatches =
@@ -185,10 +185,10 @@ let ``T15 VPO-f52d9071426e82b3 VPO-c135d16c59f5baf8 VPO-9d59cc57fd44b927 all 90 
     Assert.True(mismatches.IsEmpty, String.Join("\n", mismatches))
 
 [<Fact>]
-[<Trait("obligation", "VPO-dc48d066cfa2309d")>]
-[<Trait("obligation", "VPO-d60e3a3a25cb106d")>]
+[<Trait("engineEvidenceFor", "PF-004-O3")>]
+[<Trait("engineEvidenceFor", "UI-006-O5")>]
 [<Trait("task", "T15")>]
-let ``T15 VPO-dc48d066cfa2309d VPO-d60e3a3a25cb106d every frozen file still has its locked digest after the replay run`` () =
+let ``T15 every frozen file still has its locked digest after the replay run`` () =
     // Replay everything first (reads only), then check every frozen file against the release lock.
     for entry in arrField "investigations" (rootManifest ()) do
         loadFixture (strField "investigationId" entry) |> ignore
@@ -199,16 +199,22 @@ let ``T15 VPO-dc48d066cfa2309d VPO-d60e3a3a25cb106d every frozen file still has 
         Assert.True((strField "sha256" f = Hashing.sha256Hex (bytes (p.Split('/') |> List.ofArray))), $"{p} changed")
 
 [<Fact>]
-[<Trait("obligation", "VPO-c81484cbcf203d4f")>]
+[<Trait("engineEvidenceFor", "EXT-DATA-013-O2")>]
 [<Trait("obligation", "VPO-4b4747eaff96e385")>]
-[<Trait("obligation", "VPO-77f6e22e08d5bba0")>]
+[<Trait("engineEvidenceFor", "EXT-DATA-013-O3")>]
 [<Trait("task", "T15")>]
-let ``T15 EXT-DATA-013 VPO-c81484cbcf203d4f VPO-4b4747eaff96e385 the active historical catalog loads all three cases through the engine to their catalog states`` () =
+let ``T15 EXT-DATA-013 VPO-4b4747eaff96e385 the active historical catalog loads all three cases through the engine to their catalog states`` () =
     let active = json [ "catalog"; "active.json" ]
     let manifestPath = strField "manifest" active
     let catalog = json (manifestPath.Split('/') |> List.ofArray)
     let cases = arrField "cases" catalog
     Assert.Equal(3, cases.Length)
+    Assert.Equal("historical-v1", strField "activeCatalog" active)
+    Assert.Equal<string list>([ "apollo-1"; "apollo-11"; "challenger-sts-51l" ], cases |> List.map (strField "caseKey") |> List.sort)
+    let titles = cases |> List.map (strField "title")
+    Assert.Contains(titles, fun t -> t.Contains "Apollo 1 (AS-204)")
+    Assert.Contains(titles, fun t -> t.Contains "Apollo 11")
+    Assert.Contains(titles, fun t -> t.Contains "Challenger")
     for case in cases do
         let id = strField "investigationId" case
         let dir = path ((strField "path" case).Split('/') |> List.ofArray)
@@ -225,7 +231,7 @@ let ``T15 EXT-DATA-013 VPO-c81484cbcf203d4f VPO-4b4747eaff96e385 the active hist
 
 [<Fact>]
 [<Trait("obligation", "VPO-3d67d1f2b8287e39")>]
-[<Trait("obligation", "VPO-557743cb4997c484")>]
+[<Trait("engineEvidenceFor", "PF-004-O1")>]
 [<Trait("task", "T15")>]
 let ``T15 VPO-3d67d1f2b8287e39 golden scenarios.json agrees with the replayed histories (no CAUSA.GOLDEN_MISMATCH)`` () =
     let scenarios = arrField "scenarios" (json [ "contract"; "v1.0.0"; "golden"; "scenarios.json" ])
@@ -244,9 +250,9 @@ let ``T15 VPO-3d67d1f2b8287e39 golden scenarios.json agrees with the replayed hi
     Assert.Equal(31, allTypes.Count)
 
 [<Fact>]
-[<Trait("obligation", "VPO-c135d16c59f5baf8")>]
+[<Trait("engineEvidenceFor", "EXT-DATA-005-O2")>]
 [<Trait("task", "T15")>]
-let ``T15 VPO-c135d16c59f5baf8 concurrent readers all verify (regression: the schema regex cache raced under parallel reads)`` () =
+let ``T15 concurrent readers all verify (regression: the schema regex cache raced under parallel reads)`` () =
     let ids = arrField "investigations" (rootManifest ()) |> List.map (strField "investigationId")
     let results =
         [| for _ in 1..8 do yield! ids |]
