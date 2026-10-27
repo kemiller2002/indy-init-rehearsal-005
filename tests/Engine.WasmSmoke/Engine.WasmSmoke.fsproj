@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+  <!-- WASM smoke for the kernel: runs the engine in .NET WebAssembly (Mono interpreter) under node and loads the
+       active historical catalog through Storage.read, and builds Aegis faults. Not in App.slnx (needs wasm-tools).
+       Run: dotnet build -c Release tests/Engine.WasmSmoke && node tests/Engine.WasmSmoke/run.mjs
+       Data is read at run time from CAUSA_DATA_DIR (a causa-data checkout); nothing is bundled. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>false</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/engine/App.Engine.fsproj" />
+  </ItemGroup>
+</Project>
