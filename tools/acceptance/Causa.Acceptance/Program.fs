@@ -19,6 +19,12 @@ let usage =
   reuse-decision --plan PLAN.json --test ID          Prints run or reuse.
   provenance  --plan PLAN.json --test ID --revision SHA --run-id ID --outcome passed|failed --out FILE
   curation    --traceability FILE --out FILE         testBindings for Indy-init's verification-plan curation.
+  produce     --root DIR --plan PLAN.json --gates FILE --defects FILE --out FILE --records-dir DIR --run-id ID --source-sha SHA
+              [--producers FILE] [--results DIR]... [--sources DIR]... [--assemblies DIR]... [--record-prefix P]
+              The computed gate producers of acceptance/gates.json `producers`, appended to the workflow-reported ones.
+  apply-curation --curation CURATION.json --plan PLAN.json --bindings TESTBINDINGS.json --out FILE
+              Replaces `testBindings` in a COPY of Indy-init's curation/verification-plan.json with a run's
+              curation-test-bindings.json, after checking every binding against the current plan. Never edits in place.
   report      --verdict FILE --traceability FILE --out FILE [--assessment FILE] [--lock-gate FILE] [--context k=v]...
 """
 
@@ -198,6 +204,94 @@ let curation opts =
     printfn "%d obligations with bound tests" bindings.Length
     0
 
+let gitIsAncestor (root: string) (sha: string) =
+    try
+        let psi = Diagnostics.ProcessStartInfo("git", sprintf "-C \"%s\" merge-base --is-ancestor %s HEAD" root sha, RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false)
+        use p = Diagnostics.Process.Start psi
+        p.StandardOutput.ReadToEnd() |> ignore
+        p.StandardError.ReadToEnd() |> ignore
+        p.WaitForExit()
+        p.ExitCode = 0
+    with _ -> false
+
+let readCommitted (root: string) (rel: string) =
+    let p = full root rel
+    if not (File.Exists p) then None
+    else
+        let sha = sha256File p
+        let node = try Some(Json.load p) with _ -> None
+        Some(sha, node |> Option.filter (isNull >> not))
+
+let produce opts =
+    let root = one opts "root" |> Option.defaultValue "."
+    let _, trace = traceOf opts root
+    let results = Discovery.discover root (many opts "results" |> List.map (full root)) (many opts "assemblies" |> List.map (full root))
+    let gates = Json.load (full root (required opts "gates"))
+    let specs = Producers.loadSpecs gates
+    let env: Producers.Environment =
+        { Trace = trace
+          Results = results
+          ReadFile = readCommitted root
+          IsAncestor = gitIsAncestor root
+          DefectClasses = Json.load (full root (required opts "defects")) |> Ledger.loadDefectClasses }
+    let baseProducers =
+        one opts "producers" |> Option.map (fun p -> items "producers" (Json.load (full root p))) |> Option.defaultValue []
+    let reported = baseProducers |> List.map (strOr "" "id") |> Set.ofList
+    for s in specs do
+        if reported.Contains(Producers.specId s) then failwithf "producer %s is both reported and computed" (Producers.specId s)
+    let recordsDir = required opts "records-dir"
+    let prefix = one opts "record-prefix" |> Option.defaultValue ""
+    let ctx = [ "runId", jstr (required opts "run-id"); "sourceSha", jstr (required opts "source-sha") ]
+    let computed =
+        specs
+        |> List.map (fun spec ->
+            let checks = Producers.checksOf env spec
+            let id = Producers.specId spec
+            Json.write (Path.Combine(recordsDir, id + ".json")) (Producers.recordJson spec checks ctx) |> ignore
+            let st = Producers.status checks
+            printfn "%s: %s" id (Producers.statusName st)
+            for c in checks do
+                if c.Status <> Producers.CheckPass then printfn "  %s %s: %s" (Producers.checkStatusName c.Status) c.Name c.Detail
+            jobj
+                [ "id", jstr id
+                  "status", jstr (Producers.statusName st)
+                  "command", jstr (sprintf "causa-acceptance produce (acceptance/gates.json producers.%s)" id)
+                  "record", jstr (prefix + id + ".json") ])
+    Json.write (required opts "out") (jobj [ "producers", jarr (baseProducers @ computed) ]) |> ignore
+    0
+
+/// Applies a run's curation-test-bindings.json to a copy of Indy-init's curation/verification-plan.json. Every
+/// binding must name a baseline obligation of the current plan, at least one test, and a known kind; any problem
+/// refuses the whole application (nothing is written).
+let applyCuration opts =
+    let curation = Json.load (required opts "curation")
+    let plan = Plan.load (required opts "plan")
+    let bindings = items "testBindings" (Json.load (required opts "bindings"))
+    let known = Plan.obligations plan |> List.map (fun o -> o.SourceObligation) |> Set.ofList
+    let kinds = set [ "live"; "deterministic"; "review" ]
+    let problems =
+        [ for b in bindings do
+              let o = strOr "" "obligation" b
+              let tests = items "tests" b
+              if not (known.Contains o) then yield sprintf "binding names %s, which is not an obligation of plan %s" o plan.PlanId
+              if tests.IsEmpty then yield sprintf "binding for %s names no test" o
+              for t in tests do
+                  if String.IsNullOrWhiteSpace(strOr "" "id" t) then yield sprintf "binding for %s has an empty test id" o
+                  if not (kinds.Contains(strOr "" "kind" t)) then yield sprintf "binding for %s has unknown kind %s" o (strOr "" "kind" t)
+          for o, n in bindings |> List.countBy (strOr "" "obligation") do
+              if n > 1 then yield sprintf "obligation %s is bound more than once" o ]
+    if not problems.IsEmpty then
+        for p in problems do eprintfn "%s" p
+        1
+    else
+        let sorted = bindings |> List.sortBy (strOr "" "obligation")
+        let out = curation.DeepClone()
+        out["testBindings"] <- jarr sorted
+        Json.write (required opts "out") out |> ignore
+        let bound = sorted |> List.map (strOr "" "obligation") |> Set.ofList
+        printfn "testBindings: %d of %d obligations of plan %s bound (%d unbound stay missing)" bound.Count known.Count plan.PlanId (known.Count - bound.Count)
+        0
+
 let report opts =
     let verdict = Json.load (required opts "verdict")
     let assessment = one opts "assessment" |> Option.bind Json.tryLoad
@@ -231,6 +325,8 @@ let main argv =
                 | "provenance" -> provenance opts
                 | "report" -> report opts
                 | "curation" -> curation opts
+                | "produce" -> produce opts
+                | "apply-curation" -> applyCuration opts
                 | other ->
                     eprintfn "unknown command %s\n%s" other usage
                     2

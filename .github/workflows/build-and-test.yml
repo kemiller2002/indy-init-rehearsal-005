@@ -37,6 +37,10 @@ env:
   DOTNET_NOLOGO: "1"
   # Indy-init (requirements authority): verifiers, plan VP-e77a2134e1b0, baseline and approvals history.
   INDY_INIT_REF: 459f65ac1aa5569d05c0e7a4096ada277dbabc91
+  # The verification plan at INDY_INIT_REF. These three change together, only when the requirements owner applies a
+  # plan curation (acceptance/README.md, "Plan curation"); acceptance.sh refuses any other plan.
+  PLAN_ID: VP-e77a2134e1b0
+  PLAN_PATH: requirements-compiled/v1/verification-plan.json
   CA: dotnet tools/acceptance/Causa.Acceptance/bin/Release/net10.0/causa-acceptance.dll
   IS_MAIN: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
 
@@ -505,6 +509,105 @@ jobs:
           if-no-files-found: ignore
           retention-days: 30
 
+  # G0: the requirements preservation gate, re-run exactly as recorded in
+  # evidence/requirements-preservation/gate-pre-implementation-command.txt against the same pinned inputs
+  # (Indy-init at INDY_INIT_REF and at the baseline source commit aab8f80, Praxis 3.22.0 from the pinned channel).
+  preservation-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      status: ${{ steps.gate.outputs.status }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: kemiller2002/Indy-init
+          ref: ${{ env.INDY_INIT_REF }}
+          path: .indy-init
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Indy-init at the pinned ref and at the baseline source commit, outside the checkout
+        run: |
+          mv .indy-init "$RUNNER_TEMP/indy-init"
+          git -C "$RUNNER_TEMP/indy-init" worktree add --detach "$RUNNER_TEMP/indy-init-aab8f80" aab8f80c7743392e794b3b631542903ed4ed6f64
+      - name: Install Praxis (verified against the pinned channel)
+        run: tools/acceptance/ci/install-host-tool.sh praxis praxis "$RUNNER_TEMP/host-tools" >> "$GITHUB_PATH"
+      - name: praxis requirements preservation verify (as recorded)
+        id: gate
+        env:
+          INDY_INIT: ${{ runner.temp }}/indy-init
+          INDY_INIT_SOURCE: ${{ runner.temp }}/indy-init-aab8f80
+          OUT_DIR: TestResults/preservation
+        run: |
+          set +e
+          tools/acceptance/ci/preservation-gate.sh | tee -a "$GITHUB_STEP_SUMMARY"
+          status=$?
+          set -e
+          echo "status=$(cat TestResults/preservation/status 2>/dev/null || echo failure)" >> "$GITHUB_OUTPUT"
+          cat TestResults/preservation/compare.txt
+          exit $status
+      - name: Publish the preservation gate record
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: preservation-gate
+          path: TestResults/preservation/
+          if-no-files-found: warn
+          retention-days: 30
+
+  # G5: `percepta verify-app` against the built site (dist/ from the site job) with the committed
+  # .percepta/bindings.json. Not produced (G5 stays NOT_RUN) until both exist; never reused.
+  percepta:
+    needs: site
+    if: always() && needs.site.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      status: ${{ steps.verify.outputs.status }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Built site
+        if: needs.site.outputs.built == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: dist
+      - name: percepta verify-app
+        id: verify
+        env:
+          BUILT: ${{ needs.site.outputs.built }}
+        run: |
+          mkdir -p TestResults/percepta
+          if [ "$BUILT" != true ] || [ ! -f .percepta/bindings.json ]; then
+            echo "status=not-produced" >> "$GITHUB_OUTPUT"
+            echo "::warning::percepta verify-app not run: needs the built site (dist/) and .percepta/bindings.json (built=$BUILT). G5 stays NOT_RUN."
+            exit 0
+          fi
+          export PATH="$(tools/acceptance/ci/install-host-tool.sh percepta-semantic percepta "$RUNNER_TEMP/host-tools"):$PATH"
+          percepta version | tee TestResults/percepta/percepta-version.txt
+          timeout 600 percepta install-browser || echo "::warning::percepta install-browser failed; verify-app reports it if no browser is usable"
+          (cd dist && python3 -m http.server 4330 --bind 127.0.0.1 > /dev/null 2>&1 &)
+          for i in $(seq 1 30); do curl -fsS -o /dev/null http://127.0.0.1:4330/ && break; sleep 1; done
+          set +e
+          percepta verify-app --base-url http://127.0.0.1:4330/ --bindings .percepta/bindings.json \
+            --out TestResults/percepta/verify-app.json 2>&1 | tee TestResults/percepta/verify-app.log
+          status=${PIPESTATUS[0]}
+          set -e
+          if [ "$status" -eq 0 ] && [ -s TestResults/percepta/verify-app.json ]; then
+            echo "status=success" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=failure" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+      - name: Publish the Percepta evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: percepta
+          path: TestResults/percepta/
+          if-no-files-found: ignore
+          retention-days: 30
+
   # The required check. Passes only when every mandatory job passed: core, lock-gate, site, browser, and on main
   # pushes the live suite. A job that reused an identical earlier pass (branches only) counts as passed here and as
   # not produced in the acceptance ledger. (The persistence-provider workflow is deliberately not required here.)
@@ -577,7 +680,7 @@ jobs:
           echo "sha=$served" >> "$GITHUB_OUTPUT"
 
   acceptance:
-    needs: [reuse, core, lock-gate, site, browser, live, build-and-test, deploy, deployed-smoke]
+    needs: [reuse, core, lock-gate, site, browser, live, preservation-gate, percepta, build-and-test, deploy, deployed-smoke]
     if: always() && needs.reuse.result != 'cancelled'
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -591,6 +694,13 @@ jobs:
           ref: ${{ env.INDY_INIT_REF }}
           path: .indy-init
           fetch-depth: 0
+          persist-credentials: false
+      # The frozen fixture set whose lock digest the ledger records (same pin as the core job).
+      - uses: actions/checkout@v4
+        with:
+          repository: kemiller2002/causa-data
+          ref: 3d861bc181ad7f4f49d82c8147325737b6d3aa1c
+          path: .causa-data
           persist-credentials: false
       # 10.0.402 is the SDK Indy-init's global.json pins (rollForward: disable) for the plan verifier.
       - uses: actions/setup-dotnet@v4
@@ -607,10 +717,11 @@ jobs:
         run: |
           dotnet build App.slnx -c Release
           mv .indy-init "$RUNNER_TEMP/indy-init"
+          mv .causa-data "$RUNNER_TEMP/causa-data"
           (cd "$RUNNER_TEMP/indy-init" && dotnet build tools/requirements-compiler/src -c Release)
       - uses: actions/download-artifact@v4
         with:
-          pattern: "{core-results,browser-results,live-results,lock-gate}"
+          pattern: "{core-results,browser-results,live-results,lock-gate,preservation-gate,percepta}"
           path: collected
         continue-on-error: true
       - name: Collect the results of this run
@@ -620,6 +731,10 @@ jobs:
           [ -d collected/browser-results ] && cp -r collected/browser-results/. TestResults/playwright/ || true
           [ -d collected/live-results ] && cp -r collected/live-results/. TestResults/live/ || true
           [ -d collected/lock-gate ] && cp -r collected/lock-gate/. TestResults/lock-gate/ || true
+          # Gate records that are not test results are kept beside the evidence, never scanned as results.
+          mkdir -p gate-records
+          [ -d collected/preservation-gate ] && cp -r collected/preservation-gate gate-records/ || true
+          [ -d collected/percepta ] && cp -r collected/percepta gate-records/ || true
           find TestResults -type f | sort
       - name: Producers of this run
         env:
@@ -630,22 +745,30 @@ jobs:
           LIVE: ${{ needs.live.result == 'success' && needs.live.outputs.ran == 'true' && 'success' || needs.live.result == 'failure' && 'failure' || 'not-produced' }}
           DEPLOY: ${{ needs.deploy.result == 'success' && 'success' || needs.deploy.result == 'failure' && 'failure' || 'not-produced' }}
           SMOKE: ${{ needs.deployed-smoke.result == 'success' && 'success' || needs.deployed-smoke.result == 'failure' && 'failure' || 'not-produced' }}
+          PRESERVATION: ${{ needs.preservation-gate.outputs.status == 'success' && 'success' || needs.preservation-gate.result == 'failure' && 'failure' || 'not-produced' }}
+          PERCEPTA: ${{ needs.percepta.outputs.status == 'success' && 'success' || needs.percepta.result == 'failure' && 'failure' || 'not-produced' }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           jq -n --arg core "$CORE" --arg lock "$LOCK" --arg site "$SITE" --arg browser "$BROWSER" --arg live "$LIVE" \
-                --arg deploy "$DEPLOY" --arg smoke "$SMOKE" --arg run "$RUN" '{producers: [
+                --arg deploy "$DEPLOY" --arg smoke "$SMOKE" --arg pres "$PRESERVATION" --arg percepta "$PERCEPTA" \
+                --arg run "$RUN" '{producers: [
             {id: "core", status: $core, command: "dotnet test App.slnx -c Release (\($run))", record: "TestResults/dotnet"},
             {id: "lock-gate", status: $lock, command: "causa-acceptance lock-gate (\($run))", record: "TestResults/lock-gate/lock-gate.json"},
             {id: "site", status: $site, command: "npm run build (\($run))"},
             {id: "browser", status: $browser, command: "npx playwright test --grep-invert @live (\($run))", record: "TestResults/playwright/browser-results.json"},
             {id: "live", status: $live, command: "npx playwright test --grep @live (\($run))", record: "TestResults/live/live-results.json"},
             {id: "deploy", status: $deploy, command: "actions/deploy-pages (\($run))"},
-            {id: "deployed-smoke", status: $smoke, command: "version.json at the deployed URL equals the source SHA (\($run))"}
+            {id: "deployed-smoke", status: $smoke, command: "version.json at the deployed URL equals the source SHA (\($run))"},
+            {id: "preservation-gate", status: $pres, command: "tools/acceptance/ci/preservation-gate.sh: praxis requirements preservation verify as recorded (\($run))", record: "gate-records/preservation-gate/gate.json"},
+            {id: "percepta-verify-app", status: $percepta, command: "percepta verify-app --base-url <built site> (\($run))", record: "gate-records/percepta/verify-app.json"}
           ]}' > "$RUNNER_TEMP/producers.json"
           cat "$RUNNER_TEMP/producers.json"
       - name: Evidence bundle, ledger and computed verdict
         env:
           INDY_INIT: ${{ runner.temp }}/indy-init
+          CAUSA_DATA_DIR: ${{ runner.temp }}/causa-data
+          PLAN_ID: ${{ env.PLAN_ID }}
+          PLAN_PATH: ${{ env.PLAN_PATH }}
           RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
           SOURCE_SHA: ${{ github.sha }}
           DEPLOYED_SHA: ${{ needs.deployed-smoke.outputs.sha }}
@@ -654,6 +777,7 @@ jobs:
         run: |
           tools/acceptance/ci/acceptance.sh
           cp TestResults/lock-gate/lock-gate.json evidence-out/ 2>/dev/null || true
+          cp -r gate-records evidence-out/ 2>/dev/null || true
           cat evidence-out/report.md >> "$GITHUB_STEP_SUMMARY"
       - name: Publish the acceptance evidence
         if: always()
