@@ -36,7 +36,7 @@ async function setUp(page) {
   await page.getByLabel("What should the assistant propose?").fill("Propose hypotheses.");
 }
 
-test("proposals are drafted, recorded only on request, and applied only when a person accepts one; the key goes only in the auth header [VPO-be99a964783c59b5] [VPO-04eb901270c2994a] [VPO-f97eb988899c23af] [VPO-bb08b9a414ba4cd7]", { tag: ["@webkit"] }, async ({ page }) => {
+test("proposals are drafted, recorded only on request, and applied only when a person accepts one; the key goes only in the auth header [VPO-be99a964783c59b5] [VPO-04eb901270c2994a] [VPO-f97eb988899c23af] [VPO-bb08b9a414ba4cd7] [VPO-c41f10e4ed8a086b]", { tag: ["@webkit"] }, async ({ page }) => {
   const requests = [];
   await page.route(ENDPOINT, async (route) => {
     const r = route.request();
@@ -106,7 +106,7 @@ for (const c of cases) {
   });
 }
 
-test("drafts made from an older version are labelled stale; a cancelled request ignores its late answer [VPO-d08de632c7c1a4ab]", async ({ page }) => {
+test("drafts made from an older version are labelled stale, never mixed in as current [VPO-d08de632c7c1a4ab]", async ({ page }) => {
   let release;
   const gate = new Promise((r) => { release = r; });
   await page.route(ENDPOINT, async (route) => {
@@ -124,4 +124,22 @@ test("drafts made from an older version are labelled stale; a cancelled request 
   await page.getByRole("navigation", { name: "Investigation sections" }).getByRole("link", { name: "AI proposals" }).click();
   release();
   await expect(page.locator(".causa-stale")).toContainText("Stale: drafted from version 1; the investigation is now at version 2.");
+});
+
+test("cancelling a request settles it as cancelled and its late answer changes nothing", async ({ page }) => {
+  let release;
+  const gate = new Promise((r) => { release = r; });
+  await page.route(ENDPOINT, async (route) => {
+    if (route.request().method() === "OPTIONS") return route.fulfill({ status: 204, headers: CORS });
+    await gate;
+    await route.fulfill({ status: 200, headers: { ...CORS, "content-type": "application/json" }, body: answer([{ kind: "hypothesis", text: "Late." }]) });
+  });
+  await setUp(page);
+  await page.getByRole("button", { name: "Request proposals" }).click();
+  await page.getByRole("button", { name: "Cancel the request" }).click();
+  await expect(page.getByText("The request was cancelled; nothing was recorded.")).toBeVisible();
+  release();
+  await page.waitForTimeout(1000);
+  await expect(page.getByText("Drafted proposals (not recorded)")).toHaveCount(0);
+  await expect(page.getByText("The request was cancelled; nothing was recorded.")).toBeVisible();
 });
