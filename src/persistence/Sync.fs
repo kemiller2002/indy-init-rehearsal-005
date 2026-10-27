@@ -225,6 +225,7 @@ module Sync =
         match r with
         | InSync -> "inSync"
         | Ahead -> "ahead"
+        | SendFailed(ProviderFailure.Offline _) -> "queuedOffline"
         | SendFailed _ -> "failed"
         | Conflicted _ -> "conflict"
         | Sending _
@@ -365,7 +366,8 @@ module Sync =
                                         match Json.str "remote" d, attempt with
                                         | Some "unknown", Some a -> OutcomeUnknown a
                                         | Some "conflict", _ -> Conflicted(None, None, "A conflict was found before the restart; reload the remote copy.")
-                                        | Some "failed", _ -> SendFailed(ProviderFailure.Offline "restored after a failed send")
+                                        | Some "queuedOffline", _ -> SendFailed(ProviderFailure.Offline "queued before the restart")
+                                        | Some "failed", _ -> SendFailed(Rejected(0, "a send failed before the restart"))
                                         | _ when local.Version > cv -> Ahead
                                         | _ -> InSync
                                     Ok
@@ -392,7 +394,7 @@ module Sync =
         | None -> ""
 
     /// Fold a remote file set read at `head` into the documents, preserving every local change.
-    let private integrate (head: string) (id: string) (remote: Verified option) (readOnly: bool) (m: Model) : Model =
+    let private integrate (now: string) (head: string) (id: string) (remote: Verified option) (readOnly: bool) (m: Model) : Model =
         let existing = Map.tryFind id m.Documents
         let fresh (v: Verified) =
             { InvestigationId = id
@@ -446,6 +448,7 @@ module Sync =
                                 Confirmed = Some remote'
                                 ConfirmedHead = Some head
                                 Remote = (if d.Local.Version > remote'.Version then Ahead else InSync)
+                                LastSyncedAt = Some now
                                 Reload = None }
                     elif sameBytes d.Confirmed remote then Some { d with ConfirmedHead = Some head; Remote = Ahead; Reload = None }
                     else Some { d with Remote = Conflicted(Some head, remote, "The repository changed while the outcome of a save was unknown."); Reload = None }
@@ -456,7 +459,7 @@ module Sync =
         | Some d -> { m with Documents = m.Documents |> Map.add id d }
         | None -> m
 
-    let private finishLoad (m: Model, effects: Effect list) =
+    let private finishLoad (now: string) (m: Model, effects: Effect list) =
         match m.Load with
         | None -> m, effects
         | Some job when not job.Listed || not job.Dirs.IsEmpty -> m, effects
@@ -467,13 +470,13 @@ module Sync =
                 job.Done
                 |> Map.fold (fun m id r ->
                     match r with
-                    | Ok v -> integrate job.Head id (Some v) (isCatalog id || job.Manifest.IsSome) m
+                    | Ok v -> integrate now job.Head id (Some v) (isCatalog id || job.Manifest.IsSome) m
                     | Error _ -> m) { m with Head = Some job.Head }
             // Writable documents this device knows but the workspace no longer lists.
             let m =
                 m.Documents
                 |> Map.fold (fun m id d ->
-                    if not d.ReadOnly && not (job.Done.ContainsKey id) then integrate job.Head id None false m else m) m
+                    if not d.ReadOnly && not (job.Done.ContainsKey id) then integrate now job.Head id None false m else m) m
             let errors = job.Done |> Map.toList |> List.choose (fun (id, r) -> match r with Error e -> Some(id, e) | Ok _ -> None)
             let catalog =
                 match job.Manifest with
@@ -496,7 +499,9 @@ module Sync =
                 | _, (_, e) :: _ -> Incompatible(sprintf "%d investigation(s) failed validation; first: %s %s" errors.Length e.Code e.Detail)
                 | _ when m.Documents.IsEmpty -> AuthorizedEmpty
                 | _ -> Connected
-            { m with Load = None; LoadErrors = errors; Catalog = catalog; Connection = connection }, effects
+            let m = { m with Load = None; LoadErrors = errors; Catalog = catalog; Connection = connection }
+            let writable = m.Documents |> Map.toList |> List.filter (fun (_, d) -> not d.ReadOnly) |> List.map fst
+            if writable.IsEmpty then m, effects else persistLocal writable (m, effects)
 
     let private startListing (head: string) (m: Model, effects: Effect list) =
         let m = { m with Load = m.Load |> Option.map (fun j -> { j with Head = head }) }
@@ -522,7 +527,7 @@ module Sync =
                 if reload then
                     let m =
                         match result with
-                        | Ok v -> integrate dir.Commit id (Some v) false m
+                        | Ok v -> integrate (env.Now()) dir.Commit id (Some v) false m
                         | Error e ->
                             let m = { m with LoadErrors = m.LoadErrors @ [ id, e ] }
                             match Map.tryFind id m.Documents with
@@ -535,7 +540,7 @@ module Sync =
                             Load =
                                 m.Load
                                 |> Option.map (fun j -> { j with Dirs = j.Dirs |> Map.remove id; Done = j.Done |> Map.add id result }) }
-                    finishLoad (m, effects)
+                    finishLoad (env.Now()) (m, effects)
             else
                 let setDir m =
                     if reload then
@@ -556,7 +561,7 @@ module Sync =
                 { m with
                     Load = m.Load |> Option.map (fun j -> { j with Dirs = j.Dirs |> Map.remove id; Done = j.Done |> Map.add id (Error e) }) }
             ignore env
-            finishLoad (m, effects)
+            finishLoad (env.Now()) (m, effects)
 
     /// A credential GitHub rejected is dropped at once: nothing cached may mask it (PF-009-O2).
     let private credentialRejected (m: Model) =
@@ -681,7 +686,7 @@ module Sync =
                         dirs
                         |> List.filter (fun e -> Uuid.isValid e.Name)
                         |> List.fold (fun st e -> send (ListDir(e.Name, false)) (fun c t _ -> GitHub.listDirectory c t head (Target.investigationDir t e.Name)) st) (m, [])
-                    Ok(finishLoad st)
+                    Ok(finishLoad (env.Now()) st)
             | ListDir(id, reload) ->
                 match read GitHub.parseListing with
                 | Error e when e = Unauthorized -> Ok(loadFailed e st)
@@ -960,6 +965,7 @@ module Sync =
         match d.Remote, d.Durability with
         | Conflicted _, _ -> "conflict"
         | _, LocalSaveFailed _ -> "failed"
+        | SendFailed(ProviderFailure.Offline _), _ -> "queuedOffline"
         | SendFailed _, _ -> "failed"
         | OutcomeUnknown _, _
         | Reconciling _, _ -> "unknown"
