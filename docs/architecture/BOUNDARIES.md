@@ -22,6 +22,41 @@ decision and a new manifest version (REHEARSAL-AGENT-INTERFACE-FREEZE §5).
 | C — replay and storage contract v1.0.0 | `Storage.read : string -> Map<string, byte[]> -> Result<LoadedInvestigation, StorageError>` (17 stages, contract §11.1); `Storage.write`, `Storage.append`, `Storage.successor`, `Storage.appendBytes`; `History.validate`; `Wire.*`; `Hashing.eventId` | core | persistence (GitHub/fixture adapters), shell (load after Connect) |
 | D — persistence write invariants | `Sync.step : Sync.State -> Sync.Event -> Result<Sync.State * Sync.Effect list, Sync.Fault>`; `Sync.status`, `Sync.canRetry`, `Sync.classify` | core (invariants); persistence owns the provider port and adapters | persistence, shell (save status) |
 | E — report | `Projection.report : Investigation -> ReportProjection` | core | shell / Folio |
+| A — AI proposal loop (T27) | `Proposals.parse : string -> Result<ProposalDraft list, AgentOutputError>` (closed shape, all or nothing); `Proposals.commands` (agent `RecordProposal` envelopes); `Proposals.pending`; `Proposals.context` (investigation as quoted data) | core | shell / AI tool agent |
+| B — history and time travel (T28) | `Timeline.entries` (canonical sequence order, clock anomalies flagged); `Timeline.stateAt`, `Timeline.view` (historical label); `Timeline.changesAt`, `Timeline.between`, `Timeline.diff` (semantic diff from the projection) | core | shell (S14, S15) |
+
+## Stable APIs (decision of the coordinator, R5)
+
+Persistence calls these as the single validator and writer of Boundary C, and
+they do not change without a manifest revision:
+
+- `Storage.read : string -> Map<string, byte[]> -> Result<LoadedInvestigation, StorageError>`
+  (directory id, the directory's files by name; all 17 stages in contract order)
+- `Storage.append : LoadedInvestigation -> int64 -> byte[] -> Result<LoadedInvestigation * FileSet, StorageError>`
+  (expected version, appended NDJSON bytes; refuses `CAUSA.VERSION_STALE` before reading the lines)
+- `Storage.write`, `Storage.appendBytes`, `Storage.successor`, `Storage.filesOf`
+- `History.validate : DomainEvent list -> DomainError list` (empty = admissible), `History.firstCode`
+
+Boundary D: persistence embeds one `Sync.State` per document and delegates every
+write-path transition to `Sync.step`; it owns the outer machine (connection,
+loading, several investigations, local durability). The per-document state is
+durable: `Sync.encode : State -> Json` / `Sync.decode : Json -> Result<State, string>`
+(`causa.sync-state/1`, canonical with `Json.canonical`, no credentials).
+After loading a durable copy call `Sync.restore` (anything in flight becomes
+Unknown: no Retry, reconcile first; connection attempts are dropped; pending and
+held changes are kept; the request counter is kept so no pre-reload answer can
+land), then `Sync.attach head` once the branch head has been read again.
+`Sync` does no IO.
+
+## WebAssembly
+
+`tests/Engine.WasmSmoke` runs the kernel in .NET WebAssembly under node: it loads
+the active historical catalog (from `CAUSA_DATA_DIR`) through `Storage.read` to the
+catalog state digests and builds Aegis faults (`Faults.*`). Run
+`dotnet build -c Release tests/Engine.WasmSmoke && node tests/Engine.WasmSmoke/run.mjs`
+(needs the wasm-tools workload; not part of `App.slnx`). The test
+`WASM-SAFETY …` scans the compiled kernel for process, file, thread, network,
+platform-crypto and `Environment.WorkingSet`-style references.
 
 ## Rules every consumer relies on
 
