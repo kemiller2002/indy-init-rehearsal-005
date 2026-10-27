@@ -168,10 +168,14 @@ jobs:
         with:
           name: reuse-plan
           path: .reuse-plan
-      - if: success() && needs.reuse.outputs.core != 'reuse' && hashFiles('.reuse-plan/provenance/core/provenance.json') != ''
+      # Saved under the same path the reuse job restores (a cache entry is bound to its path).
+      - name: Stage the provenance record
+        if: success() && needs.reuse.outputs.core != 'reuse'
+        run: mkdir -p .reuse/prior/core && cp .reuse-plan/provenance/core/provenance.json .reuse/prior/core/ || true
+      - if: success() && needs.reuse.outputs.core != 'reuse' && hashFiles('.reuse/prior/core/provenance.json') != ''
         uses: actions/cache/save@v4
         with:
-          path: .reuse-plan/provenance/core
+          path: .reuse/prior/core
           key: dokimos-prov-core-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
 
   lock-gate:
@@ -246,10 +250,14 @@ jobs:
         with:
           name: reuse-plan
           path: .reuse-plan
-      - if: success() && needs.reuse.outputs.lock-gate != 'reuse' && hashFiles('.reuse-plan/provenance/lock-gate/provenance.json') != ''
+      # Saved under the same path the reuse job restores (a cache entry is bound to its path).
+      - name: Stage the provenance record
+        if: success() && needs.reuse.outputs.lock-gate != 'reuse'
+        run: mkdir -p .reuse/prior/lock-gate && cp .reuse-plan/provenance/lock-gate/provenance.json .reuse/prior/lock-gate/ || true
+      - if: success() && needs.reuse.outputs.lock-gate != 'reuse' && hashFiles('.reuse/prior/lock-gate/provenance.json') != ''
         uses: actions/cache/save@v4
         with:
-          path: .reuse-plan/provenance/lock-gate
+          path: .reuse/prior/lock-gate
           key: dokimos-prov-lock-gate-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
 
   site:
@@ -399,10 +407,14 @@ jobs:
         with:
           name: reuse-plan
           path: .reuse-plan
-      - if: success() && needs.reuse.outputs.browser != 'reuse' && hashFiles('.reuse-plan/provenance/browser/provenance.json') != ''
+      # Saved under the same path the reuse job restores (a cache entry is bound to its path).
+      - name: Stage the provenance record
+        if: success() && needs.reuse.outputs.browser != 'reuse'
+        run: mkdir -p .reuse/prior/browser && cp .reuse-plan/provenance/browser/provenance.json .reuse/prior/browser/ || true
+      - if: success() && needs.reuse.outputs.browser != 'reuse' && hashFiles('.reuse/prior/browser/provenance.json') != ''
         uses: actions/cache/save@v4
         with:
-          path: .reuse-plan/provenance/browser
+          path: .reuse/prior/browser
           key: dokimos-prov-browser-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
 
   # The live provider journey: real GitHub, the CAUSA_GITHUB_TOKEN secret, the isolated CAUSA_TEST_REPO. Tests tagged
