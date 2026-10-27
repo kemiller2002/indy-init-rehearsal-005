@@ -18,10 +18,11 @@
       "definition": "verified package/SHA/integrity lock, SDK, WASM/Forma/Folio smoke",
       "requires": [
         "lock-gate",
+        "wasm-smoke",
         "stack-smoke"
       ],
       "evidenceType": "lock",
-      "note": "lock-gate is the T11 stack lock gate (PASS needs package-lock.json); stack-smoke is computed (producers.stack-smoke): Limen startup / Forma render / Folio print / WASM engine browser tests tagged @stack-smoke-* plus the frozen golden replay"
+      "note": "lock-gate is the T11 stack lock gate (PASS needs package-lock.json); wasm-smoke is the CI job that loads the three historical cases in the engine compiled to .NET WebAssembly; stack-smoke is computed (producers.stack-smoke): Limen startup / Forma render / Folio print browser tests tagged @stack-smoke-limen/-forma/-folio plus the frozen golden replay"
     },
     {
       "id": "G2",
@@ -122,7 +123,7 @@
     {
       "id": "stack-smoke",
       "kind": "tests",
-      "description": "DEP-CURRENT-004 stack smoke: Limen startup, Forma render, Folio print and the WASM engine in a real browser (tests tagged @stack-smoke-limen/-forma/-folio/-wasm) and the frozen golden replay.",
+      "description": "DEP-CURRENT-004 stack smoke: Limen startup, Forma render and Folio print in a real browser (tests tagged @stack-smoke-limen/-forma/-folio) and the frozen golden replay; the WASM engine smoke is the separate wasm-smoke producer.",
       "tests": [
         {
           "name": "Limen startup",
@@ -135,10 +136,6 @@
         {
           "name": "Folio print",
           "tag": "@stack-smoke-folio"
-        },
-        {
-          "name": "WASM engine",
-          "tag": "@stack-smoke-wasm"
         },
         {
           "name": "frozen golden replay",

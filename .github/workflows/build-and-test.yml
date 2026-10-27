@@ -12,6 +12,9 @@ name: Build and test
 #   browser      Playwright suite without @live tests (JSON)                            -> browser-results
 #   live         Playwright @live tests on main (CAUSA_GITHUB_TOKEN / CAUSA_TEST_REPO);
 #                never uploads traces; refuses to keep any file containing the token    -> live-results
+#   wasm-smoke   the engine in .NET WebAssembly loads the three historical cases (required)  -> wasm-smoke
+#   preservation-gate  praxis requirements preservation verify, re-run as recorded (G0)       -> preservation-gate
+#   percepta     percepta verify-app against the built site (G5; not produced until bindings + dist exist) -> percepta
 #   build-and-test   the required check: every mandatory job passed
 #   deploy / deployed-smoke   GitHub Pages on main (DEPLOY_TARGET=github-pages); proves the served SHA
 #   acceptance   evidence bundle + causa.acceptance-ledger/2 at the deployed SHA, computed verdict from
@@ -509,6 +512,49 @@ jobs:
           if-no-files-found: ignore
           retention-days: 30
 
+  # The engine compiled to .NET WebAssembly loads the three historical cases (read from causa-data at run time) to
+  # their catalog state digests and returns typed faults (R4 D-HIST-WASM). Required; never reused.
+  wasm-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: kemiller2002/causa-data
+          ref: 3d861bc181ad7f4f49d82c8147325737b6d3aa1c
+          path: causa-data
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-wasm-${{ runner.os }}-${{ hashFiles('**/*.fsproj', '**/*.csproj', 'Directory.Build.props', 'NuGet.config') }}
+      - name: Install the wasm-tools workload
+        run: dotnet workload install wasm-tools
+      - name: Build the WASM smoke
+        run: dotnet build -c Release tests/Engine.WasmSmoke
+      - name: Load the three historical cases in .NET WebAssembly
+        env:
+          CAUSA_DATA_DIR: ${{ github.workspace }}/causa-data
+        run: |
+          mkdir -p TestResults/wasm-smoke
+          set -o pipefail
+          node tests/Engine.WasmSmoke/run.mjs 2>&1 | tee TestResults/wasm-smoke/wasm-smoke.log
+      - name: Publish the WASM smoke log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-smoke
+          path: TestResults/wasm-smoke/
+          if-no-files-found: warn
+          retention-days: 30
+
   # G0: the requirements preservation gate, re-run exactly as recorded in
   # evidence/requirements-preservation/gate-pre-implementation-command.txt against the same pinned inputs
   # (Indy-init at INDY_INIT_REF and at the baseline source commit aab8f80, Praxis 3.22.0 from the pinned channel).
@@ -612,7 +658,7 @@ jobs:
   # pushes the live suite. A job that reused an identical earlier pass (branches only) counts as passed here and as
   # not produced in the acceptance ledger. (The persistence-provider workflow is deliberately not required here.)
   build-and-test:
-    needs: [reuse, core, lock-gate, site, browser, live]
+    needs: [reuse, core, lock-gate, site, browser, live, wasm-smoke]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -624,9 +670,10 @@ jobs:
           SITE: ${{ needs.site.result }}
           BROWSER: ${{ needs.browser.result }}
           LIVE: ${{ needs.live.result }}
+          WASM: ${{ needs.wasm-smoke.result }}
         run: |
-          echo "reuse=$REUSE core=$CORE lock-gate=$LOCK site=$SITE browser=$BROWSER live=$LIVE (live required: $IS_MAIN)"
-          for r in "$REUSE" "$CORE" "$LOCK" "$SITE" "$BROWSER"; do [ "$r" = success ] || exit 1; done
+          echo "reuse=$REUSE core=$CORE lock-gate=$LOCK site=$SITE browser=$BROWSER wasm-smoke=$WASM live=$LIVE (live required: $IS_MAIN)"
+          for r in "$REUSE" "$CORE" "$LOCK" "$SITE" "$BROWSER" "$WASM"; do [ "$r" = success ] || exit 1; done
           if [ "$IS_MAIN" = true ]; then [ "$LIVE" = success ] || exit 1; fi
 
   deploy:
@@ -680,7 +727,7 @@ jobs:
           echo "sha=$served" >> "$GITHUB_OUTPUT"
 
   acceptance:
-    needs: [reuse, core, lock-gate, site, browser, live, preservation-gate, percepta, build-and-test, deploy, deployed-smoke]
+    needs: [reuse, core, lock-gate, site, browser, live, wasm-smoke, preservation-gate, percepta, build-and-test, deploy, deployed-smoke]
     if: always() && needs.reuse.result != 'cancelled'
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -721,7 +768,7 @@ jobs:
           (cd "$RUNNER_TEMP/indy-init" && dotnet build tools/requirements-compiler/src -c Release)
       - uses: actions/download-artifact@v4
         with:
-          pattern: "{core-results,browser-results,live-results,lock-gate,preservation-gate,percepta}"
+          pattern: "{core-results,browser-results,live-results,lock-gate,preservation-gate,percepta,wasm-smoke}"
           path: collected
         continue-on-error: true
       - name: Collect the results of this run
@@ -735,6 +782,7 @@ jobs:
           mkdir -p gate-records
           [ -d collected/preservation-gate ] && cp -r collected/preservation-gate gate-records/ || true
           [ -d collected/percepta ] && cp -r collected/percepta gate-records/ || true
+          [ -d collected/wasm-smoke ] && cp -r collected/wasm-smoke gate-records/ || true
           find TestResults -type f | sort
       - name: Producers of this run
         env:
@@ -745,12 +793,13 @@ jobs:
           LIVE: ${{ needs.live.result == 'success' && needs.live.outputs.ran == 'true' && 'success' || needs.live.result == 'failure' && 'failure' || 'not-produced' }}
           DEPLOY: ${{ needs.deploy.result == 'success' && 'success' || needs.deploy.result == 'failure' && 'failure' || 'not-produced' }}
           SMOKE: ${{ needs.deployed-smoke.result == 'success' && 'success' || needs.deployed-smoke.result == 'failure' && 'failure' || 'not-produced' }}
+          WASM: ${{ needs.wasm-smoke.result == 'success' && 'success' || needs.wasm-smoke.result == 'failure' && 'failure' || 'not-produced' }}
           PRESERVATION: ${{ needs.preservation-gate.outputs.status == 'success' && 'success' || needs.preservation-gate.result == 'failure' && 'failure' || 'not-produced' }}
           PERCEPTA: ${{ needs.percepta.outputs.status == 'success' && 'success' || needs.percepta.result == 'failure' && 'failure' || 'not-produced' }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           jq -n --arg core "$CORE" --arg lock "$LOCK" --arg site "$SITE" --arg browser "$BROWSER" --arg live "$LIVE" \
-                --arg deploy "$DEPLOY" --arg smoke "$SMOKE" --arg pres "$PRESERVATION" --arg percepta "$PERCEPTA" \
+                --arg deploy "$DEPLOY" --arg smoke "$SMOKE" --arg pres "$PRESERVATION" --arg percepta "$PERCEPTA" --arg wasm "$WASM" \
                 --arg run "$RUN" '{producers: [
             {id: "core", status: $core, command: "dotnet test App.slnx -c Release (\($run))", record: "TestResults/dotnet"},
             {id: "lock-gate", status: $lock, command: "causa-acceptance lock-gate (\($run))", record: "TestResults/lock-gate/lock-gate.json"},
@@ -759,6 +808,7 @@ jobs:
             {id: "live", status: $live, command: "npx playwright test --grep @live (\($run))", record: "TestResults/live/live-results.json"},
             {id: "deploy", status: $deploy, command: "actions/deploy-pages (\($run))"},
             {id: "deployed-smoke", status: $smoke, command: "version.json at the deployed URL equals the source SHA (\($run))"},
+            {id: "wasm-smoke", status: $wasm, command: "dotnet build -c Release tests/Engine.WasmSmoke && node tests/Engine.WasmSmoke/run.mjs (\($run))", record: "gate-records/wasm-smoke/wasm-smoke.log"},
             {id: "preservation-gate", status: $pres, command: "tools/acceptance/ci/preservation-gate.sh: praxis requirements preservation verify as recorded (\($run))", record: "gate-records/preservation-gate/gate.json"},
             {id: "percepta-verify-app", status: $percepta, command: "percepta verify-app --base-url <built site> (\($run))", record: "gate-records/percepta/verify-app.json"}
           ]}' > "$RUNNER_TEMP/producers.json"
