@@ -1,0 +1,364 @@
+{
+  "name": "four-roles",
+  "purpose": "One outcome explained by four hypotheses, one per cause role.",
+  "synthetic": true,
+  "document": {
+    "format": "forma-workflow",
+    "formatVersion": "1.0.0",
+    "id": "causal-00000000-0000-4000-8000-00000000a0a0",
+    "title": "Causal analysis: Four roles",
+    "language": "en",
+    "forma": {
+      "version": "0.9.0"
+    },
+    "palette": {
+      "navy": "#14283f",
+      "teal": "#087f8c",
+      "amber": "#e9a23b",
+      "coral": "#d66b58",
+      "ivory": "#f5f3ed"
+    },
+    "layout": {
+      "direction": "down"
+    },
+    "presentation": {
+      "legendTitle": "Key",
+      "legend": [
+        {
+          "id": "tone-teal",
+          "label": "Supported or confirmed",
+          "color": {
+            "stroke": "palette:teal"
+          }
+        },
+        {
+          "id": "tone-amber",
+          "label": "Open: proposed, plausible or awaiting work",
+          "color": {
+            "stroke": "palette:amber"
+          }
+        },
+        {
+          "id": "tone-coral",
+          "label": "Weakened or falsified",
+          "color": {
+            "stroke": "palette:coral"
+          }
+        },
+        {
+          "id": "tone-navy",
+          "label": "Other recorded states",
+          "color": {
+            "stroke": "palette:navy"
+          }
+        },
+        {
+          "id": "role-root-cause",
+          "label": "Root cause",
+          "line": "solid"
+        },
+        {
+          "id": "role-trigger",
+          "label": "Trigger",
+          "line": "solid"
+        },
+        {
+          "id": "role-contributing-factor",
+          "label": "Contributing factor",
+          "line": "dashed"
+        },
+        {
+          "id": "role-enabling-condition",
+          "label": "Enabling condition",
+          "line": "dotted"
+        }
+      ]
+    },
+    "nodes": [
+      {
+        "id": "h-h-1",
+        "kind": "org.causa.graph:hypothesis",
+        "kindLabel": "Hypothesis",
+        "label": "Root cause hypothesis",
+        "description": "3 supporting, 0 contradicting evidence",
+        "variant": "rounded",
+        "color": {
+          "fill": "palette:ivory",
+          "stroke": "palette:teal",
+          "accent": "palette:teal"
+        },
+        "status": {
+          "state": "org.causa.state:supported",
+          "label": "Supported"
+        },
+        "accessibility": {
+          "name": "Hypothesis (Supported): Root cause hypothesis",
+          "description": "Root cause hypothesis \u00B7 3 supporting, 0 contradicting evidence"
+        },
+        "references": [
+          {
+            "id": "hypothesis",
+            "system": "org.causa",
+            "type": "hypothesis",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-1",
+            "label": "Hypothesis record",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-1"
+          },
+          {
+            "id": "evidence",
+            "system": "org.causa",
+            "type": "evidence",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/evidence",
+            "label": "Evidence records",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/evidence"
+          }
+        ],
+        "interaction": {
+          "action": "navigate",
+          "target": {
+            "reference": "hypothesis"
+          },
+          "label": "Open hypothesis record"
+        }
+      },
+      {
+        "id": "h-h-2",
+        "kind": "org.causa.graph:hypothesis",
+        "kindLabel": "Hypothesis",
+        "label": "Trigger hypothesis",
+        "description": "1 supporting, 1 contradicting evidence",
+        "variant": "rounded",
+        "color": {
+          "fill": "palette:ivory",
+          "stroke": "palette:amber",
+          "accent": "palette:amber"
+        },
+        "status": {
+          "state": "org.causa.state:plausible",
+          "label": "Plausible"
+        },
+        "accessibility": {
+          "name": "Hypothesis (Plausible): Trigger hypothesis",
+          "description": "Trigger hypothesis \u00B7 1 supporting, 1 contradicting evidence"
+        },
+        "references": [
+          {
+            "id": "hypothesis",
+            "system": "org.causa",
+            "type": "hypothesis",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-2",
+            "label": "Hypothesis record",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-2"
+          },
+          {
+            "id": "evidence",
+            "system": "org.causa",
+            "type": "evidence",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/evidence",
+            "label": "Evidence records",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/evidence"
+          }
+        ],
+        "interaction": {
+          "action": "navigate",
+          "target": {
+            "reference": "hypothesis"
+          },
+          "label": "Open hypothesis record"
+        }
+      },
+      {
+        "id": "h-h-3",
+        "kind": "org.causa.graph:hypothesis",
+        "kindLabel": "Hypothesis",
+        "label": "Contributing factor hypothesis",
+        "description": "1 supporting, 2 contradicting evidence",
+        "variant": "rounded",
+        "color": {
+          "fill": "palette:ivory",
+          "stroke": "palette:coral",
+          "accent": "palette:coral"
+        },
+        "status": {
+          "state": "org.causa.state:weakened",
+          "label": "Weakened"
+        },
+        "accessibility": {
+          "name": "Hypothesis (Weakened): Contributing factor hypothesis",
+          "description": "Contributing factor hypothesis \u00B7 1 supporting, 2 contradicting evidence"
+        },
+        "references": [
+          {
+            "id": "hypothesis",
+            "system": "org.causa",
+            "type": "hypothesis",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-3",
+            "label": "Hypothesis record",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-3"
+          },
+          {
+            "id": "evidence",
+            "system": "org.causa",
+            "type": "evidence",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/evidence",
+            "label": "Evidence records",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/evidence"
+          }
+        ],
+        "interaction": {
+          "action": "navigate",
+          "target": {
+            "reference": "hypothesis"
+          },
+          "label": "Open hypothesis record"
+        }
+      },
+      {
+        "id": "h-h-4",
+        "kind": "org.causa.graph:hypothesis",
+        "kindLabel": "Hypothesis",
+        "label": "Enabling condition hypothesis",
+        "description": "supporting: not known, contradicting: not known evidence",
+        "variant": "rounded",
+        "color": {
+          "fill": "palette:ivory",
+          "stroke": "palette:amber",
+          "accent": "palette:amber"
+        },
+        "status": {
+          "state": "org.causa.state:proposed",
+          "label": "Proposed"
+        },
+        "accessibility": {
+          "name": "Hypothesis (Proposed): Enabling condition hypothesis",
+          "description": "Enabling condition hypothesis \u00B7 supporting: not known, contradicting: not known evidence"
+        },
+        "references": [
+          {
+            "id": "hypothesis",
+            "system": "org.causa",
+            "type": "hypothesis",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-4",
+            "label": "Hypothesis record",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-4"
+          },
+          {
+            "id": "evidence",
+            "system": "org.causa",
+            "type": "evidence",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/evidence",
+            "label": "Evidence records",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/evidence"
+          }
+        ],
+        "interaction": {
+          "action": "navigate",
+          "target": {
+            "reference": "hypothesis"
+          },
+          "label": "Open hypothesis record"
+        }
+      },
+      {
+        "id": "c-c-1",
+        "kind": "org.causa.graph:outcome",
+        "kindLabel": "Outcome",
+        "label": "The synthetic outcome",
+        "description": "Causal relationship \u00B7 4 contributing hypotheses",
+        "variant": "pill",
+        "color": {
+          "fill": "palette:ivory",
+          "stroke": "palette:teal",
+          "accent": "palette:teal"
+        },
+        "status": {
+          "state": "org.causa.state:confirmed",
+          "label": "Confirmed"
+        },
+        "accessibility": {
+          "name": "Outcome (Confirmed): The synthetic outcome",
+          "description": "The synthetic outcome \u00B7 Causal relationship \u00B7 4 contributing hypotheses"
+        },
+        "references": [
+          {
+            "id": "cause",
+            "system": "org.causa",
+            "type": "cause",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/causal-analysis?item=c-1",
+            "label": "Causal relationship record",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/causal-analysis?item=c-1"
+          }
+        ],
+        "interaction": {
+          "action": "navigate",
+          "target": {
+            "reference": "cause"
+          },
+          "label": "Open causal relationship record"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "e-c-1-h-1",
+        "source": {
+          "node": "h-h-1"
+        },
+        "target": {
+          "node": "c-c-1"
+        },
+        "label": "Root cause",
+        "line": "solid",
+        "width": 3,
+        "color": {
+          "stroke": "palette:navy"
+        }
+      },
+      {
+        "id": "e-c-1-h-2",
+        "source": {
+          "node": "h-h-2"
+        },
+        "target": {
+          "node": "c-c-1"
+        },
+        "label": "Trigger",
+        "line": "solid",
+        "width": 2,
+        "color": {
+          "stroke": "palette:navy"
+        }
+      },
+      {
+        "id": "e-c-1-h-3",
+        "source": {
+          "node": "h-h-3"
+        },
+        "target": {
+          "node": "c-c-1"
+        },
+        "label": "Contributing factor",
+        "line": "dashed",
+        "width": 2,
+        "color": {
+          "stroke": "palette:navy"
+        }
+      },
+      {
+        "id": "e-c-1-h-4",
+        "source": {
+          "node": "h-h-4"
+        },
+        "target": {
+          "node": "c-c-1"
+        },
+        "label": "Enabling condition",
+        "line": "dotted",
+        "width": 2,
+        "color": {
+          "stroke": "palette:navy"
+        }
+      }
+    ]
+  }
+}
