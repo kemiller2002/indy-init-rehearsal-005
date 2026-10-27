@@ -7,6 +7,8 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/persistence/Causa.Persistence.fsproj" />
+    <!-- The live recorder/checker: its BLOCKED behaviour without secrets is tested offline. -->
+    <ProjectReference Include="../../src/persistence/Tool/Causa.Persistence.Tool.fsproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Synthetic.fs" />
@@ -17,6 +19,7 @@
     <Compile Include="CatalogAppTests.fs" />
     <Compile Include="DcTableTests.fs" />
     <Compile Include="DctProviderTests.fs" />
+    <Compile Include="BlockedTests.fs" />
     <Compile Include="ConformanceTests.fs" />
   </ItemGroup>
   <ItemGroup>
