@@ -12,11 +12,16 @@
     <ProjectReference Include="../engine/App.Engine.fsproj" />
   </ItemGroup>
   <ItemGroup>
+    <!-- Sanitized recordings of real GitHub behaviour (T18): the shapes the offline fake and fixture mode answer with. -->
+    <EmbeddedResource Include="../../tests/Persistence.Tests/recordings/*.ndjson" LogicalName="causa/recordings/%(Filename)%(Extension)" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Json.fs" />
     <Compile Include="Contract.fs" />
     <Compile Include="Store.fs" />
     <Compile Include="Provider.fs" />
     <Compile Include="GitHub.fs" />
+    <Compile Include="RecordedGitHub.fs" />
     <Compile Include="Catalog.fs" />
     <Compile Include="Sync.fs" />
   </ItemGroup>
