@@ -412,6 +412,7 @@ let project (model: Model) : ViewState =
       "motion", text (if model.Settings.ReducedMotion then "reduced" else "system")
       "nav", items primaryNav
       "connection.label", text (connectionText ws.Connection)
+      "data.fixture", flag (model.Port.Name = "engine/fixture")
       "connected", flag connected
       "notice.show", flag notice.IsSome
       "notice.text", text (notice |> Option.defaultValue "")
