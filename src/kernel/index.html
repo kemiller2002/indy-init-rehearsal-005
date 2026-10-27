@@ -63,6 +63,16 @@
       </div>
     </template>
 
+    <!-- UI-004-O3: a destructive or irreversible action waits here for an explicit confirmation. -->
+    <template data-if="confirm.show">
+      <div id="causa-confirm" class="ef-dialog causa-confirm" role="alertdialog" aria-modal="false" aria-labelledby="causa-confirm-title" aria-describedby="causa-confirm-text">
+        <h2 id="causa-confirm-title">Please confirm</h2>
+        <p id="causa-confirm-text" data-text="confirm.text"></p>
+        <button type="button" class="ef-button" data-ef-variant="primary" id="causa-confirm-yes" data-event="confirm-yes">Yes, continue</button>
+        <button type="button" class="ef-button" data-event="confirm-no">Cancel</button>
+      </div>
+    </template>
+
     <!-- Disconnected: the empty workspace and the explicit Connect action (UI-001-O1, EXT-DATA-002). -->
     <template data-if="screen.connect">
       <section class="causa-connect" aria-labelledby="connect-heading" data-percepta-screen="connect">
@@ -436,6 +446,11 @@
                     <option value="">Choose a change</option><option value="markPlausible">Mark plausible</option><option value="markSupported">Mark supported</option><option value="markWeakened">Mark weakened</option><option value="falsify">Falsify</option><option value="supersede">Supersede</option><option value="reopen">Reopen</option>
                   </select></div>
               </div>
+              <div class="ef-field"><label class="ef-field__label" id="hyp-evidence-label" for="hyp-evidence">Evidence that caused the change (required to falsify)</label>
+                <select id="hyp-evidence" aria-labelledby="hyp-evidence-label" class="causa-input" data-event="field-TransitionHypothesis.evidence">
+                  <option value="">None cited</option>
+                  <template data-each="evidence" data-key="id"><option data-bind-value="id" data-text="content"></option></template>
+                </select></div>
               <div class="ef-field"><label class="ef-field__label" id="hyp-reason-label" for="hyp-reason">Reason</label>
                 <input id="hyp-reason" aria-labelledby="hyp-reason-label" class="causa-input" type="text" required data-event="field-TransitionHypothesis.reason" data-on="input" data-bind-value="form.hyp.reason"></div>
               <button type="submit" class="ef-button" data-ef-variant="primary" data-bind-disabled="not.TransitionHypothesis" data-percepta-capability="TransitionHypothesis">Record the change</button>

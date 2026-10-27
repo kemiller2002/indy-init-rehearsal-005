@@ -47,6 +47,8 @@ type Model =
       TimelineFilter: string
       /// The investigation catalog's order (stream ux): "activity", "title" or "status".
       CatalogSort: string
+      /// A destructive or irreversible action waiting for the person's confirmation (UI-004-O3), with its words.
+      PendingConfirm: (AdapterInput * string) option
       /// Bumped each time a token or key is taken, so the page can empty its password fields.
       SecretEpoch: int
       /// Text typed for a capability that needs one input, by capability id.
@@ -71,6 +73,7 @@ let initial =
       PageBase = ""
       CommandInputs = Map.empty
       SecretEpoch = 0
+      PendingConfirm = None
       HistoryVersion = None
       TimelineFilter = "all"
       CatalogSort = "activity"
@@ -128,6 +131,23 @@ let private toPort (entropy: Entropy) (input: AdapterInput) (model: Model) =
             | _ -> None)
     { model with Port = port; Route = route |> Option.defaultValue model.Route }, effects
 
+/// Actions that destroy local work or cannot be undone in the record: each needs an explicit confirmation.
+let confirmationFor (input: AdapterInput) : string option =
+    match input with
+    | DiscardLocal _ -> Some "Discard your local change to this investigation? It has not been saved to GitHub and cannot be recovered."
+    | Command(_, "CloseInvestigation", _, _) -> Some "Close this investigation? A closed investigation accepts no further changes unless it is reopened."
+    | Command(_, name, _, _) when name.StartsWith("TransitionHypothesis:", StringComparison.Ordinal) && name.EndsWith(":falsify", StringComparison.Ordinal) ->
+        Some "Falsify this hypothesis? The falsification is recorded permanently in the investigation history."
+    | Command(_, name, _, _) when name.StartsWith("RejectProposal:", StringComparison.Ordinal) ->
+        Some "Reject this proposal? The rejection and your reason are recorded permanently."
+    | _ -> None
+
+/// Sends an input to the port, or holds it for confirmation when it is destructive.
+let private guarded (entropy: Entropy) (input: AdapterInput) (model: Model) =
+    match confirmationFor input with
+    | Some text -> { model with PendingConfirm = Some(input, text); Notice = None }, []
+    | None -> toPort entropy input model
+
 let rec private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
     let value = e.Value |> Option.defaultValue ""
     let d = model.Drafts
@@ -149,11 +169,16 @@ let rec private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
         toPort entropy (Connect request) { model with Drafts = { d with Token = "" }; Notice = None; SecretEpoch = model.SecretEpoch + 1 }
     | "disconnect" -> toPort entropy Disconnect { model with Notice = Some { Tone = "info"; Text = "Disconnected. The token was forgotten." } }
     | "dismiss" -> { model with Notice = None }, []
+    | "confirm-yes" ->
+        match model.PendingConfirm with
+        | Some(input, _) -> toPort entropy input { model with PendingConfirm = None; Notice = None }
+        | None -> model, []
+    | "confirm-no" -> { model with PendingConfirm = None; Notice = Some { Tone = "info"; Text = "Cancelled. Nothing was changed." } }, []
     | "check-remote" -> toPort entropy CheckRemote model
     | "discard-local"
     | "reload-remote" ->
         match model.Route with
-        | Investigation(id, _) -> toPort entropy (if e.Name = "discard-local" then DiscardLocal id else ReloadRemote id) model
+        | Investigation(id, _) -> guarded entropy (if e.Name = "discard-local" then DiscardLocal id else ReloadRemote id) model
         | _ -> model, []
     // The graph frame reports the node the person selected; the shell only remembers which (UI-026-O3).
     | "graph-select" when value = "" || Routes.selection ("?item=" + value) = value -> { model with Selected = value }, []
@@ -207,7 +232,7 @@ let rec private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
         match model.Route, model.Route |> (function Investigation(id, _) -> model.Port.Projection.Opened.TryFind id | _ -> None) with
         | Investigation(id, _), Some(Loaded inv) ->
             let cleared = model.CommandInputs |> Map.filter (fun k _ -> not (k.StartsWith(form + ".", StringComparison.Ordinal)) || k.EndsWith(".hypothesis") || k.EndsWith(".evidence"))
-            toPort entropy (Command(Some id, command, fields, inv.Version)) { model with CommandInputs = cleared }
+            guarded entropy (Command(Some id, command, fields, inv.Version)) { model with CommandInputs = cleared }
         | _ -> { model with Notice = Some { Tone = "warning"; Text = "That action is not available here." } }, []
     | "command-input" ->
         match e.Key with
@@ -227,7 +252,7 @@ let rec private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
         | Some capability, Some v ->
             let fields = model.CommandInputs |> Map.tryFind capability |> Option.map (fun t -> Map.ofList [ "text", t ]) |> Option.defaultValue Map.empty
             let investigation = match model.Route with Investigation(id, _) -> Some id | _ -> None
-            toPort entropy (Command(investigation, capability, fields, v)) { model with CommandInputs = model.CommandInputs.Remove capability }
+            guarded entropy (Command(investigation, capability, fields, v)) { model with CommandInputs = model.CommandInputs.Remove capability }
         | _ -> { model with Notice = Some { Tone = "warning"; Text = "That action is not available here." } }, []
     | _ -> model, []
 
@@ -251,7 +276,7 @@ let update (entropy: Entropy) (message: BrowserToEngineMessage) (model: Model) :
         let model, more = openRoute entropy model
         model, fx @ boot @ more
     | BrowserToEngineMessage.LocationChanged location ->
-        openRoute entropy { model with Route = Routes.parse location.Hash; Selected = Routes.selection location.Hash; HistoryVersion = Routes.versionOf location.Hash; Notice = None }
+        openRoute entropy { model with Route = Routes.parse location.Hash; Selected = Routes.selection location.Hash; HistoryVersion = Routes.versionOf location.Hash; Notice = None; PendingConfirm = None }
     | BrowserToEngineMessage.Event e -> onEvent entropy e model
     | BrowserToEngineMessage.EffectResult(EffectResult.HttpResult(CorrelationId corr, outcome)) when model.ShellPending.Contains corr ->
         let model = { model with ShellPending = model.ShellPending.Remove corr }

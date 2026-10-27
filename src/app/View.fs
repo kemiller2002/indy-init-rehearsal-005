@@ -204,7 +204,7 @@ let project (model: Model) : ViewState =
                        |> Option.defaultValue "")
                       "current", (if model.HistoryVersion = Some t.Sequence then "true" else "false")
                       "eventHref", Routes.formatItem (Investigation(i.Id, Timeline)) $"event-{t.Sequence}"
-                      "eventLabel", $"Details of event #{t.Sequence}"
+                      "eventLabel", $"Details of event {t.Sequence}"
                       "selected", (UxView.selectionState model.Selected $"event-{t.Sequence}") ]
                     [ "hasAffected", first.IsSome
                       "clockNote", t.ClockBeforePrevious ]))
@@ -407,6 +407,8 @@ let project (model: Model) : ViewState =
       "connection.detail", text (ws.ConnectionStatus |> Option.bind snd |> Option.defaultValue "")
       "connection.hasDetail", flag ((ws.ConnectionStatus |> Option.bind snd |> Option.isSome) && (match ws.Connection with ConnectionFailed _ -> false | _ -> true))
       "sync.conflict", flag (ws.Sync = Conflict)
+      "confirm.show", flag model.PendingConfirm.IsSome
+      "confirm.text", text (model.PendingConfirm |> Option.map snd |> Option.defaultValue "")
       "connected", flag connected
       "notice.show", flag notice.IsSome
       "notice.text", text (notice |> Option.defaultValue "")

@@ -164,7 +164,7 @@ test.describe("security of the shell", () => {
 });
 
 test.describe("identity, accessibility and layout (UI-011, UI-014, UI-016)", () => {
-  test("the Causa palette is mapped to named Forma tokens with measured contrast [VPO-cecb71404071030d] [VPO-3d80d031f05ec0dc] [VPO-d0c711c2da0f3800] [VPO-e0e945fc040386e1] [VPO-fbc386df77130f2d] [VPO-8905fd51176a3fc6] [VPO-fe19413526420c16] [VPO-d657e8dd084961b1] [VPO-6051ea46b65ebe27] [VPO-1a1aae8ffa920386]", async ({ page }) => {
+  test("the Causa palette is mapped to named Forma tokens with measured contrast [VPO-cecb71404071030d] [VPO-3d80d031f05ec0dc] [VPO-d0c711c2da0f3800] [VPO-e0e945fc040386e1] [VPO-fbc386df77130f2d] [VPO-8905fd51176a3fc6] [VPO-fe19413526420c16] [VPO-d657e8dd084961b1] [VPO-6051ea46b65ebe27] [VPO-1a1aae8ffa920386] [VPO-5a993f5a761fd6ee]", async ({ page }) => {
     await page.goto("index.html");
     await started(page);
     const tokens = await page.evaluate(() => {

@@ -175,7 +175,7 @@ test.describe("detail inspector and relationships (UI-005, UI-033, UI-034, UI-03
     await expect(row(page, "Hypotheses it contradicts")).toContainText("It is not linked as contradicting any hypothesis.");
   });
 
-  test("traversal follows recorded relationships with stable addresses and explicit absent links, and closing restores focus @responsive [VPO-5a85f3ea85db30b2] [VPO-63d89380e8017050] [VPO-f3ebcdbe15cdf92d] [VPO-8f8156f91b64963b] [VPO-ad49e5ff43f1ace6]", async ({ page }) => {
+  test("traversal follows recorded relationships with stable addresses and explicit absent links, and closing restores focus @responsive [VPO-5a85f3ea85db30b2] [VPO-63d89380e8017050] [VPO-f3ebcdbe15cdf92d] [VPO-8f8156f91b64963b] [VPO-ad49e5ff43f1ace6] [VPO-8a5de7e5afae98cb]", async ({ page }) => {
     const id = await buildCase(page);
     await section(page, "Hypotheses");
     const fan = page.locator("[data-percepta-screen=investigation-hypotheses] .causa-item--hypothesis").filter({ hasText: "The cooling fan failed." });
@@ -220,7 +220,7 @@ test.describe("detail inspector and relationships (UI-005, UI-033, UI-034, UI-03
     await expect(other).toBeFocused();
   });
 
-  test("a cause's explanation lists its hypotheses, supporting and conflicting evidence, history and why it is not confirmed; nothing is concluded [VPO-f8666daf6fdf79d7] [VPO-ffda9fea0324a42e] [VPO-885e4767b84371de]", async ({ page }) => {
+  test("a cause's explanation lists its hypotheses, supporting and conflicting evidence, history and why it is not confirmed; nothing is concluded [VPO-f8666daf6fdf79d7] [VPO-ffda9fea0324a42e] [VPO-885e4767b84371de] [VPO-8a5de7e5afae98cb]", async ({ page }) => {
     await buildCase(page);
     await section(page, "Causal analysis");
     await page.locator(".causa-item--cause").getByRole("link", { name: /^Details:/ }).click();
@@ -346,5 +346,68 @@ test.describe("investigation work apart from Administration and Settings (UI-017
     await expect(page.locator("[data-percepta-screen=settings] select, [data-percepta-screen=settings] input[type=checkbox], [data-percepta-screen=settings] input[type=radio]").first()).toBeVisible();
     // No browser storage holds anything from this session.
     expect(await page.evaluate(() => localStorage.length + sessionStorage.length)).toBe(0);
+  });
+});
+
+test.describe("identity, failures and component ownership (UI-017-O4, UI-022-O1, UI-030-O4, UI-034-O3, UI-039-O2)", () => {
+  test("the global header carries the application identity and navigation, never commits, versions or provider mechanics [VPO-8f9c1b8914be43f6]", async ({ page }) => {
+    const info = await (await page.request.get(SITE + "build-info.json")).json();
+    await buildCase(page);
+    const header = page.locator("header.causa-masthead");
+    await expect(header.locator(".ef-site-header__name")).toHaveText("Causa");
+    await expect(header.getByRole("navigation", { name: "Primary" }).getByRole("link")).toHaveText(["Investigations", "Administration", "Settings"]);
+    const text = await header.innerText();
+    expect(text).not.toContain(info.commit);
+    expect(text).not.toContain(info.commit.slice(0, 7));
+    for (const t of TECHNICAL) expect(text, `header shows ${t}`).not.toMatch(t);
+  });
+
+  test("a connection failure says what happened and what to do in plain words; the technical detail is in Administration [VPO-7e849b4055bdfadf]", async ({ page }) => {
+    await page.goto(SITE + "index.html#/investigations");
+    await started(page);
+    await page.getByLabel("Fine-grained GitHub token").fill("github_pat_FAKE_FOR_TEST_ONLY");
+    await page.getByLabel(/Repository/).first().fill("synthetic-owner/no-such-repo");
+    await page.getByLabel(/Workspace/).first().fill("synthetic");
+    await page.getByRole("button", { name: "Connect" }).click();
+    const failure = page.locator("[data-percepta-screen=connect]");
+    await expect(failure).toContainText(/not|could not|cannot/i, { timeout: 30_000 });
+    const text = await main(page).innerText();
+    expect(text).not.toMatch(/\b(404|422|HTTP|stack|exception|api\.github\.com)\b/i);
+    expect(text).not.toContain("github_pat_FAKE_FOR_TEST_ONLY");
+    // The next action is offered: the form is still there to correct and connect again.
+    await expect(main(page).getByRole("button", { name: "Connect" })).toBeEnabled();
+    await page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Administration" }).click();
+    await expect(page.locator("[data-percepta-screen=administration]").getByRole("row", { name: /Provider connection|Data provider/ }).first()).toBeVisible();
+  });
+
+  test("Administration never presents an unsupported or unmeasured item as passed [VPO-f70d9f1e42371d48]", async ({ page }) => {
+    await page.goto(SITE + "index.html#/administration");
+    await started(page);
+    const admin = page.locator("[data-percepta-screen=administration]");
+    await expect(admin).toContainText("Not confirmed ready to demonstrate");
+    for (const name of [/Smoke tests at this commit/, /Report preview and print/]) {
+      const r = admin.getByRole("row", { name }).first();
+      await expect(r).toContainText(/Unknown|Unavailable|not measured|Not verified/i);
+      await expect(r).not.toContainText(/\bVerified\b|\bPassed\b/);
+    }
+  });
+
+  test("the inspector is composed from Forma's own record header, key-value list and relationship index, which the served Forma stylesheet defines and Causa does not redefine [VPO-a2099d5e8abc8ef0] [VPO-f1f1bfbfc325fa21] [VPO-f3ebcdbe15cdf92d]", async ({ page }) => {
+    const forma = await (await page.request.get(SITE + "vendor/forma/all.css")).text();
+    const causa = await (await page.request.get(SITE + "causa.css")).text();
+    for (const cls of ["ef-record-header", "ef-key-value-list", "ef-relationship-index", "ef-status-lozenge", "ef-identifier", "ef-master-detail__detail"]) {
+      expect(forma, `${cls} is a Forma component`).toContain("." + cls);
+      expect(causa, `${cls} is not re-implemented by Causa`).not.toMatch(new RegExp("\\." + cls + "\\b[^{,]*\\{"));
+    }
+    await buildCase(page);
+    await section(page, "Evidence");
+    await page.locator("[data-percepta-screen=investigation-evidence] .causa-item--evidence").first().getByRole("link", { name: /^Details:/ }).click();
+    const box = inspector(page);
+    await expect(box.locator(".ef-record-header")).toHaveCount(1);
+    await expect(box.locator("dl.ef-key-value-list")).toHaveCount(1);
+    await expect(box.locator(".ef-relationship-index")).toHaveCount(1);
+    // Forma's styles apply (the component is Forma's, not a look-alike).
+    const display = await box.locator("dl.ef-key-value-list > div").first().evaluate((el) => getComputedStyle(el).display);
+    expect(display).not.toBe("");
   });
 });

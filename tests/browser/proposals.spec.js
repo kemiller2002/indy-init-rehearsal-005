@@ -84,6 +84,10 @@ test("a rejected proposal records the person's reason and is never applied [VPO-
   const proposal = page.locator(".causa-list .causa-item--proposal").filter({ hasText: "pad compound" });
   await proposal.getByLabel("Why it is rejected").fill("The pads were not changed.");
   await proposal.getByRole("button", { name: "Reject" }).click();
+  // Irreversible: the rejection waits for confirmation, which takes focus.
+  await expect(page.getByRole("alertdialog")).toContainText("Reject this proposal?");
+  await expect(page.getByRole("button", { name: "Yes, continue" })).toBeFocused();
+  await page.getByRole("button", { name: "Yes, continue" }).click();
   await expect(proposal).toContainText("Rejected");
   await expect(proposal.getByRole("button")).toHaveCount(0);
 });
