@@ -6,8 +6,9 @@
 import { existsSync } from "node:fs";
 import { defineConfig, devices } from "@playwright/test";
 
-const port = 4321;
-const testPort = 4322;
+// CAUSA_PORT / CAUSA_TEST_PORT move both servers (e.g. when several worktrees test on one machine).
+const port = Number(process.env.CAUSA_PORT ?? 4321);
+const testPort = Number(process.env.CAUSA_TEST_PORT ?? 4322);
 const origin = `http://127.0.0.1:${port}`;
 const deployed = process.env.CAUSA_BASE_URL;
 

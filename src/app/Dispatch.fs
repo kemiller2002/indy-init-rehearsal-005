@@ -12,7 +12,7 @@ let private nonce = Guid.NewGuid().ToString("N").Substring(0, 12)
 
 let private entropy () =
     { Now = DateTime.UtcNow
-      Ids = List.init 4 (fun _ -> Guid.NewGuid())
+      Ids = List.init 48 (fun _ -> Guid.NewGuid())
       Nonce = nonce }
 
 let mutable private state = initial
