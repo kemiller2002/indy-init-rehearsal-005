@@ -1,4 +1,8 @@
 # T08 / PRE-REQ-04 (2026-10-27), Praxis 3.22.0 (praxis-linux-x64.tar.gz sha256 36edb44b058e417b2e8e6ad321f9f9090ed408b32921ed36489b81cc085745c0)
+# Re-run 2026-10-27 under WI-0002 after the derived package was re-emitted in Praxis RQ form
+# (RQ-CAUSA-2026-NNNN--slug.md: id, title, owners, created/updated, Praxis priority vocabulary with P0 carried
+# as critical and P1 as high, tags, source; disposition semantics unchanged). The first run passed on the
+# earlier NR-* package, which `praxis validate` rejects as RQ records.
 # Exit 0, verdict pass: 461 requirements, 2293 obligations (1449 verbatim, 775 review, 69 tokens),
 # 0 exclusions, 0 fail/drift/blocked/needs-review, 775 info (equivalence-reviewed).
 # Approvals and reviews: Indy-init kickoff/rehearsal-005 (approvals.json: no approvals; equivalence-reviews.json
@@ -6,6 +10,10 @@
 # owner's chat approval; see its README). <indy-init> is a checkout of kemiller2002/indy-init branch
 # claude/rehearsal-5-reviews at 0bc45d400ac049adf0946ebb6690a4dad5a75de7; <indy-init@aab8f80> a checkout at
 # aab8f80c7743392e794b3b631542903ed4ed6f64 (both run as these literal relative paths).
+# The WI-0002 re-run used <indy-init> at 459f65ac1aa5569d05c0e7a4096ada277dbabc91 (origin/main, the merge of that
+# branch); baseline, normalized package, approvals.json and equivalence-reviews.json are byte-identical to
+# 0bc45d4 (empty git diff; sha256s as recorded). gate-dry-run-no-reviews.json is the historical T07 dry run on the
+# earlier NR-* package and is not re-run.
 # The derivation applies a review only to a review-requested obligation whose criterion is byte-identical
 # to its text, and fails otherwise.
 dotnet tools/derive-requirements/bin/Release/net10.0/derive-requirements.dll \
@@ -15,6 +23,12 @@ dotnet tools/derive-requirements/bin/Release/net10.0/derive-requirements.dll \
   --reviews '<indy-init>/kickoff/rehearsal-005/equivalence-reviews.json' \
   --reviews-ref 'kemiller2002/indy-init 0bc45d400ac049adf0946ebb6690a4dad5a75de7:kickoff/rehearsal-005/equivalence-reviews.json' \
   --out research
+# then, for each research/requirements/RQ-*.md (frontmatter provenance only; criteria unchanged):
+praxis provenance record --path research/requirements/RQ-....md --operation created \
+  --reason 'Identity derivation of the pinned Indy-init baseline into Praxis RQ form (WI-0002, tools/derive-requirements)' \
+  --evidence research/requirements-preservation/derivation-record.json --execution EXE-20261027T201410340Z-c35e9b80
+# (derivation-record.json's derivedDocumentsSha256 is the tool's output before this provenance step; the gate
+# evidence records the sha256 of every derived file as verified.)
 praxis requirements preservation verify \
   --baseline '<indy-init>/requirements/causa-requirements-baseline.json' \
   --source '<indy-init@aab8f80>' \

@@ -14,6 +14,10 @@ let private table (header: string) (rows: Criterion list) =
         @ (rows |> List.map (fun c -> $"| {c.Id} | {escapeCell c.Text} |"))
         @ [ "" ]
 
+/// A YAML double-quoted scalar.
+let private yamlString (text: string) =
+    "\"" + text.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\""
+
 /// Renders one derived document. Acceptance criteria go to a table whose second
 /// header cell says "Acceptance", which is how Praxis classifies them.
 let render (doc: DerivedDocument) : string =
@@ -21,10 +25,15 @@ let render (doc: DerivedDocument) : string =
 
     [ "---"
       $"id: {doc.Id}"
+      "title: " + yamlString (doc.Source + " " + doc.Title)
       "status: accepted"
       "version: 1.0.0"
+      "owners: [indy-init-rehearsal-005]"
+      "created: 2026-10-27"
+      "updated: 2026-10-27"
       $"priority: {doc.Priority}"
-      $"source: {doc.Source}"
+      "tags: [rehearsal-005, identity-derivation]"
+      "source: " + yamlString doc.Source
       "---"
       ""
       $"# {doc.Id}"

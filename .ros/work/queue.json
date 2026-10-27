@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "repository": "indy-init-rehearsal-005",
-  "nextSeq": 2,
+  "nextSeq": 3,
   "items": [
     {
       "id": "COND-MISSION-001",
@@ -37,6 +37,27 @@
       "attachments": [],
       "createdAt": "2026-10-27T20:13:51.113Z",
       "updatedAt": "2026-10-27T20:13:51.113Z",
+      "createdBy": "unknown",
+      "createdByActor": {
+        "kind": "agent",
+        "id": "anthropic/claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-5-5",
+        "runtime": "claude-code"
+      },
+      "source": "manual",
+      "sourceReference": null
+    },
+    {
+      "id": "WI-0002",
+      "title": "R5: emit the derived requirements package as Praxis RQ documents (RQ-CAUSA-2026-NNNN--slug.md) and re-run the preservation gate",
+      "description": null,
+      "tags": [],
+      "priority": "medium",
+      "status": "ready",
+      "attachments": [],
+      "createdAt": "2026-10-27T20:14:09.316Z",
+      "updatedAt": "2026-10-27T20:14:09Z",
       "createdBy": "unknown",
       "createdByActor": {
         "kind": "agent",

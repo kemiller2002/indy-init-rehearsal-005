@@ -16,10 +16,10 @@
   },
   "outputs": {
     "derivedDocuments": 461,
-    "derivedDocumentsSha256": "ad31cb2488deb2e34f4315be036534f51f8f214c2c3166837967da8dfef0c4c2",
+    "derivedDocumentsSha256": "7f51b63d1115d85619a4776753f8adfc2f486c095abd5235cded52d854635169",
     "derivedDocumentsDigestMethod": "sha256 of the lines '<sha256>  <file name>\\n' for every research/requirements/*.md, ordinal by file name",
-    "dispositionSha256": "325d3acdb726590dcd673d6c9e3b498d62ab637b65e7209272c6cf0ec395537e",
-    "reviewRequestsSha256": "1e98c9234b30173616e3aec77e0ac54633a92acb5dfe60895b24668423254dd5"
+    "dispositionSha256": "2e946d0b0f323a83a86771b4f34674b0895066c9444c1fd4d872639426148c74",
+    "reviewRequestsSha256": "c7d59d7d1acdffdb7948f8b100175341fb3e2f9c5d6248dd21a046b352411ea1"
   },
   "counts": {
     "requirements": 461,

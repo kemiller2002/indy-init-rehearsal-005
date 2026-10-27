@@ -117,8 +117,9 @@ let private sourceViolations (source: string) (bl: Baseline) =
 
 let run (a: Args) =
     let bl = Io.readBaseline a.Baseline
-    let normalized = Io.readNormalized a.Normalized
-    let docs = bl.Requirements |> List.map (fun r -> r.Id, deriveDocument normalized r) |> Map.ofList
+    // The compiled package is an input of record: it must parse, and its digest is recorded below.
+    Io.readNormalized a.Normalized |> ignore
+    let docs = deriveDocuments bl
     let rendered = bl.Requirements |> List.map (fun r -> let d = docs.[r.Id] in d, Markdown.render d)
     let parsed = parsedCriteria rendered
     let carriage = verifyCarriage bl docs parsed

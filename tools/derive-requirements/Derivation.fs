@@ -14,23 +14,51 @@ let wordCount (text: string) =
 /// at least five words long; anything shorter needs a person's review.
 let needsReview (o: Obligation) = List.isEmpty o.Tokens && wordCount o.Text < 5
 
-let derivedIdOf (normalized: Map<string, NormalizedEntry>) (r: Requirement) =
-    normalized |> Map.tryFind r.Id |> Option.map (fun n -> n.Id) |> Option.defaultValue ("NR-" + r.Id)
+/// Praxis RQ priority vocabulary. A P0 source requirement is carried as critical
+/// and P1 as high, so the gate never sees a source priority lowered; a source
+/// without a stated priority is carried as medium.
+let praxisPriority (sourcePriority: string) =
+    match sourcePriority with
+    | "P0" -> "critical"
+    | "P1" -> "high"
+    | _ -> "medium"
 
-let deriveDocument (normalized: Map<string, NormalizedEntry>) (r: Requirement) : DerivedDocument =
-    let id = derivedIdOf normalized r
+/// Lower-case ASCII slug of a baseline requirement id for the file name, at most
+/// 60 characters; every other character becomes a single hyphen.
+let fileSlug (sourceId: string) =
+    let mapped =
+        sourceId.ToLowerInvariant()
+        |> String.map (fun c -> if (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') then c else '-')
+
+    let collapsed = Text.RegularExpressions.Regex.Replace(mapped, "-{2,}", "-").Trim('-')
+    if collapsed.Length <= 60 then collapsed else collapsed.Substring(0, 60).TrimEnd('-')
+
+/// The Praxis RQ identifier of the requirement at ordinal position `ordinal`
+/// (0-based) of the baseline sorted by id.
+let rqIdOf (ordinal: int) = sprintf "RQ-CAUSA-2026-%04d" (ordinal + 1)
+
+let deriveDocument (ordinal: int) (r: Requirement) : DerivedDocument =
+    let id = rqIdOf ordinal
 
     { Id = id
       Source = r.Id
       Title = r.Title
-      Priority = r.Priority
-      FileName = id + ".md"
+      Priority = praxisPriority r.Priority
+      FileName = $"{id}--{fileSlug r.Id}.md"
       Criteria =
         r.Obligations
         |> List.map (fun o ->
             { Id = o.Id
               Text = o.Text
               IsAcceptance = (o.Kind = Acceptance) }) }
+
+/// Derived documents keyed by baseline requirement id, numbered in ordinal
+/// baseline-id order.
+let deriveDocuments (baseline: Baseline) : Map<string, DerivedDocument> =
+    baseline.Requirements
+    |> List.sortWith (fun a b -> String.CompareOrdinal(a.Id, b.Id))
+    |> List.mapi (fun i r -> r.Id, deriveDocument i r)
+    |> Map.ofList
 
 let criterionRef (doc: DerivedDocument) (obligationId: string) = $"{doc.Id}#{obligationId}"
 
