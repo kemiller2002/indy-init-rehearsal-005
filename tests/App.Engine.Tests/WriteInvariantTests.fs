@@ -414,3 +414,49 @@ let ``UI-006 VPO-89ed6170f531961e pending sending conflicted unknown and failed 
     let statuses = everyPhase real |> List.map (fun s -> Sync.status s.Phase) |> List.distinct
     for expected in [ Unsaved; Saving; Verifying; MayHaveSaved; Checking; Conflicted; Failed; Clean; NotConnected ] do
         Assert.Contains(expected, statuses)
+
+// ---------------------------------------------------------------------------------------------------------------
+// Durable per-document state (persistence embeds one Sync.State per investigation).
+
+[<Fact>]
+[<Trait("obligation", "VPO-34731ac9a977b818")>]
+[<Trait("boundary", "D")>]
+let ``SYNC-DURABLE VPO-34731ac9a977b818 every phase survives encode and decode exactly`` () =
+    for state in everyPhase real do
+        let text = Json.canonical (Sync.encode state)
+        match Json.parse text |> Result.bind Sync.decode with
+        | Ok back -> Assert.Equal(state, back)
+        | Error e -> failwithf "%s: %s" (phaseName state.Phase) e
+    // unknown shapes are refused, never guessed
+    Assert.True(Result.isError (Sync.decode (JObject [ "schema", JString "causa.sync-state/9"; "issued", JInt 0L; "state", JObject [] ])))
+
+[<Fact>]
+[<Trait("obligation", "VPO-b3efad6eb85360be")>]
+[<Trait("obligation", "VPO-34731ac9a977b818")>]
+[<Trait("obligation", "VPO-8c435e1ebdf43e7c")>]
+[<Trait("boundary", "D")>]
+let ``SYNC-DURABLE VPO-b3efad6eb85360be VPO-34731ac9a977b818 VPO-8c435e1ebdf43e7c restore after reload never loses a change or forgets a possible write`` () =
+    for state in everyPhase real do
+        let restored = Sync.restore state
+        Assert.Equal(None, inFlight restored.Phase)
+        Assert.Equal(state.Issued, restored.Issued)
+        match state.Phase, restored.Phase with
+        | (Writing(_, a) | Confirming(_, a, _, _) | Reconciling(_, a, _)), Unknown(_, b) ->
+            // a request that may have left is Unknown: no Retry, reconcile first (DC-003)
+            Assert.Equal(a.Change, b.Change)
+            Assert.False(canRetry restored.Phase)
+        | (Writing _ | Confirming _ | Reconciling _), other -> failwithf "in-flight restored to %A" other
+        | Idle(_, pending), Idle(_, kept) -> Assert.Equal(pending, kept)
+        | Held(_, c, _), Held(_, k, _) -> Assert.Equal(c, k)
+        | Unknown _, Unknown _ -> ()
+        | (Disconnected | Connecting _ | ConnectRefused _), Disconnected -> ()
+        | before, after -> failwithf "%A restored to %A" before after
+        // no answer to a request issued before the reload can land afterwards
+        match state.Phase |> inFlight with
+        | Some r ->
+            match real restored (PublicationAcknowledged(r, C)) with
+            | Error f -> Assert.Equal(StaleAnswer, f.Code)
+            | Ok _ -> failwith "a pre-reload answer was applied"
+        | None -> ()
+    // a restored disconnected document is re-attached at the freshly read head
+    Assert.Equal(Idle(B, None), (Sync.attach B (Sync.restore Sync.initial)).Phase)
