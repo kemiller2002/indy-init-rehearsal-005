@@ -44,7 +44,7 @@ let initial =
       Notice = None
       Settings = { LargeText = false; ReducedMotion = false }
       Build = NotRequested
-      Port = EnginePort.create EnginePort.Persistence.unavailable
+      Port = EnginePort.create PersistencePort.persistence
       Counter = 0
       ShellPending = Set.empty
       PageBase = ""
@@ -192,5 +192,6 @@ let update (entropy: Entropy) (message: BrowserToEngineMessage) (model: Model) :
 
         { model with Build = build }, []
     | BrowserToEngineMessage.EffectResult(EffectResult.HttpResult(CorrelationId corr, _) as result) -> toPort entropy (Answer(corr, result)) model
+    | BrowserToEngineMessage.EffectResult(EffectResult.StorageResult(CorrelationId corr, _) as result) -> toPort entropy (Answer(corr, result)) model
     | BrowserToEngineMessage.EffectResult _ -> model, []
     | BrowserToEngineMessage.CapabilityFact _ -> model, []

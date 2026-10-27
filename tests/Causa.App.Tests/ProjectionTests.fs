@@ -80,7 +80,7 @@ let ``the production dispatcher refuses the Percepta state event`` () =
     let ev: SemanticEvent = { Name = "percepta-state"; Key = None; Value = Some """{"name":"x","predicates":[],"capabilities":{}}"""; Checked = None; Values = None; Submitter = None }
     let next, _ = Dispatch.step entropy (BrowserToEngineMessage.Event ev) model
     Assert.Equal(None, next.InjectedState)
-    Assert.Equal("engine/unavailable", next.Port.Name)
+    Assert.Equal("engine/github", next.Port.Name)
 
 [<Fact>]
 let ``VPO-bb08b9a414ba4cd7 the token leaves the shell model when Connect is handed to the port`` () =
