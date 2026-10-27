@@ -128,6 +128,12 @@ type AdapterInput =
     | Answer of correlation: string * EffectResult
     /// "Check now": re-read the branch to settle a save whose outcome is unknown (MayHaveSaved).
     | CheckRemote
+    /// Conflict resolution: drop this device's change to the investigation and adopt the repository's copy.
+    | DiscardLocal of id: string
+    /// Re-read the investigation from the repository (after a conflict), keeping this device's change.
+    | ReloadRemote of id: string
+    /// Page start: restore this device's unsaved work before anything else (call once from Initialize).
+    | Boot
 
 /// The engine and persistence as the shell sees them.
 type Port =

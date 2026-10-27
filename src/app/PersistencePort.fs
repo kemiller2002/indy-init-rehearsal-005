@@ -1,10 +1,23 @@
 /// The shell's persistence (EnginePort.Persistence) over stream persist's program, Causa.Persistence.Sync: the
-/// connection and its eight states, loading, the historical catalog, local durability and restore, and publication
+/// connection and its states, loading, the historical catalog, local durability and restore, and publication
 /// through core's request book. This module only translates — Sync messages in, Limen effects out, the program's
-/// state into the shell's projection — plus two policies the shell has no controls for yet:
-///  - restore: the first input restores this device's stored record (storage Get) before it is handled;
-///  - automatic save and check: a pending change is saved when connected, and a save whose outcome is unknown is
-///    checked once (reconcile, which reads the branch first); a failed save is never retried blindly.
+/// state into the shell's projection.
+///
+/// Inputs the shell sends (EnginePort.PersistenceInput, from Adapter.AdapterInput):
+///   Boot                  page start, once from Initialize: restores this device's stored work (storage Get).
+///                         If the shell never sends it, the first other input triggers the same restore first.
+///   Connect request       explicit Connect (token, owner/name, branch, workspace).
+///   Disconnect            forget the credential; this device's unsaved work stays.
+///   Accepted(...)         a command the kernel accepted: appended, verified, saved automatically when connected.
+///   CheckRemote           "Check now": settle a save whose outcome is unknown by re-reading the branch first.
+///   DiscardLocal id       conflict resolution: drop this device's change, adopt the repository's copy.
+///   ReloadRemote id       re-read the investigation from the repository, keeping this device's change.
+///   Answer(corr, result)  effect results whose correlation id starts with "persist-".
+/// Output fields beyond the shell's projection:
+///   ConnectionState       EnginePort.ConnectionState (render with EnginePort.ConnectionState.label);
+///   ConnectionDetail      the plain-language reason for incompatible / accessDenied / offline / conflict.
+/// Policies: a pending change is saved automatically when connected; a save whose outcome is unknown is checked once
+/// automatically (reconcile, which reads the branch first); a failed save is never retried blindly.
 module Causa.App.PersistencePort
 
 open System
@@ -86,18 +99,28 @@ let private syncStatus (m: Model) (d: Document) : A.SyncStatus =
         | "failed" -> A.SaveFailed "The change is kept on this device."
         | _ -> A.Unsaved(int pendingEvents)
 
-let private connectionLabelText (m: Model) =
-    match Sync.connectionLabel m with
-    | "disconnected" -> "Not connected"
-    | "connecting" -> "Connecting: checking the repository and branch"
-    | "loading" -> "Connected: loading the workspace"
-    | "authorizedEmpty" -> "Connected: the workspace has no investigation yet"
-    | "connected" -> "Connected"
-    | "incompatible" -> "The repository's data is not compatible"
-    | "accessDenied" -> "Access denied"
-    | "offline" -> "Offline"
-    | "conflict" -> "Connected: someone else changed an investigation"
-    | other -> other
+/// The program's connection, exhaustively, as the shell's union.
+let private connectionState (m: Model) : EP.ConnectionState =
+    let conflict = m.Documents |> Map.exists (fun _ d -> Sync.documentStatus m d = "conflict")
+    match m.Connection with
+    | Connection.Connected
+    | Connection.AuthorizedEmpty when conflict -> EP.ConnectionState.Conflict
+    | Connection.Disconnected -> EP.ConnectionState.Disconnected
+    | Connection.Connecting -> EP.ConnectionState.Connecting
+    | Connection.Loading -> EP.ConnectionState.Loading
+    | Connection.AuthorizedEmpty -> EP.ConnectionState.AuthorizedEmpty
+    | Connection.Connected -> EP.ConnectionState.Connected
+    | Connection.Incompatible _ -> EP.ConnectionState.Incompatible
+    | Connection.AccessDenied _ -> EP.ConnectionState.AccessDenied
+    | Connection.Offline _ -> EP.ConnectionState.Offline
+
+let private connectionDetail (m: Model) =
+    match Sync.connectionDetail m with
+    | Some d -> Some d
+    | None ->
+        m.Documents
+        |> Map.toList
+        |> List.tryPick (fun (_, d) -> d.RemoteConflict |> Option.map (fun c -> c.Detail))
 
 let rec private persistenceOf (s: State) : EP.Persistence =
     let m = s.Model
@@ -107,6 +130,8 @@ let rec private persistenceOf (s: State) : EP.Persistence =
         | _ -> m.Documents |> Map.toList |> List.map fst
     { Name = "github"
       Connection = connection m
+      ConnectionState = connectionState m
+      ConnectionDetail = connectionDetail m
       Catalog =
         (match m.Connection with
          | Connection.Disconnected when m.Documents.IsEmpty -> A.NotRequested
@@ -133,7 +158,7 @@ let rec private persistenceOf (s: State) : EP.Persistence =
         [ { Id = "provider"; Section = "persistence"; Label = "Data provider"
             Value = (match m.Target with Some t -> "GitHub " + Target.fullName t + " · " + t.Branch + " · " + t.Workspace | None -> "GitHub (not connected)")
             State = "Reported by the running application" }
-          { Id = "connection"; Section = "persistence"; Label = "Connection"; Value = connectionLabelText m; State = "Reported by the running application" } ]
+          { Id = "connection"; Section = "persistence"; Label = "Connection"; Value = EP.ConnectionState.label (connectionState m); State = "Reported by the running application" } ]
       Handle = fun entropy input -> handle entropy input s }
 
 /// Apply one program message, then the automatic policies, and translate the effects.
@@ -199,6 +224,8 @@ and private handleState (entropy: A.Entropy) (input: EP.PersistenceInput) (s: St
     match s.Boot, input with
     | _, EP.Answer(c, result) when c.StartsWith(prefix, StringComparison.Ordinal) -> answer entropy c result s
     | _, EP.Answer _ -> s, []
+    | NotBooted, EP.Boot -> { s with Boot = Booting [] }, [ EffectRequest.Storage(StorageEffectRequest.Get(CorrelationId bootId, Sync.storageKey)) ]
+    | (Booting _ | Booted), EP.Boot -> s, []
     | NotBooted, _ ->
         { s with Boot = Booting [ input ] }, [ EffectRequest.Storage(StorageEffectRequest.Get(CorrelationId bootId, Sync.storageKey)) ]
     | Booting held, _ -> { s with Boot = Booting(held @ [ input ]) }, []
@@ -212,6 +239,8 @@ and private handleState (entropy: A.Entropy) (input: EP.PersistenceInput) (s: St
         | _ -> { s with Notice = Some("warning", "Enter the repository as owner/name.") }, []
     | Booted, EP.Disconnect -> apply entropy Msg.Disconnect s
     | Booted, EP.Open _ -> s, []
+    | Booted, EP.DiscardLocal id -> apply entropy (Msg.DiscardLocal id) s
+    | Booted, EP.ReloadRemote id -> apply entropy (Msg.ReloadRemote id) s
     // "Check now": settle every save whose outcome is unknown by re-reading the branch (never a blind retry).
     | Booted, EP.CheckRemote ->
         s.Model.Documents

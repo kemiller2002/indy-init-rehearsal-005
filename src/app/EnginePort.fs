@@ -24,11 +24,45 @@ type PersistenceInput =
     | Answer of correlation: string * EffectResult
     /// Re-read the branch to settle a save whose outcome is unknown (the shell's "check now").
     | CheckRemote
+    | DiscardLocal of id: string
+    | ReloadRemote of id: string
+    | Boot
+
+/// The connection as persistence knows it (EXT-DATA-007-O1): every state distinct, matched exhaustively.
+[<RequireQualifiedAccess>]
+type ConnectionState =
+    | Disconnected
+    | Connecting
+    | Loading
+    | AuthorizedEmpty
+    | Connected
+    | Incompatible
+    | AccessDenied
+    | Offline
+    | Conflict
+
+[<RequireQualifiedAccess>]
+module ConnectionState =
+    /// The one place the state's wire/label string is produced.
+    let label (state: ConnectionState) =
+        match state with
+        | ConnectionState.Disconnected -> "disconnected"
+        | ConnectionState.Connecting -> "connecting"
+        | ConnectionState.Loading -> "loading"
+        | ConnectionState.AuthorizedEmpty -> "authorizedEmpty"
+        | ConnectionState.Connected -> "connected"
+        | ConnectionState.Incompatible -> "incompatible"
+        | ConnectionState.AccessDenied -> "accessDenied"
+        | ConnectionState.Offline -> "offline"
+        | ConnectionState.Conflict -> "conflict"
 
 /// The thin persistence interface (until stream persist's program lands).
 type Persistence =
     { Name: string
       Connection: A.Connection
+      /// The precise connection state and its plain-language detail (why it is incompatible, denied or offline).
+      ConnectionState: ConnectionState
+      ConnectionDetail: string option
       /// The workspace's investigations, in catalog order.
       Catalog: A.Loadable<string list>
       Documents: Map<string, A.Loadable<Document>>
@@ -43,6 +77,8 @@ module Persistence =
     let rec unavailable: Persistence =
         { Name = "unavailable"
           Connection = A.NotConnected
+          ConnectionState = ConnectionState.Disconnected
+          ConnectionDetail = None
           Catalog = A.NotRequested
           Documents = Map.empty
           Message = None
@@ -54,6 +90,7 @@ module Persistence =
                 | Connect _ ->
                     { unavailable with
                         Connection = A.ConnectionFailed "Connecting to a data repository is not available in this build yet. Nothing was sent."
+                        ConnectionDetail = Some "Connecting to a data repository is not available in this build yet. Nothing was sent."
                         Message = Some("warning", "Connecting is not available in this build yet. Nothing was sent and nothing was stored.") },
                     []
                 | _ -> unavailable, [] }
@@ -62,6 +99,8 @@ module Persistence =
     let rec memory (docs: Map<string, A.Loadable<Document>>) (order: string list) : Persistence =
         { Name = "memory"
           Connection = A.ConnectedTo("this tab only (test build)", "none", "not saved")
+          ConnectionState = ConnectionState.Connected
+          ConnectionDetail = None
           Catalog = A.Loaded order
           Documents = docs
           Message = None
@@ -175,6 +214,9 @@ and private handle (entropy: A.Entropy) (input: A.AdapterInput) (p: Persistence)
     | A.Open id -> pass (Open id)
     | A.Answer(corr, result) -> pass (Answer(corr, result))
     | A.CheckRemote -> pass CheckRemote
+    | A.DiscardLocal id -> pass (DiscardLocal id)
+    | A.ReloadRemote id -> pass (ReloadRemote id)
+    | A.Boot -> pass Boot
     | A.Command(investigation, name, fields, expected) ->
         let session, expectedVersion, id =
             match investigation with
