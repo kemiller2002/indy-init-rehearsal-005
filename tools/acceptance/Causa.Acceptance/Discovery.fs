@@ -159,7 +159,8 @@ let parsePlaywright (source: string) (report: Text.Json.Nodes.JsonNode) : TestRe
     [ for top in items "suites" report do
           for titles, file, spec in specsOf [] "" top do
               let specTitle = strOr "" "title" spec
-              let tags = strings "tags" spec
+              // The JSON reporter records `{ tag: "@x" }` as "x"; tags are compared with their `@`.
+              let tags = strings "tags" spec |> List.map (fun t -> if t.StartsWith "@" then t else "@" + t)
               for test in items "tests" spec do
                   let project = strOr "" "projectName" test
                   let annotations =
