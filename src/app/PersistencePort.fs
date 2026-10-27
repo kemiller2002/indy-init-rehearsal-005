@@ -273,9 +273,10 @@ and private handleState (entropy: A.Entropy) (input: EP.PersistenceInput) (s: St
         if not fixtureAllowed then
             { s with Notice = Some("warning", "Fixture mode exists only in the test build. Nothing was sent.") }, []
         else
-            match Fixture.provider (), Credential.create "fixture-mode-no-credential" with
+            let ws = if List.contains (r.Workspace.Trim()) Fixture.workspaces then r.Workspace.Trim() else Fixture.workspace
+            match Fixture.providerFor ws, Credential.create "fixture-mode-no-credential" with
             | Ok provider, Ok placeholder ->
-                let t = { Owner = Fixture.owner; Repo = Fixture.repo; Branch = Fixture.branch; Workspace = Fixture.workspace }
+                let t = { Owner = Fixture.owner; Repo = Fixture.repo; Branch = Fixture.branch; Workspace = ws }
                 apply entropy (Msg.Connect(t, placeholder)) { s with Fixture = Some provider }
             | Error e, _
             | _, Error e -> { s with Notice = Some("warning", "The fixture could not be generated: " + e) }, []
