@@ -1,14 +1,14 @@
 // Real-browser checks for the Causa application.
 //
-// Two builds are served: the production site (dist/, exactly what GitHub Pages deploys) on 4321, and the test
-// configuration (obj/site-test/, the same site with the Percepta state hook enabled) on 4322. Build both first:
+// Two builds are served: the production site (dist/, exactly what GitHub Pages deploys) on 4821 (CAUSA_PORT), and the test
+// configuration (obj/site-test/, the same site with the Percepta state hook enabled) on 4822 (CAUSA_TEST_PORT). Build both first:
 // `npm run build && npm run build:test`. CAUSA_BASE_URL runs the production suites against a deployed site instead.
 import { existsSync } from "node:fs";
 import { defineConfig, devices } from "@playwright/test";
 
 // CAUSA_PORT / CAUSA_TEST_PORT move both servers (e.g. when several worktrees test on one machine).
-const port = Number(process.env.CAUSA_PORT ?? 4321);
-const testPort = Number(process.env.CAUSA_TEST_PORT ?? 4322);
+const port = Number(process.env.CAUSA_PORT ?? 4821);
+const testPort = Number(process.env.CAUSA_TEST_PORT ?? 4822);
 const origin = `http://127.0.0.1:${port}`;
 const deployed = process.env.CAUSA_BASE_URL;
 

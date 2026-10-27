@@ -9,23 +9,19 @@ import { join, relative } from "node:path";
 const root = process.cwd();
 const test = process.argv.includes("--test");
 const site = join(root, test ? "obj/site-test" : "dist");
-const wasmOut = join(root, "obj/site-wasm");
 rmSync(site, { recursive: true, force: true });
 mkdirSync(site, { recursive: true });
 
-// The test configuration reuses the production build's WebAssembly output (same engine; only main.js differs), so
-// a CI job that only has dist/ can build it without the .NET SDK.
-const reuseDist = test && process.argv.includes("--skip-dotnet") && !existsSync(wasmOut) && existsSync(join(root, "dist/wasm/_framework"));
-if (reuseDist) {
-  cpSync(join(root, "dist/wasm/_framework"), join(site, "wasm/_framework"), { recursive: true });
-} else {
-  if (!process.argv.includes("--skip-dotnet") || !existsSync(wasmOut)) {
-    rmSync(wasmOut, { recursive: true, force: true });
-    execFileSync("dotnet", ["publish", "src/wasm/Causa.Wasm.csproj", "-c", "Release", "-o", wasmOut, "-p:DebugType=none", "-p:DebugSymbols=false"], { stdio: "inherit" });
-  }
-  // GitHub Pages serves no precompressed variants, and symbols are not shipped.
-  cpSync(join(wasmOut, "wwwroot/_framework"), join(site, "wasm/_framework"), { recursive: true, filter: (src) => !/\.(br|gz|pdb)$/.test(src) });
+// The test configuration is its own .NET build (-p:CausaTestBuild=true): only it exports EnableTestHooks. Its output
+// is kept apart from production's (the compiler's input cache sees the changed define and recompiles).
+const wasmOutFor = join(root, test ? "obj/site-wasm-test" : "obj/site-wasm");
+if (!process.argv.includes("--skip-dotnet") || !existsSync(wasmOutFor)) {
+  rmSync(wasmOutFor, { recursive: true, force: true });
+  execFileSync("dotnet", ["publish", "src/wasm/Causa.Wasm.csproj", "-c", "Release", "-o", wasmOutFor, "-p:DebugType=none", "-p:DebugSymbols=false",
+    `-p:CausaTestBuild=${test}`], { stdio: "inherit" });
 }
+// GitHub Pages serves no precompressed variants, and symbols are not shipped.
+cpSync(join(wasmOutFor, "wwwroot/_framework"), join(site, "wasm/_framework"), { recursive: true, filter: (src) => !/\.(br|gz|pdb)$/.test(src) });
 
 const limen = join(root, "node_modules/@echelon-foundry/limen/dist");
 for (const part of ["kernel", "hosts", "protocol.js", "generated", "capability-support"]) {
@@ -95,5 +91,13 @@ const walk = (dir) => readdirSync(dir).flatMap((name) => {
 for (const file of walk(site)) {
   const bytes = readFileSync(file);
   if (pattern.test(bytes.toString("latin1")) || pattern.test(bytes.toString("utf16le"))) throw new Error(`token-shaped string in ${relative(root, file)}`);
+}
+// The production .NET build must not carry the test-only export (main.js names it only in code that the production
+// constant TEST_BUILD = false never runs).
+if (!test) {
+  for (const file of walk(join(site, "wasm"))) {
+    const bytes = readFileSync(file);
+    if (bytes.toString("latin1").includes("EnableTestHooks") || bytes.toString("utf16le").includes("EnableTestHooks")) throw new Error(`test-only export in production file ${relative(root, file)}`);
+  }
 }
 console.log(`built ${relative(root, site)} (${walk(site).length} files)`);

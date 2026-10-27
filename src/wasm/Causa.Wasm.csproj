@@ -13,6 +13,10 @@
     <PublishTrimmed>false</PublishTrimmed>
     <RootNamespace>Causa.Wasm</RootNamespace>
   </PropertyGroup>
+  <!-- The test configuration (Percepta state hook, fixture mode) exists only when built with -p:CausaTestBuild=true. -->
+  <PropertyGroup Condition="'$(CausaTestBuild)' == 'true'">
+    <DefineConstants>$(DefineConstants);CAUSA_TEST_BUILD</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../app/Causa.App.fsproj" />
     <SupportedPlatform Include="browser" />

@@ -127,6 +127,9 @@ Promise.race([kernel.start(), timeout]).then(
       startFailed("Causa could not start.", `kernel status ${kernel.status}`);
       return;
     }
+    // The .NET runtime publishes a global accessor for itself; the production page does not need it, so it is
+    // removed once the application has started (the kernel keeps its own reference to the exports).
+    if (!TEST_BUILD) Reflect.deleteProperty(globalThis, "getDotnetRuntime");
     // WASM-LOAD-004: the shell leaves only once the application has rendered its first projection.
     // Test build only: `?percepta=default` shows the fixture investigation with no predicates, so a Percepta run
     // can establish the screen's identity before it injects its own fixtures. `?percepta=conflict` is the same state
