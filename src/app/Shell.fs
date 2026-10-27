@@ -221,9 +221,13 @@ let rec private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
             |> Map.toList
             |> List.choose (fun (k, v) -> if k.StartsWith(form + ".", StringComparison.Ordinal) then Some(k.Substring(form.Length + 1), v) else None)
             |> Map.ofList
+            // The record a detail screen shows (?item=) is the subject of its forms (S04, S13).
+            |> fun f -> if model.Selected = "" || f.ContainsKey "item" then f else f.Add("item", model.Selected)
         let command =
             if form = "TransitionHypothesis" then
                 $"""TransitionHypothesis:{fields |> Map.tryFind "hypothesis" |> Option.defaultValue ""}:{fields |> Map.tryFind "change" |> Option.defaultValue ""}"""
+            elif form = "FalsifyHypothesis" then $"TransitionHypothesis:{model.Selected}:falsify"
+            elif form = "ReopenHypothesis" then $"TransitionHypothesis:{model.Selected}:reopen"
             else form
         match model.Route, model.Route |> (function Investigation(id, _) -> model.Port.Projection.Opened.TryFind id | _ -> None) with
         | Investigation(id, _), Some(Loaded inv) ->
