@@ -236,9 +236,9 @@ type Fake(owner: string, repo: string, defaultBranch: string, publicRepo: bool) 
                         | _ -> []
                     | _ -> []
                 match Map.tryFind branch branches with
-                | None -> respond "write.missingBranch" (Some(JObj [ "errors", JArr [ JObj [ "type", JStr "NOT_FOUND"; "message", JStr "fake: branch not found" ] ] ]))
+                | None -> respond "write.missingBranch" (Some(JObj [ "errors", JArr [ JObj [ "type", JStr "NOT_FOUND"; "message", JStr "fake: branch not found"; "path", JArr [ JStr "createCommitOnBranch" ]; "locations", JArr [ JObj [ "line", JInt 1L; "column", JInt 1L ] ] ] ] ]))
                 | Some head when head <> expected ->
-                    respond "write.conflict.staleHead" (Some(JObj [ "errors", JArr [ JObj [ "type", JStr "STALE_DATA"; "message", JStr "fake: expected head moved" ] ] ]))
+                    respond "write.conflict.staleHead" (Some(JObj [ "errors", JArr [ JObj [ "type", JStr "STALE_DATA"; "message", JStr "fake: expected head moved"; "path", JArr [ JStr "createCommitOnBranch" ]; "locations", JArr [ JObj [ "line", JInt 1L; "column", JInt 1L ] ] ] ] ]))
                 | Some _ ->
                     let oid = this.CommitFiles(branch, additions)
                     respond "write.create" (Some(JObj [ "data", JObj [ "createCommitOnBranch", JObj [ "commit", JObj [ "oid", JStr oid ] ] ] ]))
