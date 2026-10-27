@@ -4,7 +4,10 @@
   "type": "module",
   "scripts": {
     "check": "tsc --noEmit",
-    "test:browser": "playwright test"
+    "build": "node scripts/build-site.mjs",
+    "build:test": "node scripts/build-site.mjs --test --skip-dotnet",
+    "test:browser": "playwright test",
+    "serve": "node scripts/serve.mjs dist 4321"
   },
   "dependencies": {
     "@echelon-foundry/design-system": "0.9.0",

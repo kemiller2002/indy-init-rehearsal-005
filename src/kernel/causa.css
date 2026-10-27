@@ -1,0 +1,314 @@
+/* Causa identity on Forma (UI-016). The five canonical values are declared once as named tokens and every other
+   colour derives from them; components use only the semantic --causa-color-* and Forma --ef-color-* tokens.
+   Text colours are the "-ink" variants, chosen for WCAG AA (4.5:1) on the surfaces they sit on; the base values are
+   used for structure, fills and non-text indicators (3:1). Status is never conveyed by colour alone. */
+
+:root[data-ef-brand="causa"] {
+  /* Canonical palette (UI-016-O3..O7). */
+  --causa-navy: #14283F;   /* Deep navy: navigation, masthead, structural emphasis */
+  --causa-teal: #087F8C;   /* Teal: primary investigation actions, active selection, positive workflow */
+  --causa-amber: #E9A23B;  /* Amber: unresolved unknowns, pending review, attention */
+  --causa-coral: #D66B58;  /* Coral: contradictions, material conflicts, critical alerts */
+  --causa-ivory: #F5F3ED;  /* Soft ivory: main workspace surface */
+
+  /* Derived, contrast-measured tokens (UI-016-O10/O11). */
+  --causa-white: #FFFFFF;
+  --causa-teal-ink: #06646E;   /* 6.19:1 on ivory, 6.87:1 on white */
+  --causa-coral-ink: #9E3B29;  /* 6.08:1 on ivory, 6.75:1 on white */
+  --causa-amber-ink: #6E4708;  /* 7.37:1 on ivory */
+  --causa-navy-ink: #14283F;   /* 13.47:1 on ivory */
+  --causa-muted-ink: #4A5566;  /* 6.80:1 on ivory */
+  --causa-amber-wash: #FBEFD9;
+  --causa-coral-wash: #F9E2DD;
+  --causa-teal-wash: #DDF0F1;
+
+  /* Semantic roles. */
+  --causa-color-structure: var(--causa-navy);
+  --causa-color-action: var(--causa-teal);
+  --causa-color-action-ink: var(--causa-teal-ink);
+  --causa-color-attention: var(--causa-amber);
+  --causa-color-attention-ink: var(--causa-amber-ink);
+  --causa-color-conflict: var(--causa-coral);
+  --causa-color-conflict-ink: var(--causa-coral-ink);
+  --causa-color-surface: var(--causa-ivory);
+  --causa-color-raised: var(--causa-white);
+  --causa-color-text: var(--causa-navy-ink);
+  --causa-color-muted: var(--causa-muted-ink);
+
+  /* Forma theme tokens, mapped to the Causa roles (UI-016-O8/O9). */
+  --ef-color-surface-primary: var(--causa-color-surface);
+  --ef-color-surface-secondary: var(--causa-color-raised);
+  --ef-color-surface-elevated: var(--causa-color-raised);
+  --ef-color-surface-inverse: var(--causa-color-structure);
+  --ef-color-text-primary: var(--causa-color-text);
+  --ef-color-text-heading: var(--causa-color-structure);
+  --ef-color-text-muted: var(--causa-color-muted);
+  --ef-color-text-inverse: var(--causa-ivory);
+  --ef-color-accent-primary: var(--causa-color-action-ink);
+  --ef-color-accent-hover: var(--causa-navy);
+  --ef-color-focus-ring: var(--causa-color-action);
+  --ef-color-status-danger: var(--causa-color-conflict-ink);
+  --ef-color-status-warning: var(--causa-color-attention-ink);
+  --ef-color-status-success: var(--causa-color-action-ink);
+  --ef-color-status-info: var(--causa-color-structure);
+  --ef-color-border-subtle: #D9D4C7;
+  --ef-color-border-functional: var(--causa-muted-ink);
+}
+
+body.causa {
+  margin: 0;
+  background: var(--causa-color-surface);
+  color: var(--causa-color-text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.causa-masthead {
+  background: var(--causa-color-structure);
+  color: var(--causa-ivory);
+  border-bottom: 4px solid var(--causa-color-action);
+}
+
+.causa-masthead .ef-site-header__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+  padding: 0.75rem 1rem;
+}
+
+.causa-masthead .ef-site-header__name { font-weight: 700; font-size: 1.25rem; color: var(--causa-ivory); }
+.causa-masthead .ef-site-header__tagline { color: var(--causa-ivory); opacity: 0.9; }
+
+.causa-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--causa-color-action);
+  color: var(--causa-white);
+  font-weight: 700;
+  margin-right: 0.5rem;
+}
+
+.causa-connection { margin: 0 0 0 auto; font-size: 0.9rem; color: var(--causa-ivory); }
+
+.causa-disconnect { background: transparent; color: var(--causa-ivory); border: 1px solid var(--causa-ivory); }
+
+.causa-main {
+  flex: 1;
+  width: 100%;
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 6rem;
+  box-sizing: border-box;
+}
+
+.causa-main h1, .causa-main h2 { color: var(--causa-color-structure); }
+
+.causa-muted { color: var(--causa-color-muted); }
+
+/* Notices: the tone is carried by text ("Not saved: …") and an icon-like border, never colour alone. */
+.causa-notice {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  border-left: 6px solid var(--causa-color-structure);
+  background: var(--causa-color-raised);
+  padding: 0.75rem 1rem;
+  margin: 0 0 1rem;
+}
+.causa-notice[data-tone="danger"] { border-left-color: var(--causa-color-conflict); background: var(--causa-coral-wash); color: var(--causa-color-conflict-ink); }
+.causa-notice[data-tone="warning"] { border-left-color: var(--causa-color-attention); background: var(--causa-amber-wash); color: var(--causa-color-attention-ink); }
+.causa-notice[data-tone="success"] { border-left-color: var(--causa-color-action); background: var(--causa-teal-wash); color: var(--causa-color-action-ink); }
+.causa-notice__text { margin: 0; }
+
+.causa-empty { padding: 1.5rem 0; }
+.causa-hint { color: var(--causa-color-attention-ink); font-weight: 600; }
+
+.causa-form { display: grid; gap: 1rem; max-width: 40rem; }
+.causa-form__row { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(12rem, 100%), 1fr)); }
+.causa-form--inline { margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--ef-color-border-subtle); }
+.causa-input {
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--ef-color-border-functional);
+  border-radius: 4px;
+  background: var(--causa-color-raised);
+  color: var(--causa-color-text);
+}
+
+.causa-main :focus-visible, .causa-savebar :focus-visible, .causa-masthead :focus-visible {
+  outline: 3px solid var(--causa-color-action);
+  outline-offset: 2px;
+}
+
+.ef-button[data-ef-variant="primary"] { background: var(--causa-color-action-ink); color: var(--causa-white); border-color: var(--causa-color-action-ink); }
+.ef-button[data-ef-variant="primary"]:hover { background: var(--causa-color-structure); }
+.ef-button:disabled { opacity: 0.55; cursor: not-allowed; }
+.causa-link-button { text-decoration: none; }
+
+.causa-heading-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; }
+
+.causa-cards { list-style: none; padding: 0; display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fill, minmax(min(16rem, 100%), 1fr)); }
+.causa-card { background: var(--causa-color-raised); border: 1px solid var(--ef-color-border-subtle); border-top: 4px solid var(--causa-color-structure); padding: 0.875rem 1rem; border-radius: 6px; }
+.causa-card--yours { border-top-color: var(--causa-color-action); }
+.causa-card__link { color: var(--causa-color-action-ink); font-weight: 600; }
+.causa-card__status { margin: 0.5rem 0 0; color: var(--causa-color-muted); font-size: 0.9rem; }
+
+.causa-kind { color: var(--causa-color-action-ink); font-weight: 600; margin-bottom: 0; }
+.causa-back { color: var(--causa-color-action-ink); }
+.causa-observation { background: var(--causa-color-raised); border-left: 4px solid var(--causa-color-structure); padding: 0.75rem 1rem; }
+
+.causa-panel { background: var(--causa-color-raised); border: 1px solid var(--ef-color-border-subtle); border-radius: 6px; padding: 1rem 1.25rem; margin-top: 1.25rem; }
+.causa-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.causa-item { border-left: 4px solid var(--causa-color-structure); padding: 0.25rem 0.75rem; }
+.causa-item p { margin: 0.25rem 0; }
+.causa-item--evidence { border-left-color: var(--causa-color-action); }
+.causa-item--hypothesis { border-left-color: var(--causa-color-attention); }
+.causa-item--cause { border-left-color: var(--causa-color-conflict); }
+.causa-tag { display: inline-block; font-size: 0.8rem; font-weight: 600; padding: 0.1rem 0.5rem; border-radius: 999px; background: var(--causa-teal-wash); color: var(--causa-color-action-ink); }
+.causa-tag--state { background: var(--causa-amber-wash); color: var(--causa-color-attention-ink); }
+.causa-label { font-weight: 600; }
+
+.causa-savebar {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--causa-color-structure);
+  color: var(--causa-ivory);
+  border-top: 4px solid var(--causa-color-attention);
+}
+.causa-savebar__state { margin: 0; }
+.causa-savebar .ef-button:not([data-ef-variant="primary"]) { background: var(--causa-ivory); color: var(--causa-navy); }
+
+/* WASM-LOAD: the starting state. Motion only for people who have not asked for less. */
+.causa-boot { max-width: 40rem; margin: 3rem auto; padding: 1.5rem; text-align: center; background: var(--causa-color-raised); border-top: 4px solid var(--causa-color-action); border-radius: 6px; }
+.causa-boot[data-state="failed"] { border-top-color: var(--causa-color-conflict); }
+.causa-boot__label { font-weight: 600; color: var(--causa-color-structure); }
+.causa-boot__spinner { display: inline-block; width: 2rem; height: 2rem; border-radius: 50%; border: 4px solid var(--causa-teal-wash); border-top-color: var(--causa-color-action); }
+.causa-boot[data-state="failed"] .causa-boot__spinner { display: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .causa-boot__spinner { animation: causa-spin 1s linear infinite; }
+}
+@keyframes causa-spin { to { transform: rotate(360deg); } }
+
+@media print {
+  .causa-masthead, .causa-savebar, form { display: none; }
+  body.causa { background: #FFFFFF; color: #000000; }
+}
+
+/* Navigation (UI-020, UI-029). The current destination is marked with aria-current and an underline, not colour alone. */
+.causa-primary-nav ul, .causa-sections ul { list-style: none; display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; margin: 0; padding: 0; }
+.causa-primary-nav a { color: var(--causa-ivory); text-decoration: none; padding: 0.25rem 0; border-bottom: 3px solid transparent; }
+.causa-primary-nav a[aria-current="page"] { border-bottom-color: var(--causa-amber); font-weight: 700; }
+.causa-sections { margin-top: 1rem; border-bottom: 1px solid var(--ef-color-border-subtle); }
+.causa-sections a { display: inline-block; color: var(--causa-color-action-ink); text-decoration: none; padding: 0.5rem 0; border-bottom: 3px solid transparent; }
+.causa-sections a[aria-current="page"] { color: var(--causa-color-structure); border-bottom-color: var(--causa-color-action); font-weight: 700; }
+.causa-inv-header h1 { margin: 0.25rem 0; }
+.causa-inv-meta { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin: 0; }
+.causa-card__lifecycle { margin: 0.25rem 0 0; }
+
+/* Overview (UI-025). */
+.causa-overview-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr)); }
+.causa-item--open { border-left-color: var(--causa-color-attention); }
+.causa-next a { color: var(--causa-color-action-ink); font-weight: 600; }
+
+/* Causal graph (UI-026): the isolated Forma workflow frame. */
+.causa-graph { margin-bottom: 1rem; }
+.causa-graph__canvas { border: 1px solid var(--ef-color-border-subtle); border-radius: 6px; background: var(--causa-white); }
+.causa-graph__frame { display: block; width: 100%; height: 26rem; border: 0; }
+.causa-graph__selection { margin: 0.5rem 0 0; padding: 0.5rem 0.75rem; border-left: 4px solid var(--causa-color-action); background: var(--causa-teal-wash); }
+
+/* Evidence and the inspector (UI-005). */
+.causa-evidence__layout { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr)); align-items: start; }
+.causa-item--hypothesis[data-selected="true"], .causa-item--evidence[data-selected="true"] { outline: 3px solid var(--causa-color-action); outline-offset: 2px; }
+.causa-item--evidence[data-selected="true"]::after { content: "Selected"; font-size: 0.8rem; font-weight: 600; color: var(--causa-color-action-ink); }
+.causa-inspect { margin-top: 0.25rem; }
+.causa-inspector { border: 1px solid var(--ef-color-border-subtle); border-top: 4px solid var(--causa-color-action); border-radius: 6px; padding: 0.75rem 1rem; }
+.causa-facts { display: grid; grid-template-columns: max-content 1fr; gap: 0.25rem 0.75rem; }
+.causa-facts dt { font-weight: 600; }
+.causa-facts dd { margin: 0; }
+
+/* Timeline. */
+.causa-filter { max-width: 20rem; margin-bottom: 0.75rem; }
+.causa-timeline { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.25rem; }
+.causa-timeline__entry { display: flex; flex-wrap: wrap; gap: 0.25rem 0.75rem; align-items: baseline; padding: 0.25rem 0; border-bottom: 1px solid var(--ef-color-border-subtle); }
+.causa-timeline__type { font-weight: 600; }
+
+/* Administration (UI-018). */
+.causa-admin { width: 100%; border-collapse: collapse; background: var(--causa-color-raised); }
+.causa-admin th, .causa-admin td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--ef-color-border-subtle); vertical-align: top; overflow-wrap: anywhere; }
+
+/* Settings: larger text for this page (UI-019). */
+body[data-text-size="large"] { zoom: 1.25; }
+
+/* Completeness checklist (UI-036): status in words and a mark, never colour alone, never a percentage. */
+.causa-checklist { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.375rem; }
+.causa-check { display: grid; grid-template-columns: 7.5rem 1fr; gap: 0 0.75rem; padding: 0.375rem 0.75rem; border-left: 4px solid var(--causa-color-attention); background: var(--causa-amber-wash); }
+.causa-check[data-met="true"] { border-left-color: var(--causa-color-action); background: var(--causa-teal-wash); }
+.causa-check__status { font-weight: 700; grid-row: span 2; }
+.causa-check[data-met="true"] .causa-check__status::before { content: "✓ "; }
+.causa-check[data-met="false"] .causa-check__status::before { content: "○ "; }
+.causa-check__rule { font-weight: 600; }
+.causa-related { color: var(--causa-color-action-ink); font-size: 0.9rem; }
+
+/* Report preview (UI-009, T26): Folio primitives; on screen a preview, in print only the report. */
+.causa-report { display: block; }
+.causa-report__title-page { display: block; padding: 1rem 0; border-bottom: 4px solid var(--causa-color-structure); margin-bottom: 1rem; }
+.causa-report__eyebrow { color: var(--causa-color-action-ink); font-weight: 600; margin: 0; }
+.causa-report__title { font-size: 1.6rem; font-weight: 700; color: var(--causa-color-structure); margin: 0.25rem 0; }
+.causa-report__incomplete { display: block; padding: 0.5rem 0.75rem; border-left: 4px solid var(--causa-color-attention); background: var(--causa-amber-wash); color: var(--causa-color-attention-ink); font-weight: 600; }
+.causa-report ef-print-section { display: block; margin-top: 1rem; }
+.causa-report__list { padding-left: 1.25rem; }
+.causa-report__table { width: 100%; border-collapse: collapse; }
+.causa-report__table th, .causa-report__table td { text-align: left; padding: 0.375rem 0.5rem; border-bottom: 1px solid var(--ef-color-border-subtle); vertical-align: top; overflow-wrap: anywhere; }
+
+@media print {
+  .ef-skip-link, .causa-masthead, .causa-savebar, .causa-sections, .causa-back, .causa-inv-header, .causa-notice, #causa-ready, [data-screen-only] { display: none !important; }
+  body { background: #fff; }
+  .causa-main { padding: 0; max-width: none; }
+  .causa-panel.causa-report-preview { border: 0; padding: 0; margin: 0; background: #fff; }
+  .causa-report__incomplete { print-color-adjust: exact; }
+}
+
+/* Touch targets (UI-011, WCAG 2.5.5): every control and navigation link is at least 44x44 CSS px. */
+.causa .ef-button, .causa button, .causa select, .causa .causa-input:not(textarea) { min-height: 44px; min-width: 44px; }
+.causa-primary-nav a, .causa-sections a { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
+.causa-primary-nav a { padding: 0 0.25rem; }
+
+/* Reflow (UI-011, WCAG 1.4.10): nothing forces a width wider than the viewport. */
+.causa-main, .causa-panel, .causa-form, .causa-item, .causa-card, .causa-check { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+.causa-check { grid-template-columns: minmax(0, 7.5rem) minmax(0, 1fr); }
+.causa-facts { grid-template-columns: minmax(0, max-content) minmax(0, 1fr); }
+.causa-input { max-width: 100%; }
+.causa-report__table { table-layout: fixed; }
+
+.causa-stopped { margin: 0; border-radius: 0; position: sticky; top: 0; z-index: 10; }
+
+/* R5 shell additions. Tone tags pair colour with the state's text (UI-016-O12). */
+.causa-tag[data-tone="attention"] { background: var(--causa-amber-wash); color: var(--causa-color-attention-ink); }
+.causa-tag[data-tone="conflict"] { background: var(--causa-coral-wash); color: var(--causa-color-conflict-ink); }
+.causa-tag[data-tone="action"] { background: var(--causa-teal-wash); color: var(--causa-color-action-ink); }
+.causa-tag[data-tone="neutral"] { background: var(--causa-ivory); color: var(--causa-color-text); border: 1px solid var(--ef-color-border-subtle); }
+.causa-item--blocker { border-left-color: var(--causa-color-attention); background: var(--causa-amber-wash); }
+.causa-capabilities { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.causa-capability__reason { margin: 0.25rem 0 0; color: var(--causa-color-attention-ink); }
+.causa-sync { margin: 0; padding: 0.5rem 0.75rem; border-left: 4px solid var(--causa-color-structure); background: var(--causa-color-raised); }
+.causa-sync[data-tone="conflict"] { border-left-color: var(--causa-color-conflict); }
+.causa-sync[data-tone="attention"] { border-left-color: var(--causa-color-attention); }
+.causa-sync[data-tone="action"] { border-left-color: var(--causa-color-action); }
+body[data-motion="reduced"] *, body[data-motion="reduced"] *::before { animation: none !important; transition: none !important; }
+.causa-mark-img { width: 2rem; height: 2rem; margin-right: 0.5rem; vertical-align: middle; }
+.causa-boot__mark { width: 4rem; height: 4rem; display: block; margin: 0 auto 0.75rem; }
+.causa-item[data-selected="true"] { outline: 3px solid var(--causa-color-action); outline-offset: 2px; }

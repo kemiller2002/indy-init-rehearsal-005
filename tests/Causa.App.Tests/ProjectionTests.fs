@@ -1,0 +1,94 @@
+/// The shell's projection, without a browser: what is shown comes only from the port's projection.
+module Causa.App.Tests.ProjectionTests
+
+open System
+open Xunit
+open Limen.Contract.Core
+open Causa.App
+open Causa.App.Adapter
+
+let private entropy = { Now = DateTime(2026, 10, 27); Ids = List.init 4 (fun _ -> Guid.NewGuid()); Nonce = "n" }
+
+let private textOf (view: ViewState) key =
+    match view |> Map.tryFind key with
+    | Some(ViewValue.Text t) -> t
+    | other -> failwithf "%s is %A" key other
+
+let private flagOf (view: ViewState) key =
+    match view |> Map.tryFind key with
+    | Some(ViewValue.Flag b) -> b
+    | other -> failwithf "%s is %A" key other
+
+let private itemsOf (view: ViewState) key =
+    match view |> Map.tryFind key with
+    | Some(ViewValue.Items xs) -> xs
+    | other -> failwithf "%s is %A" key other
+
+let private field (item: ViewItem) key =
+    match item |> Map.tryFind key with
+    | Some(ViewPrimitive.Text t) -> t
+    | other -> failwithf "%s is %A" key other
+
+let private injected predicates caps =
+    match TestState.parse $"""{{"name":"t","predicates":[{predicates}],"capabilities":{{{caps}}}}}""" with
+    | Ok s -> TestState.toProjection s
+    | Error e -> failwith e
+
+let private at route port = { Shell.initial with Route = route; Port = port }
+
+[<Fact>]
+let ``VPO-2f4f9de66ddd6434 before Connect only the empty, disconnected workspace with Connect is shown`` () =
+    let view = View.project (at Routes.Investigations Port.unavailable)
+    Assert.True(flagOf view "screen.connect")
+    Assert.False(flagOf view "screen.list")
+    Assert.Empty(itemsOf view "cards")
+    Assert.Equal("Not connected", textOf view "connection.label")
+
+[<Fact>]
+let ``VPO-be99a964783c59b5 VPO-9659118aa1ef95ff only the engine's capabilities are rendered, illegal ones with the engine's reason`` () =
+    let ws = injected "\"material-blocker-exists\"" "\"RecordObservation\":\"legal\",\"ConfirmCause\":\"illegal\""
+    let view = View.project (at (Routes.Investigation(TestState.fixtureId, Routes.Overview)) (Port.fixedAt ws))
+    let caps = itemsOf view "capabilities"
+    Assert.Equal<string list>([ "RecordObservation"; "ConfirmCause" ], caps |> List.map (fun c -> field c "id"))
+    let confirm = caps |> List.find (fun c -> field c "id" = "ConfirmCause")
+    Assert.Equal("An open material question must be answered first.", field confirm "reason")
+    Assert.Equal(Some(ViewPrimitive.Flag false), confirm |> Map.tryFind "legal")
+
+[<Fact>]
+let ``VPO-56201f80b312c7c8 unknown counts are never shown as zero`` () =
+    let ws = injected "" ""
+    let view = View.project (at Routes.Investigations (Port.fixedAt ws))
+    let card = itemsOf view "cards" |> List.exactlyOne
+    Assert.Equal("unresolved contradictions: not known", field card "contradictions")
+    Assert.Equal("1 hypotheses", field card "hypotheses")
+
+[<Fact>]
+let ``VPO-b3efad6eb85360be only a confirmed remote sync is described as saved to GitHub`` () =
+    for s in [ NoChanges; Unsaved 2; Saving; Conflict; SaveFailed "GitHub refused the token."; ReadOnly ] do
+        Assert.DoesNotContain("Saved to GitHub", Presentation.syncText s)
+    Assert.StartsWith("Saved to GitHub", Presentation.syncText (RemotelySynced(Some "12:00")))
+
+[<Fact>]
+let ``VPO-d4a9c8fd05795e00 unmapped domain values are never echoed raw`` () =
+    Assert.Equal("Not recorded", Presentation.label "someInternalEnum")
+    Assert.Equal("Awaiting evidence", Presentation.label "awaitingEvidence")
+
+[<Fact>]
+let ``the production dispatcher refuses the Percepta state event`` () =
+    Dispatch.reset ()
+    let model = Shell.initial
+    let ev: SemanticEvent = { Name = "percepta-state"; Key = None; Value = Some """{"name":"x","predicates":[],"capabilities":{}}"""; Checked = None; Values = None; Submitter = None }
+    let next, _ = Dispatch.step entropy (BrowserToEngineMessage.Event ev) model
+    Assert.Equal(None, next.InjectedState)
+    Assert.Equal("unavailable", next.Port.Name)
+
+[<Fact>]
+let ``VPO-bb08b9a414ba4cd7 the token leaves the shell model when Connect is handed to the port`` () =
+    let ev name value: SemanticEvent = { Name = name; Key = None; Value = value; Checked = None; Values = None; Submitter = None }
+    let m, _ = Shell.update entropy (BrowserToEngineMessage.Event(ev "token" (Some "github_pat_secret"))) Shell.initial
+    Assert.Equal("github_pat_secret", m.Drafts.Token)
+    let m, _ = Shell.update entropy (BrowserToEngineMessage.Event(ev "connect" None)) m
+    Assert.Equal("", m.Drafts.Token)
+    let view = View.project m
+    for KeyValue(_, v) in view do
+        Assert.DoesNotContain("github_pat_secret", sprintf "%A" v)

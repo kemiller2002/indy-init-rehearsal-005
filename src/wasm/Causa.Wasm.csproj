@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+  <!-- .NET WebAssembly host for the F# application: JSExports that forward one serialized Limen message (and, in
+       the test build only, enable the Percepta state hook). No decision is made here. AllowUnsafeBlocks is required
+       by the JSExport source generator. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <WasmEnableWebcil>true</WasmEnableWebcil>
+    <PublishTrimmed>false</PublishTrimmed>
+    <RootNamespace>Causa.Wasm</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../app/Causa.App.fsproj" />
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+</Project>

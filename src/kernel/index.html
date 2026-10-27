@@ -1,14 +1,335 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-ef-brand="causa">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <link rel="stylesheet" href="../../node_modules/@echelon-foundry/design-system/dist/all.css">
-  <title>Application</title>
+  <!-- The page runs only its own code and the .NET WebAssembly application; the only remote it may reach is GitHub's
+       API. No inline script, no eval, no base element. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://api.github.com; frame-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title data-text="page.title">Causa</title>
+  <link rel="icon" href="causa-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="vendor/forma/all.css">
+  <link rel="stylesheet" href="causa.css">
+  <script type="module" src="main.js"></script>
 </head>
-<body>
-  <main>
-    <ef-button><button type="button">Ready</button></ef-button>
+<body class="ef-site causa" data-bind-data-text-size="text.size" data-bind-data-motion="motion" data-bind-data-screen="screen" data-bind-data-percepta-state="percepta.state">
+  <p id="causa-ready" class="ef-visually-hidden" role="status" tabindex="-1"></p>
+  <a class="ef-skip-link" href="#causa-main">Skip to main content</a>
+
+  <header class="ef-site-header causa-masthead" data-ef-tone="inverse">
+    <div class="ef-site-header__inner">
+      <div class="ef-site-header__identity">
+        <img class="causa-mark-img" src="causa-icon.svg" alt="">
+        <span class="ef-site-header__name">Causa</span>
+        <span class="ef-site-header__tagline">Root-cause investigation</span>
+      </div>
+      <nav class="causa-primary-nav" aria-label="Primary">
+        <ul>
+          <template data-each="nav" data-key="id">
+            <li><a data-bind-href="href" data-bind-aria-current="current" data-text="label"></a></li>
+          </template>
+        </ul>
+      </nav>
+      <p class="causa-connection" aria-live="polite"><span class="ef-visually-hidden">Data repository: </span><span data-text="connection.label">Not connected</span></p>
+      <template data-if="connected">
+        <button type="button" class="ef-button causa-disconnect" data-event="disconnect">Disconnect</button>
+      </template>
+    </div>
+  </header>
+
+  <!-- WASM-LOAD-001..006: a static, accessible starting state shown before the application runs; main.js removes it
+       only once the kernel reports the application running. -->
+  <div id="causa-boot" class="causa-boot" role="status" aria-live="polite" data-state="starting">
+    <img class="causa-boot__mark" src="causa-icon.svg" alt="Causa">
+    <span class="causa-boot__spinner" aria-hidden="true"></span>
+    <p id="causa-boot-label" class="causa-boot__label">Starting Causa…</p>
+    <p id="causa-boot-detail" class="causa-boot__detail">Loading the investigation workspace. Nothing is sent anywhere until you connect.</p>
+  </div>
+
+  <main id="causa-main" class="ef-site__main causa-main" tabindex="-1">
+    <template data-if="notice.alert">
+      <div class="ef-alert causa-notice" role="alert" data-bind-data-tone="notice.tone">
+        <p class="causa-notice__text" data-text="notice.text"></p>
+        <button type="button" class="ef-button causa-notice__dismiss" data-event="dismiss">Dismiss</button>
+      </div>
+    </template>
+    <template data-if="notice.status">
+      <div class="ef-alert causa-notice" role="status" data-bind-data-tone="notice.tone">
+        <p class="causa-notice__text" data-text="notice.text"></p>
+        <button type="button" class="ef-button causa-notice__dismiss" data-event="dismiss">Dismiss</button>
+      </div>
+    </template>
+
+    <!-- Disconnected: the empty workspace and the explicit Connect action (UI-001-O1, EXT-DATA-002). -->
+    <template data-if="screen.connect">
+      <section class="causa-connect" aria-labelledby="connect-heading" data-percepta-screen="connect">
+        <div class="ef-empty-state causa-empty">
+          <h1 id="connect-heading">Connect a data repository</h1>
+          <p>Causa starts empty. It shows no investigation until you connect to a GitHub repository.</p>
+          <template data-if="route.pending">
+            <p class="causa-hint">Connect to open the page you asked for.</p>
+          </template>
+        </div>
+        <template data-if="connect.failed">
+          <p class="ef-alert causa-notice" data-tone="warning" role="alert" data-text="connect.failure"></p>
+        </template>
+        <form class="ef-form causa-form" data-event="connect" aria-describedby="token-help">
+          <div class="ef-field">
+            <label class="ef-field__label" for="token">Fine-grained GitHub token</label>
+            <input id="token" class="causa-input" type="password" autocomplete="off" spellcheck="false" required data-event="token">
+            <p id="token-help" class="ef-field__description">Kept in this page's memory only: never stored in the browser, never written to the repository or logs. Reloading the page forgets it.</p>
+          </div>
+          <div class="ef-field">
+            <label class="ef-field__label" for="repository">Repository (owner/name)</label>
+            <input id="repository" class="causa-input" type="text" autocomplete="off" spellcheck="false" required data-event="repository" data-on="input" data-bind-value="draft.repository">
+          </div>
+          <div class="causa-form__row">
+            <div class="ef-field">
+              <label class="ef-field__label" for="branch">Branch</label>
+              <input id="branch" class="causa-input" type="text" autocomplete="off" spellcheck="false" required data-event="branch" data-on="input" data-bind-value="draft.branch">
+            </div>
+            <div class="ef-field">
+              <label class="ef-field__label" for="workspace">Workspace</label>
+              <input id="workspace" class="causa-input" type="text" autocomplete="off" spellcheck="false" required data-event="workspace" data-on="input" data-bind-value="draft.workspace">
+            </div>
+          </div>
+          <button type="submit" class="ef-button" data-ef-variant="primary" data-bind-disabled="connect.busy">Connect</button>
+        </form>
+      </section>
+    </template>
+
+    <!-- Investigations (UI-001, UI-022). -->
+    <template data-if="screen.list">
+      <section class="causa-dashboard" aria-labelledby="dashboard-heading" data-percepta-screen="investigations">
+        <div class="causa-heading-row">
+          <h1 id="dashboard-heading">Investigations</h1>
+          <a class="ef-button causa-link-button" data-ef-variant="primary" href="#/investigations/new">New investigation</a>
+        </div>
+        <template data-if="list.loading"><p class="causa-muted" role="status">Loading investigations…</p></template>
+        <template data-if="list.failed"><p class="ef-alert causa-notice" data-tone="danger" role="alert" data-text="list.failure"></p></template>
+        <template data-if="list.empty"><p class="ef-empty-state">No investigations yet.</p></template>
+        <ul class="causa-cards">
+          <template data-each="cards" data-key="id">
+            <li class="causa-card ef-surface">
+              <h2 class="causa-card__title"><a class="causa-card__link" data-bind-href="href" data-text="title"></a></h2>
+              <p class="causa-card__lifecycle">Status: <span class="causa-tag" data-bind-data-tone="tone" data-text="status"></span> <span class="causa-muted" data-text="kind"></span></p>
+              <p class="causa-card__status" data-text="activity"></p>
+              <p class="causa-card__status"><span data-text="hypotheses"></span> · <span data-text="evidence"></span> · <span data-text="contradictions"></span></p>
+            </li>
+          </template>
+        </ul>
+      </section>
+    </template>
+
+    <template data-if="screen.new">
+      <section aria-labelledby="new-heading" data-percepta-screen="investigation-start">
+        <h1 id="new-heading">New investigation</h1>
+        <p class="causa-muted">Starting an investigation is not available in this build yet.</p>
+      </section>
+    </template>
+
+    <template data-if="screen.opening">
+      <section aria-labelledby="opening-heading" data-percepta-screen="investigation-opening">
+        <h1 id="opening-heading">Opening investigation</h1>
+        <p role="status" class="causa-muted">Opening investigation…</p>
+      </section>
+    </template>
+
+    <template data-if="screen.failed">
+      <section aria-labelledby="failed-heading" data-percepta-screen="investigation-failed">
+        <h1 id="failed-heading">This investigation could not be opened</h1>
+        <p class="ef-alert causa-notice" data-tone="danger" role="alert" data-text="failed.text"></p>
+        <p><a class="causa-back" href="#/investigations">Back to Investigations</a></p>
+      </section>
+    </template>
+
+    <template data-if="screen.missing">
+      <section aria-labelledby="missing-heading" data-percepta-screen="investigation-missing">
+        <h1 id="missing-heading">Investigation not found</h1>
+        <p>No investigation with this address exists in the connected repository. Nothing was changed.</p>
+        <p><a class="causa-back" href="#/investigations">Back to Investigations</a></p>
+      </section>
+    </template>
+
+    <template data-if="screen.notfound">
+      <section aria-labelledby="notfound-heading" data-percepta-screen="not-found">
+        <h1 id="notfound-heading">Page not found</h1>
+        <p>This address does not match any page in Causa.</p>
+        <p><a class="causa-back" href="#/investigations">Go to Investigations</a></p>
+      </section>
+    </template>
+
+    <!-- An investigation: header, secondary navigation and one section (UI-025, UI-029-O2). -->
+    <template data-if="screen.investigation">
+      <div class="causa-investigation">
+        <p><a class="causa-back" href="#/investigations">Investigations</a></p>
+        <header class="causa-inv-header">
+          <p class="causa-kind" data-text="inv.kind"></p>
+          <h1 data-text="inv.title"></h1>
+          <p class="causa-inv-meta">Status: <span class="causa-tag" data-bind-data-tone="inv.tone" data-text="inv.status"></span> <span class="causa-muted" data-text="inv.version"></span></p>
+        </header>
+        <nav class="causa-sections" aria-label="Investigation sections">
+          <ul>
+            <template data-each="sections" data-key="id">
+              <li><a data-bind-href="href" data-bind-aria-current="current" data-text="label"></a></li>
+            </template>
+          </ul>
+        </nav>
+
+        <template data-if="section.overview">
+          <section class="causa-overview" aria-label="Overview" data-percepta-screen="investigation-overview">
+            <h2>Overview</h2>
+            <div class="causa-overview-grid">
+              <section class="causa-panel" aria-labelledby="ov-what" data-percepta-region="observation">
+                <h3 id="ov-what">What happened</h3>
+                <p class="causa-observation" data-text="inv.description"></p>
+                <h4>Evidence</h4>
+                <template data-if="evidence.empty"><p class="causa-muted">No evidence recorded yet.</p></template>
+                <ul class="causa-list">
+                  <template data-each="evidence" data-key="id">
+                    <li class="causa-item causa-item--evidence"><p data-text="content"></p><p class="causa-muted"><span data-text="category"></span> · <span data-text="source"></span></p></li>
+                  </template>
+                </ul>
+              </section>
+              <section class="causa-panel" aria-labelledby="ov-hyp" data-percepta-region="hypotheses">
+                <h3 id="ov-hyp">Hypotheses</h3>
+                <template data-if="hypotheses.empty"><p class="causa-muted">No hypotheses recorded yet.</p></template>
+                <ul class="causa-list">
+                  <template data-each="hypotheses" data-key="id">
+                    <li class="causa-item causa-item--hypothesis"><p data-text="statement"></p><p><span class="causa-tag" data-bind-data-tone="tone" data-text="state"></span> <span class="causa-muted"><span data-text="supporting"></span>, <span data-text="contradicting"></span></span></p></li>
+                  </template>
+                </ul>
+              </section>
+              <section class="causa-panel" aria-labelledby="ov-open" data-percepta-region="blockers">
+                <h3 id="ov-open">Open questions</h3>
+                <template data-if="blockers.empty"><p class="causa-muted">No open questions recorded.</p></template>
+                <ul class="causa-list">
+                  <template data-each="blockers" data-key="id">
+                    <li class="causa-item causa-item--blocker" data-bind-id="anchor" data-bind-data-selected="selected" tabindex="-1" data-percepta-observation="blocker-visible"><p data-text="question"></p><p class="causa-muted" data-text="materiality"></p></li>
+                  </template>
+                </ul>
+              </section>
+              <section class="causa-panel" aria-labelledby="ov-next" data-percepta-region="next-actions">
+                <h3 id="ov-next">Next actions</h3>
+                <template data-if="capabilities.empty"><p class="causa-muted">No actions are available for this investigation.</p></template>
+                <ul class="causa-capabilities">
+                  <template data-each="capabilities" data-key="id">
+                    <li>
+                      <template data-if="legal">
+                        <button type="button" class="ef-button" data-ef-variant="primary" data-event="command" data-bind-data-percepta-capability="id" data-text="label"></button>
+                      </template>
+                      <template data-if="illegal"><div class="causa-capability">
+                        <button type="button" class="ef-button" disabled data-bind-data-percepta-capability="id" data-bind-aria-describedby="reasonId" data-text="label"></button>
+                        <p class="causa-capability__reason" data-bind-id="reasonId" data-bind-data-percepta-unavailable-reason-for="id" data-text="reason"></p>
+                        <template data-if="hasBlocker">
+                          <a class="causa-related" data-bind-href="blockerHref" data-bind-data-percepta-blocker-link-for="id">See the open question</a>
+                        </template>
+                      </div></template>
+                    </li>
+                  </template>
+                </ul>
+              </section>
+            </div>
+            <p class="causa-sync" data-percepta-region="persistence-state" data-bind-data-tone="sync.tone" role="status"><span class="ef-visually-hidden">Save status: </span><span data-text="sync.text"></span></p>
+          </section>
+        </template>
+
+        <template data-if="section.causal">
+          <section aria-labelledby="sec-causal" data-percepta-screen="investigation-causal-analysis">
+            <h2 id="sec-causal">Causal analysis</h2>
+            <p class="causa-muted">The causal graph is not available in this build yet.</p>
+          </section>
+        </template>
+        <template data-if="section.evidence">
+          <section aria-labelledby="sec-evidence" data-percepta-screen="investigation-evidence">
+            <h2 id="sec-evidence">Evidence</h2>
+            <template data-if="evidence.empty"><p class="causa-muted">No evidence recorded yet.</p></template>
+            <ul class="causa-list">
+              <template data-each="evidence" data-key="id">
+                <li class="causa-item causa-item--evidence"><p data-text="content"></p><p class="causa-muted"><span data-text="category"></span> · <span data-text="source"></span> · <span data-text="recorded"></span></p></li>
+              </template>
+            </ul>
+          </section>
+        </template>
+        <template data-if="section.hypotheses">
+          <section aria-labelledby="sec-hyp" data-percepta-screen="investigation-hypotheses">
+            <h2 id="sec-hyp">Hypotheses</h2>
+            <template data-if="hypotheses.empty"><p class="causa-muted">No hypotheses recorded yet.</p></template>
+            <ul class="causa-list">
+              <template data-each="hypotheses" data-key="id">
+                <li class="causa-item causa-item--hypothesis"><p data-text="statement"></p><p><span class="causa-tag" data-bind-data-tone="tone" data-text="state"></span> <span class="causa-muted"><span data-text="supporting"></span>, <span data-text="contradicting"></span></span></p></li>
+              </template>
+            </ul>
+          </section>
+        </template>
+        <template data-if="section.timeline">
+          <section aria-labelledby="sec-timeline" data-percepta-screen="investigation-timeline">
+            <h2 id="sec-timeline">Investigation history</h2>
+            <template data-if="timeline.empty"><p class="causa-muted">No recorded events.</p></template>
+            <ol class="causa-timeline">
+              <template data-each="timeline" data-key="id">
+                <li class="causa-timeline__entry"><span data-text="sequence"></span><span class="causa-timeline__type" data-text="type"></span><span data-text="occurred"></span><span class="causa-muted" data-text="recorded"></span><span class="causa-muted" data-text="actor"></span></li>
+              </template>
+            </ol>
+          </section>
+        </template>
+        <template data-if="section.corrective">
+          <section aria-labelledby="sec-corrective" data-percepta-screen="investigation-corrective-actions">
+            <h2 id="sec-corrective">Corrective actions</h2>
+            <p class="causa-muted">Corrective actions are not available in this build yet.</p>
+          </section>
+        </template>
+        <template data-if="section.report">
+          <section aria-labelledby="sec-report" data-percepta-screen="investigation-report">
+            <h2 id="sec-report">Report</h2>
+            <p class="causa-muted">The report preview is not available in this build yet.</p>
+          </section>
+        </template>
+      </div>
+    </template>
+
+    <!-- Administration (UI-018, VER-007): read-only system information. -->
+    <template data-if="screen.admin">
+      <section aria-labelledby="admin-heading" data-percepta-screen="administration">
+        <h1 id="admin-heading">Administration</h1>
+        <p class="causa-muted">System information and diagnostics. Read-only. Tokens are never shown.</p>
+        <table class="causa-admin">
+          <thead><tr><th scope="col">Item</th><th scope="col">Value</th><th scope="col">State</th></tr></thead>
+          <tbody>
+            <template data-each="admin" data-key="id">
+              <tr><th scope="row" data-text="label"></th><td data-text="value"></td><td data-text="state"></td></tr>
+            </template>
+          </tbody>
+        </table>
+      </section>
+    </template>
+
+    <!-- Settings (UI-019): session-scope preferences only. -->
+    <template data-if="screen.settings">
+      <section aria-labelledby="settings-heading" data-percepta-screen="settings">
+        <h1 id="settings-heading">Settings</h1>
+        <p class="causa-muted">These preferences apply to this browser tab for this session only. They are not stored.</p>
+        <div class="ef-field causa-filter">
+          <label class="ef-field__label" for="setting-text-size">Text size</label>
+          <select id="setting-text-size" class="causa-input" data-event="text-size" data-bind-value="settings.textSize">
+            <option value="standard">Standard</option>
+            <option value="large">Large</option>
+          </select>
+        </div>
+        <div class="ef-field causa-filter">
+          <label class="ef-field__label" for="setting-motion">Motion</label>
+          <select id="setting-motion" class="causa-input" data-event="motion" data-bind-value="settings.motion">
+            <option value="system">Follow the system setting</option>
+            <option value="reduced">Reduce motion</option>
+          </select>
+        </div>
+        <h2>Data repository connection</h2>
+        <p data-text="settings.connection"></p>
+      </section>
+    </template>
   </main>
+  <!-- Test build only: the Percepta state hook sends the injected state through this control (main.js). -->
+  <input id="percepta-state" type="hidden" data-event="percepta-state">
 </body>
 </html>
