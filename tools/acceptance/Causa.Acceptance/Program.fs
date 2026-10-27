@@ -118,6 +118,21 @@ let dependencyLockSha root =
     |> Text.Encoding.UTF8.GetBytes
     |> sha256Hex
 
+/// The environment the evidence was produced in, from the CI runner's own variables (absent ones are omitted).
+let runEnvironment () =
+    let v name = Environment.GetEnvironmentVariable name |> Option.ofObj |> Option.filter (String.IsNullOrWhiteSpace >> not)
+    [ "runner.os", v "RUNNER_OS"
+      "runner.arch", v "RUNNER_ARCH"
+      "runner.image", v "ImageOS" |> Option.map (fun os -> os + (v "ImageVersion" |> Option.map (sprintf " %s") |> Option.defaultValue ""))
+      "dotnet.runtime", Some(Runtime.InteropServices.RuntimeInformation.FrameworkDescription)
+      "os.description", Some(Runtime.InteropServices.RuntimeInformation.OSDescription)
+      "ci.run",
+      (match v "GITHUB_SERVER_URL", v "GITHUB_REPOSITORY", v "GITHUB_RUN_ID" with
+       | Some s, Some r, Some id -> Some(sprintf "%s/%s/actions/runs/%s" s r id)
+       | _ -> None)
+      "ci.workflow", v "GITHUB_WORKFLOW" ]
+    |> List.choose (fun (k, x) -> x |> Option.map (fun x -> k, x))
+
 let ledger opts =
     let root = one opts "root" |> Option.defaultValue "."
     let plan, trace = traceOf opts root
@@ -136,7 +151,8 @@ let ledger opts =
           FrozenFixtureDigest = one opts "frozen-fixture-digest" |> Option.defaultValue "unavailable: no frozen fixture set in this candidate"
           DependencyLockSha = dependencyLockSha root
           InterfaceManifestSha = one opts "interface-manifest-sha" |> Option.defaultValue "unavailable: no interface manifest in this candidate"
-          Command = one opts "command" |> Option.defaultValue "causa-acceptance ledger" }
+          Command = one opts "command" |> Option.defaultValue "causa-acceptance ledger"
+          Environment = runEnvironment () }
     let ctx =
         [ "runId", jstr inputs.RunId; "sourceSha", jstr inputs.SourceSha ] @ (contextOf opts |> List.map (fun (k, v) -> k, jstr v))
     Json.write (Path.Combine(outDir, "traceability.json")) (Traceability.toJson trace ctx) |> ignore
