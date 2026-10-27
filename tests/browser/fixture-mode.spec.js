@@ -95,6 +95,11 @@ async function openFixtureInvestigation(page, workspace) {
   await expect(page.getByRole("heading", { level: 1, name: /Synthetic fixture/ })).toBeVisible({ timeout: 60_000 });
 }
 
+async function recordHypothesis(page, text) {
+  await page.locator('input[aria-labelledby="input-label-RecordHypothesis"]').fill(text);
+  await page.locator('button[data-percepta-capability="RecordHypothesis"]').first().click();
+}
+
 async function recordObservation(page, text) {
   await page.locator('input[aria-labelledby="input-label-RecordObservation"]').fill(text);
   await page.locator('button[data-percepta-capability="RecordObservation"]').first().click();
@@ -128,7 +133,7 @@ test(
   async ({ page, githubRequests }) => {
     // The synthetic-conflict workspace: another writer commits just before this page's first save (deterministic).
     await openFixtureInvestigation(page, "synthetic-conflict");
-    await recordObservation(page, "My change, decided before the other writer's commit.");
+    await recordHypothesis(page, "My change, decided before the other writer's commit.");
     const conflict = page.locator(".causa-conflict");
     await expect(conflict).toContainText("Someone else changed this investigation", { timeout: 60_000 });
     await expect(page.locator(".causa-sync [role=status]")).toContainText("someone else changed the repository");
