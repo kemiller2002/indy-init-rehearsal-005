@@ -153,6 +153,7 @@ let toJson (trace: Trace) (context: (string * JsonNode) list) : JsonNode =
                       [ "id", jstr t.Obligation.Id
                         "requirement", jstr t.Obligation.Requirement
                         "sourceObligation", jstr t.Obligation.SourceObligation
+                        "text", jstr t.Obligation.Text
                         "binding", jstr (bindingName t.Binding)
                         "verification", jstr (verificationName t.Verification)
                         "declaredIn",
