@@ -100,7 +100,10 @@ let private syncStatus (m: Model) (d: Document) : A.SyncStatus =
     let pendingEvents = d.Local.Version - (d.Confirmed |> Option.map (fun c -> c.Version) |> Option.defaultValue 0L)
     if d.ReadOnly then A.ReadOnly
     // Fixture mode never claims GitHub: changes live in this page only (PF-003-O4).
-    elif m.Target |> Option.exists Fixture.isFixture then A.LocalOnly "Fixture mode: kept in this page only; nothing is saved to GitHub."
+    // (A conflict, an unknown outcome or a failure is still shown as such: those are the program's own states.)
+    elif m.Target |> Option.exists Fixture.isFixture
+         && not (List.contains (Sync.documentStatus m d) [ "conflict"; "unknown"; "failed" ]) then
+        A.LocalOnly "Fixture mode: kept in this page only; nothing is saved to GitHub."
     else
         match Sync.documentStatus m d with
         | "clean" -> A.NoChanges
@@ -273,9 +276,10 @@ and private handleState (entropy: A.Entropy) (input: EP.PersistenceInput) (s: St
         if not fixtureAllowed then
             { s with Notice = Some("warning", "Fixture mode exists only in the test build. Nothing was sent.") }, []
         else
-            match Fixture.provider (), Credential.create "fixture-mode-no-credential" with
+            let ws = if List.contains (r.Workspace.Trim()) Fixture.workspaces then r.Workspace.Trim() else Fixture.workspace
+            match Fixture.providerFor ws, Credential.create "fixture-mode-no-credential" with
             | Ok provider, Ok placeholder ->
-                let t = { Owner = Fixture.owner; Repo = Fixture.repo; Branch = Fixture.branch; Workspace = Fixture.workspace }
+                let t = { Owner = Fixture.owner; Repo = Fixture.repo; Branch = Fixture.branch; Workspace = ws }
                 apply entropy (Msg.Connect(t, placeholder)) { s with Fixture = Some provider }
             | Error e, _
             | _, Error e -> { s with Notice = Some("warning", "The fixture could not be generated: " + e) }, []

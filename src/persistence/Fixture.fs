@@ -95,14 +95,36 @@ module Fixture =
                         Store.submit v (envelope i label v.Version command)
                         |> Result.mapError (fun r -> label + ": " + r.Code + " " + String.Join(" ", r.Reasons)))) (Ok v)
 
-    /// The in-page provider: the recorded-behaviour GitHub holding the synthetic workspace. No credential is needed
+    /// The workspace of the conflict scenario: another writer changes the investigation just before this page's first
+    /// save reaches the provider, so the save is refused as stale and the person resolves the conflict (PF-009).
+    let conflictWorkspace = "synthetic-conflict"
+
+    let workspaces = [ workspace; conflictWorkspace ]
+
+    /// The in-page provider: the recorded-behaviour GitHub holding a synthetic workspace. No credential is needed
     /// and none is sent anywhere: nothing leaves the page.
-    let provider () : Result<RecordedGitHub, string> =
+    let providerFor (ws: string) : Result<RecordedGitHub, string> =
         investigation ()
         |> Result.map (fun v ->
             let p = RecordedGitHub(owner, repo, branch, false)
             p.AnyCredential <- true
-            let t = { Owner = owner; Repo = repo; Branch = branch; Workspace = workspace }
-            p.CommitFiles(branch, Store.files v |> List.map (fun (n, b) -> Target.investigationDir t v.InvestigationId + "/" + n, b), "fixture: synthetic investigation")
+            let t = { Owner = owner; Repo = repo; Branch = branch; Workspace = ws }
+            let dir = Target.investigationDir t v.InvestigationId
+            p.CommitFiles(branch, Store.files v |> List.map (fun (n, b) -> dir + "/" + n, b), "fixture: synthetic investigation")
             |> ignore
+            if ws = conflictWorkspace then
+                p.BeforeFirstWrite <-
+                    Some(fun () ->
+                        let other: CommandEnvelope =
+                            { CommandId = gid "command/other-writer"
+                              Investigation = Id(gid "investigation")
+                              ExpectedVersion = Some v.Version
+                              Actor = { ActorId = "fixture-other-writer"; Kind = Human }
+                              RequestedAt = at 500
+                              Command = RecordHypothesis(idOf "h/other-writer", "Another writer's hypothesis: a certificate rotation.", None) }
+                        match Store.submit v other with
+                        | Ok theirs -> p.CommitFiles(branch, Store.files theirs |> List.map (fun (n, b) -> dir + "/" + n, b), "fixture: another writer") |> ignore
+                        | Error _ -> ())
             p)
+
+    let provider () = providerFor workspace
