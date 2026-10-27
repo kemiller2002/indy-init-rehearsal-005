@@ -125,7 +125,7 @@ let private programLive (ctx: Ctx) (cred: Credential) (owner: string) (repo: str
     match Target.create owner repo branch ("rec-" + runId + "-app") with
     | Error _ -> expect ctx "live.app.target" false "the application target is invalid"
     | Ok t ->
-        let env = { Now = now }
+        let env = { Now = now; Nonce = Guid.NewGuid().ToString "N" }
         let mutable stored = None
         let run lose m msg =
             let m2, refusals, s = runWith lose env m msg
@@ -188,7 +188,8 @@ let private programLive (ctx: Ctx) (cred: Credential) (owner: string) (repo: str
         expect ctx "live.app.rejectedToken" (Sync.connectionLabel x = "accessDenied") ("a rejected token connects as " + Sync.connectionLabel x)
 
 let private recordAll (token: string) (repoFull: string) (runId: string) =
-    let ctx = { Secrets = [ token; repoFull ]; Failures = [] }
+    let readOnlyToken = Environment.GetEnvironmentVariable "CAUSA_READONLY_TOKEN" |> Option.ofObj |> Option.defaultValue ""
+    let ctx = { Secrets = [ token; repoFull; readOnlyToken ] |> List.filter (fun s -> s <> ""); Failures = [] }
     let cred =
         match Credential.create token with
         | Ok c -> c
@@ -213,7 +214,7 @@ let private recordAll (token: string) (repoFull: string) (runId: string) =
     let repoOf (r: HttpResponse) = GitHub.classify r |> Result.bind GitHub.parseRepository
     // Repository: authorized, anonymous, rejected credential. Permissions are recorded (booleans only).
     let info =
-        observe ctx "repository.read.authorized" "GET /repos/{owner}/{repo}" (GitHub.getRepository (Some cred) probe) (repoOf >> classification) []
+        observe ctx "repository.read.authorized" "GET /repos/{owner}/{repo}" (GitHub.getRepository (Some cred) probe (Guid.NewGuid().ToString "N")) (repoOf >> classification) []
         |> Option.bind (fun r ->
             match GitHub.classify r with
             | Ok(JObj o) ->
@@ -223,9 +224,9 @@ let private recordAll (token: string) (repoFull: string) (runId: string) =
                 | _ -> emit ctx (JObj [ "scenario", JStr "repository.permissions"; "permissions", JStr "absent" ])
                 repoOf r |> Result.toOption
             | _ -> None)
-    observe ctx "repository.read.anonymous" "GET /repos/{owner}/{repo}" (GitHub.getRepository None probe) (repoOf >> classification) [] |> ignore
+    observe ctx "repository.read.anonymous" "GET /repos/{owner}/{repo}" (GitHub.getRepository None probe (Guid.NewGuid().ToString "N")) (repoOf >> classification) [] |> ignore
     let bogus = Credential("causa-invalid-credential-for-recording")
-    observe ctx "repository.read.rejectedCredential" "GET /repos/{owner}/{repo}" (GitHub.getRepository (Some bogus) probe) (repoOf >> classification) [] |> ignore
+    observe ctx "repository.read.rejectedCredential" "GET /repos/{owner}/{repo}" (GitHub.getRepository (Some bogus) probe (Guid.NewGuid().ToString "N")) (repoOf >> classification) [] |> ignore
     match info with
     | None ->
         Console.Out.WriteLine endMarker
@@ -330,6 +331,16 @@ let private recordAll (token: string) (repoFull: string) (runId: string) =
                     let headAfterConflict = readHead "ref.read.afterConflict"
                     sw2.Stop()
                     expect ctx "live.conflict" (refused && headAfterConflict = Some oid2) (sprintf "stale write refused and head unchanged; conflict handled in %d ms" sw2.ElapsedMilliseconds)
+                    // DC-004: a credential without write access to the test repository (the workflow's own read-only
+                    // installation token). Its repository read may omit permissions; its write is refused by GitHub.
+                    let readOnly = Environment.GetEnvironmentVariable "CAUSA_READONLY_TOKEN" |> Option.ofObj |> Option.defaultValue ""
+                    if readOnly <> "" then
+                        let ro = Credential readOnly
+                        let ctxSecrets = ctx.Secrets
+                        ignore ctxSecrets
+                        observe ctx "repository.read.installationToken" "GET /repos/{owner}/{repo}" (GitHub.getRepository (Some ro) t (Guid.NewGuid().ToString "N")) (repoOf >> classification) [] |> ignore
+                        write "write.forbidden" oid2 "causa: read-only credential (recorder)" second t.Branch ro |> ignore
+                        expect ctx "live.forbidden.head" (readHead "ref.read.afterForbidden" = Some oid2) "a refused write moved nothing"
                     // Missing branch and rejected credential on the write path.
                     write "write.missingBranch" oid2 "causa: missing branch (recorder)" second ("causa-missing-" + runId) cred |> ignore
                     let rejected = write "write.rejectedCredential" oid2 "causa: rejected credential (recorder)" second t.Branch bogus
@@ -365,7 +376,7 @@ let private catalogLive (token: string) (repoFull: string) (branch: string) (wor
             Console.Out.WriteLine("RESULT: BLOCKED (" + String.Join(" ", p) + ")")
             2
         | Ok t ->
-            let env = { Now = now }
+            let env = { Now = now; Nonce = Guid.NewGuid().ToString "N" }
             let sw = Stopwatch.StartNew()
             let m, refusals = runProgram env Sync.initial (Connect(t, cred))
             sw.Stop()

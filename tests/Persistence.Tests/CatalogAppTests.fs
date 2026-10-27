@@ -15,6 +15,8 @@ type private Tamper =
     | WrongStateDigest
     | ExtraInvestigation
     | MissingCase
+    | MalformedPointer
+    | MalformedManifest
 
 let private build (tamper: Tamper) =
     let fake = newFake ()
@@ -54,8 +56,8 @@ let private build (tamper: Tamper) =
     fake.CommitFiles(
         branch,
         files
-        @ [ "catalog/active.json", utf8 (Json.canonicalText pointer + "\n")
-            "catalog/synthetic-v1/manifest.json", utf8 (Json.canonicalText manifest + "\n") ]
+        @ [ "catalog/active.json", utf8 (if tamper = MalformedPointer then "{\"activeCatalog\":" else Json.canonicalText pointer + "\n")
+            "catalog/synthetic-v1/manifest.json", utf8 (if tamper = MalformedManifest then "{\"cases\":[{\"caseKey\":1}]}\n" else Json.canonicalText manifest + "\n") ]
     )
     |> ignore
     fake, cases
@@ -65,7 +67,8 @@ let private build (tamper: Tamper) =
 [<Trait("obligation", "VPO-d60e3a3a25cb106d")>]
 [<Trait("obligation", "VPO-dc48d066cfa2309d")>]
 [<Trait("obligation", "VPO-7ced47ef45099aab")>]
-let ``VPO-c81484cbcf203d4f VPO-d60e3a3a25cb106d VPO-dc48d066cfa2309d after Connect every catalog case loads, replays to its manifest digest and is read-only`` () =
+[<Trait("obligation", "VPO-557743cb4997c484")>]
+let ``VPO-c81484cbcf203d4f VPO-d60e3a3a25cb106d VPO-dc48d066cfa2309d VPO-557743cb4997c484 after Connect every catalog case loads, replays to its manifest digest and is read-only`` () =
     let fake, cases = build NoTamper
     let app = App(fake)
     match app.Connect catalogWs with
@@ -112,8 +115,23 @@ let ``VPO-c81484cbcf203d4f an investigation the manifest does not list is never 
     Assert.True(app.Model.Documents.IsEmpty)
 
 [<Fact>]
+[<Trait("obligation", "VPO-9d59cc57fd44b927")>]
+[<Trait("obligation", "VPO-f52d9071426e82b3")>]
+let ``VPO-9d59cc57fd44b927 VPO-f52d9071426e82b3 a malformed catalog pointer or manifest fails closed and presents no case`` () =
+    for tamper in [ MalformedPointer; MalformedManifest ] do
+        let fake, _ = build tamper
+        let app = App(fake)
+        app.Connect catalogWs |> ignore
+        Assert.True((app.Connection = "incompatible"), sprintf "%A: %s %A" tamper app.Connection app.Model.Catalog)
+        Assert.True(app.Model.Documents.IsEmpty)
+        match app.Model.Catalog with
+        | CatalogFailed _ -> ()
+        | other -> failwithf "%A: %A" tamper other
+
+[<Fact>]
 [<Trait("obligation", "VPO-c81484cbcf203d4f")>]
-let ``VPO-c81484cbcf203d4f a missing catalog case fails the catalog closed`` () =
+[<Trait("obligation", "VPO-9d59cc57fd44b927")>]
+let ``VPO-c81484cbcf203d4f VPO-9d59cc57fd44b927 a missing catalog case fails the catalog closed`` () =
     let fake, _ = build MissingCase
     let app = App(fake)
     app.Connect catalogWs |> ignore

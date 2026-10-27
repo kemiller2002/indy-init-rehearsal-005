@@ -9,7 +9,6 @@
     <ProjectReference Include="../../src/persistence/Causa.Persistence.fsproj" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Synthetic.fs" />
     <Compile Include="FakeGitHub.fs" />
     <Compile Include="Harness.fs" />
@@ -17,6 +16,7 @@
     <Compile Include="SyncAppTests.fs" />
     <Compile Include="CatalogAppTests.fs" />
     <Compile Include="DcTableTests.fs" />
+    <Compile Include="DctProviderTests.fs" />
     <Compile Include="ConformanceTests.fs" />
   </ItemGroup>
   <ItemGroup>

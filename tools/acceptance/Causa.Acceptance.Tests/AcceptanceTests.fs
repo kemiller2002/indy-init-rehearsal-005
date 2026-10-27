@@ -56,7 +56,7 @@ let ``Playwright results are discovered with obligations from titles, tags and a
                      {"title":"passes %s","tags":[],"tests":[{"projectName":"chromium","status":"expected","annotations":[],"results":[{"status":"passed"}]}]},
                      {"title":"tagged","tags":["@%s"],"tests":[{"projectName":"chromium","status":"skipped","annotations":[],"results":[{"status":"skipped"}]}]},
                      {"title":"annotated","tags":[],"tests":[{"projectName":"chromium","status":"unexpected","annotations":[{"type":"obligation","description":"%s"}],"results":[{"status":"failed"}]}]},
-                     {"title":"flaky","tags":["@%s"],"tests":[{"projectName":"chromium","status":"flaky","annotations":[],"results":[{"status":"failed"},{"status":"passed"}]}]}],
+                     {"title":"flaky","tags":["%s","stack-smoke-limen"],"tests":[{"projectName":"chromium","status":"flaky","annotations":[],"results":[{"status":"failed"},{"status":"passed"}]}]}],
                    "suites":[]}]}"""
                 o1
                 o2
@@ -72,6 +72,9 @@ let ``Playwright results are discovered with obligations from titles, tags and a
     Assert.Equal<string list>([ o3 ], rs[2].Obligations)
     // A retry is not a pass.
     Assert.Equal(Failed, rs[3].Outcome)
+    // The JSON reporter drops the `@` of a tag; it is restored, and an id tag still binds.
+    Assert.Equal<string list>([ o1 ], rs[3].Obligations)
+    Assert.Contains("@stack-smoke-limen", rs[3].Tags)
     Assert.StartsWith("playwright:a.spec.js > passes", rs[0].TestId)
 
 [<Fact>]

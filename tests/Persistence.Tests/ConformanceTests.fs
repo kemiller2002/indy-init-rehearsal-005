@@ -67,9 +67,9 @@ let ``VPO-03b8215501e25334 VPO-74efa48033c82a96 VPO-bb13dc090d4c152b the fake ag
     let created = fake.Handle(GitHub.createCommit cred t head0 "create" "" files)
     let oid = fake.Head branch
     let cases: (string * (unit -> HttpResponse) * (HttpResponse -> string)) list =
-        [ "repository.read.authorized", (fun () -> fake.Handle(GitHub.getRepository cred t)), repoOf
-          "repository.read.anonymous", (fun () -> fake.Handle(GitHub.getRepository None t)), repoOf
-          "repository.read.rejectedCredential", (fun () -> fake.Handle(GitHub.getRepository bogus t)), repoOf
+        [ "repository.read.authorized", (fun () -> fake.Handle(GitHub.getRepository cred t "n0")), repoOf
+          "repository.read.anonymous", (fun () -> fake.Handle(GitHub.getRepository None t "n0")), repoOf
+          "repository.read.rejectedCredential", (fun () -> fake.Handle(GitHub.getRepository bogus t "n0")), repoOf
           "ref.read.head", (fun () -> fake.Handle(GitHub.getBranchHead cred t "n1")), headOf
           "ref.read.missingBranch", (fun () -> fake.Handle(GitHub.getBranchHead cred { t with Branch = "causa-missing" } "n2")), headOf
           "contents.list.missingPath", (fun () -> fake.Handle(GitHub.listDirectory cred t oid "workspaces/demo/absent/investigations")), listOf

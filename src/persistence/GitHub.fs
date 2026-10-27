@@ -38,9 +38,11 @@ module GitHub =
           Fresh = fresh
           Credential = cred }
 
-    let getRepository (cred: Credential option) (t: Target) = get cred true (repo t)
+    /// The repository: a mutable read (permissions, default branch), sent under a URL unique to this read.
+    let getRepository (cred: Credential option) (t: Target) (nonce: string) = get cred true (repo t + "?causa_fresh=" + seg nonce)
 
-    /// The branch head: a mutable read, never served from a cache (unique query value + Fresh).
+    /// The branch head: a mutable read, never served from a cache. `nonce` must be unique across page loads and
+    /// sessions (DC-005): the program passes its page-load nonce plus the request id.
     let getBranchHead (cred: Credential option) (t: Target) (nonce: string) =
         get cred true (repo t + "/git/ref/heads/" + pathSegs t.Branch + "?causa_fresh=" + seg nonce)
 
@@ -189,6 +191,9 @@ module GitHub =
                 elif kind = "NOT_FOUND" then Error NotFound
                 elif kind = "UNPROCESSABLE" || msg.Contains("does not exist", StringComparison.Ordinal) then Error(MissingRef kind)
                 elif kind = "RATE_LIMITED" then Error(RateLimited None)
+                // Observed live (recording run 40584769828): an error with a message and no type, after ~4 s. Nothing
+                // says it was not applied, so it is an unknown outcome, never a refusal that invites a retry.
+                elif kind = "" then Error(Unknown "GitHub answered with an untyped error")
                 else Error(Rejected(200, kind))
 
     /// The trailer that carries a change's marker in its commit message (audit metadata only, CONTRACT §9.4.5).

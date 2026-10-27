@@ -10,6 +10,8 @@ on:
     branches: [r5/persist]
     paths:
       - "src/persistence/**"
+      - "src/app/PersistencePort.fs"
+      - "tests/browser/live-*.spec.js"
       - ".github/workflows/persistence-provider.yml"
   workflow_dispatch:
 
@@ -36,6 +38,8 @@ jobs:
           CAUSA_GITHUB_TOKEN: ${{ secrets.CAUSA_GITHUB_TOKEN }}
           CAUSA_TEST_REPO_SECRET: ${{ secrets.CAUSA_TEST_REPO }}
           CAUSA_TEST_REPO_VAR: ${{ vars.CAUSA_TEST_REPO }}
+          # DC-004: the workflow's own read-only token, which cannot write to the test repository.
+          CAUSA_READONLY_TOKEN: ${{ github.token }}
         run: dotnet src/persistence/Tool/bin/Release/net10.0/causa-persistence.dll record
       # T25 / EXT-DATA-013 / PF-014: load the active historical catalog through the application's own Sync program
       # with a credential (DEC-025: no anonymous mode). The workflow's read-only token is enough for a public read
@@ -45,3 +49,41 @@ jobs:
         env:
           CAUSA_CATALOG_TOKEN: ${{ github.token }}
         run: dotnet src/persistence/Tool/bin/Release/net10.0/causa-persistence.dll catalog
+
+  # The @live browser journey (tests/browser/live-*.spec.js) on this branch, so the write path through the real page
+  # is proven before it reaches main (where build-and-test's live job runs it). Traces, screenshots and video are
+  # off; nothing is uploaded; any file containing the token is deleted and fails the job.
+  browser-live:
+    needs: record
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install npm dependencies
+        run: if [ -f package-lock.json ]; then npm ci; else npm install --no-audit --no-fund; fi
+      - name: Build the site
+        run: npm run build
+      - name: Install Chromium
+        timeout-minutes: 10
+        run: timeout 300 npx playwright install --with-deps chromium
+      - name: Live browser journey against the test repository
+        env:
+          CAUSA_GITHUB_TOKEN: ${{ secrets.CAUSA_GITHUB_TOKEN }}
+          CAUSA_TEST_REPO: ${{ secrets.CAUSA_TEST_REPO || vars.CAUSA_TEST_REPO }}
+        run: npx playwright test tests/browser/live-persistence.spec.js --grep @live --project chromium --trace off --reporter=list
+      - name: Refuse to keep any file that contains the token
+        if: always()
+        env:
+          CAUSA_GITHUB_TOKEN: ${{ secrets.CAUSA_GITHUB_TOKEN }}
+        run: |
+          rm -rf test-results playwright-report
+          if [ -z "$CAUSA_GITHUB_TOKEN" ]; then exit 0; fi
+          leaked=$(grep -rlF -- "$CAUSA_GITHUB_TOKEN" . --exclude-dir=node_modules --exclude-dir=.git 2>/dev/null || true)
+          if [ -n "$leaked" ]; then echo "$leaked" | xargs rm -f; echo "::error::Files containing the token were found and deleted."; exit 1; fi

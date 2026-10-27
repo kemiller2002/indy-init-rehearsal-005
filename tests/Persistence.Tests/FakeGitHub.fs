@@ -117,6 +117,11 @@ type Fake(owner: string, repo: string, defaultBranch: string, publicRepo: bool) 
         branches <- branches |> Map.add defaultBranch first
 
     member _.Requests = List.rev log
+    /// Which recorded repository form answers an authorized read (DC-004: forms without permissions exist).
+    member val RepositoryForm = "repository.read.authorized" with get, set
+    member val Push = true with get, set
+    /// Credentials GitHub refuses writes for (recorded "write.forbidden"), though they may read.
+    member val ReadOnly: Set<string> = Set.empty with get, set
     member _.Head(branch: string) = Map.find branch branches
     member _.Branches = branches
 
@@ -135,6 +140,17 @@ type Fake(owner: string, repo: string, defaultBranch: string, publicRepo: bool) 
         commits <- commits |> Map.add oid tree
         parents <- parents |> Map.add oid parent
         messages <- messages |> Map.add oid message
+        branches <- branches |> Map.add branch oid
+        oid
+
+    /// Another writer deletes every file under a prefix.
+    member _.RemoveFiles(branch: string, prefix: string) =
+        let parent = Map.find branch branches
+        let tree = Map.find parent commits |> Map.filter (fun k _ -> not (k.StartsWith(prefix, System.StringComparison.Ordinal)))
+        let oid = newOid ()
+        commits <- commits |> Map.add oid tree
+        parents <- parents |> Map.add oid parent
+        messages <- messages |> Map.add oid "fake delete"
         branches <- branches |> Map.add branch oid
         oid
 
@@ -170,7 +186,7 @@ type Fake(owner: string, repo: string, defaultBranch: string, publicRepo: bool) 
         | RejectedCredential, _ -> respond "repository.read.rejectedCredential" None
         | Anonymous, _ when not publicRepo -> respond "ref.read.missingBranch" None
         | _, "GET" when path = repoPrefix ->
-            let scenario = if auth = ValidCredential then "repository.read.authorized" else "repository.read.anonymous"
+            let scenario = if auth = ValidCredential then this.RepositoryForm else "repository.read.anonymous"
             respond
                 scenario
                 (Some(
@@ -179,7 +195,7 @@ type Fake(owner: string, repo: string, defaultBranch: string, publicRepo: bool) 
                           "name", JStr repo
                           "private", JBool(not publicRepo)
                           "default_branch", JStr defaultBranch
-                          "permissions", JObj [ "admin", JBool false; "maintain", JBool false; "pull", JBool true; "push", JBool true; "triage", JBool false ] ]
+                          "permissions", JObj [ "admin", JBool false; "maintain", JBool false; "pull", JBool true; "push", JBool this.Push; "triage", JBool false ] ]
                 ))
         | _, "GET" when path.StartsWith(repoPrefix + "/git/ref/heads/") ->
             let branch = Uri.UnescapeDataString(path.Substring((repoPrefix + "/git/ref/heads/").Length))
@@ -264,6 +280,10 @@ type Fake(owner: string, repo: string, defaultBranch: string, publicRepo: bool) 
             | Some b -> respond "blob.read" (Some(JObj [ "sha", JStr sha; "size", JInt(int64 b.Length); "encoding", JStr "base64"; "content", JStr(Convert.ToBase64String b) ]))
             | None -> respond "contents.list.missingPath" None
         | Anonymous, "POST" -> respond "write.rejectedCredential" None
+        | _, "POST" when path = "/graphql" && (r.Credential |> Option.exists (fun c -> this.ReadOnly.Contains c.AuthorizationHeader)) ->
+            respond
+                "write.forbidden"
+                (Some(JObj [ "errors", JArr [ JObj [ "type", JStr "FORBIDDEN"; "message", JStr "fake: not accessible"; "path", JArr [ JStr "createCommitOnBranch" ]; "locations", JArr [ JObj [ "line", JInt 1L; "column", JInt 1L ] ]; "extensions", JObj [ "saml_failure", JBool false; "ip_allow_list_failure", JBool false ] ] ] ]))
         | _, "POST" when path = "/graphql" ->
             let input =
                 match r.Body |> Option.map Json.parse with
