@@ -191,6 +191,9 @@ module GitHub =
                 elif kind = "NOT_FOUND" then Error NotFound
                 elif kind = "UNPROCESSABLE" || msg.Contains("does not exist", StringComparison.Ordinal) then Error(MissingRef kind)
                 elif kind = "RATE_LIMITED" then Error(RateLimited None)
+                // Observed live (recording run 40584769828): an error with a message and no type, after ~4 s. Nothing
+                // says it was not applied, so it is an unknown outcome, never a refusal that invites a retry.
+                elif kind = "" then Error(Unknown "GitHub answered with an untyped error")
                 else Error(Rejected(200, kind))
 
     /// The trailer that carries a change's marker in its commit message (audit metadata only, CONTRACT §9.4.5).
