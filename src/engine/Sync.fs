@@ -10,6 +10,8 @@
 ///            reconciliation re-reads the head first. Pending, sending, conflicted and unknown stay distinct.
 module IndyInitRootCauseInvestigator.Engine.Sync
 
+open IndyInitRootCauseInvestigator.Engine
+
 /// A Git commit object id. Provider metadata: never written into domain files.
 type Oid = Oid of string
 
@@ -339,3 +341,255 @@ let status =
     | Reconciling _ -> Checking
     | Held(_, _, Conflict _) -> Conflicted
     | Held(_, _, NotWritten _) -> Failed
+
+// ---- durable per-document state (persistence embeds one Sync.State per investigation) ----
+
+/// After a reload from a local durable copy nothing is in flight any more: a request that may have left is Unknown
+/// (DC-003), connection attempts are dropped (credentials are in memory only), held and pending changes are kept.
+/// The request counter is kept, so no answer to a request issued before the reload can ever match.
+let restore (state: State) : State =
+    let phase =
+        match state.Phase with
+        | Disconnected
+        | Connecting _
+        | ConnectRefused _ -> Disconnected
+        | Idle _
+        | Held _
+        | Unknown _ -> state.Phase
+        | Writing(head, attempt) -> Unknown(head, { attempt with Stage = Sent })
+        | Confirming(head, attempt, _, _)
+        | Reconciling(head, attempt, _) -> Unknown(head, attempt)
+    { state with Phase = phase }
+
+/// After restore, a document whose head was read before the reload is re-attached to a fresh connection
+/// (the outer machine has read the branch head again): Disconnected documents become Idle at that head.
+let attach (head: Oid) (state: State) : State =
+    match state.Phase with
+    | Disconnected -> { state with Phase = Idle(head, None) }
+    | _ -> state
+
+let private oidText (Oid s) = s
+let private reqNum (RequestId n) = n
+
+let private encodeChange (c: Change) =
+    JObject
+        [ "decidedAt", JString(oidText c.DecidedAt)
+          "marker", JString c.Marker
+          "files", JArray(c.Files |> List.map (fun f -> JObject [ "path", JString f.Path; "bytes", JString f.Bytes ])) ]
+
+let private encodeAttempt (a: Attempt) =
+    JObject
+        [ "request", JInt(reqNum a.Request)
+          "change", encodeChange a.Change
+          "stage", JString(match a.Stage with Preparing -> "preparing" | Sent -> "sent") ]
+
+let private refusalText =
+    function
+    | StaleHead -> "staleHead"
+    | Unauthorized -> "unauthorized"
+    | Forbidden -> "forbidden"
+    | NotFound -> "notFound"
+    | RateLimited -> "rateLimited"
+    | Invalid _ -> "invalid"
+
+let private transportText =
+    function
+    | NetworkError -> "networkError"
+    | TimedOut -> "timedOut"
+    | Cancelled -> "cancelled"
+
+let private connectFailureText =
+    function
+    | ConnectUnauthorized -> "unauthorized"
+    | ConnectForbidden -> "forbidden"
+    | ConnectNotFound -> "notFound"
+    | ConnectOffline -> "offline"
+    | ConnectIncompatible _ -> "incompatible"
+
+let private reasonOf =
+    function
+    | Invalid r -> JString r
+    | _ -> JNull
+
+/// Serialise the per-document state (canonical JSON via Json.canonical). Contains no credentials.
+let encode (state: State) : Json =
+    let phase =
+        match state.Phase with
+        | Disconnected -> JObject [ "phase", JString "disconnected" ]
+        | Connecting r -> JObject [ "phase", JString "connecting"; "request", JInt(reqNum r) ]
+        | ConnectRefused f ->
+            JObject
+                [ "phase", JString "connectRefused"
+                  "failure", JString(connectFailureText f)
+                  "reason", (match f with ConnectIncompatible r -> JString r | _ -> JNull) ]
+        | Idle(head, pending) -> JObject [ "phase", JString "idle"; "head", JString(oidText head); "pending", Json.opt encodeChange pending ]
+        | Writing(head, a) -> JObject [ "phase", JString "writing"; "head", JString(oidText head); "attempt", encodeAttempt a ]
+        | Confirming(head, a, commit, read) ->
+            JObject
+                [ "phase", JString "confirming"
+                  "head", JString(oidText head)
+                  "attempt", encodeAttempt a
+                  "commit", JString(oidText commit)
+                  "request", JInt(reqNum read) ]
+        | Unknown(head, a) -> JObject [ "phase", JString "unknown"; "head", JString(oidText head); "attempt", encodeAttempt a ]
+        | Reconciling(head, a, read) ->
+            JObject [ "phase", JString "reconciling"; "head", JString(oidText head); "attempt", encodeAttempt a; "request", JInt(reqNum read) ]
+        | Held(head, c, reason) ->
+            let r =
+                match reason with
+                | Conflict remote -> JObject [ "kind", JString "conflict"; "remoteHead", Json.opt (oidText >> JString) remote ]
+                | NotWritten(Refused x) -> JObject [ "kind", JString "refused"; "refusal", JString(refusalText x); "reason", reasonOf x ]
+                | NotWritten(NeverSent t) -> JObject [ "kind", JString "neverSent"; "transport", JString(transportText t) ]
+            JObject [ "phase", JString "held"; "head", JString(oidText head); "change", encodeChange c; "reason", r ]
+    JObject [ "schema", JString "causa.sync-state/1"; "issued", JInt state.Issued; "state", phase ]
+
+let private field name j =
+    match Json.field name j with
+    | Some v -> Ok v
+    | None -> Error $"missing {name}"
+
+let private text name j =
+    match Json.field name j with
+    | Some(JString s) -> Ok s
+    | _ -> Error $"{name} is not a string"
+
+let private int64Of name j =
+    match Json.field name j with
+    | Some(JInt i) -> Ok i
+    | _ -> Error $"{name} is not an integer"
+
+let private decodeChange (j: Json) =
+    result {
+        let! decidedAt = text "decidedAt" j
+        let! marker = text "marker" j
+        let! files = field "files" j
+        let! fs =
+            match files with
+            | JArray items ->
+                items
+                |> List.fold
+                    (fun acc f ->
+                        acc
+                        |> Result.bind (fun xs ->
+                            result {
+                                let! p = text "path" f
+                                let! b = text "bytes" f
+                                return { Path = p; Bytes = b } :: xs
+                            }))
+                    (Ok [])
+                |> Result.map List.rev
+            | _ -> Error "files is not an array"
+        return { DecidedAt = Oid decidedAt; Marker = marker; Files = fs }
+    }
+
+let private decodeAttempt (j: Json) =
+    result {
+        let! r = int64Of "request" j
+        let! c = field "change" j |> Result.bind decodeChange
+        let! stage =
+            match Json.field "stage" j with
+            | Some(JString "preparing") -> Ok Preparing
+            | Some(JString "sent") -> Ok Sent
+            | _ -> Error "unknown stage"
+        return { Request = RequestId r; Change = c; Stage = stage }
+    }
+
+/// Restore what `encode` wrote. Unknown shapes are refused, never guessed. Apply `restore` before use.
+let decode (j: Json) : Result<State, string> =
+    result {
+        let! schema = text "schema" j
+        if schema <> "causa.sync-state/1" then return! Error $"unsupported sync state schema {schema}"
+        let! issued = int64Of "issued" j
+        let! p = field "state" j
+        let! kind = text "phase" p
+        let head () = text "head" p |> Result.map Oid
+        let attempt () = field "attempt" p |> Result.bind decodeAttempt
+        let! phase =
+            match kind with
+            | "disconnected" -> Ok Disconnected
+            | "connecting" -> int64Of "request" p |> Result.map (RequestId >> Connecting)
+            | "connectRefused" ->
+                result {
+                    let! f = text "failure" p
+                    let reason = match Json.field "reason" p with Some(JString r) -> r | _ -> ""
+                    let! failure =
+                        match f with
+                        | "unauthorized" -> Ok ConnectUnauthorized
+                        | "forbidden" -> Ok ConnectForbidden
+                        | "notFound" -> Ok ConnectNotFound
+                        | "offline" -> Ok ConnectOffline
+                        | "incompatible" -> Ok(ConnectIncompatible reason)
+                        | other -> Error $"unknown connect failure {other}"
+                    return ConnectRefused failure
+                }
+            | "idle" ->
+                result {
+                    let! h = head ()
+                    let! pending =
+                        match Json.field "pending" p with
+                        | Some JNull -> Ok None
+                        | Some c -> decodeChange c |> Result.map Some
+                        | None -> Error "missing pending"
+                    return Idle(h, pending)
+                }
+            | "writing" -> result { let! h = head () in let! a = attempt () in return Writing(h, a) }
+            | "confirming" ->
+                result {
+                    let! h = head ()
+                    let! a = attempt ()
+                    let! c = text "commit" p
+                    let! r = int64Of "request" p
+                    return Confirming(h, a, Oid c, RequestId r)
+                }
+            | "unknown" -> result { let! h = head () in let! a = attempt () in return Unknown(h, a) }
+            | "reconciling" ->
+                result {
+                    let! h = head ()
+                    let! a = attempt ()
+                    let! r = int64Of "request" p
+                    return Reconciling(h, a, RequestId r)
+                }
+            | "held" ->
+                result {
+                    let! h = head ()
+                    let! c = field "change" p |> Result.bind decodeChange
+                    let! r = field "reason" p
+                    let! k = text "kind" r
+                    let! reason =
+                        match k with
+                        | "conflict" ->
+                            match Json.field "remoteHead" r with
+                            | Some(JString o) -> Ok(Conflict(Some(Oid o)))
+                            | Some JNull -> Ok(Conflict None)
+                            | _ -> Error "bad remoteHead"
+                        | "refused" ->
+                            result {
+                                let! x = text "refusal" r
+                                let! refusal =
+                                    match x with
+                                    | "staleHead" -> Ok StaleHead
+                                    | "unauthorized" -> Ok Unauthorized
+                                    | "forbidden" -> Ok Forbidden
+                                    | "notFound" -> Ok NotFound
+                                    | "rateLimited" -> Ok RateLimited
+                                    | "invalid" -> Ok(Invalid(match Json.field "reason" r with Some(JString s) -> s | _ -> ""))
+                                    | other -> Error $"unknown refusal {other}"
+                                return NotWritten(Refused refusal)
+                            }
+                        | "neverSent" ->
+                            result {
+                                let! t = text "transport" r
+                                let! transport =
+                                    match t with
+                                    | "networkError" -> Ok NetworkError
+                                    | "timedOut" -> Ok TimedOut
+                                    | "cancelled" -> Ok Cancelled
+                                    | other -> Error $"unknown transport {other}"
+                                return NotWritten(NeverSent transport)
+                            }
+                        | other -> Error $"unknown held reason {other}"
+                    return Held(h, c, reason)
+                }
+            | other -> Error $"unknown phase {other}"
+        return { Phase = phase; Issued = issued }
+    }

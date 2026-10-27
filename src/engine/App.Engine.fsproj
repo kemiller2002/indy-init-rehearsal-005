@@ -22,11 +22,11 @@
     <Compile Include="Decide.fs" />
     <Compile Include="Hashing.fs" />
     <Compile Include="Json.fs" />
+    <Compile Include="Sync.fs" />
     <Compile Include="Schema.fs" />
     <Compile Include="Wire.fs" />
     <Compile Include="Storage.fs" />
     <Compile Include="Kernel.fs" />
     <Compile Include="Projection.fs" />
-    <Compile Include="Sync.fs" />
   </ItemGroup>
 </Project>
