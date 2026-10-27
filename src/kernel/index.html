@@ -33,6 +33,7 @@
           </template>
         </ul>
       </nav>
+      <template data-if="data.fixture"><p class="causa-tag causa-fixture-mode" role="status" data-percepta-observation="data-mode">Fixture data: synthetic, not GitHub</p></template>
       <p class="causa-connection" aria-live="polite"><span class="ef-visually-hidden">Data repository: </span><span data-text="connection.label">Not connected</span></p>
       <template data-if="connected">
         <button type="button" class="ef-button causa-disconnect" data-event="disconnect">Disconnect</button>

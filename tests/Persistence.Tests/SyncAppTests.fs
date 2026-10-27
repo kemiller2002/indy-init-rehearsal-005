@@ -360,6 +360,7 @@ let ``VPO-b3efad6eb85360be a reload during a send restores it as unknown and the
 [<Trait("obligation", "VPO-bb08b9a414ba4cd7")>]
 [<Trait("obligation", "VPO-ca58030e3eecdf9b")>]
 [<Trait("obligation", "VPO-c41f10e4ed8a086b")>]
+[<Trait("obligation", "VPO-a500f6d5a0f3e254")>]
 let ``VPO-2de744fb2c8bdc70 VPO-bb08b9a414ba4cd7 VPO-ca58030e3eecdf9b VPO-c41f10e4ed8a086b the token appears only in the Authorization header`` () =
     let fake = newFake ()
     let app = App(fake)

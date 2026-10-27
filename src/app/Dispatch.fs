@@ -19,7 +19,9 @@ let mutable private state = initial
 let mutable private testHooks = false
 
 /// Test build only (scripts/build-site.mjs --test): accept the Percepta state event.
-let enableTestHooks () = testHooks <- true
+let enableTestHooks () =
+    testHooks <- true
+    PersistencePort.enableFixtureMode ()
 
 /// Percepta state injection: replaces the port with a fixed projection of the injected state, so the normal View
 /// renders it. Refused (unchanged model, a recorded reason) in the production build or for an unsupported state.

@@ -171,6 +171,7 @@ let ``VPO-533a2328decf91cb VPO-8fbeadc2bfc10f7a provider failures are classified
 [<Fact>]
 [<Trait("obligation", "VPO-a460a95198e68863")>]
 [<Trait("obligation", "VPO-0e682dd716a12d49")>]
+[<Trait("obligation", "VPO-a500f6d5a0f3e254")>]
 let ``VPO-a460a95198e68863 VPO-0e682dd716a12d49 a classic token with repo or admin scope is refused at connect`` () =
     let response scopes =
         let o = respond "repository.read.authorized" (Some(JObj [ "full_name", JStr(owner + "/" + repo); "default_branch", JStr branch ]))
