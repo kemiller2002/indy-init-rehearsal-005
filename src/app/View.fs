@@ -35,6 +35,8 @@ type Screen =
     | FailedScreen of string
     | MissingScreen
     | AdministrationScreen
+    | ProofScreen
+    | FactoryScreen
     | SettingsScreen
     | NotFoundScreen
 
@@ -44,6 +46,8 @@ let screenOf (model: Model) =
 
     match model.Route with
     | Administration -> AdministrationScreen
+    | RequirementsProof -> ProofScreen
+    | FactoryView -> FactoryScreen
     | Settings -> SettingsScreen
     | NotFound _ -> NotFoundScreen
     | _ when not connected -> ConnectScreen
@@ -78,6 +82,8 @@ let private screenName =
     | FailedScreen _ -> "investigation-failed"
     | MissingScreen -> "investigation-missing"
     | AdministrationScreen -> "administration"
+    | ProofScreen -> "requirements-proof"
+    | FactoryScreen -> "factory-view"
     | SettingsScreen -> "settings"
     | NotFoundScreen -> "not-found"
 
@@ -111,6 +117,8 @@ let private navKeys (model: Model) : (string * ViewValue) list =
     let pageTitle =
         match screen with
         | AdministrationScreen -> "Administration · Causa"
+        | ProofScreen -> "Requirements proof · Administration · Causa"
+        | FactoryScreen -> "How this build was made · Administration · Causa"
         | SettingsScreen -> "Settings · Causa"
         | ConnectScreen -> "Connect · Causa"
         | ListScreen -> "Investigations · Causa"
@@ -882,4 +890,4 @@ let private formsKeys (model: Model) : (string * ViewValue) list =
 /// The projection, assembled from one function per area: a single method holding every key exceeded the .NET
 /// WebAssembly interpreter's per-method limit ("locals size too big") once its optimizer passes are off.
 let project (model: Model) : ViewState =
-    [ navKeys; invKeys; screensKeys; listKeys; historyKeys; reportKeys; aiKeys; adminKeys; formsKeys ] |> List.collect (fun part -> part model) |> Map.ofList
+    [ navKeys; invKeys; screensKeys; listKeys; historyKeys; reportKeys; aiKeys; adminKeys; formsKeys ] |> List.collect (fun part -> part model) |> fun keys -> keys @ Evidence.keys model |> Map.ofList

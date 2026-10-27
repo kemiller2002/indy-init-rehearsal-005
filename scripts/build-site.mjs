@@ -82,6 +82,55 @@ writeFileSync(join(site, "build-info.json"), JSON.stringify({
   },
 }, null, 1) + "\n");
 
+// ---- Published evidence for Requirements proof (S21) and the factory view (S20) -------------------------------------
+// Only values read from files in this checkout (or the CI run that builds it) are published, each with its source, so
+// the page shows what is and is not proven without inventing anything. A missing source is published as missing.
+const readJson = (path) => { try { return JSON.parse(readFileSync(path, "utf8")); } catch { return null; } };
+const traceabilityPath = process.env.CAUSA_TRACEABILITY ?? join(root, "acceptance/traceability.json");
+const trace = readJson(traceabilityPath);
+const planPath = [process.env.CAUSA_PLAN, join(root, "../indy-init/requirements-compiled/v1/verification-plan.json"), join(root, "indy-init/requirements-compiled/v1/verification-plan.json")].find((p) => p && existsSync(p));
+const plan = planPath ? readJson(planPath) : null;
+const planReq = new Map((plan?.requirements ?? []).map((r) => [r.requirement, r]));
+const commit = process.env.GITHUB_SHA ?? (() => { try { return execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim(); } catch { return null; } })();
+const run = process.env.GITHUB_RUN_ID ? { id: process.env.GITHUB_RUN_ID, url: `${process.env.GITHUB_SERVER_URL ?? "https://github.com"}/${process.env.GITHUB_REPOSITORY ?? ""}/actions/runs/${process.env.GITHUB_RUN_ID}` } : null;
+const byRequirement = new Map();
+for (const o of trace?.obligations ?? []) {
+  if (!byRequirement.has(o.requirement)) byRequirement.set(o.requirement, []);
+  byRequirement.get(o.requirement).push({ id: o.id, source: o.sourceObligation, text: o.text, binding: o.binding, verification: o.verification,
+    tests: (o.tests ?? []).map((t) => ({ name: t.name, suite: t.suite, outcome: t.outcome })) });
+}
+mkdirSync(join(site, "evidence"), { recursive: true });
+writeFileSync(join(site, "evidence/proof.json"), JSON.stringify({
+  schema: "causa.requirements-proof/1",
+  commit,
+  run,
+  traceability: trace ? { source: relative(root, traceabilityPath), schema: trace.schema, generatedBy: trace.context?.generatedBy ?? null, plan: trace.plan ?? null, summary: trace.summary ?? null } : null,
+  planSource: planPath ? relative(root, planPath) : null,
+  requirements: [...byRequirement.entries()].map(([id, obligations]) => {
+    const r = planReq.get(id);
+    return { id, title: r?.title ?? null, priority: r?.priority ?? null, document: r?.document ?? null, sectionSha256: r?.sectionSha256 ?? null, obligations };
+  }),
+}) + "\n");
+
+const queue = readJson(join(root, ".ros/work/queue.json"));
+const eventsFile = join(root, ".ros/events/events.jsonl");
+const praxis = readJson(join(root, ".praxis/instance.json"));
+const aegis = readJson(join(root, "aegis-boundaries.json"));
+const executions = existsSync(join(root, ".ros/executions")) ? readdirSync(join(root, ".ros/executions")).length : null;
+writeFileSync(join(site, "evidence/factory.json"), JSON.stringify({
+  schema: "causa.factory/1",
+  commit,
+  run,
+  ros: queue ? {
+    source: ".ros/work/queue.json",
+    items: queue.items.map((i) => ({ id: i.id, title: i.title, status: i.status, priority: i.priority ?? null, updatedAt: i.updatedAt ?? null })),
+    events: existsSync(eventsFile) ? readFileSync(eventsFile, "utf8").split("\n").filter((l) => l.trim() !== "").length : null,
+    executions,
+  } : null,
+  praxis: praxis ? { source: ".praxis/instance.json", version: praxis.createdWith ?? null, instanceId: praxis.instanceId ?? null, repository: praxis.repository?.repository ?? null } : null,
+  aegis: aegis ? { source: "aegis-boundaries.json", boundaries: Array.isArray(aegis.boundaries) ? aegis.boundaries.length : Object.keys(aegis.boundaries ?? {}).length } : null,
+}) + "\n");
+
 // No credential may ship. .wasm and .dll files carry string literals as UTF-16LE, so scan both encodings.
 const pattern = /(gh[pousr]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{22,})/;
 const walk = (dir) => readdirSync(dir).flatMap((name) => {
