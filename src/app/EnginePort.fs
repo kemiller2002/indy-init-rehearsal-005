@@ -24,11 +24,45 @@ type PersistenceInput =
     | Answer of correlation: string * EffectResult
     /// Re-read the branch to settle a save whose outcome is unknown (the shell's "check now").
     | CheckRemote
+    | DiscardLocal of id: string
+    | ReloadRemote of id: string
+    | Boot
+
+/// The connection as persistence knows it (EXT-DATA-007-O1): every state distinct, matched exhaustively.
+[<RequireQualifiedAccess>]
+type ConnectionState =
+    | Disconnected
+    | Connecting
+    | Loading
+    | AuthorizedEmpty
+    | Connected
+    | Incompatible
+    | AccessDenied
+    | Offline
+    | Conflict
+
+[<RequireQualifiedAccess>]
+module ConnectionState =
+    /// The one place the state's wire/label string is produced.
+    let label (state: ConnectionState) =
+        match state with
+        | ConnectionState.Disconnected -> "disconnected"
+        | ConnectionState.Connecting -> "connecting"
+        | ConnectionState.Loading -> "loading"
+        | ConnectionState.AuthorizedEmpty -> "authorizedEmpty"
+        | ConnectionState.Connected -> "connected"
+        | ConnectionState.Incompatible -> "incompatible"
+        | ConnectionState.AccessDenied -> "accessDenied"
+        | ConnectionState.Offline -> "offline"
+        | ConnectionState.Conflict -> "conflict"
 
 /// The thin persistence interface (until stream persist's program lands).
 type Persistence =
     { Name: string
       Connection: A.Connection
+      /// The precise connection state and its plain-language detail (why it is incompatible, denied or offline).
+      ConnectionState: ConnectionState
+      ConnectionDetail: string option
       /// The workspace's investigations, in catalog order.
       Catalog: A.Loadable<string list>
       Documents: Map<string, A.Loadable<Document>>
@@ -43,6 +77,8 @@ module Persistence =
     let rec unavailable: Persistence =
         { Name = "unavailable"
           Connection = A.NotConnected
+          ConnectionState = ConnectionState.Disconnected
+          ConnectionDetail = None
           Catalog = A.NotRequested
           Documents = Map.empty
           Message = None
@@ -54,6 +90,7 @@ module Persistence =
                 | Connect _ ->
                     { unavailable with
                         Connection = A.ConnectionFailed "Connecting to a data repository is not available in this build yet. Nothing was sent."
+                        ConnectionDetail = Some "Connecting to a data repository is not available in this build yet. Nothing was sent."
                         Message = Some("warning", "Connecting is not available in this build yet. Nothing was sent and nothing was stored.") },
                     []
                 | _ -> unavailable, [] }
@@ -62,6 +99,8 @@ module Persistence =
     let rec memory (docs: Map<string, A.Loadable<Document>>) (order: string list) : Persistence =
         { Name = "memory"
           Connection = A.ConnectedTo("this tab only (test build)", "none", "not saved")
+          ConnectionState = ConnectionState.Connected
+          ConnectionDetail = None
           Catalog = A.Loaded order
           Documents = docs
           Message = None
@@ -260,6 +299,19 @@ let private outcomeOf (n: int64) (result: EffectResult) : AiHttpOutcome option =
         | EffectOutcome.OutcomeUnknown _ -> Some(OutcomeUnknown n)
     | _ -> None
 
+/// Every connection state in its own words (none merged into another).
+let connectionWords (state: ConnectionState) =
+    match state with
+    | ConnectionState.Disconnected -> "Not connected"
+    | ConnectionState.Connecting -> "Connecting: checking the repository and branch"
+    | ConnectionState.Loading -> "Connected: loading the workspace"
+    | ConnectionState.AuthorizedEmpty -> "Connected: the workspace has no investigation yet"
+    | ConnectionState.Connected -> "Connected"
+    | ConnectionState.Incompatible -> "Not connected: the repository's data is not compatible"
+    | ConnectionState.AccessDenied -> "Not connected: access denied"
+    | ConnectionState.Offline -> "Offline: work on this device is kept"
+    | ConnectionState.Conflict -> "Connected: someone else changed an investigation"
+
 /// The workspace projection, re-derived from persistence's sessions at `at` (one version per investigation).
 let private project (at: DateTimeOffset) (p: Persistence) (message: (string * string) option) (ai: A.AiView) : A.WorkspaceProjection =
     let projectionOf (d: Document) =
@@ -297,6 +349,7 @@ let private project (at: DateTimeOffset) (p: Persistence) (message: (string * st
     let connected = match p.Connection with A.ConnectedTo _ -> true | _ -> false
 
     { Connection = p.Connection
+      ConnectionStatus = Some(connectionWords p.ConnectionState, p.ConnectionDetail)
       Investigations = cards
       Opened = opened
       Sync = sync |> Option.defaultValue A.NoChanges
@@ -389,6 +442,9 @@ and private handle (entropy: A.Entropy) (input: A.AdapterInput) (p: Persistence)
             | None -> portOf at p None ai, []
         | _ -> portOf at p None ai, []
     | A.Answer(corr, result) -> pass (Answer(corr, result))
+    | A.DiscardLocal id -> pass (DiscardLocal id)
+    | A.ReloadRemote id -> pass (ReloadRemote id)
+    | A.Boot -> pass Boot
     | A.Command(investigation, name, fields, expected) ->
         let session, expectedVersion, id =
             match investigation with

@@ -411,7 +411,10 @@ let project (model: Model) : ViewState =
       "text.size", text (if model.Settings.LargeText then "large" else "standard")
       "motion", text (if model.Settings.ReducedMotion then "reduced" else "system")
       "nav", items primaryNav
-      "connection.label", text (connectionText ws.Connection)
+      "connection.label", text (match ws.ConnectionStatus with Some(words, _) -> words | None -> connectionText ws.Connection)
+      "connection.detail", text (ws.ConnectionStatus |> Option.bind snd |> Option.defaultValue "")
+      "connection.hasDetail", flag ((ws.ConnectionStatus |> Option.bind snd |> Option.isSome) && (match ws.Connection with ConnectionFailed _ -> false | _ -> true))
+      "sync.conflict", flag (ws.Sync = Conflict)
       "connected", flag connected
       "notice.show", flag notice.IsSome
       "notice.text", text (notice |> Option.defaultValue "")

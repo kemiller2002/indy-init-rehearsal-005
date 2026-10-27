@@ -73,6 +73,9 @@
             <p class="causa-hint">Connect to open the page you asked for.</p>
           </template>
         </div>
+        <template data-if="connection.hasDetail">
+          <p class="causa-muted" role="status" data-text="connection.detail"></p>
+        </template>
         <template data-if="connect.failed">
           <p class="ef-alert causa-notice" data-tone="warning" role="alert" data-text="connect.failure"></p>
         </template>
@@ -290,7 +293,10 @@
               </section>
             </div>
             <div class="causa-sync" data-percepta-region="persistence-state" data-bind-data-tone="sync.tone"><p role="status"><span class="ef-visually-hidden">Save status: </span><span data-text="sync.text"></span></p>
-              <template data-if="sync.mayHaveSaved"><button type="button" class="ef-button" data-event="check-remote">Check now</button></template></div>
+              <template data-if="sync.mayHaveSaved"><button type="button" class="ef-button" data-event="check-remote">Check now</button></template>
+              <template data-if="sync.conflict"><div class="causa-conflict"><p>Someone else changed this investigation in GitHub. Your change is kept on this device until you choose.</p>
+                <button type="button" class="ef-button" data-event="reload-remote">Reload the version in GitHub (keep my change)</button>
+                <button type="button" class="ef-button" data-event="discard-local">Discard my local change</button></div></template></div>
           </section>
         </template>
 

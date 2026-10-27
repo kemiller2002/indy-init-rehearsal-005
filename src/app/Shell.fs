@@ -147,6 +147,11 @@ let rec private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
     | "disconnect" -> toPort entropy Disconnect { model with Notice = Some { Tone = "info"; Text = "Disconnected. The token was forgotten." } }
     | "dismiss" -> { model with Notice = None }, []
     | "check-remote" -> toPort entropy CheckRemote model
+    | "discard-local"
+    | "reload-remote" ->
+        match model.Route with
+        | Investigation(id, _) -> toPort entropy (if e.Name = "discard-local" then DiscardLocal id else ReloadRemote id) model
+        | _ -> model, []
     // The graph frame reports the node the person selected; the shell only remembers which (UI-026-O3).
     | "graph-select" when value = "" || Routes.selection ("?item=" + value) = value -> { model with Selected = value }, []
     | "text-size" -> { model with Settings = { model.Settings with LargeText = (value = "large") } }, []
@@ -237,8 +242,10 @@ let update (entropy: Entropy) (message: BrowserToEngineMessage) (model: Model) :
             | i -> location.Path.Substring(0, i + 1)
 
         let model, fx = readBuildInfo { model with Route = Routes.parse location.Hash; Selected = Routes.selection location.Hash; HistoryVersion = Routes.versionOf location.Hash; PageBase = location.Origin + dir }
+        // Restore this device's work first, so it shows before Connect (persistence's Boot).
+        let model, boot = toPort entropy Boot model
         let model, more = openRoute entropy model
-        model, fx @ more
+        model, fx @ boot @ more
     | BrowserToEngineMessage.LocationChanged location ->
         openRoute entropy { model with Route = Routes.parse location.Hash; Selected = Routes.selection location.Hash; HistoryVersion = Routes.versionOf location.Hash; Notice = None }
     | BrowserToEngineMessage.Event e -> onEvent entropy e model
