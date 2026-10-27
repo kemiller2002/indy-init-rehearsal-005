@@ -1,0 +1,17 @@
+{
+  "schema": "causa.acceptance-evidence-index/1",
+  "description": "Computed acceptance verdicts copied verbatim from the acceptance-evidence artifact of the named CI run (.github/workflows/build-and-test.yml, job acceptance). Never edited. Each directory holds the bundle, ledger, both verifier outputs and the report.",
+  "verdicts": [
+    {
+      "path": "evidence/acceptance/run-40579006057-8d15492",
+      "run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40579006057",
+      "sourceSha": "8d154928196bc95dcc6656d483c4acd13e909b6f",
+      "deployedSha": null,
+      "planId": "VP-e77a2134e1b0",
+      "ledgerVerifier": "INCOMPLETE",
+      "planVerifier": "INCOMPLETE",
+      "accepted": false,
+      "note": "First computed verdict (branch r5/acc, not deployed): nothing implemented. Obligations 326: bound 3 (acceptance tool tests), missing 323. P0 requirements: ledger PASS 1 (VER-008), NOT_RUN 107; plan verifier UNBOUND 1, NOT_RUN 107. Gates G0-G9 NOT_RUN. 8 defect classes open."
+    }
+  ]
+}

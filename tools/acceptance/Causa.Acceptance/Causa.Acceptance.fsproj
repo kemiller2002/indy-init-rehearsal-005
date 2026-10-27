@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>causa-acceptance</AssemblyName>
+    <RootNamespace>Causa.Acceptance</RootNamespace>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- Interop-heavy (JsonNode, XDocument, reflection metadata): nulls are handled explicitly at each boundary. -->
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Json.fs" />
+    <Compile Include="Plan.fs" />
+    <Compile Include="Discovery.fs" />
+    <Compile Include="Traceability.fs" />
+    <Compile Include="LockGate.fs" />
+    <Compile Include="Ledger.fs" />
+    <Compile Include="Reuse.fs" />
+    <Compile Include="Report.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Reflection.MetadataLoadContext" Version="10.0.0" />
+  </ItemGroup>
+</Project>

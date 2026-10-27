@@ -1,0 +1,11 @@
+{
+  "schema": "causa.acceptance-evidence-manifest/1",
+  "run_id": "40579006057-1",
+  "source_sha": "8d154928196bc95dcc6656d483c4acd13e909b6f",
+  "entries": [
+    {
+      "path": "evidence/requirements/VER-008.json",
+      "sha256": "be681f29e148575f228e562dcbdd943519fcafb82eaa421f71f77bbb20432f53"
+    }
+  ]
+}
