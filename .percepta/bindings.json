@@ -50,6 +50,24 @@
       ]
     },
     {
+      "contract": "S09-action-experiment-designer",
+      "appScreen": "action-experiment-designer",
+      "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/actions",
+      "fixtures": [
+        "fixtures/s09-blocked.json",
+        "fixtures/s09-legal.json"
+      ]
+    },
+    {
+      "contract": "S10-finding-result-capture",
+      "appScreen": "finding-result-capture",
+      "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/actions?item=act-1",
+      "fixtures": [
+        "fixtures/s10-blocked.json",
+        "fixtures/s10-legal.json"
+      ]
+    },
+    {
       "contract": "S11-cause-review",
       "appScreen": "investigation-causal-analysis",
       "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/causal-analysis",
@@ -92,6 +110,15 @@
       "fixtures": [
         "fixtures/s15-blocked.json",
         "fixtures/s15-legal.json"
+      ]
+    },
+    {
+      "contract": "S19-replay-spectator",
+      "appScreen": "replay-spectator",
+      "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/timeline?item=replay&version=1",
+      "fixtures": [
+        "fixtures/s19-blocked.json",
+        "fixtures/s19-legal.json"
       ]
     },
     {
