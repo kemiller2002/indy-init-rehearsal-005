@@ -325,3 +325,6 @@ fieldset.causa-panel legend { font-weight: 700; color: var(--causa-color-structu
 /* Outcome unknown: neither saved (teal) nor failed (coral); a dashed amber edge and its own words. */
 .causa-sync[data-tone="unknown"] { border-left: 4px dashed var(--causa-color-attention); background: var(--causa-amber-wash); color: var(--causa-color-attention-ink); }
 .causa-sync[data-tone="unknown"]::before { content: "? "; font-weight: 700; }
+.causa-item--proposal { border-left-color: var(--causa-color-attention); }
+.causa-ai-status { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+.causa-stale { font-weight: 600; }

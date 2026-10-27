@@ -66,6 +66,28 @@ type CauseRole =
 /// A causal relationship as the domain records it: hypotheses (members, each with its role) explain one outcome.
 type CauseRow = { Id: string; Outcome: string; State: string; Members: (string * CauseRole) list }
 
+/// An agent's proposal as recorded in the investigation; only a human accepts or rejects it (D-004).
+type ProposalRow = { Id: string; Kind: string; Text: string; Rationale: string option; State: string; By: string }
+
+/// One drafted proposal from the AI loop, not yet recorded.
+type DraftRow = { Kind: string; Text: string; Rationale: string option }
+
+/// The AI proposal loop as the shell shows it (T27). The key itself never appears here.
+type AiView =
+    { KeyHeld: bool
+      InFlight: bool
+      /// The investigation the current request or result belongs to.
+      Investigation: string option
+      /// The last result in plain words (AiLoop.describe), its tone and whether a retry is honest (AiLoop.retryable).
+      Result: (string * string * bool) option
+      Drafts: DraftRow list
+      /// Set when the drafts were made from an older version than the current one.
+      Stale: string option
+      /// The last request with its key removed (AiLoop.redacted), for Administration.
+      LastRequest: string option }
+
+let noAi = { KeyHeld = false; InFlight = false; Investigation = None; Result = None; Drafts = []; Stale = None; LastRequest = None }
+
 type InvestigationProjection =
     { Id: string
       Title: string
@@ -80,6 +102,7 @@ type InvestigationProjection =
       Blockers: BlockerRow list
       Causes: CauseRow list
       Timeline: TimelineRow list
+      Proposals: ProposalRow list
       Capabilities: Capability list }
 
 /// Distinct save and sync states (UI-006-O1). Only `RemotelySynced` may say the provider holds the change.
@@ -115,6 +138,7 @@ type WorkspaceProjection =
       Blockers: BlockerRow list
       /// A short, plain-language message for the person, when the adapter has one.
       Message: (string * string) option
+      Ai: AiView
       Administration: AdminFact list }
 
 type ConnectRequest = { Token: string; Repository: string; Branch: string; Workspace: string }
@@ -128,6 +152,15 @@ type AdapterInput =
     | Answer of correlation: string * EffectResult
     /// "Check now": re-read the branch to settle a save whose outcome is unknown (MayHaveSaved).
     | CheckRemote
+    /// The provider key typed on the key screen: held in memory by the port only, never in the shell's model.
+    | SetAiKey of key: string
+    | ClearAiKey
+    /// Ask the AI for proposals about an investigation with the configured model (never a default).
+    | RequestProposals of investigation: string * model: string * task: string
+    | CancelProposals
+    /// Record the drafted proposals (still proposals: a human accepts each one) or discard them.
+    | RecordDrafts of investigation: string * model: string
+    | DiscardDrafts
 
 /// The engine and persistence as the shell sees them.
 type Port =
@@ -143,6 +176,7 @@ let emptyWorkspace =
       Capabilities = []
       Blockers = []
       Message = None
+      Ai = noAi
       Administration = [] }
 
 module Port =

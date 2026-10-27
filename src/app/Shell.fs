@@ -10,10 +10,23 @@ open Causa.App.Adapter
 
 type Notice = { Tone: string; Text: string }
 
-type Drafts = { Token: string; Repository: string; Branch: string; Workspace: string; Title: string; Statement: string }
+type Drafts =
+    { Token: string
+      Repository: string
+      Branch: string
+      Workspace: string
+      Title: string
+      Statement: string
+      /// The provider key while it is typed; cleared the moment it is handed to the port.
+      AiKey: string
+      AiTask: string }
 
 /// Session-scope preferences (UI-019-O5): kept in this page's memory only, never in browser storage.
-type Settings = { LargeText: bool; ReducedMotion: bool }
+type Settings =
+    { LargeText: bool
+      ReducedMotion: bool
+      /// The AI model id to call: configuration the person enters; there is no default (T27).
+      AiModel: string }
 
 type Model =
     { Route: Route
@@ -28,6 +41,8 @@ type Model =
       /// Correlation ids of requests the shell itself made; every other answer belongs to the port.
       ShellPending: Set<string>
       PageBase: string
+      /// Bumped each time a token or key is taken, so the page can empty its password fields.
+      SecretEpoch: int
       /// Text typed for a capability that needs one input, by capability id.
       CommandInputs: Map<string, string>
       /// Only the test build enables this (Percepta state injection).
@@ -35,20 +50,21 @@ type Model =
       /// The Percepta fixture state name currently shown, if any.
       InjectedState: string option }
 
-let initialDrafts = { Token = ""; Repository = ""; Branch = "main"; Workspace = ""; Title = ""; Statement = "" }
+let initialDrafts = { Token = ""; Repository = ""; Branch = "main"; Workspace = ""; Title = ""; Statement = ""; AiKey = ""; AiTask = "" }
 
 let initial =
     { Route = Home
       Selected = ""
       Drafts = initialDrafts
       Notice = None
-      Settings = { LargeText = false; ReducedMotion = false }
+      Settings = { LargeText = false; ReducedMotion = false; AiModel = "" }
       Build = NotRequested
       Port = EnginePort.create EnginePort.Persistence.unavailable
       Counter = 0
       ShellPending = Set.empty
       PageBase = ""
       CommandInputs = Map.empty
+      SecretEpoch = 0
       TestHooks = false
       InjectedState = None }
 
@@ -103,7 +119,7 @@ let private toPort (entropy: Entropy) (input: AdapterInput) (model: Model) =
             | _ -> None)
     { model with Port = port; Route = route |> Option.defaultValue model.Route }, effects
 
-let private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
+let rec private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
     let value = e.Value |> Option.defaultValue ""
     let d = model.Drafts
 
@@ -121,7 +137,7 @@ let private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
     | "connect" ->
         let request: ConnectRequest = { Token = d.Token; Repository = d.Repository; Branch = d.Branch; Workspace = d.Workspace }
         // The token leaves the shell's model as soon as it is handed to the port (memory only, OD-INDY-10).
-        toPort entropy (Connect request) { model with Drafts = { d with Token = "" }; Notice = None }
+        toPort entropy (Connect request) { model with Drafts = { d with Token = "" }; Notice = None; SecretEpoch = model.SecretEpoch + 1 }
     | "disconnect" -> toPort entropy Disconnect { model with Notice = Some { Tone = "info"; Text = "Disconnected. The token was forgotten." } }
     | "dismiss" -> { model with Notice = None }, []
     | "check-remote" -> toPort entropy CheckRemote model
@@ -129,6 +145,31 @@ let private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
     | "graph-select" when value = "" || Routes.selection ("?item=" + value) = value -> { model with Selected = value }, []
     | "text-size" -> { model with Settings = { model.Settings with LargeText = (value = "large") } }, []
     | "motion" -> { model with Settings = { model.Settings with ReducedMotion = (value = "reduced") } }, []
+    | "ai-model" -> { model with Settings = { model.Settings with AiModel = value.Trim() } }, []
+    | "ai-key" -> { model with Drafts = { d with AiKey = value } }, []
+    | "ai-key-set" -> toPort entropy (SetAiKey d.AiKey) { model with Drafts = { d with AiKey = "" }; SecretEpoch = model.SecretEpoch + 1 }
+    | "ai-key-clear" -> toPort entropy ClearAiKey model
+    | "ai-task" -> { model with Drafts = { d with AiTask = value } }, []
+    | "ai-request"
+    | "ai-retry" ->
+        match model.Route with
+        | Investigation(id, _) -> toPort entropy (RequestProposals(id, model.Settings.AiModel, d.AiTask)) model
+        | _ -> model, []
+    | "ai-cancel" -> toPort entropy CancelProposals model
+    | "ai-discard" -> toPort entropy DiscardDrafts model
+    | "ai-record" ->
+        match model.Route with
+        | Investigation(id, _) -> toPort entropy (RecordDrafts(id, model.Settings.AiModel)) model
+        | _ -> model, []
+    | "proposal-reason" ->
+        match e.Key with
+        | Some k -> { model with CommandInputs = model.CommandInputs.Add("RejectProposal:" + k, value) }, []
+        | None -> model, []
+    | "proposal-accept"
+    | "proposal-reject" ->
+        match e.Key with
+        | Some k -> onEvent entropy { e with Name = "command"; Key = Some((if e.Name = "proposal-accept" then "AcceptProposal:" else "RejectProposal:") + k) } model
+        | None -> model, []
     | "command-input" ->
         match e.Key with
         | Some capability -> { model with CommandInputs = model.CommandInputs.Add(capability, value) }, []

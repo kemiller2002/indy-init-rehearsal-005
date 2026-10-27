@@ -76,6 +76,8 @@ let describe (inv: Investigation) (action: CapabilityAction) : (string * string 
     | Create RecordObservationKind -> Some("RecordObservation", "RecordObservation", "Record an observation", Some "Observation")
     | Create RecordHypothesisKind -> Some("RecordHypothesis", "RecordHypothesis", "Record a hypothesis", Some "Hypothesis statement")
     | Create IdentifyUnknownKind -> Some("IdentifyUnknown", "IdentifyUnknown", "Record an open question", Some "Question")
+    | AcceptProposalAction p -> Some("AcceptProposal:" + p.Text, "AcceptProposal", "Accept this proposal", None)
+    | RejectProposalAction p -> Some("RejectProposal:" + p.Text, "RejectProposal", "Reject this proposal", Some "Why it is rejected")
     | ConfirmCauseAction c ->
         let outcome = inv.Causes |> Map.tryFind c |> Option.map (fun x -> text x.Outcome) |> Option.defaultValue ""
         Some("ConfirmCause:" + c.Text, "ConfirmCause", $"Confirm the cause of: {outcome}", None)
@@ -149,6 +151,19 @@ let ofProjection (writable: bool) (history: DomainEvent list) (p: InvestigationP
                OccurredAt = stamp e.At
                RecordedAt = None
                Actor = Some e.Actor.ActorId }: A.TimelineRow))
+      Proposals =
+        values inv.Proposals
+        |> List.sortBy (fun p -> p.Provenance.RecordedAt, p.Id.Text)
+        |> List.map (fun p ->
+            ({ Id = p.Id.Text
+               Kind = (match p.Kind with ProposedHypothesis -> "Hypothesis" | ProposedUnknown -> "Open question" | ProposedAction -> "Action")
+               Text = p.Text.Value
+               Rationale = p.Rationale |> Option.map (fun r -> r.Value)
+               State = (match p.State with ProposalActive -> "Awaiting your decision" | ProposalAccepted -> "Accepted" | ProposalRejected -> "Rejected")
+               By =
+                 match p.Provenance.Actor.Kind with
+                 | Agent(provider, model) -> $"Proposed by an AI agent ({provider}, {model})"
+                 | _ -> "Proposed by " + p.Provenance.Actor.ActorId }: A.ProposalRow))
       Capabilities = capabilities }
 
 /// The card for the investigation list: counts the engine state actually holds (never unknown-as-zero).

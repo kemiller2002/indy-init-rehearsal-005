@@ -67,6 +67,7 @@ let private screenName =
     | InvestigationScreen(_, Timeline) -> "investigation-timeline"
     | InvestigationScreen(_, CorrectiveActions) -> "investigation-corrective-actions"
     | InvestigationScreen(_, Report) -> "investigation-report"
+    | InvestigationScreen(_, AiProposals) -> "investigation-proposals"
     | FailedScreen _ -> "investigation-failed"
     | MissingScreen -> "investigation-missing"
     | AdministrationScreen -> "administration"
@@ -253,7 +254,9 @@ let project (model: Model) : ViewState =
         @ build
         // VER-007-O2: the runtime actually executing this projection, read from itself.
         @ [ fact "runtime" "deployment" ".NET runtime (loaded)" (string System.Environment.Version) "Reported by the running application"
-            fact "ai" "ai" "AI assistance" "Not part of this build" "Unavailable"
+            fact "ai" "ai" "AI provider key" (if ws.Ai.KeyHeld then "Held in this page's memory (never shown or stored)" else "Not entered") (if ws.Ai.KeyHeld then "Unknown" else "Unavailable")
+            fact "ai-model" "ai" "AI model id" (if model.Settings.AiModel = "" then "Not set (there is no default)" else model.Settings.AiModel) (if model.Settings.AiModel = "" then "Unavailable" else "Unknown")
+            fact "ai-last" "ai" "Last AI request (key redacted)" (ws.Ai.LastRequest |> Option.defaultValue "None in this session") "Unknown"
             fact "report-print" "report" "Report preview and print" "Rendered from the open investigation; print output is not verified here" "Unknown"
             fact "token" "security" "Credential handling" "The token is held in this page's memory only and sent only in the Authorization header" "Design rule; not measured here"
             fact "smoke" "smoke-tests" "Smoke tests at this commit" "Results are recorded by CI, not by the running application" "Unknown" ]
@@ -289,6 +292,41 @@ let project (model: Model) : ViewState =
     let complete = inv |> Option.exists (fun i -> i.Lifecycle = "resolved" || i.Lifecycle = "closed")
     let confirmedCauses = inv |> Option.map (fun i -> i.Causes |> List.filter (fun c -> c.State = "confirmed")) |> Option.defaultValue []
 
+    // AI proposals (T27): recorded proposals with the engine's accept/reject legality, and the loop's state.
+    let capability id = inv |> Option.bind (fun i -> i.Capabilities |> List.tryFind (fun c -> c.Id = id))
+
+    let proposals =
+        inv
+        |> Option.map (fun i ->
+            i.Proposals
+            |> List.map (fun p ->
+                let accept = capability ("AcceptProposal:" + p.Id)
+                let reject = capability ("RejectProposal:" + p.Id)
+                let legal (c: Capability option) = c |> Option.exists (fun c -> c.Legal)
+                let why (c: Capability option) = c |> Option.bind (fun c -> c.Reason) |> Option.defaultValue ""
+
+                itemF
+                    [ "id", p.Id
+                      "kind", p.Kind
+                      "text", p.Text
+                      "rationale", (p.Rationale |> Option.defaultValue "No rationale given.")
+                      "state", p.State
+                      "by", p.By
+                      "reasonInputId", "reject-reason-" + p.Id
+                      "reasonLabelId", "reject-label-" + p.Id
+                      "reasonValue", (model.CommandInputs |> Map.tryFind ("RejectProposal:" + p.Id) |> Option.defaultValue "")
+                      "acceptWhy", why accept
+                      "rejectWhy", why reject ]
+                    [ "canAccept", legal accept
+                      "canReject", legal reject
+                      "decided", not (legal accept || legal reject)
+                      "acceptBlocked", (accept.IsSome && not (legal accept))
+                      "rejectBlocked", (reject.IsSome && not (legal reject)) ]))
+        |> Option.defaultValue []
+
+    let ai = ws.Ai
+    let aiHere = inv.IsSome && ai.Investigation = (inv |> Option.map (fun i -> i.Id))
+
     let notice, noticeTone =
         match model.Notice, ws.Message with
         | Some n, _ -> Some n.Text, n.Tone
@@ -312,6 +350,7 @@ let project (model: Model) : ViewState =
 
     [ "page.title", text pageTitle
       "screen", text (screenName screen)
+      "secrets.epoch", text (string model.SecretEpoch)
       "percepta.state", text (model.InjectedState |> Option.defaultValue "")
       "text.size", text (if model.Settings.LargeText then "large" else "standard")
       "motion", text (if model.Settings.ReducedMotion then "reduced" else "system")
@@ -362,6 +401,7 @@ let project (model: Model) : ViewState =
       "section.timeline", flag (on Timeline)
       "section.corrective", flag (on CorrectiveActions)
       "section.report", flag (on Report)
+      "section.proposals", flag (on AiProposals)
       "hypotheses", items hypotheses
       "hypotheses.empty", flag (inv.IsSome && hypotheses.IsEmpty)
       "evidence", items evidence
@@ -409,6 +449,27 @@ let project (model: Model) : ViewState =
       "report.source", text (inv |> Option.map (fun i -> $"{i.Title}, version {i.Version}") |> Option.defaultValue "")
       "report.conclusion", text (match confirmedCauses with [] -> "No cause has been confirmed. The report states no conclusion." | cs -> cs |> List.map (fun c -> c.Outcome) |> String.concat "; ")
       "report.verification", text "Verification of corrective actions is not part of this report yet; nothing is reported as verified."
+      "proposals", items proposals
+      "proposals.empty", flag (inv.IsSome && proposals.IsEmpty)
+      "ai.keyHeld", flag ai.KeyHeld
+      "ai.noKey", flag (not ai.KeyHeld)
+      "ai.modelSet", flag (model.Settings.AiModel <> "")
+      "ai.noModel", flag (model.Settings.AiModel = "")
+      "ai.model", text model.Settings.AiModel
+      "ai.canRequest", flag (ai.KeyHeld && model.Settings.AiModel <> "" && not ai.InFlight)
+      "ai.requestDisabled", flag (not (ai.KeyHeld && model.Settings.AiModel <> "") || ai.InFlight)
+      "ai.inFlight", flag (aiHere && ai.InFlight)
+      "ai.result.show", flag (aiHere && ai.Result.IsSome)
+      "ai.result.text", text (ai.Result |> Option.map (fun (t, _, _) -> t) |> Option.defaultValue "")
+      "ai.result.tone", text (ai.Result |> Option.map (fun (_, tone, _) -> tone) |> Option.defaultValue "info")
+      "ai.retryable", flag (aiHere && not ai.InFlight && ai.Result |> Option.exists (fun (_, _, r) -> r))
+      "ai.drafts", items (if aiHere then ai.Drafts |> List.mapi (fun i d -> item [ "id", string i; "kind", d.Kind; "text", d.Text; "rationale", (d.Rationale |> Option.defaultValue "No rationale given.") ]) else [])
+      "ai.hasDrafts", flag (aiHere && not ai.Drafts.IsEmpty)
+      "ai.stale.show", flag (aiHere && ai.Stale.IsSome)
+      "ai.stale.text", text (ai.Stale |> Option.defaultValue "")
+      "draft.aiTask", text model.Drafts.AiTask
+      "settings.aiModel", text model.Settings.AiModel
+      "settings.aiKey", text (if ai.KeyHeld then "A key is held in this page's memory for this session. It is never shown, stored or sent anywhere except the provider's authentication header." else "No key entered. Proposals cannot be requested without one.")
       "sync.text", text (syncText ws.Sync)
       "sync.tone", text (syncTone ws.Sync)
       "sync.mayHaveSaved", flag (match ws.Sync with MayHaveSaved _ -> true | _ -> false)

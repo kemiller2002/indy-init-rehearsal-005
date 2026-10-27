@@ -14,6 +14,7 @@ type Section =
     | Timeline
     | CorrectiveActions
     | Report
+    | AiProposals
 
 type Route =
     | Home
@@ -32,7 +33,8 @@ let sections =
       Hypotheses, "hypotheses", "Hypotheses"
       Timeline, "timeline", "Timeline"
       CorrectiveActions, "corrective-actions", "Corrective actions"
-      Report, "report", "Report" ]
+      Report, "report", "Report"
+      AiProposals, "proposals", "AI proposals" ]
 
 let sectionSlug (s: Section) = sections |> List.pick (fun (x, slug, _) -> if x = s then Some slug else None)
 let sectionLabel (s: Section) = sections |> List.pick (fun (x, _, label) -> if x = s then Some label else None)

@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <!-- The page runs only its own code and the .NET WebAssembly application; the only remote it may reach is GitHub's
-       API. No inline script, no eval, no base element. -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://api.github.com; frame-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <!-- The page runs only its own code and the .NET WebAssembly application; the only remotes it may reach are
+       GitHub's API and, when the person asks for AI proposals with their own key, the Anthropic API. No inline script, no eval, no base element. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://api.github.com https://api.anthropic.com; frame-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="no-referrer">
   <title data-text="page.title">Causa</title>
   <link rel="icon" href="causa-icon.svg" type="image/svg+xml">
@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="vendor/folio/print.css" media="print">
   <script type="module" src="main.js"></script>
 </head>
-<body class="ef-site causa" data-bind-data-text-size="text.size" data-bind-data-motion="motion" data-bind-data-screen="screen" data-bind-data-percepta-state="percepta.state">
+<body class="ef-site causa" data-bind-data-text-size="text.size" data-bind-data-motion="motion" data-bind-data-screen="screen" data-bind-data-percepta-state="percepta.state" data-bind-data-secret-epoch="secrets.epoch">
   <p id="causa-ready" class="ef-visually-hidden" role="status" tabindex="-1"></p>
   <a class="ef-skip-link" href="#causa-main">Skip to main content</a>
 
@@ -76,7 +76,7 @@
         <template data-if="connect.failed">
           <p class="ef-alert causa-notice" data-tone="warning" role="alert" data-text="connect.failure"></p>
         </template>
-        <form class="ef-form causa-form" data-event="connect" aria-describedby="token-help">
+        <form class="ef-form causa-form" data-event="connect" data-clear-secrets aria-describedby="token-help">
           <div class="ef-field">
             <label class="ef-field__label" id="token-label" for="token">Fine-grained GitHub token</label>
             <input id="token" aria-labelledby="token-label" class="causa-input" type="password" autocomplete="off" spellcheck="false" required data-event="token">
@@ -359,6 +359,54 @@
             <p class="causa-muted">Corrective actions are not available in this build yet.</p>
           </section>
         </template>
+        <template data-if="section.proposals">
+          <section aria-labelledby="sec-proposals" data-percepta-screen="investigation-proposals">
+            <h2 id="sec-proposals">AI proposals</h2>
+            <p class="causa-muted">An AI assistant can only propose hypotheses, open questions or actions. Nothing it proposes changes the investigation until you accept it.</p>
+            <template data-if="ai.noKey"><p class="causa-notice" data-tone="warning">Enter your provider key in <a href="#/settings">Settings</a> to request proposals.</p></template>
+            <template data-if="ai.noModel"><p class="causa-notice" data-tone="warning">Set the AI model id in <a href="#/settings">Settings</a>; there is no default model.</p></template>
+            <form class="ef-form causa-form" data-event="ai-request">
+              <div class="ef-field">
+                <label class="ef-field__label" id="ai-task-label" for="ai-task">What should the assistant propose?</label>
+                <textarea id="ai-task" aria-labelledby="ai-task-label" class="causa-input" rows="2" required data-event="ai-task" data-on="input" data-bind-value="draft.aiTask"></textarea>
+              </div>
+              <button type="submit" class="ef-button" data-ef-variant="primary" data-bind-disabled="ai.requestDisabled">Request proposals</button>
+            </form>
+            <template data-if="ai.inFlight"><div class="causa-ai-status" role="status"><p>Waiting for the provider…</p><button type="button" class="ef-button" data-event="ai-cancel">Cancel the request</button></div></template>
+            <template data-if="ai.result.show"><div class="ef-alert causa-notice" role="status" data-bind-data-tone="ai.result.tone"><p class="causa-notice__text" data-text="ai.result.text"></p>
+              <template data-if="ai.retryable"><button type="button" class="ef-button" data-event="ai-retry">Try again</button></template></div></template>
+            <template data-if="ai.hasDrafts">
+              <section class="causa-panel" aria-labelledby="ai-drafts-heading">
+                <h3 id="ai-drafts-heading">Drafted proposals (not recorded)</h3>
+                <template data-if="ai.stale.show"><p class="causa-notice causa-stale" data-tone="warning" data-text="ai.stale.text"></p></template>
+                <ul class="causa-list">
+                  <template data-each="ai.drafts" data-key="id">
+                    <li class="causa-item causa-item--proposal"><p><span class="causa-tag" data-text="kind"></span> <span data-text="text"></span></p><p class="causa-muted" data-text="rationale"></p></li>
+                  </template>
+                </ul>
+                <p><button type="button" class="ef-button" data-ef-variant="primary" data-event="ai-record">Record as proposals for review</button> <button type="button" class="ef-button" data-event="ai-discard">Discard drafts</button></p>
+              </section>
+            </template>
+            <h3>Proposals awaiting a decision and decided</h3>
+            <template data-if="proposals.empty"><p class="causa-muted">No proposals have been recorded.</p></template>
+            <ul class="causa-list">
+              <template data-each="proposals" data-key="id">
+                <li class="causa-item causa-item--proposal">
+                  <p><span class="causa-tag" data-text="kind"></span> <span data-text="text"></span></p>
+                  <p class="causa-muted" data-text="rationale"></p>
+                  <p class="causa-muted"><span data-text="by"></span> · <strong data-text="state"></strong></p>
+                  <template data-if="canAccept"><button type="button" class="ef-button" data-ef-variant="primary" data-event="proposal-accept" data-percepta-capability="AcceptProposal">Accept</button></template>
+                  <template data-if="canReject"><div class="causa-capability causa-capability--input">
+                    <label class="ef-field__label" data-bind-id="reasonLabelId" data-bind-for="reasonInputId">Why it is rejected</label>
+                    <input class="causa-input" type="text" autocomplete="off" data-bind-id="reasonInputId" data-bind-aria-labelledby="reasonLabelId" data-event="proposal-reason" data-on="input" data-bind-value="reasonValue">
+                    <button type="button" class="ef-button" data-event="proposal-reject" data-percepta-capability="RejectProposal">Reject</button>
+                  </div></template>
+                  <template data-if="acceptBlocked"><p class="causa-capability__reason" data-text="acceptWhy"></p></template>
+                </li>
+              </template>
+            </ul>
+          </section>
+        </template>
         <template data-if="section.report">
           <section aria-labelledby="sec-report" data-percepta-screen="investigation-report">
             <h2 id="sec-report">Report</h2>
@@ -495,6 +543,23 @@
             <option value="reduced">Reduce motion</option>
           </select>
         </div>
+        <h2>AI assistance</h2>
+        <p class="causa-muted">Proposals are requested with your own provider key and the model you name. Both apply to this tab for this session only.</p>
+        <div class="ef-field causa-filter">
+          <label class="ef-field__label" id="setting-ai-model-label" for="setting-ai-model">AI model id</label>
+          <input id="setting-ai-model" aria-labelledby="setting-ai-model-label" class="causa-input" type="text" autocomplete="off" spellcheck="false" data-event="ai-model" data-on="input" data-bind-value="settings.aiModel" aria-describedby="setting-ai-model-help">
+          <p id="setting-ai-model-help" class="ef-field__description">There is no default: requests are refused until you enter one.</p>
+        </div>
+        <form class="ef-form causa-form" data-event="ai-key-set" data-clear-secrets aria-describedby="ai-key-help">
+          <div class="ef-field">
+            <label class="ef-field__label" id="ai-key-label" for="ai-key">Provider key</label>
+            <input id="ai-key" aria-labelledby="ai-key-label" class="causa-input" type="password" autocomplete="off" spellcheck="false" required data-event="ai-key">
+            <p id="ai-key-help" class="ef-field__description">Kept in this page's memory only: never stored in the browser, never shown, logged or written anywhere. Reloading the page forgets it.</p>
+          </div>
+          <button type="submit" class="ef-button" data-ef-variant="primary">Use this key</button>
+        </form>
+        <p data-text="settings.aiKey"></p>
+        <template data-if="ai.keyHeld"><button type="button" class="ef-button" data-event="ai-key-clear">Forget the key</button></template>
         <h2>Data repository connection</h2>
         <p data-text="settings.connection"></p>
       </section>
