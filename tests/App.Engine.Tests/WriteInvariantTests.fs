@@ -277,12 +277,13 @@ let private legal (event: Event) (phase: Phase) =
     | Connect, (Disconnected | ConnectRefused _) -> true
     | Write, (Idle(_, Some _) | Held(_, _, NotWritten _)) -> true
     | (Edit _ | Reapply _), Idle _ -> true
-    | Discard, Held _ -> true
+    | Discard, (Held _ | Idle(_, Some _)) -> true
+    | Reloaded _, (Idle _ | Held(_, _, HeldReason.Conflict _)) -> true
     | Reconcile, Unknown _ -> true
     | _ -> false
 
 let private userEventsGuarded (stepper: Stepper) =
-    let events = [ Connect; Write; Edit sample; Reapply sample; Discard; Reconcile ]
+    let events = [ Connect; Write; Edit sample; Reapply sample; Discard; Reconcile; Reloaded B ]
     everyPhase stepper
     |> List.forall (fun state ->
         events
@@ -460,3 +461,90 @@ let ``SYNC-DURABLE VPO-b3efad6eb85360be VPO-34731ac9a977b818 VPO-8c435e1ebdf43e7
         | None -> ()
     // a restored disconnected document is re-attached at the freshly read head
     Assert.Equal(Idle(B, None), (Sync.attach B (Sync.restore Sync.initial)).Phase)
+
+// ---------------------------------------------------------------------------------------------------------------
+// Hooks for persistence's outer machine (Boundary D).
+
+[<Fact>]
+[<Trait("obligation", "VPO-b3efad6eb85360be")>]
+[<Trait("obligation", "VPO-8c435e1ebdf43e7c")>]
+[<Trait("obligation", "VPO-2d4b7557ce013e50")>]
+[<Trait("boundary", "D")>]
+let ``SYNC-HOOK restoreUnknown VPO-b3efad6eb85360be VPO-8c435e1ebdf43e7c is Unknown with no retry and no pre-reload answer can apply`` () =
+    let c = change A "m-reload"
+    let s = Sync.restoreUnknown A c
+    match s.Phase with
+    | Unknown(h, a) ->
+        Assert.Equal(A, h)
+        Assert.Equal(c, a.Change)
+    | other -> failwithf "%A" other
+    Assert.False(canRetry s.Phase)
+    Assert.Equal(MayHaveSaved, Sync.status s.Phase)
+    match real s Write with
+    | Error f -> Assert.Equal(OutcomeUnknown, f.Code)
+    | Ok _ -> failwith "write accepted while the outcome is unknown"
+    // reconcile re-reads the head first, with a request id outside any pre-reload book's range
+    let s, fx = run' real s [ Reconcile ]
+    match fx with
+    | [ ReadHead(RequestId r, since) ] ->
+        Assert.Equal(A, since)
+        Assert.True(r > (1L <<< 32))
+    | other -> failwithf "%A" other
+    for old in 1L .. 2000L do
+        match real s (HeadObserved(RequestId old, B, Descends [])) with
+        | Error f -> Assert.Equal(StaleAnswer, f.Code)
+        | Ok _ -> failwithf "pre-reload answer %d applied" old
+    // different changes get different bands
+    Assert.NotEqual((Sync.restoreUnknown A (change A "x")).Issued, (Sync.restoreUnknown A (change A "y")).Issued)
+
+[<Fact>]
+[<Trait("obligation", "VPO-34731ac9a977b818")>]
+[<Trait("obligation", "VPO-d7fbd84e40ded145")>]
+[<Trait("boundary", "D")>]
+let ``SYNC-HOOK Reloaded VPO-34731ac9a977b818 VPO-d7fbd84e40ded145 re-observes the head and keeps the book and the change`` () =
+    let s = connectedAt real A
+    // idle, nothing pending: follow the head
+    let s1, fx = run' real s [ Reloaded B ]
+    Assert.Equal(Idle(B, None), s1.Phase)
+    Assert.Empty(fx)
+    Assert.Equal(s.Issued, s1.Issued)
+    // pending change, head unchanged: still publishable
+    let p, _ = run' real s [ Edit(change A "m") ]
+    let p1, _ = run' real p [ Reloaded A ]
+    Assert.Equal(p.Phase, p1.Phase)
+    // pending change, head moved: a held conflict, never re-targeted (DC-001)
+    let p2, _ = run' real p [ Reloaded B ]
+    match p2.Phase with
+    | Held(h, c, HeldReason.Conflict(Some remote)) ->
+        Assert.Equal(A, h)
+        Assert.Equal("m", c.Marker)
+        Assert.Equal(B, remote)
+    | other -> failwithf "%A" other
+    // held conflict: the remote head is updated, the change kept
+    let p3, _ = run' real p2 [ Reloaded C ]
+    match p3.Phase with
+    | Held(_, c, HeldReason.Conflict(Some remote)) ->
+        Assert.Equal("m", c.Marker)
+        Assert.Equal(C, remote)
+    | other -> failwithf "%A" other
+    Assert.Equal(p.Issued, p3.Issued)
+    // illegal while a write is in flight
+    let w, _ = run' real p [ Write ]
+    match real w (Reloaded B) with
+    | Error f -> Assert.Equal(IllegalInState, f.Code)
+    | Ok _ -> failwith "Reloaded accepted while writing"
+
+[<Fact>]
+[<Trait("obligation", "VPO-199103f9166730e7")>]
+[<Trait("boundary", "D")>]
+let ``SYNC-HOOK Discard VPO-199103f9166730e7 a local unsent change can be discarded and is handed back`` () =
+    let s = connectedAt real A
+    let p, _ = run' real s [ Edit(change A "m") ]
+    match real p Discard with
+    | Ok(d, [ Released c ]) ->
+        Assert.Equal(Idle(A, None), d.Phase)
+        Assert.Equal("m", c.Marker)
+    | other -> failwithf "%A" other
+    match real s Discard with
+    | Error f -> Assert.Equal(IllegalInState, f.Code)
+    | Ok _ -> failwith "discard of nothing accepted"

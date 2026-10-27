@@ -17,7 +17,7 @@ control: the same check run against a deliberately defective step must fail.
 | DC-001 (DCT-001-B) | Reconciliation classifies by ancestry and change marker, never ref equality | `Sync.classify` | `DCT-001-B …`, negative control `… ref-equality reconciliation` |
 | DC-002 (DCT-002-A) | An answer applies only to the request instance in flight | `Sync.step` (book-issued `RequestId`, `StaleAnswer`) | `DCT-002-A …`, negative control `… matched by kind` |
 | Request identity (R1 M4 / R3 M1) | An answer to an earlier connection never lands on a newer one | `Sync.step` | `REQUEST-IDENTITY …` + negative control |
-| DC-002 (DCT-002-B) | User events legal only in their source states; refusals are typed and change nothing; an unchanged resubmission keeps its parent (R3 D-04) | `Sync.step` | `DCT-002-B …` (3 tests) + negative control `… writes during an unknown outcome` |
+| DC-002 (DCT-002-B) | User events legal only in their source states (table in BOUNDARIES.md, including the persistence hooks `Reloaded` and `Discard` of an unsent change); refusals are typed and change nothing; an unchanged resubmission keeps its parent (R3 D-04) | `Sync.step` | `DCT-002-B …` (3 tests) + negative control `… writes during an unknown outcome` |
 | DC-003 (DCT-003-A) | After send, any failure is Unknown: no Retry, reconcile re-reads the head first; saved only after read-back | `Sync.step`, `Sync.canRetry`, `Sync.status` | `DCT-003-A …` (2 tests) + negative control `… stage-blind`; `UI-006 … distinct statuses` |
 | DC-004, DC-005 | Advisory fields never authorize; mutable reads never cached | provider level (T18, persistence stream) | — |
 | DC-006 | Bounded start, Retry reaches ready | browser level (T16, shell stream) | — |
