@@ -69,7 +69,7 @@ test("proposals are drafted, recorded only on request, and applied only when a p
   await proposal.getByRole("button", { name: "Accept" }).click();
   await expect(proposal).toContainText("Accepted");
   await page.getByRole("navigation", { name: "Investigation sections" }).getByRole("link", { name: "Hypotheses" }).click();
-  await expect(page.getByText("Brake fluid boiled under repeated heavy braking.")).toBeVisible();
+  await expect(page.locator(".causa-list .causa-item--hypothesis").getByText("Brake fluid boiled under repeated heavy braking.")).toBeVisible();
   // The key is nowhere in the page, storage or diagnostics.
   expect(await page.content()).not.toContain(KEY);
   expect(await page.evaluate(() => JSON.stringify({ ...localStorage }) + JSON.stringify({ ...sessionStorage }) + JSON.stringify(window.causaDiagnostics))).not.toContain(KEY);

@@ -110,6 +110,63 @@ let commandFor (entropy: A.Entropy) (name: string) (fields: Map<string, string>)
         match Guid.TryParse id with
         | true, g -> Ok(RejectProposal(Id.ofGuid g, t))
         | _ -> Error "That proposal is not in this investigation."
+    | [| "AdmitEvidence" |] ->
+        let category =
+            match text fields "category" with
+            | "measurement" -> Measurement
+            | "log" -> Log
+            | "document" -> Document
+            | "experimentResult" -> ExperimentResult
+            | "testimony" -> Testimony
+            | "externalReference" -> ExternalReference
+            | _ -> DirectObservation
+        Ok(AdmitEvidence(Id.ofGuid (fresh 2), TextInput(text fields "content"), category, text fields "source", None))
+    | [| "RelateEvidence" |] ->
+        match Guid.TryParse(text fields "evidence"), Guid.TryParse(text fields "hypothesis") with
+        | (true, e), (true, h) ->
+            let kind =
+                match text fields "kind" with
+                | "contradicts" -> Contradicts
+                | "discriminates" -> Discriminates
+                | "insufficient" -> Insufficient
+                | _ -> Supports
+            let rationale = text fields "rationale"
+            Ok(RelateEvidence(Id.ofGuid (fresh 2), Id.ofGuid e, Id.ofGuid h, kind, (if String.IsNullOrWhiteSpace rationale then None else Some rationale)))
+        | _ -> Error "Choose the evidence and the hypothesis to link."
+    | [| "TransitionHypothesis"; h; cmd |] ->
+        let command =
+            match cmd with
+            | "markPlausible" -> Some MarkPlausible
+            | "markSupported" -> Some MarkSupported
+            | "markWeakened" -> Some MarkWeakened
+            | "falsify" -> Some Falsify
+            | "supersede" -> Some Supersede
+            | "reopen" -> Some Reopen
+            | _ -> None
+        match Guid.TryParse h, command with
+        | (true, g), Some c -> Ok(TransitionHypothesis(Id.ofGuid g, c, text fields "reason", []))
+        | _ -> Error "That change is not available for this hypothesis."
+    | [| "RecordCause" |] ->
+        match Guid.TryParse(text fields "hypothesis") with
+        | true, h ->
+            let role =
+                match text fields "role" with
+                | "trigger" -> CauseRole.Trigger
+                | "contributingFactor" -> CauseRole.ContributingFactor
+                | "enablingCondition" -> CauseRole.EnablingCondition
+                | _ -> CauseRole.RootCause
+            let mechanism = text fields "mechanism"
+            Ok(RecordCause(Id.ofGuid (fresh 2), text fields "outcome", [ { Hypothesis = Id.ofGuid h; Role = role } ], (if String.IsNullOrWhiteSpace mechanism then None else Some mechanism)))
+        | _ -> Error "Choose the hypothesis that explains the outcome."
+    | [| "RecordCorrectiveAction" |] ->
+        let kind =
+            match text fields "kind" with
+            | "mitigation" -> Mitigation
+            | "workaround" -> Workaround
+            | "prevention" -> Prevention
+            | _ -> Correction
+        let targets = match Guid.TryParse(text fields "cause") with | true, c -> [ Id.ofGuid c ] | _ -> []
+        Ok(RecordCorrectiveAction(Id.ofGuid (fresh 2), kind, text fields "description", targets))
     | [| "ConfirmCause"; id |] ->
         match Guid.TryParse id with
         | true, g -> Ok(ConfirmCause(Id.ofGuid g))

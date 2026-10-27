@@ -64,6 +64,27 @@ let private lifecycleCommandName =
     | ReopenInvestigationCommand -> "ReopenInvestigation", "Reopen the investigation", Some "Why it is reopened"
     | VerificationFailedFollowOn -> "VerificationFailedFollowOn", "Follow on a failed verification", None
 
+/// Marks a capability whose inputs are collected by a dedicated form rather than one text field.
+let formMarker = "@form"
+
+let hypothesisCommandKey =
+    function
+    | MarkPlausible -> "markPlausible"
+    | MarkSupported -> "markSupported"
+    | MarkWeakened -> "markWeakened"
+    | Falsify -> "falsify"
+    | Supersede -> "supersede"
+    | Reopen -> "reopen"
+
+let hypothesisCommandLabel =
+    function
+    | MarkPlausible -> "Mark plausible"
+    | MarkSupported -> "Mark supported"
+    | MarkWeakened -> "Mark weakened"
+    | Falsify -> "Falsify"
+    | Supersede -> "Supersede"
+    | Reopen -> "Reopen"
+
 /// The capabilities the shell can submit today, with their names, labels and the one input each needs. Others
 /// (records that need several fields) are not offered until their forms exist, rather than offered and broken.
 let describe (inv: Investigation) (action: CapabilityAction) : (string * string * string * string option) option =
@@ -81,6 +102,14 @@ let describe (inv: Investigation) (action: CapabilityAction) : (string * string 
     | ConfirmCauseAction c ->
         let outcome = inv.Causes |> Map.tryFind c |> Option.map (fun x -> text x.Outcome) |> Option.defaultValue ""
         Some("ConfirmCause:" + c.Text, "ConfirmCause", $"Confirm the cause of: {outcome}", None)
+    // Commands with several fields have their own forms (Evidence, Hypotheses, Causal analysis, Corrective actions).
+    | Create AdmitEvidenceKind -> Some("AdmitEvidence", "AdmitEvidence", "Admit evidence", Some formMarker)
+    | Create RelateEvidenceKind -> Some("RelateEvidence", "RelateEvidence", "Link evidence to a hypothesis", Some formMarker)
+    | Create RecordCauseKind -> Some("RecordCause", "RecordCause", "Record a causal relationship", Some formMarker)
+    | Create RecordCorrectiveActionKind -> Some("RecordCorrectiveAction", "RecordCorrectiveAction", "Record a corrective action", Some formMarker)
+    | HypothesisAction(h, c) ->
+        let cmd = hypothesisCommandKey c
+        Some($"TransitionHypothesis:{h.Text}:{cmd}", "TransitionHypothesis", hypothesisCommandLabel c, Some formMarker)
     | _ -> None
 
 let actorText (a: Actor) =

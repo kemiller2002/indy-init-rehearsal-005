@@ -181,6 +181,25 @@ let rec private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
         match e.Key with
         | Some k -> onEvent entropy { e with Name = "command"; Key = Some((if e.Name = "proposal-accept" then "AcceptProposal:" else "RejectProposal:") + k) } model
         | None -> model, []
+    // Multi-field forms: "field-<Form>.<field>" keeps the typed value; "submit-<Form>" sends the command with them.
+    | name when name.StartsWith("field-", StringComparison.Ordinal) ->
+        { model with CommandInputs = model.CommandInputs.Add(name.Substring 6, value) }, []
+    | name when name.StartsWith("submit-", StringComparison.Ordinal) ->
+        let form = name.Substring 7
+        let fields =
+            model.CommandInputs
+            |> Map.toList
+            |> List.choose (fun (k, v) -> if k.StartsWith(form + ".", StringComparison.Ordinal) then Some(k.Substring(form.Length + 1), v) else None)
+            |> Map.ofList
+        let command =
+            if form = "TransitionHypothesis" then
+                $"""TransitionHypothesis:{fields |> Map.tryFind "hypothesis" |> Option.defaultValue ""}:{fields |> Map.tryFind "change" |> Option.defaultValue ""}"""
+            else form
+        match model.Route, model.Route |> (function Investigation(id, _) -> model.Port.Projection.Opened.TryFind id | _ -> None) with
+        | Investigation(id, _), Some(Loaded inv) ->
+            let cleared = model.CommandInputs |> Map.filter (fun k _ -> not (k.StartsWith(form + ".", StringComparison.Ordinal)) || k.EndsWith(".hypothesis") || k.EndsWith(".evidence"))
+            toPort entropy (Command(Some id, command, fields, inv.Version)) { model with CommandInputs = cleared }
+        | _ -> { model with Notice = Some { Tone = "warning"; Text = "That action is not available here." } }, []
     | "command-input" ->
         match e.Key with
         | Some capability -> { model with CommandInputs = model.CommandInputs.Add(capability, value) }, []

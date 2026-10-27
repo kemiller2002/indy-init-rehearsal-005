@@ -37,7 +37,7 @@ test("the timeline lists events in sequence with event type, actor, event time a
   // The hypothesis event links to the hypothesis it recorded (UI-003-O4).
   await entries.nth(2).getByRole("link", { name: /hypothesis: A worn drive belt slipped\./ }).click();
   await expect(page).toHaveURL(/\/hypotheses\?item=[0-9a-f-]{36}$/);
-  await expect(page.getByText("A worn drive belt slipped.")).toBeVisible();
+  await expect(page.locator(".causa-list .causa-item--hypothesis").getByText("A worn drive belt slipped.")).toBeVisible();
 });
 
 test("a past version is shown labelled historical with what it changed and what changed since; the latest is never mixed in [VPO-d08de632c7c1a4ab] [VPO-c3326322b8ed473a]", { tag: ["@webkit"] }, async ({ page }) => {

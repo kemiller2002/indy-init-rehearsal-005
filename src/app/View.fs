@@ -134,7 +134,11 @@ let project (model: Model) : ViewState =
                       "tone", tone h.State
                       "supporting", count h.Supporting "supporting"
                       "contradicting", count h.Contradicting "contradicting"
-                      "href", Routes.formatItem (Investigation(i.Id, Hypotheses)) h.Id ]))
+                      "href", Routes.formatItem (Investigation(i.Id, Hypotheses)) h.Id
+                      "changes",
+                      (match i.Capabilities |> List.filter (fun c -> c.Legal && c.Id.StartsWith("TransitionHypothesis:" + h.Id + ":")) with
+                       | [] -> "No change is allowed now."
+                       | cs -> "Allowed changes: " + (cs |> List.map (fun c -> c.Label) |> String.concat ", ")) ]))
         |> Option.defaultValue []
 
     let evidence =
@@ -157,10 +161,24 @@ let project (model: Model) : ViewState =
             i.Blockers |> List.map (fun b -> item [ "id", b.Id; "anchor", "blocker-" + b.Id; "selected", (if model.Selected = b.Id then "true" else "false"); "question", b.Question; "materiality", (if b.Material then "Material question" else "Not material") ]))
         |> Option.defaultValue []
 
+    let formCapability (name: string) =
+        inv |> Option.map (fun i -> i.Capabilities |> List.filter (fun c -> c.Name = name)) |> Option.defaultValue []
+
+    let can name = formCapability name |> List.exists (fun c -> c.Legal)
+
+    let why name =
+        match formCapability name with
+        | [] -> "Not available for this investigation."
+        | cs when cs |> List.exists (fun c -> c.Legal) -> ""
+        | c :: _ -> c.Reason |> Option.defaultValue "Not allowed in the current status."
+
+    let field (key: string) = model.CommandInputs |> Map.tryFind key |> Option.defaultValue ""
+
     let capabilities =
         inv
         |> Option.map (fun i ->
             i.Capabilities
+            |> List.filter (fun c -> c.Input <> Some EngineView.formMarker)
             |> List.map (fun c ->
                 itemF
                     [ "id", c.Id
@@ -550,6 +568,31 @@ let project (model: Model) : ViewState =
       "draft.aiTask", text model.Drafts.AiTask
       "settings.aiModel", text model.Settings.AiModel
       "settings.aiKey", text (if ai.KeyHeld then "A key is held in this page's memory for this session. It is never shown, stored or sent anywhere except the provider's authentication header." else "No key entered. Proposals cannot be requested without one.")
+      "can.AdmitEvidence", flag (can "AdmitEvidence")
+      "why.AdmitEvidence", text (why "AdmitEvidence")
+      "not.AdmitEvidence", flag (not (can "AdmitEvidence"))
+      "can.RelateEvidence", flag (can "RelateEvidence")
+      "why.RelateEvidence", text (why "RelateEvidence")
+      "not.RelateEvidence", flag (not (can "RelateEvidence"))
+      "can.TransitionHypothesis", flag (can "TransitionHypothesis")
+      "why.TransitionHypothesis", text (why "TransitionHypothesis")
+      "not.TransitionHypothesis", flag (not (can "TransitionHypothesis"))
+      "can.RecordCause", flag (can "RecordCause")
+      "why.RecordCause", text (why "RecordCause")
+      "not.RecordCause", flag (not (can "RecordCause"))
+      "can.RecordCorrectiveAction", flag (can "RecordCorrectiveAction")
+      "why.RecordCorrectiveAction", text (why "RecordCorrectiveAction")
+      "not.RecordCorrectiveAction", flag (not (can "RecordCorrectiveAction"))
+      "form.ev.content", text (field "AdmitEvidence.content")
+      "form.ev.source", text (field "AdmitEvidence.source")
+      "form.rel.rationale", text (field "RelateEvidence.rationale")
+      "form.hyp.reason", text (field "TransitionHypothesis.reason")
+      "form.cause.outcome", text (field "RecordCause.outcome")
+      "form.cause.mechanism", text (field "RecordCause.mechanism")
+      "form.ca.description", text (field "RecordCorrectiveAction.description")
+      "causeOptions", items (inv |> Option.map (fun i -> i.Causes |> List.map (fun c -> item [ "id", c.Id; "label", c.Outcome ])) |> Option.defaultValue [])
+      "corrections", items (report |> Option.map (fun r -> r.Corrections |> List.mapi (fun k (d, st) -> item [ "id", string k; "text", d; "state", st ])) |> Option.defaultValue [])
+      "corrections.empty", flag (report |> Option.forall (fun r -> r.Corrections.IsEmpty))
       "sync.text", text (syncText ws.Sync)
       "sync.tone", text (syncTone ws.Sync)
       "sync.mayHaveSaved", flag (match ws.Sync with MayHaveSaved _ -> true | _ -> false)
