@@ -1,0 +1,9 @@
+{
+  "name": "s11-blocked",
+  "predicates": [
+    "material-blocker-exists"
+  ],
+  "capabilities": {
+    "ConfirmCause": "illegal"
+  }
+}

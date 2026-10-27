@@ -1,0 +1,7 @@
+{
+  "name": "s11-legal",
+  "predicates": [],
+  "capabilities": {
+    "ConfirmCause": "legal"
+  }
+}

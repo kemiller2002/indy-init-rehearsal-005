@@ -1,0 +1,10 @@
+{
+  "name": "s03-blocked",
+  "predicates": [
+    "material-blocker-exists"
+  ],
+  "capabilities": {
+    "RecordPrediction": "illegal",
+    "RecordInvestigationAction": "illegal"
+  }
+}

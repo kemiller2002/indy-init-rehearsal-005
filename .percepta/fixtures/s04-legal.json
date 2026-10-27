@@ -1,0 +1,8 @@
+{
+  "name": "s04-legal",
+  "predicates": [],
+  "capabilities": {
+    "FalsifyHypothesis": "legal",
+    "ReopenHypothesis": "legal"
+  }
+}

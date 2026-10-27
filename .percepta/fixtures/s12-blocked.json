@@ -1,0 +1,10 @@
+{
+  "name": "s12-blocked",
+  "predicates": [
+    "material-blocker-exists"
+  ],
+  "capabilities": {
+    "RecordCorrectiveAction": "illegal",
+    "MarkCorrectiveActionImplemented": "illegal"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "s24-blocked",
+  "predicates": [
+    "material-blocker-exists"
+  ],
+  "capabilities": {
+    "PinPolicyVersion": "illegal"
+  }
+}

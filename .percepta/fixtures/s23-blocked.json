@@ -1,0 +1,8 @@
+{
+  "name": "s23-blocked",
+  "predicates": [
+    "material-blocker-exists"
+  ],
+  "capabilities": {},
+  "sync": "conflict"
+}

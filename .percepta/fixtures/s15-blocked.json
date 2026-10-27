@@ -1,0 +1,7 @@
+{
+  "name": "s15-blocked",
+  "predicates": [
+    "material-blocker-exists"
+  ],
+  "capabilities": {}
+}
