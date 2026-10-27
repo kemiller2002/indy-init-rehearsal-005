@@ -95,6 +95,7 @@ let toProjection (s: Injected) : WorkspaceProjection =
           Capabilities = capabilities }
 
     { Connection = ConnectedTo("fixture/percepta", "main", "test")
+      ConnectionStatus = None
       Investigations =
         Loaded
             [ { Id = fixtureId

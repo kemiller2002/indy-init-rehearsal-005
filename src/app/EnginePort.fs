@@ -183,7 +183,9 @@ let commandFor (entropy: A.Entropy) (name: string) (fields: Map<string, string>)
             | "reopen" -> Some Reopen
             | _ -> None
         match Guid.TryParse h, command with
-        | (true, g), Some c -> Ok(TransitionHypothesis(Id.ofGuid g, c, text fields "reason", []))
+        | (true, g), Some c ->
+            let cited = match Guid.TryParse(text fields "evidence") with | true, e -> [ Id.ofGuid e ] | _ -> []
+            Ok(TransitionHypothesis(Id.ofGuid g, c, text fields "reason", cited))
         | _ -> Error "That change is not available for this hypothesis."
     | [| "RecordCause" |] ->
         match Guid.TryParse(text fields "hypothesis") with
@@ -299,6 +301,19 @@ let private outcomeOf (n: int64) (result: EffectResult) : AiHttpOutcome option =
         | EffectOutcome.OutcomeUnknown _ -> Some(OutcomeUnknown n)
     | _ -> None
 
+/// Every connection state in its own words (none merged into another).
+let connectionWords (state: ConnectionState) =
+    match state with
+    | ConnectionState.Disconnected -> "Not connected"
+    | ConnectionState.Connecting -> "Connecting: checking the repository and branch"
+    | ConnectionState.Loading -> "Connected: loading the workspace"
+    | ConnectionState.AuthorizedEmpty -> "Connected: the workspace has no investigation yet"
+    | ConnectionState.Connected -> "Connected"
+    | ConnectionState.Incompatible -> "Not connected: the repository's data is not compatible"
+    | ConnectionState.AccessDenied -> "Not connected: access denied"
+    | ConnectionState.Offline -> "Offline: work on this device is kept"
+    | ConnectionState.Conflict -> "Connected: someone else changed an investigation"
+
 /// The workspace projection, re-derived from persistence's sessions at `at` (one version per investigation).
 let private project (at: DateTimeOffset) (p: Persistence) (message: (string * string) option) (ai: A.AiView) : A.WorkspaceProjection =
     let projectionOf (d: Document) =
@@ -336,6 +351,7 @@ let private project (at: DateTimeOffset) (p: Persistence) (message: (string * st
     let connected = match p.Connection with A.ConnectedTo _ -> true | _ -> false
 
     { Connection = p.Connection
+      ConnectionStatus = Some(connectionWords p.ConnectionState, p.ConnectionDetail)
       Investigations = cards
       Opened = opened
       Sync = sync |> Option.defaultValue A.NoChanges
@@ -385,9 +401,6 @@ and private handle (entropy: A.Entropy) (input: A.AdapterInput) (p: Persistence)
     | A.Disconnect -> pass Disconnect
     | A.Open id -> pass (Open id)
     | A.CheckRemote -> pass CheckRemote
-    | A.DiscardLocal id -> pass (DiscardLocal id)
-    | A.ReloadRemote id -> pass (ReloadRemote id)
-    | A.Boot -> pass Boot
     | A.SetAiKey key ->
         match ProviderKey.Create key with
         | Some k -> portOf at p (Some("info", "The key is held in this page's memory only. Reloading forgets it.")) { ai with Key = Some k; Result = None }, []
@@ -431,6 +444,9 @@ and private handle (entropy: A.Entropy) (input: A.AdapterInput) (p: Persistence)
             | None -> portOf at p None ai, []
         | _ -> portOf at p None ai, []
     | A.Answer(corr, result) -> pass (Answer(corr, result))
+    | A.DiscardLocal id -> pass (DiscardLocal id)
+    | A.ReloadRemote id -> pass (ReloadRemote id)
+    | A.Boot -> pass Boot
     | A.Command(investigation, name, fields, expected) ->
         let session, expectedVersion, id =
             match investigation with

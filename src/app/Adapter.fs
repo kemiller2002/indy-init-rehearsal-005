@@ -174,6 +174,8 @@ type AdminFact = { Id: string; Section: string; Label: string; Value: string; St
 
 type WorkspaceProjection =
     { Connection: Connection
+      /// The exact connection state in words and its detail, when persistence reports them (EXT-DATA-007).
+      ConnectionStatus: (string * string option) option
       Investigations: Loadable<CardProjection list>
       Opened: Map<string, Loadable<InvestigationProjection>>
       Sync: SyncStatus
@@ -196,12 +198,6 @@ type AdapterInput =
     | Answer of correlation: string * EffectResult
     /// "Check now": re-read the branch to settle a save whose outcome is unknown (MayHaveSaved).
     | CheckRemote
-    /// Conflict resolution: drop this device's change to the investigation and adopt the repository's copy.
-    | DiscardLocal of id: string
-    /// Re-read the investigation from the repository (after a conflict), keeping this device's change.
-    | ReloadRemote of id: string
-    /// Page start: restore this device's unsaved work before anything else (call once from Initialize).
-    | Boot
     /// The provider key typed on the key screen: held in memory by the port only, never in the shell's model.
     | SetAiKey of key: string
     | ClearAiKey
@@ -211,6 +207,12 @@ type AdapterInput =
     /// Record the drafted proposals (still proposals: a human accepts each one) or discard them.
     | RecordDrafts of investigation: string * model: string
     | DiscardDrafts
+    /// Conflict resolution: drop this device's change to the investigation and adopt the repository's copy.
+    | DiscardLocal of id: string
+    /// Re-read the investigation from the repository (after a conflict), keeping this device's change.
+    | ReloadRemote of id: string
+    /// Page start: restore this device's unsaved work before anything else (call once from Initialize).
+    | Boot
 
 /// The engine and persistence as the shell sees them.
 type Port =
@@ -222,6 +224,7 @@ type Port =
 
 let emptyWorkspace =
     { Connection = NotConnected
+      ConnectionStatus = None
       Investigations = NotRequested
       Opened = Map.empty
       Sync = NoChanges

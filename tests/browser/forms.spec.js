@@ -69,3 +69,41 @@ test("evidence, links, hypothesis changes, causes and corrective actions are rec
   await version(page, 8);
   await expect(page.locator("[data-percepta-screen=investigation-corrective-actions] .causa-item")).toContainText("Not verified effective (0 of 0 criteria satisfied)");
 });
+
+test("destructive or irreversible actions wait for confirmation; cancelling changes nothing [VPO-b9af1bcfc961c8bb]", { tag: ["@webkit"] }, async ({ page }) => {
+  await page.goto(SITE + "index.html#/investigations/new");
+  await started(page);
+  await page.evaluate(() => window.__perceptaSetState({ name: "engine-memory", predicates: [], capabilities: {} }));
+  await page.getByLabel("Title").fill("Pressure drop");
+  await page.getByLabel(/Problem statement/).fill("Line pressure fell by 2 bar at 09:00.");
+  await page.getByRole("button", { name: "Start the investigation" }).click();
+  await page.getByRole("button", { name: "Activate the investigation" }).click();
+  await page.getByLabel("Hypothesis statement").fill("A relief valve opened.");
+  await page.getByRole("button", { name: "Record a hypothesis" }).click();
+  await version(page, 3);
+  await section(page, "Evidence");
+  await page.getByLabel("What the evidence shows, quoted as recorded").fill("Valve log: closed all morning.");
+  await page.getByLabel("Source").fill("Valve controller log");
+  await page.getByRole("button", { name: "Admit evidence" }).click();
+  await version(page, 4);
+  await section(page, "Hypotheses");
+  await page.locator("#hyp-which").selectOption({ label: "A relief valve opened." });
+  await page.locator("#hyp-evidence").selectOption({ label: "Valve log: closed all morning." });
+  await page.getByLabel("Change", { exact: true }).selectOption("falsify");
+  await page.getByLabel("Reason").fill("The valve log shows it stayed shut.");
+  await page.getByRole("button", { name: "Record the change" }).click();
+  const dialog = page.getByRole("alertdialog");
+  await expect(dialog).toContainText("Falsify this hypothesis?");
+  await expect(page.getByRole("button", { name: "Yes, continue" })).toBeFocused();
+  await dialog.getByRole("button", { name: "Cancel" }).click();
+  await expect(page.getByText("Cancelled. Nothing was changed.")).toBeVisible();
+  await version(page, 4);
+  // Submitting again and confirming records it.
+  await page.getByLabel("Reason").fill("The valve log shows it stayed shut.");
+  await page.getByRole("button", { name: "Record the change" }).click();
+  await expect(page.getByRole("button", { name: "Yes, continue" })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.locator(".causa-notice").first()).toContainText("Recorded");
+  await version(page, 5);
+  await expect(page.locator(".causa-list .causa-item--hypothesis")).toContainText("Falsified");
+});
