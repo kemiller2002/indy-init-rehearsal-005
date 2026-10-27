@@ -49,6 +49,24 @@ held changes are kept; the request counter is kept so no pre-reload answer can
 land), then `Sync.attach head` once the branch head has been read again.
 `Sync` does no IO.
 
+Hooks for the outer machine (do not build `Sync.State` values by hand; that bypasses the invariants):
+
+- `Sync.restoreUnknown : Oid -> Change -> State` — after a reload where only the change and the head it was
+  decided on survived and the change may have been sent: an explicit Unknown (no Retry; `Reconcile` re-reads the
+  head first). Its request counter starts in a band (>= 2^32, derived from the change marker) that a book counting
+  from 0 never reaches, so no answer from before the reload can apply. When the saved `State` is available, use
+  `Sync.decode` + `Sync.restore` instead (keeps the exact counter).
+- `Reloaded of head: Oid` event — legal in `Idle` and `Held(Conflict)`; keeps the book (`Issued`).
+  `Idle(_, None)` follows the head; `Idle(_, Some change)` stays publishable only if the head equals
+  `change.DecidedAt`, otherwise becomes `Held(DecidedAt, change, Conflict(Some head))` (never re-targeted, DC-001);
+  `Held(_, change, Conflict _)` records the new remote head and keeps the change.
+- `Discard` is also legal in `Idle(head, Some change)`: the unsent change is dropped locally and handed back as
+  `Released change` (for reapply).
+
+Legal source states of user events (DCT-002-B): Connect from Disconnected/ConnectRefused; Edit/Reapply from Idle;
+Write from Idle with a pending change or Held(NotWritten); Discard from Held or Idle with a pending change;
+Reconcile from Unknown; Reloaded from Idle or Held(Conflict). Everything else is a typed fault that changes nothing.
+
 ## AI proposal loop for the shell (T27)
 
 1. Hold the user's key as `ProviderKey.Create text` in memory only (never stored, logged or put in a URL or body).
