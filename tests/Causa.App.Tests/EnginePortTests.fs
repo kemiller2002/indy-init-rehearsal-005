@@ -88,3 +88,49 @@ let ``VPO-2f4f9de66ddd6434 the production port refuses Connect and claims no con
     match port.Projection.Connection with
     | ConnectionFailed _ -> ()
     | other -> failwithf "%A" other
+
+[<Fact>]
+let ``VPO-d0e33c8aaaf705f2 VPO-f0256bc31283be14 VPO-58231f4725864068 integrity that passed never becomes a Verified finding in the investigation views`` () =
+    // A loaded investigation whose data passed every integrity check but holds no confirmed cause.
+    let port, _, id = start (memory ())
+    let inv = opened port id
+    let ws = port.Projection
+    let docs =
+        ws.Opened
+        |> Map.map (fun _ l ->
+            match l with
+            | Loaded i -> Loaded { i with Integrity = Some "events SHA-256 abc…, state SHA-256 def…, admissibility checked" }
+            | other -> other)
+    let model = { Shell.initial with Route = Routes.Investigation(id, Routes.Overview); Port = Port.fixedAt { ws with Opened = docs } }
+    let view = View.project model
+    let text k = match view |> Map.tryFind k with Some(ViewValue.Text t) -> t | _ -> ""
+    Assert.Equal("Confirmed causes: 0 · Corrective actions verified effective: 0 · Not resolved", text "findings.text")
+    // No investigation-facing value says Verified; the integrity fact appears only in Administration.
+    for KeyValue(k, v) in view do
+        if not (k.StartsWith "admin") then Assert.DoesNotContain("Verified", (sprintf "%A" v).Replace("verified effective", ""))
+    let admin = View.project { model with Route = Routes.Administration }
+    Assert.Contains("Integrity check passed", sprintf "%A" (admin |> Map.find "admin.persistence"))
+    Assert.Equal(Some { ConfirmedCauses = 0; VerifiedCorrections = 0; Resolved = false }, inv.Findings)
+
+[<Fact>]
+let ``VPO-b8e1657130d006fd an investigation that failed to load renders no partial state`` () =
+    let id = "00000000-0000-4000-8000-0000000000a9"
+    let ws = { emptyWorkspace with Connection = ConnectedTo("a/b", "main", "w"); Investigations = Loaded []; Opened = Map.ofList [ id, Failed "The history failed validation at event 4; nothing from it is shown." ] }
+    let view = View.project { Shell.initial with Route = Routes.Investigation(id, Routes.Overview); Port = Port.fixedAt ws }
+    Assert.Equal(Some(ViewValue.Flag true), view |> Map.tryFind "screen.failed")
+    Assert.Equal(Some(ViewValue.Flag false), view |> Map.tryFind "screen.investigation")
+    Assert.Equal(Some(ViewValue.Items []), view |> Map.tryFind "hypotheses")
+    Assert.Equal(Some(ViewValue.Text ""), view |> Map.tryFind "inv.title")
+
+[<Fact>]
+let ``VPO-f8666daf6fdf79d7 VPO-ffda9fea0324a42e the report explains only from Projection.report's typed records`` () =
+    let port, _, id = start (memory ())
+    let port, _ = port.Handle (entropy ()) (Command(Some id, "ActivateInvestigation", Map.empty, 1L))
+    let port, _ = port.Handle (entropy ()) (Command(Some id, "IdentifyUnknown", Map.ofList [ "text", "Was the valve replaced last month?" ], 2L))
+    let inv = opened port id
+    let r = inv.Report.Value
+    Assert.Equal(None, r.Conclusion)
+    Assert.Equal<string list>([ "Was the valve replaced last month?" ], r.OpenQuestions)
+    let view = View.project { Shell.initial with Route = Routes.Investigation(id, Routes.Report); Port = port }
+    Assert.Equal(Some(ViewValue.Text "No cause has been confirmed and no conclusion is recorded. The report states no conclusion."), view |> Map.tryFind "report.conclusion")
+    Assert.Contains("Open question: Was the valve replaced last month?", sprintf "%A" (view |> Map.find "report.open"))

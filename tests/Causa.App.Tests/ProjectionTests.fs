@@ -103,3 +103,36 @@ let ``VPO-89ed6170f531961e an unknown save outcome is its own state: neither sav
     let ws = { emptyWorkspace with Connection = ConnectedTo("a/b", "main", "w"); Sync = s }
     let view = View.project { Shell.initial with Route = Routes.Investigations; Port = Port.fixedAt ws }
     Assert.True(flagOf view "sync.mayHaveSaved")
+
+/// A port that records every input it receives and changes nothing.
+let private recording () =
+    let seen = Collections.Generic.List<AdapterInput>()
+    let projection = { emptyWorkspace with Connection = ConnectedTo("a/b", "main", "w"); Sync = Conflict; ConnectionStatus = Some(EnginePort.connectionWords EnginePort.ConnectionState.Conflict, None) }
+    let rec make () : Port =
+        { Name = "recording"
+          History = fun _ _ -> None
+          Projection = projection
+          Handle = fun _ input -> seen.Add input; make (), [] }
+    make (), seen
+
+[<Fact>]
+let ``VPO-34731ac9a977b818 on a conflict the shell offers reload and discard, and each reaches persistence for that investigation only`` () =
+    let port, seen = recording ()
+    let id = "00000000-0000-4000-8000-0000000000c1"
+    let model = { Shell.initial with Route = Routes.Investigation(id, Routes.Overview); Port = port }
+    let view = View.project model
+    Assert.True(flagOf view "sync.conflict")
+    Assert.Equal("Connected: someone else changed an investigation", textOf view "connection.label")
+    let ev name: SemanticEvent = { Name = name; Key = None; Value = None; Checked = None; Values = None; Submitter = None }
+    Shell.update entropy (BrowserToEngineMessage.Event(ev "reload-remote")) model |> ignore
+    Shell.update entropy (BrowserToEngineMessage.Event(ev "discard-local")) model |> ignore
+    Assert.Equal<AdapterInput list>([ ReloadRemote id; DiscardLocal id ], List.ofSeq seen)
+
+[<Fact>]
+let ``every connection state has its own words`` () =
+    let states =
+        [ EnginePort.ConnectionState.Disconnected; EnginePort.ConnectionState.Connecting; EnginePort.ConnectionState.Loading
+          EnginePort.ConnectionState.AuthorizedEmpty; EnginePort.ConnectionState.Connected; EnginePort.ConnectionState.Incompatible
+          EnginePort.ConnectionState.AccessDenied; EnginePort.ConnectionState.Offline; EnginePort.ConnectionState.Conflict ]
+    let words = states |> List.map EnginePort.connectionWords
+    Assert.Equal(states.Length, (List.distinct words).Length)

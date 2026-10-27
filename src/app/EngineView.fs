@@ -64,6 +64,27 @@ let private lifecycleCommandName =
     | ReopenInvestigationCommand -> "ReopenInvestigation", "Reopen the investigation", Some "Why it is reopened"
     | VerificationFailedFollowOn -> "VerificationFailedFollowOn", "Follow on a failed verification", None
 
+/// Marks a capability whose inputs are collected by a dedicated form rather than one text field.
+let formMarker = "@form"
+
+let hypothesisCommandKey =
+    function
+    | MarkPlausible -> "markPlausible"
+    | MarkSupported -> "markSupported"
+    | MarkWeakened -> "markWeakened"
+    | Falsify -> "falsify"
+    | Supersede -> "supersede"
+    | Reopen -> "reopen"
+
+let hypothesisCommandLabel =
+    function
+    | MarkPlausible -> "Mark plausible"
+    | MarkSupported -> "Mark supported"
+    | MarkWeakened -> "Mark weakened"
+    | Falsify -> "Falsify"
+    | Supersede -> "Supersede"
+    | Reopen -> "Reopen"
+
 /// The capabilities the shell can submit today, with their names, labels and the one input each needs. Others
 /// (records that need several fields) are not offered until their forms exist, rather than offered and broken.
 let describe (inv: Investigation) (action: CapabilityAction) : (string * string * string * string option) option =
@@ -76,10 +97,167 @@ let describe (inv: Investigation) (action: CapabilityAction) : (string * string 
     | Create RecordObservationKind -> Some("RecordObservation", "RecordObservation", "Record an observation", Some "Observation")
     | Create RecordHypothesisKind -> Some("RecordHypothesis", "RecordHypothesis", "Record a hypothesis", Some "Hypothesis statement")
     | Create IdentifyUnknownKind -> Some("IdentifyUnknown", "IdentifyUnknown", "Record an open question", Some "Question")
+    | AcceptProposalAction p -> Some("AcceptProposal:" + p.Text, "AcceptProposal", "Accept this proposal", None)
+    | RejectProposalAction p -> Some("RejectProposal:" + p.Text, "RejectProposal", "Reject this proposal", Some "Why it is rejected")
     | ConfirmCauseAction c ->
         let outcome = inv.Causes |> Map.tryFind c |> Option.map (fun x -> text x.Outcome) |> Option.defaultValue ""
         Some("ConfirmCause:" + c.Text, "ConfirmCause", $"Confirm the cause of: {outcome}", None)
+    // Commands with several fields have their own forms (Evidence, Hypotheses, Causal analysis, Corrective actions).
+    | Create AdmitEvidenceKind -> Some("AdmitEvidence", "AdmitEvidence", "Admit evidence", Some formMarker)
+    | Create RelateEvidenceKind -> Some("RelateEvidence", "RelateEvidence", "Link evidence to a hypothesis", Some formMarker)
+    | Create RecordCauseKind -> Some("RecordCause", "RecordCause", "Record a causal relationship", Some formMarker)
+    | Create RecordCorrectiveActionKind -> Some("RecordCorrectiveAction", "RecordCorrectiveAction", "Record a corrective action", Some formMarker)
+    | HypothesisAction(h, c) ->
+        let cmd = hypothesisCommandKey c
+        Some($"TransitionHypothesis:{h.Text}:{cmd}", "TransitionHypothesis", hypothesisCommandLabel c, Some formMarker)
     | _ -> None
+
+let actorText (a: Actor) =
+    match a.Kind with
+    | Human -> a.ActorId
+    | System -> "System"
+    | Agent(provider, model) -> $"AI agent ({provider}, {model})"
+
+let categoryKey =
+    function
+    | LifecycleEvents -> "lifecycle"
+    | ObservationEvents -> "observations"
+    | HypothesisEvents -> "hypotheses"
+    | EvidenceEvents -> "evidence"
+    | UnknownEvents -> "unknowns"
+    | AssumptionEvents -> "assumptions"
+    | ContradictionEvents -> "contradictions"
+    | PredictionEvents -> "predictions"
+    | ActionEvents -> "actions"
+    | FindingEvents -> "findings"
+    | NegativeKnowledgeEvents -> "negative-knowledge"
+    | CauseEvents -> "causes"
+    | CorrectionEvents -> "corrective-actions"
+    | VerificationEvents -> "verifications"
+    | ConclusionEvents -> "conclusions"
+    | ProposalEvents -> "proposals"
+
+let categoryLabels =
+    [ "lifecycle", "Status and start"; "observations", "Observations"; "hypotheses", "Hypotheses"; "evidence", "Evidence"
+      "unknowns", "Open questions"; "assumptions", "Assumptions"; "contradictions", "Contradictions"; "predictions", "Predictions"
+      "actions", "Actions"; "findings", "Findings"; "negative-knowledge", "Ruled out"; "causes", "Causes"
+      "corrective-actions", "Corrective actions"; "verifications", "Verifications"; "conclusions", "Conclusions"; "proposals", "AI proposals" ]
+
+let private kindWord =
+    function
+    | "observations" -> "observation"
+    | "hypotheses" -> "hypothesis"
+    | "evidence" -> "evidence"
+    | "relationships" -> "evidence link"
+    | "unknowns" -> "open question"
+    | "assumptions" -> "assumption"
+    | "contradictions" -> "contradiction"
+    | "predictions" -> "prediction"
+    | "actions" -> "action"
+    | "findings" -> "finding"
+    | "negativeKnowledge" -> "ruled-out statement"
+    | "causes" -> "cause"
+    | "correctiveActions" -> "corrective action"
+    | "criteria" -> "criterion"
+    | "verifications" -> "verification"
+    | "conclusions" -> "conclusion"
+    | "proposals" -> "proposal"
+    | "investigation" -> "investigation"
+    | other -> other
+
+/// A record an event touched, as a link target: (section slug, id, words) from the current state's text.
+let private affectedLink (inv: Investigation) (r: EntityRef) : (string * string * string) option =
+    let find (m: Map<Id<'T>, 'V>) (text: 'V -> string) =
+        match Guid.TryParse r.Id with
+        | true, g -> m |> Map.tryFind (Id g) |> Option.map text
+        | _ -> None
+    let words =
+        match r.Kind with
+        | "hypotheses" -> find inv.Hypotheses (fun h -> h.Statement.Value)
+        | "evidence" -> find inv.Evidence (fun e -> e.Source.Value)
+        | "unknowns" -> find inv.Unknowns (fun u -> u.Question.Value)
+        | "causes" -> find inv.Causes (fun c -> c.Outcome.Value)
+        | "proposals" -> find inv.Proposals (fun p -> p.Text.Value)
+        | "observations" -> find inv.Observations (fun o -> o.Original.Value)
+        | _ -> None
+    let section =
+        match r.Kind with
+        | "hypotheses" -> Some "hypotheses"
+        | "evidence" | "relationships" -> Some "evidence"
+        | "causes" -> Some "causal-analysis"
+        | "correctiveActions" | "criteria" | "verifications" -> Some "corrective-actions"
+        | "proposals" -> Some "proposals"
+        | "unknowns" | "observations" | "investigation" -> Some "overview"
+        | _ -> None
+    match section with
+    | Some sec -> Some(sec, r.Id, kindWord r.Kind + (words |> Option.map (fun w -> ": " + w) |> Option.defaultValue ""))
+    | None -> None
+
+let private shortJson (j: Json) =
+    match j with
+    | JString s -> s
+    | JNull -> "none"
+    | other -> let t = Json.canonical other in if t.Length > 60 then t.Substring(0, 57) + "…" else t
+
+/// One semantic change in words (UI-003-O2: before and after, never invented).
+let changeText (c: SemanticChange) =
+    match c with
+    | TitleChanged(b, a) -> $"Title: {b} → {a}"
+    | LifecycleMoved(None, a) -> $"Status set to {Causa.App.Presentation.label (lifecycle a)}"
+    | LifecycleMoved(Some b, a) -> $"Status: {Causa.App.Presentation.label (lifecycle b)} → {Causa.App.Presentation.label (lifecycle a)}"
+    | EntityAdded r -> $"Added {kindWord r.Kind} {r.Id.Substring(0, min 8 r.Id.Length)}"
+    | StateMoved(r, b, a) -> $"{kindWord r.Kind} {r.Id.Substring(0, min 8 r.Id.Length)}: {Causa.App.Presentation.label b} → {Causa.App.Presentation.label a}"
+    | FieldChanged(r, field, b, a) -> $"{kindWord r.Kind} {r.Id.Substring(0, min 8 r.Id.Length)}: {field} {shortJson b} → {shortJson a}"
+
+/// The investigation at `version` (Timeline.view), with what that version changed and what changed since.
+let history (events: DomainEvent list) (version: int64) : A.HistoryView option =
+    Timeline.view events version
+    |> Option.map (fun v ->
+        let s = v.State
+        { AtVersion = v.AtVersion
+          LatestVersion = v.LatestVersion
+          IsHistorical = v.IsHistorical
+          Title = s.Title.Value
+          Lifecycle = lifecycle s.Lifecycle
+          Counts =
+            [ "Hypotheses", s.Hypotheses.Count; "Evidence items", s.Evidence.Count; "Open questions", s.Unknowns.Count
+              "Causes", s.Causes.Count; "Proposals", s.Proposals.Count ]
+          ChangesHere = Timeline.changesAt events v.AtVersion |> List.map changeText
+          ChangesSince = (if v.IsHistorical then Timeline.between events v.AtVersion v.LatestVersion |> List.map changeText else []) })
+
+let private strength =
+    function
+    | PlausibleExplanation -> "a plausible explanation"
+    | LeadingExplanation -> "the leading explanation"
+    | SupportedCause -> "a supported cause"
+    | ConfirmedCause -> "a confirmed cause"
+    | AcceptedWithResidualUncertainty -> "accepted with residual uncertainty"
+
+/// Boundary E in words: the report states only what the typed records hold.
+let reportView (inv: Investigation) : A.ReportView =
+    let r = Projection.report inv
+    let roleWord (m: CauseRole) = Causa.App.Presentation.roleLabel (role m)
+
+    { Conclusion =
+        r.CurrentConclusion
+        |> Option.map (fun c ->
+            let residual = c.ResidualUncertainty |> Option.map (fun u -> $" Residual uncertainty: {u.Value}") |> Option.defaultValue ""
+            $"{c.Statement.Value} (recorded as {strength c.Strength}).{residual}")
+      Causes =
+        r.Causes
+        |> List.map (fun c ->
+            let members = c.Members |> List.map (fun (h, m) -> $"{roleWord m}: {h.Statement.Value} ({Causa.App.Presentation.label (hypothesisState h.State)})") |> String.concat "; "
+            c.Cause.Outcome.Value, c.Confirmed, (if members = "" then "No contributing hypotheses recorded." else members))
+      OpenQuestions = r.OpenUnknowns |> List.map (fun u -> u.Question.Value)
+      AcceptedResiduals = r.AcceptedResiduals
+      OpenContradictions = r.OpenContradictions |> List.map (fun c -> c.Statement.Value)
+      UnverifiedAssumptions = r.UnverifiedAssumptions |> List.map (fun a -> a.Proposition.Value)
+      Corrections =
+        r.Corrections
+        |> List.map (fun c ->
+            let met = c.Criteria |> List.filter snd |> List.length
+            c.Action.Description.Value,
+            (if c.VerifiedEffective then "Verified effective" else $"Not verified effective ({met} of {c.Criteria.Length} criteria satisfied)")) }
 
 /// Boundary B -> the shell's investigation view.
 let ofProjection (writable: bool) (history: DomainEvent list) (p: InvestigationProjection) : A.InvestigationProjection =
@@ -140,15 +318,40 @@ let ofProjection (writable: bool) (history: DomainEvent list) (p: InvestigationP
                State = causeState c.State
                Members = c.Members |> List.map (fun m -> m.Hypothesis.Text, role m.Role) }: A.CauseRow))
       Timeline =
-        history
+        Timeline.entries history
         |> List.map (fun e ->
-            let name = Wire.eventType e.Body
-
             ({ Sequence = e.Version
-               EventType = name
-               OccurredAt = stamp e.At
+               EventType = e.EventType
+               OccurredAt = stamp e.OccurredAt
                RecordedAt = None
-               Actor = Some e.Actor.ActorId }: A.TimelineRow))
+               Actor = Some(actorText e.Actor)
+               Category = categoryKey e.Category
+               Affected = e.Affected |> List.choose (affectedLink inv)
+               ClockBeforePrevious = e.ClockBeforePrevious }: A.TimelineRow))
+      Proposals =
+        values inv.Proposals
+        |> List.sortBy (fun p -> p.Provenance.RecordedAt, p.Id.Text)
+        |> List.map (fun p ->
+            ({ Id = p.Id.Text
+               Kind = (match p.Kind with ProposedHypothesis -> "Hypothesis" | ProposedUnknown -> "Open question" | ProposedAction -> "Action")
+               Text = p.Text.Value
+               Rationale = p.Rationale |> Option.map (fun r -> r.Value)
+               State = (match p.State with ProposalActive -> "Awaiting your decision" | ProposalAccepted -> "Accepted" | ProposalRejected -> "Rejected")
+               By =
+                 match p.Provenance.Actor.Kind with
+                 | Agent(provider, model) -> $"Proposed by an AI agent ({provider}, {model})"
+                 | _ -> "Proposed by " + p.Provenance.Actor.ActorId }: A.ProposalRow))
+      Findings =
+        Some
+            { ConfirmedCauses = p.Verification.ConfirmedCauses.Length
+              VerifiedCorrections = p.Verification.VerifiedEffectiveCorrections.Length
+              Resolved = p.Verification.Resolved }
+      Integrity =
+        p.Integrity
+        |> Option.map (fun i ->
+            let checkedText = if i.AdmissibilityChecked then "checked" else "not checked"
+            $"events SHA-256 {i.EventsSha256.Substring(0, min 12 i.EventsSha256.Length)}…, state SHA-256 {i.StateSha256.Substring(0, min 12 i.StateSha256.Length)}…, admissibility {checkedText}")
+      Report = Some(reportView inv)
       Capabilities = capabilities }
 
 /// The card for the investigation list: counts the engine state actually holds (never unknown-as-zero).

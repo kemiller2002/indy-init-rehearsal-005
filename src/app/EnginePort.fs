@@ -141,14 +141,179 @@ let commandFor (entropy: A.Entropy) (name: string) (fields: Map<string, string>)
     | [| "RecordObservation" |] -> Ok(RecordObservation(Id.ofGuid (fresh 2), t, None))
     | [| "RecordHypothesis" |] -> Ok(RecordHypothesis(Id.ofGuid (fresh 2), t, None))
     | [| "IdentifyUnknown" |] -> Ok(IdentifyUnknown(Id.ofGuid (fresh 2), t, Material))
+    | [| "AcceptProposal"; id |] ->
+        match Guid.TryParse id with
+        | true, g -> Ok(AcceptProposal(Id.ofGuid g, fresh 2))
+        | _ -> Error "That proposal is not in this investigation."
+    | [| "RejectProposal"; id |] ->
+        match Guid.TryParse id with
+        | true, g -> Ok(RejectProposal(Id.ofGuid g, t))
+        | _ -> Error "That proposal is not in this investigation."
+    | [| "AdmitEvidence" |] ->
+        let category =
+            match text fields "category" with
+            | "measurement" -> Measurement
+            | "log" -> Log
+            | "document" -> Document
+            | "experimentResult" -> ExperimentResult
+            | "testimony" -> Testimony
+            | "externalReference" -> ExternalReference
+            | _ -> DirectObservation
+        Ok(AdmitEvidence(Id.ofGuid (fresh 2), TextInput(text fields "content"), category, text fields "source", None))
+    | [| "RelateEvidence" |] ->
+        match Guid.TryParse(text fields "evidence"), Guid.TryParse(text fields "hypothesis") with
+        | (true, e), (true, h) ->
+            let kind =
+                match text fields "kind" with
+                | "contradicts" -> Contradicts
+                | "discriminates" -> Discriminates
+                | "insufficient" -> Insufficient
+                | _ -> Supports
+            let rationale = text fields "rationale"
+            Ok(RelateEvidence(Id.ofGuid (fresh 2), Id.ofGuid e, Id.ofGuid h, kind, (if String.IsNullOrWhiteSpace rationale then None else Some rationale)))
+        | _ -> Error "Choose the evidence and the hypothesis to link."
+    | [| "TransitionHypothesis"; h; cmd |] ->
+        let command =
+            match cmd with
+            | "markPlausible" -> Some MarkPlausible
+            | "markSupported" -> Some MarkSupported
+            | "markWeakened" -> Some MarkWeakened
+            | "falsify" -> Some Falsify
+            | "supersede" -> Some Supersede
+            | "reopen" -> Some Reopen
+            | _ -> None
+        match Guid.TryParse h, command with
+        | (true, g), Some c -> Ok(TransitionHypothesis(Id.ofGuid g, c, text fields "reason", []))
+        | _ -> Error "That change is not available for this hypothesis."
+    | [| "RecordCause" |] ->
+        match Guid.TryParse(text fields "hypothesis") with
+        | true, h ->
+            let role =
+                match text fields "role" with
+                | "trigger" -> CauseRole.Trigger
+                | "contributingFactor" -> CauseRole.ContributingFactor
+                | "enablingCondition" -> CauseRole.EnablingCondition
+                | _ -> CauseRole.RootCause
+            let mechanism = text fields "mechanism"
+            Ok(RecordCause(Id.ofGuid (fresh 2), text fields "outcome", [ { Hypothesis = Id.ofGuid h; Role = role } ], (if String.IsNullOrWhiteSpace mechanism then None else Some mechanism)))
+        | _ -> Error "Choose the hypothesis that explains the outcome."
+    | [| "RecordCorrectiveAction" |] ->
+        let kind =
+            match text fields "kind" with
+            | "mitigation" -> Mitigation
+            | "workaround" -> Workaround
+            | "prevention" -> Prevention
+            | _ -> Correction
+        let targets = match Guid.TryParse(text fields "cause") with | true, c -> [ Id.ofGuid c ] | _ -> []
+        Ok(RecordCorrectiveAction(Id.ofGuid (fresh 2), kind, text fields "description", targets))
     | [| "ConfirmCause"; id |] ->
         match Guid.TryParse id with
         | true, g -> Ok(ConfirmCause(Id.ofGuid g))
         | _ -> Error "That cause is not in this investigation."
     | _ -> Error "That action is not available here."
 
+/// The AI proposal loop's state (T27). The key is held here, in memory, and only AiLoop puts it in a header.
+type Ai =
+    { Loop: AiLoopState
+      Key: ProviderKey option
+      Investigation: string option
+      Result: AiResult option
+      Task: string
+      Model: string
+      LastRequest: string option }
+
+let noAi = { Loop = AiLoop.initial; Key = None; Investigation = None; Result = None; Task = ""; Model = ""; LastRequest = None }
+
+let private kindText =
+    function
+    | ProposedHypothesis -> "Hypothesis"
+    | ProposedUnknown -> "Open question"
+    | ProposedAction -> "Action"
+
+let private resultTone (r: AiResult) =
+    match r with
+    | Drafted _ -> "info"
+    | KeyMissing
+    | KeyRejected
+    | NotPermitted _
+    | ModelUnavailable _
+    | SpendCapReached _
+    | RequestRejected _ -> "danger"
+    | _ -> "warning"
+
+let private currentVersion (p: Persistence) (id: string) =
+    match p.Documents.TryFind id with
+    | Some(A.Loaded d) -> d.Session.State |> Option.map (fun i -> i.Version)
+    | _ -> None
+
+let private aiView (p: Persistence) (ai: Ai) : A.AiView =
+    let drafts, stale =
+        match ai.Result, ai.Investigation with
+        | Some(Drafted(ds, contextVersion, _) as r), Some id ->
+            let rows = ds |> List.map (fun d -> ({ Kind = kindText d.Kind; Text = d.Text; Rationale = d.Rationale }: A.DraftRow))
+            let stale =
+                match currentVersion p id with
+                | Some v when AiLoop.isStale v r -> Some $"Stale: drafted from version {contextVersion}; the investigation is now at version {v}. Review them against the current state."
+                | _ -> None
+            rows, stale
+        | _ -> [], None
+
+    { KeyHeld = ai.Key.IsSome
+      InFlight = ai.Loop.InFlight.IsSome
+      Investigation = ai.Investigation
+      Result = ai.Result |> Option.map (fun r -> AiLoop.describe r, resultTone r, AiLoop.retryable r)
+      Drafts = drafts
+      Stale = stale
+      LastRequest = ai.LastRequest }
+
+/// The provider call as a Limen Http effect, exactly as AiLoop built it.
+let private httpOf (e: AiHttpEffect) : EffectRequest =
+    EffectRequest.Http
+        { CorrelationId = CorrelationId($"ai-{e.Request}")
+          Method = HttpMethod.Post
+          Url = e.Url
+          Headers = Some(Map.ofList e.Headers)
+          Body = Some e.Body
+          TimeoutMs = int64 e.TimeoutMs
+          Response = Some HttpResponseKind.Text
+          ResponseHeaders = Some [ "retry-after" ]
+          Credentials = Some HttpCredentials.Omit
+          Xsrf = None }
+
+/// Limen's outcome for request `n` as AiLoop's outcome. A text response arrives as a JSON string literal.
+let private outcomeOf (n: int64) (result: EffectResult) : AiHttpOutcome option =
+    match result with
+    | EffectResult.HttpResult(_, outcome) ->
+        match outcome with
+        | EffectOutcome.Success(status, Limen.Contract.RawJson raw, headers) ->
+            let body =
+                try
+                    Text.Json.JsonSerializer.Deserialize<string>(raw: string)
+                with _ ->
+                    raw
+            let hs = headers |> Option.map Map.toList |> Option.defaultValue []
+            Some(Responded(n, int status, hs, body))
+        | EffectOutcome.Failure(HttpFailureReason.Aborted, _) -> Some(TimedOut n)
+        | EffectOutcome.Failure(_, _) -> Some(NetworkFailed n)
+        | EffectOutcome.Cancelled -> Some(Cancelled n)
+        | EffectOutcome.OutcomeUnknown _ -> Some(OutcomeUnknown n)
+    | _ -> None
+
+/// Every connection state in its own words (none merged into another).
+let connectionWords (state: ConnectionState) =
+    match state with
+    | ConnectionState.Disconnected -> "Not connected"
+    | ConnectionState.Connecting -> "Connecting: checking the repository and branch"
+    | ConnectionState.Loading -> "Connected: loading the workspace"
+    | ConnectionState.AuthorizedEmpty -> "Connected: the workspace has no investigation yet"
+    | ConnectionState.Connected -> "Connected"
+    | ConnectionState.Incompatible -> "Not connected: the repository's data is not compatible"
+    | ConnectionState.AccessDenied -> "Not connected: access denied"
+    | ConnectionState.Offline -> "Offline: work on this device is kept"
+    | ConnectionState.Conflict -> "Connected: someone else changed an investigation"
+
 /// The workspace projection, re-derived from persistence's sessions at `at` (one version per investigation).
-let private project (at: DateTimeOffset) (p: Persistence) (message: (string * string) option) : A.WorkspaceProjection =
+let private project (at: DateTimeOffset) (p: Persistence) (message: (string * string) option) (ai: A.AiView) : A.WorkspaceProjection =
     let projectionOf (d: Document) =
         d.Session.State |> Option.map (fun inv -> Projection.ofInvestigation human at d.Integrity inv)
 
@@ -184,6 +349,7 @@ let private project (at: DateTimeOffset) (p: Persistence) (message: (string * st
     let connected = match p.Connection with A.ConnectedTo _ -> true | _ -> false
 
     { Connection = p.Connection
+      ConnectionStatus = Some(connectionWords p.ConnectionState, p.ConnectionDetail)
       Investigations = cards
       Opened = opened
       Sync = sync |> Option.defaultValue A.NoChanges
@@ -195,25 +361,87 @@ let private project (at: DateTimeOffset) (p: Persistence) (message: (string * st
             BlockerId = None } ]
       Blockers = []
       Message = (match message with Some m -> Some m | None -> p.Message)
+      Ai = ai
       Administration =
         p.Administration
         @ [ { Id = "engine"; Section = "persistence"; Label = "Investigation engine"; Value = "Causa kernel (F#), running in this page"; State = "Reported by the running application" } ] }
 
-let rec private portOf (at: DateTimeOffset) (p: Persistence) (message: (string * string) option) : A.Port =
+let rec private portOf (at: DateTimeOffset) (p: Persistence) (message: (string * string) option) (ai: Ai) : A.Port =
     { Name = "engine/" + p.Name
-      Projection = project at p message
-      Handle = fun entropy input -> handle entropy input p }
+      Projection = project at p message (aiView p ai)
+      History =
+        fun id version ->
+            match p.Documents.TryFind id with
+            | Some(A.Loaded d) -> EngineView.history d.Session.History version
+            | _ -> None
+      Handle = fun entropy input -> handle entropy input p ai }
 
-and private handle (entropy: A.Entropy) (input: A.AdapterInput) (p: Persistence) : A.Port * EffectRequest list =
+and private handle (entropy: A.Entropy) (input: A.AdapterInput) (p: Persistence) (ai: Ai) : A.Port * EffectRequest list =
     let at = truncated entropy.Now
-    let pass i = let p, fx = p.Handle entropy i in portOf at p None, fx
+    let pass i = let p, fx = p.Handle entropy i in portOf at p None ai, fx
+    let say tone text = portOf at p (Some(tone, text)) ai, []
+
+    let requestProposals (id: string) (model: string) (task: string) =
+        match p.Documents.TryFind id with
+        | Some(A.Loaded { Session = { State = Some inv } }) when not (String.IsNullOrWhiteSpace model) && not (String.IsNullOrWhiteSpace task) ->
+            match AiLoop.start ai.Loop ai.Key (AiLoop.anthropic (model.Trim())) inv task with
+            | Ok(loop, effect) ->
+                let logged = AiLoop.redacted effect
+                let line = $"""{logged.Method} {logged.Url} · headers: {logged.Headers |> List.map (fun (h, v) -> h + "=" + v) |> String.concat ", "}"""
+                portOf at p None { ai with Loop = loop; Investigation = Some id; Result = None; Task = task; Model = model.Trim(); LastRequest = Some line }, [ httpOf effect ]
+            | Error result -> portOf at p None { ai with Investigation = Some id; Result = Some result }, []
+        | Some(A.Loaded _) when String.IsNullOrWhiteSpace model -> say "warning" "Set the AI model id in Settings first; there is no default model."
+        | Some(A.Loaded _) -> say "warning" "Describe what the assistant should propose."
+        | _ -> say "warning" "That investigation is not open."
 
     match input with
     | A.Connect r -> pass (Connect r)
     | A.Disconnect -> pass Disconnect
     | A.Open id -> pass (Open id)
-    | A.Answer(corr, result) -> pass (Answer(corr, result))
     | A.CheckRemote -> pass CheckRemote
+    | A.SetAiKey key ->
+        match ProviderKey.Create key with
+        | Some k -> portOf at p (Some("info", "The key is held in this page's memory only. Reloading forgets it.")) { ai with Key = Some k; Result = None }, []
+        | None -> say "warning" "That key is empty or contains a line break; it was not kept."
+    | A.ClearAiKey -> portOf at p (Some("info", "The key was forgotten.")) { ai with Key = None }, []
+    | A.RequestProposals(id, model, task) -> requestProposals id model task
+    | A.CancelProposals -> portOf at p None { ai with Loop = AiLoop.cancel ai.Loop; Result = Some CancelledResult }, []
+    | A.DiscardDrafts -> portOf at p None { ai with Result = None }, []
+    | A.RecordDrafts(id, model) ->
+        match ai.Result, p.Documents.TryFind id with
+        | Some(Drafted(drafts, _, _)), Some(A.Loaded d) when ai.Investigation = Some id ->
+            let version = d.Session.State |> Option.map (fun i -> i.Version) |> Option.defaultValue 0L
+            let ids = entropy.Ids |> List.chunkBySize 2 |> List.filter (fun c -> c.Length = 2) |> List.map (fun c -> c[0], c[1])
+            if ids.Length < drafts.Length then say "warning" "Too many proposals to record at once."
+            else
+                let agent: AgentIdentity = { AgentId = "causa-ai"; Provider = "anthropic"; Model = (if model = "" then ai.Model else model) }
+                let envelopes = Proposals.commands agent (Id.ofGuid (Guid.Parse id)) version at (ids |> List.truncate drafts.Length) drafts
+                // Each envelope goes through Kernel.submit; recording stops at the first refusal and nothing after it is sent.
+                let rec submit (session: Session) (events: DomainEvent list) (envs: CommandEnvelope list) =
+                    match envs with
+                    | [] -> Ok(session, events)
+                    | e :: rest ->
+                        match Kernel.submit session e with
+                        | Ok a -> submit a.Session (events @ a.Events) rest
+                        | Error r -> Error r
+                match submit d.Session [] envelopes with
+                | Ok(session, events) ->
+                    let p, fx = p.Handle entropy (Accepted(id, Some version, session, events))
+                    portOf at p (Some("info", $"{drafts.Length} proposal(s) recorded for your review. None is applied until you accept it. Not saved yet.")) { ai with Result = None }, fx
+                | Error rejection -> say "warning" ("The proposals were not recorded: " + String.concat " " (Kernel.reasons rejection))
+        | _ -> say "warning" "There are no drafted proposals to record."
+    | A.Answer(corr, result) when corr.StartsWith("ai-", StringComparison.Ordinal) ->
+        match Int64.TryParse(corr.Substring 3) with
+        | true, n ->
+            match outcomeOf n result with
+            | Some outcome ->
+                match AiLoop.receive ai.Loop outcome with
+                | Ok(loop, r) -> portOf at p None { ai with Loop = loop; Result = Some r }, []
+                // A late answer for a cancelled or replaced request changes nothing.
+                | Error _ -> portOf at p None ai, []
+            | None -> portOf at p None ai, []
+        | _ -> portOf at p None ai, []
+    | A.Answer(corr, result) -> pass (Answer(corr, result))
     | A.DiscardLocal id -> pass (DiscardLocal id)
     | A.ReloadRemote id -> pass (ReloadRemote id)
     | A.Boot -> pass Boot
@@ -227,8 +455,8 @@ and private handle (entropy: A.Entropy) (input: A.AdapterInput) (p: Persistence)
             | None -> Some Kernel.empty, None, (entropy.Ids[1]).ToString("D")
 
         match session, commandFor entropy name fields with
-        | None, _ -> portOf at p (Some("warning", "That investigation is not open.")), []
-        | _, Error reason -> portOf at p (Some("warning", reason)), []
+        | None, _ -> say "warning" "That investigation is not open."
+        | _, Error reason -> say "warning" reason
         | Some s, Ok command ->
             let envelope =
                 { CommandId = entropy.Ids[0]
@@ -247,9 +475,9 @@ and private handle (entropy: A.Entropy) (input: A.AdapterInput) (p: Persistence)
                     if investigation.IsNone then
                         [ EffectRequest.Navigation(NavigationEffectRequest.Push(CorrelationId("start-" + id), Causa.App.Routes.format (Causa.App.Routes.Investigation(id, Causa.App.Routes.Overview)))) ]
                     else []
-                portOf at p (Some("info", $"Recorded ({n} change(s), version {Kernel.version accepted.Session}). Not saved yet.")), fx @ go
+                portOf at p (Some("info", $"Recorded ({n} change(s), version {Kernel.version accepted.Session}). Not saved yet.")) ai, fx @ go
             | Error rejection ->
                 // Nothing changes on a rejection; the engine's reasons are shown as they are (safe messages).
-                portOf at p (Some("warning", "Not recorded: " + String.concat " " (Kernel.reasons rejection))), []
+                say "warning" ("Not recorded: " + String.concat " " (Kernel.reasons rejection))
 
-let create (p: Persistence) : A.Port = portOf DateTimeOffset.UnixEpoch p None
+let create (p: Persistence) : A.Port = portOf DateTimeOffset.UnixEpoch p None noAi
