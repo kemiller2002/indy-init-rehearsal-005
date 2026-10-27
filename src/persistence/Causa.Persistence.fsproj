@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Causa persistence: the one program the shell drives for data (connection, loading, the historical catalog,
+       local durability and restore, publication), the GitHub provider as request/response data, and the adapter to
+       the engine's storage contract (Boundary C) and request book (Boundary D), which stay the only validator and
+       the only write-path authority. Pure: effects are data the Limen kernel performs (WASM-safe). -->
+  <PropertyGroup>
+    <AssemblyName>Causa.Persistence</AssemblyName>
+    <RootNamespace>Causa.Persistence</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Boundary C (storage reader/writer, History.validate) and D (request book) are the engine's. -->
+    <ProjectReference Include="../engine/App.Engine.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Json.fs" />
+    <Compile Include="Contract.fs" />
+    <Compile Include="Store.fs" />
+    <Compile Include="Provider.fs" />
+    <Compile Include="GitHub.fs" />
+    <Compile Include="Catalog.fs" />
+    <Compile Include="Sync.fs" />
+  </ItemGroup>
+</Project>
