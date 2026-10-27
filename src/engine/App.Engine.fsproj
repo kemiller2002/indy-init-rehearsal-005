@@ -6,12 +6,25 @@
     <AssemblyName>IndyInitRootCauseInvestigator.Engine</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <!-- The normative Causa v1.0.0 schemas (contract, not data: EXT-DATA-001-O2), byte-identical to causa-data at
+         causa-storage-v1.0.0; schema identity checked at runtime against Storage.schemaIdentity. -->
+    <EmbeddedResource Include="contract/v1.0.0/schemas/**/*.json" LogicalName="causa/v1.0.0/schemas/%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="EchelonFoundry.Aegis.Core" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Operational.fs" />
     <Compile Include="Routes.fs" />
     <Compile Include="Domain.fs" />
+    <Compile Include="Prelude.fs" />
+    <Compile Include="Model.fs" />
+    <Compile Include="Decide.fs" />
+    <Compile Include="Hashing.fs" />
+    <Compile Include="Json.fs" />
+    <Compile Include="Schema.fs" />
+    <Compile Include="Wire.fs" />
+    <Compile Include="Storage.fs" />
     <Compile Include="Sync.fs" />
   </ItemGroup>
 </Project>
