@@ -88,6 +88,9 @@ let toProjection (s: Injected) : WorkspaceProjection =
           Blockers = blockers
           Causes = [ { Id = "c-1"; Outcome = "The joint failed during ascent."; State = "identified"; Members = [ "h-1", RootCause ] } ]
           Proposals = []
+          Findings = None
+          Integrity = None
+          Report = None
           Timeline = [ { Sequence = 1L; EventType = "InvestigationOpened"; OccurredAt = "2026-01-01T00:00:00Z"; RecordedAt = Some "2026-01-01T00:00:00Z"; Actor = Some "Fixture"; Category = "lifecycle"; Affected = []; ClockBeforePrevious = false } ]
           Capabilities = capabilities }
 

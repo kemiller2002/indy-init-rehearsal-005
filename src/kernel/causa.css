@@ -335,3 +335,4 @@ fieldset.causa-panel legend { font-weight: 700; color: var(--causa-color-structu
 .causa-diff { padding-left: 1.25rem; }
 .causa-timeline__entry[data-current="true"] { outline: 3px solid var(--causa-color-action); outline-offset: 2px; }
 .causa-timeline__entry a { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
+.causa-findings { margin: 0.25rem 0; }

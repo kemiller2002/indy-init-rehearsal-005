@@ -196,6 +196,40 @@ let history (events: DomainEvent list) (version: int64) : A.HistoryView option =
           ChangesHere = Timeline.changesAt events v.AtVersion |> List.map changeText
           ChangesSince = (if v.IsHistorical then Timeline.between events v.AtVersion v.LatestVersion |> List.map changeText else []) })
 
+let private strength =
+    function
+    | PlausibleExplanation -> "a plausible explanation"
+    | LeadingExplanation -> "the leading explanation"
+    | SupportedCause -> "a supported cause"
+    | ConfirmedCause -> "a confirmed cause"
+    | AcceptedWithResidualUncertainty -> "accepted with residual uncertainty"
+
+/// Boundary E in words: the report states only what the typed records hold.
+let reportView (inv: Investigation) : A.ReportView =
+    let r = Projection.report inv
+    let roleWord (m: CauseRole) = Causa.App.Presentation.roleLabel (role m)
+
+    { Conclusion =
+        r.CurrentConclusion
+        |> Option.map (fun c ->
+            let residual = c.ResidualUncertainty |> Option.map (fun u -> $" Residual uncertainty: {u.Value}") |> Option.defaultValue ""
+            $"{c.Statement.Value} (recorded as {strength c.Strength}).{residual}")
+      Causes =
+        r.Causes
+        |> List.map (fun c ->
+            let members = c.Members |> List.map (fun (h, m) -> $"{roleWord m}: {h.Statement.Value} ({Causa.App.Presentation.label (hypothesisState h.State)})") |> String.concat "; "
+            c.Cause.Outcome.Value, c.Confirmed, (if members = "" then "No contributing hypotheses recorded." else members))
+      OpenQuestions = r.OpenUnknowns |> List.map (fun u -> u.Question.Value)
+      AcceptedResiduals = r.AcceptedResiduals
+      OpenContradictions = r.OpenContradictions |> List.map (fun c -> c.Statement.Value)
+      UnverifiedAssumptions = r.UnverifiedAssumptions |> List.map (fun a -> a.Proposition.Value)
+      Corrections =
+        r.Corrections
+        |> List.map (fun c ->
+            let met = c.Criteria |> List.filter snd |> List.length
+            c.Action.Description.Value,
+            (if c.VerifiedEffective then "Verified effective" else $"Not verified effective ({met} of {c.Criteria.Length} criteria satisfied)")) }
+
 /// Boundary B -> the shell's investigation view.
 let ofProjection (writable: bool) (history: DomainEvent list) (p: InvestigationProjection) : A.InvestigationProjection =
     let inv = p.State
@@ -278,6 +312,17 @@ let ofProjection (writable: bool) (history: DomainEvent list) (p: InvestigationP
                  match p.Provenance.Actor.Kind with
                  | Agent(provider, model) -> $"Proposed by an AI agent ({provider}, {model})"
                  | _ -> "Proposed by " + p.Provenance.Actor.ActorId }: A.ProposalRow))
+      Findings =
+        Some
+            { ConfirmedCauses = p.Verification.ConfirmedCauses.Length
+              VerifiedCorrections = p.Verification.VerifiedEffectiveCorrections.Length
+              Resolved = p.Verification.Resolved }
+      Integrity =
+        p.Integrity
+        |> Option.map (fun i ->
+            let checkedText = if i.AdmissibilityChecked then "checked" else "not checked"
+            $"events SHA-256 {i.EventsSha256.Substring(0, min 12 i.EventsSha256.Length)}…, state SHA-256 {i.StateSha256.Substring(0, min 12 i.StateSha256.Length)}…, admissibility {checkedText}")
+      Report = Some(reportView inv)
       Capabilities = capabilities }
 
 /// The card for the investigation list: counts the engine state actually holds (never unknown-as-zero).

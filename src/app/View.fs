@@ -261,7 +261,7 @@ let project (model: Model) : ViewState =
 
     // Administration (UI-018, S25): every fact in one of six sections, each with an explicit state. Only states that
     // report an observed fact count as verified; everything else is listed as not verified (never implied).
-    let observedStates = set [ "Verified"; "Connected"; "Reported by the deployed build"; "Reported by the running application" ]
+    let observedStates = set [ "Verified"; "Connected"; "Reported by the deployed build"; "Reported by the running application"; "Integrity check passed" ]
 
     let facts =
         let fact id sec l v st = { Id = id; Section = sec; Label = l; Value = v; State = st }
@@ -277,8 +277,17 @@ let project (model: Model) : ViewState =
                     let sec = if k.StartsWith "security." then "security" else "deployment"
                     fact $"build-{i}" sec (if k.StartsWith "security." then k.Substring 9 else k) v "Reported by the deployed build")
 
+        let integrity =
+            ws.Opened
+            |> Map.toList
+            |> List.choose (fun (id, l) ->
+                match l with
+                | Loaded i -> i.Integrity |> Option.map (fun t -> fact ("integrity-" + id) "persistence" ("Data integrity: " + i.Title) t "Integrity check passed")
+                | _ -> None)
+
         [ fact "connection" "persistence" "Provider connection" (connectionText ws.Connection) (if connected then "Connected" else "Not connected") ]
         @ ws.Administration
+        @ integrity
         @ build
         // VER-007-O2: the runtime actually executing this projection, read from itself.
         @ [ fact "runtime" "deployment" ".NET runtime (loaded)" (string System.Environment.Version) "Reported by the running application"
@@ -317,6 +326,7 @@ let project (model: Model) : ViewState =
         | _ -> "Not connected: there is nowhere to save an investigation yet."
 
     // Report preview (S22, R12.3): an investigation that is not resolved or closed is shown as incomplete.
+    let report = inv |> Option.bind (fun i -> i.Report)
     let complete = inv |> Option.exists (fun i -> i.Lifecycle = "resolved" || i.Lifecycle = "closed")
     let confirmedCauses = inv |> Option.map (fun i -> i.Causes |> List.filter (fun c -> c.State = "confirmed")) |> Option.defaultValue []
 
@@ -495,8 +505,30 @@ let project (model: Model) : ViewState =
       "report.incomplete", flag (inv.IsSome && not complete)
       "report.status", text (if complete then "Complete" else "Incomplete: this investigation is not resolved, so the report is a working draft.")
       "report.source", text (inv |> Option.map (fun i -> $"{i.Title}, version {i.Version}") |> Option.defaultValue "")
-      "report.conclusion", text (match confirmedCauses with [] -> "No cause has been confirmed. The report states no conclusion." | cs -> cs |> List.map (fun c -> c.Outcome) |> String.concat "; ")
-      "report.verification", text "Verification of corrective actions is not part of this report yet; nothing is reported as verified."
+      "report.conclusion",
+      text (
+          match inv |> Option.bind (fun i -> i.Report) |> Option.bind (fun r -> r.Conclusion), confirmedCauses with
+          | Some c, _ -> c
+          | None, [] -> "No cause has been confirmed and no conclusion is recorded. The report states no conclusion."
+          | None, cs -> "No conclusion is recorded. Confirmed causes: " + (cs |> List.map (fun c -> c.Outcome) |> String.concat "; ")
+      )
+      "report.causes", items (report |> Option.map (fun r -> r.Causes |> List.mapi (fun k (o, confirmed, members) -> item [ "id", string k; "outcome", o; "state", (if confirmed then "Confirmed" else "Not confirmed"); "members", members ])) |> Option.defaultValue [])
+      "report.hasCauses", flag (report |> Option.exists (fun r -> not r.Causes.IsEmpty))
+      "report.open", items (report |> Option.map (fun r -> (r.OpenQuestions |> List.map (fun q -> "Open question: " + q)) @ (r.OpenContradictions |> List.map (fun c -> "Open contradiction: " + c)) @ (r.UnverifiedAssumptions |> List.map (fun a -> "Unverified assumption: " + a)) @ (r.AcceptedResiduals |> List.map (fun a -> "Accepted as residual: " + a)) |> List.mapi (fun k t -> item [ "id", string k; "text", t ])) |> Option.defaultValue [])
+      "report.engine", flag report.IsSome
+      "report.noOpen", flag (report |> Option.forall (fun r -> r.OpenQuestions.IsEmpty && r.OpenContradictions.IsEmpty && r.UnverifiedAssumptions.IsEmpty && r.AcceptedResiduals.IsEmpty))
+      "report.corrections", items (report |> Option.map (fun r -> r.Corrections |> List.mapi (fun k (d, st) -> item [ "id", string k; "text", d; "state", st ])) |> Option.defaultValue [])
+      "report.noCorrections", flag (report |> Option.forall (fun r -> r.Corrections.IsEmpty))
+      "findings.show", flag (inv |> Option.exists (fun i -> i.Findings.IsSome))
+      "findings.text",
+      text (
+          match inv |> Option.bind (fun i -> i.Findings) with
+          | Some f ->
+              let resolved = if f.Resolved then "Resolved" else "Not resolved"
+              $"Confirmed causes: {f.ConfirmedCauses} · Corrective actions verified effective: {f.VerifiedCorrections} · {resolved}"
+          | None -> ""
+      )
+      "report.verification", text (match report with Some r when not r.Corrections.IsEmpty -> "Corrective actions and whether each is verified effective:" | _ -> "No corrective action is recorded; nothing is reported as verified.")
       "proposals", items proposals
       "proposals.empty", flag (inv.IsSome && proposals.IsEmpty)
       "ai.keyHeld", flag ai.KeyHeld

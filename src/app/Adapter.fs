@@ -112,6 +112,19 @@ type AiView =
 
 let noAi = { KeyHeld = false; InFlight = false; Investigation = None; Result = None; Drafts = []; Stale = None; LastRequest = None }
 
+/// What the domain itself asserts (Projection.verification, UI-023): never derived from data integrity.
+type DomainFindings = { ConfirmedCauses: int; VerifiedCorrections: int; Resolved: bool }
+
+/// The report projection (Projection.report, Boundary E) in words: every explanation from typed records (UI-038).
+type ReportView =
+    { Conclusion: string option
+      Causes: (string * bool * string) list
+      OpenQuestions: string list
+      AcceptedResiduals: string list
+      OpenContradictions: string list
+      UnverifiedAssumptions: string list
+      Corrections: (string * string) list }
+
 type InvestigationProjection =
     { Id: string
       Title: string
@@ -127,6 +140,11 @@ type InvestigationProjection =
       Causes: CauseRow list
       Timeline: TimelineRow list
       Proposals: ProposalRow list
+      /// Domain findings, when the engine projected them; None for a shell-only fixture.
+      Findings: DomainFindings option
+      /// Technical integrity of how the data was obtained, for Administration only (UI-023-O2).
+      Integrity: string option
+      Report: ReportView option
       Capabilities: Capability list }
 
 /// Distinct save and sync states (UI-006-O1). Only `RemotelySynced` may say the provider holds the change.

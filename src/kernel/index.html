@@ -211,6 +211,7 @@
           <p class="causa-kind" data-text="inv.kind" data-percepta-observation="ipad-landscape-semantic-priority"></p>
           <h1 data-text="inv.title" data-percepta-observation="desktop-reference-semantic-priority"></h1>
           <p class="causa-inv-meta">Status: <span class="causa-tag" data-bind-data-tone="inv.tone" data-text="inv.status" data-percepta-observation="ipad-portrait-semantic-priority"></span> <span class="causa-muted" data-text="inv.version" data-percepta-observation="narrow-phone-semantic-priority"></span></p>
+          <template data-if="findings.show"><p class="causa-findings"><span class="causa-label">Findings:</span> <span data-text="findings.text"></span></p></template>
           <!-- What blocks progress, in every section's primary flow (UI-032): counts and words, never colour alone. -->
           <div class="causa-attention" data-bind-data-tone="attention.tone" data-percepta-observation="desktop-reference-blocked-state">
             <strong data-percepta-observation="narrow-phone-blocked-state">Open questions:</strong>
@@ -457,7 +458,11 @@
                 <p data-text="report.status"></p>
               </ef-print-title-page>
               <ef-print-section aria-labelledby="rp-source" data-percepta-region="source-version"><h3 id="rp-source">Source</h3><p data-text="report.source"></p></ef-print-section>
-              <ef-print-section aria-labelledby="rp-conclusion" data-percepta-region="conclusion"><h3 id="rp-conclusion">Conclusion</h3><p data-text="report.conclusion"></p></ef-print-section>
+              <ef-print-section aria-labelledby="rp-conclusion" data-percepta-region="conclusion"><h3 id="rp-conclusion">Conclusion</h3><p data-text="report.conclusion"></p>
+                <template data-if="report.hasCauses"><div><h4>Causal relationships</h4><ul class="causa-report__list">
+                  <template data-each="report.causes" data-key="id"><li><span data-text="outcome"></span> — <strong data-text="state"></strong>. <span data-text="members"></span></li></template>
+                </ul></div></template>
+              </ef-print-section>
               <ef-print-section aria-labelledby="rp-evidence" data-percepta-region="evidence"><h3 id="rp-evidence">Evidence</h3>
                 <template data-if="evidence.empty"><p class="causa-muted">No evidence recorded yet.</p></template>
                 <ul class="causa-report__list">
@@ -465,12 +470,14 @@
                 </ul>
               </ef-print-section>
               <ef-print-section aria-labelledby="rp-uncertainty" data-percepta-region="uncertainty"><h3 id="rp-uncertainty">Open questions</h3>
-                <template data-if="blockers.empty"><p class="causa-muted">No open questions recorded.</p></template>
+                <template data-if="report.noOpen"><p class="causa-muted">No open question, contradiction or unverified assumption is recorded.</p></template>
                 <ul class="causa-report__list">
-                  <template data-each="blockers" data-key="id"><li><span data-text="question"></span> (<span data-text="materiality"></span>)</li></template>
+                  <template data-each="report.open" data-key="id"><li data-text="text"></li></template>
                 </ul>
               </ef-print-section>
-              <ef-print-section aria-labelledby="rp-verification" data-percepta-region="verification"><h3 id="rp-verification">Verification</h3><p data-text="report.verification"></p></ef-print-section>
+              <ef-print-section aria-labelledby="rp-verification" data-percepta-region="verification"><h3 id="rp-verification">Verification</h3><p data-text="report.verification"></p>
+                <ul class="causa-report__list"><template data-each="report.corrections" data-key="id"><li><span data-text="text"></span>: <strong data-text="state"></strong></li></template></ul>
+              </ef-print-section>
             </ef-print-document>
           </section>
         </template>
