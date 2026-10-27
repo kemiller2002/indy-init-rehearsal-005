@@ -121,6 +121,9 @@ type Msg =
     | Create of CommandEnvelope
     /// A command on an open investigation, decided by the engine against the local copy (Boundary A).
     | Submit of CommandEnvelope
+    /// Events the engine already accepted for a command the caller decided with Kernel.submit at `expected`
+    /// (version 0 with no local copy: a new investigation). Serialised and verified by the storage writer.
+    | Append of investigationId: string * expected: int64 * events: IndyInitRootCauseInvestigator.Engine.DomainEvent list
     | Save of investigationId: string
     | Reconcile of investigationId: string
     | ReloadRemote of investigationId: string
@@ -818,6 +821,63 @@ module Sync =
                 | Ok GitHub.Unrelated -> stepBook env id (Book.HeadObserved(r, Book.Oid h, Book.Unrelated)) st |> Result.map (persistLocal [ id ])
                 | Error _ -> stepBook env id (Book.HeadReadFailed r) st |> Result.map (persistLocal [ id ])
 
+    /// A new local investigation (from Create or an accepted start command).
+    let private createWith (m: Model) (id: string) (created: Result<Verified, Store.ChangeRefusal>) : Step =
+        match m.Target with
+        | None -> refuse "Select a data repository and workspace before creating an investigation."
+        | Some _ when isCatalogWorkspace m -> refuse "The historical catalog workspace is read-only."
+        | Some _ when m.Documents.ContainsKey id -> refuse "An investigation with this id already exists."
+        | Some t ->
+            match created with
+            | Error r -> refuse (String.Join(" ", r.Reasons))
+            | Ok local ->
+                let marker = sprintf "%s-%d" id m.NextId
+                let book =
+                    match m.Head with
+                    | Some h when canWrite m ->
+                        match Book.step (bookAt Book.initial h) (Book.Edit(changeOf t marker h local)) with
+                        | Ok(b, _) -> b
+                        | Error _ -> Book.initial
+                    | _ -> Book.initial
+                let d =
+                    { InvestigationId = id
+                      ReadOnly = false
+                      Confirmed = None
+                      ConfirmedHead = None
+                      Local = local
+                      Book = book
+                      RemoteConflict = None
+                      Durability = NotSaved
+                      LastSyncedAt = None
+                      Reload = None }
+                Ok(persistLocal [ id ] ({ m with NextId = m.NextId + 1; Documents = m.Documents |> Map.add id d }, []))
+
+    /// A change to an open investigation: the new local copy is offered to the book as decided at the commit the
+    /// book observes. Refused while a save is in flight or its outcome is unknown.
+    let private changeLocal (m: Model) (id: string) (change: Document -> Result<Verified, Store.ChangeRefusal>) : Step =
+        match Map.tryFind id m.Documents, m.Target with
+        | None, _
+        | _, None -> refuse "There is no such investigation."
+        | Some d, _ when d.ReadOnly -> refuse "This investigation is read-only."
+        | Some d, _ when bookInFlight d.Book || d.Reload.IsSome -> refuse "A save or reload of this investigation is in flight; wait for it to settle."
+        | Some d, _ when bookUnknown d.Book -> refuse "The last save may have been applied; check the repository (Reconcile) before changing it again."
+        | Some d, Some t ->
+            match change d with
+            | Error r -> refuse (String.Join(" ", r.Reasons))
+            | Ok local ->
+                let marker = sprintf "%s-%d" id m.NextId
+                let book =
+                    match d.Book.Phase with
+                    | Book.Idle(h, _) -> Book.step d.Book (Book.Edit(changeOf t marker (oidText h) local)) |> Result.map fst
+                    | Book.Held(h, _, Book.NotWritten _) ->
+                        Book.step d.Book Book.Discard
+                        |> Result.bind (fun (b, _) -> Book.step b (Book.Edit(changeOf t marker (oidText h) local)))
+                        |> Result.map fst
+                    | _ -> Ok d.Book
+                match book with
+                | Error f -> refuse f.Reason
+                | Ok book -> Ok(persistLocal [ id ] ({ m with NextId = m.NextId + 1 } |> setDoc id (fun d -> { d with Local = local; Book = book; Durability = NotSaved }), []))
+
     // ---------- the step function ----------
 
     /// The single entry point the shell drives: every load, edit, save, confirmation and reconciliation goes
@@ -868,62 +928,12 @@ module Sync =
                         Documents = m.Documents |> Map.filter (fun _ d -> not d.ReadOnly) },
                     []
                 )
-        | Create env' ->
-            let id = env'.Investigation.Text
-            match m.Target with
-            | None -> refuse "Select a data repository and workspace before creating an investigation."
-            | Some _ when isCatalogWorkspace m -> refuse "The historical catalog workspace is read-only."
-            | Some _ when m.Documents.ContainsKey id -> refuse "An investigation with this id already exists."
-            | Some t ->
-                match Store.create env' with
-                | Error r -> refuse (String.Join(" ", r.Reasons))
-                | Ok local ->
-                    let marker = sprintf "%s-%d" id m.NextId
-                    let book =
-                        match m.Head with
-                        | Some h when canWrite m ->
-                            match Book.step (bookAt Book.initial h) (Book.Edit(changeOf t marker h local)) with
-                            | Ok(b, _) -> b
-                            | Error _ -> Book.initial
-                        | _ -> Book.initial
-                    let d =
-                        { InvestigationId = id
-                          ReadOnly = false
-                          Confirmed = None
-                          ConfirmedHead = None
-                          Local = local
-                          Book = book
-                          RemoteConflict = None
-                          Durability = NotSaved
-                          LastSyncedAt = None
-                          Reload = None }
-                    Ok(persistLocal [ id ] ({ m with NextId = m.NextId + 1; Documents = m.Documents |> Map.add id d }, []))
-        | Submit env' ->
-            let id = env'.Investigation.Text
-            match Map.tryFind id m.Documents, m.Target with
-            | None, _
-            | _, None -> refuse "There is no such investigation."
-            | Some d, _ when d.ReadOnly -> refuse "This investigation is read-only."
-            | Some d, _ when bookInFlight d.Book || d.Reload.IsSome -> refuse "A save or reload of this investigation is in flight; wait for it to settle."
-            | Some d, _ when bookUnknown d.Book -> refuse "The last save may have been applied; check the repository (Reconcile) before changing it again."
-            | Some d, Some t ->
-                match Store.submit d.Local env' with
-                | Error r -> refuse (String.Join(" ", r.Reasons))
-                | Ok local ->
-                    let marker = sprintf "%s-%d" id m.NextId
-                    // Offer the new local copy to the book as decided at the commit the book observes.
-                    let book =
-                        match d.Book.Phase with
-                        | Book.Idle(h, _) -> Book.step d.Book (Book.Edit(changeOf t marker (oidText h) local)) |> Result.map fst
-                        | Book.Held(h, _, Book.NotWritten _) ->
-                            Book.step d.Book Book.Discard
-                            |> Result.bind (fun (b, _) -> Book.step b (Book.Edit(changeOf t marker (oidText h) local)))
-                            |> Result.map fst
-                        | _ -> Ok d.Book
-                    match book with
-                    | Error f -> refuse f.Reason
-                    | Ok book ->
-                        Ok(persistLocal [ id ] ({ m with NextId = m.NextId + 1 } |> setDoc id (fun d -> { d with Local = local; Book = book; Durability = NotSaved }), []))
+        | Create env' -> createWith m env'.Investigation.Text (Store.create env')
+        | Submit env' -> changeLocal m env'.Investigation.Text (fun d -> Store.submit d.Local env')
+        | Append(id, expected, events) ->
+            match Map.tryFind id m.Documents with
+            | None -> createWith m id (Store.appendAccepted None id expected events)
+            | Some _ -> changeLocal m id (fun d -> Store.appendAccepted (Some d.Local) id expected events)
         | Save id ->
             match Map.tryFind id m.Documents with
             | None -> refuse "There is no such investigation."

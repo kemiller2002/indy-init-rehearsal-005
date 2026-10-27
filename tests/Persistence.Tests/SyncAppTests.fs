@@ -468,3 +468,24 @@ let ``VPO-89ed6170f531961e a local store failure is shown as failed, distinct fr
     let iid = newId "store-fails"
     ok (app.Step(Create(createCmd iid)))
     Assert.Equal("failed", app.Status iid)
+
+[<Fact>]
+[<Trait("obligation", "VPO-d7fbd84e40ded145")>]
+[<Trait("obligation", "VPO-9c6055c47e4eb07d")>]
+let ``VPO-d7fbd84e40ded145 VPO-9c6055c47e4eb07d events accepted by the kernel are appended by the storage writer, saved, and a stale append is refused`` () =
+    let fake = newFake ()
+    let app = App(fake)
+    ok (app.Connect ws)
+    let iid = newId "accepted"
+    let accept session env =
+        match IndyInitRootCauseInvestigator.Engine.Kernel.submit session env with
+        | Ok a -> a
+        | Error r -> failwithf "%A" r
+    let a1 = accept IndyInitRootCauseInvestigator.Engine.Kernel.empty (start iid "Accepted by the kernel")
+    ok (app.Step(Append(iid, 0L, a1.Events)))
+    let a2 = accept a1.Session (hypothesis iid 1L "accepted")
+    ok (app.Step(Append(iid, 1L, a2.Events)))
+    Assert.Equal(2L, app.Doc(iid).Local.Version)
+    refused (app.Step(Append(iid, 1L, a2.Events)))
+    ok (app.Step(Save iid))
+    Assert.Equal("remotelySynced", app.Status iid)

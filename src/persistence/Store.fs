@@ -96,6 +96,23 @@ module Store =
                 |> Result.map (fst >> verified local.InvestigationId)
                 |> Result.mapError storageRefusal
 
+    /// Append events the engine already accepted (the caller ran Kernel.submit at `expected`): the storage writer
+    /// serialises them and verifies the combined history exactly as a reader would (Boundary C write path).
+    let appendAccepted (local: Verified option) (investigationId: string) (expected: int64) (events: IndyInitRootCauseInvestigator.Engine.DomainEvent list) : Result<Verified, ChangeRefusal> =
+        match local with
+        | None ->
+            if expected <> 0L then Error { Code = "CAUSA.VERSION_STALE"; Reasons = [ "A new investigation is decided at version 0." ] }
+            else
+                Storage.write events
+                |> Result.bind (fun set -> Storage.read investigationId (Storage.filesOf set))
+                |> Result.map (verified investigationId)
+                |> Result.mapError storageRefusal
+        | Some local ->
+            Storage.appendBytes events
+            |> Result.bind (fun bytes -> Storage.append local.Loaded expected bytes)
+            |> Result.map (fst >> verified investigationId)
+            |> Result.mapError storageRefusal
+
     /// A newer file set is acceptable only if it extends the accepted history byte-for-byte (contract §9.3).
     let successor (accepted: Verified) (candidate: Verified) : Result<Verified, ContractError> =
         Storage.successor accepted.Loaded candidate.InvestigationId (Map.ofList (files candidate))
