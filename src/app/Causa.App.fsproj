@@ -18,6 +18,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Routes.fs" />
+    <Compile Include="Language.fs" />
+    <Compile Include="Records.fs" />
     <Compile Include="Adapter.fs" />
     <Compile Include="Presentation.fs" />
     <Compile Include="Graph.fs" />
