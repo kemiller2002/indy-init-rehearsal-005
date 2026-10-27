@@ -13,6 +13,8 @@
   <ItemGroup>
     <!-- The core kernel (Boundaries A, B, E; docs/architecture/BOUNDARIES.md). -->
     <ProjectReference Include="../engine/App.Engine.fsproj" />
+    <!-- Persistence (stream persist): connection, loading, catalog, local durability, publication. -->
+    <ProjectReference Include="../persistence/Causa.Persistence.fsproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Routes.fs" />
@@ -21,6 +23,7 @@
     <Compile Include="Graph.fs" />
     <Compile Include="EngineView.fs" />
     <Compile Include="EnginePort.fs" />
+    <Compile Include="PersistencePort.fs" />
     <Compile Include="Shell.fs" />
     <Compile Include="TestState.fs" />
     <Compile Include="View.fs" />
