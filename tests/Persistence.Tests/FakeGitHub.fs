@@ -143,6 +143,17 @@ type Fake(owner: string, repo: string, defaultBranch: string, publicRepo: bool) 
         branches <- branches |> Map.add branch oid
         oid
 
+    /// Another writer deletes every file under a prefix.
+    member _.RemoveFiles(branch: string, prefix: string) =
+        let parent = Map.find branch branches
+        let tree = Map.find parent commits |> Map.filter (fun k _ -> not (k.StartsWith(prefix, System.StringComparison.Ordinal)))
+        let oid = newOid ()
+        commits <- commits |> Map.add oid tree
+        parents <- parents |> Map.add oid parent
+        messages <- messages |> Map.add oid "fake delete"
+        branches <- branches |> Map.add branch oid
+        oid
+
     /// The first-parent chain from a commit back to the root, newest first.
     member _.Chain(oid: string) =
         let rec go o acc =

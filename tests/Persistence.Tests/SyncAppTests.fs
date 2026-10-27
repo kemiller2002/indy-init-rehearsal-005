@@ -290,7 +290,8 @@ let ``VPO-cd9dd8ec730c3d3e a lost save that was not applied reconciles back to p
 [<Fact>]
 [<Trait("obligation", "VPO-2d4b7557ce013e50")>]
 [<Trait("obligation", "VPO-bb08b9a414ba4cd7")>]
-let ``VPO-2d4b7557ce013e50 a revoked token fails the next request, drops the credential and keeps local work; a replacement token saves it`` () =
+[<Trait("obligation", "VPO-c135d16c59f5baf8")>]
+let ``VPO-2d4b7557ce013e50 VPO-c135d16c59f5baf8 a revoked token fails the next request, drops the credential and keeps local work; a replacement token saves it`` () =
     let fake = newFake ()
     let app = App(fake)
     ok (app.Connect ws)
@@ -489,3 +490,21 @@ let ``VPO-d7fbd84e40ded145 VPO-9c6055c47e4eb07d events accepted by the kernel ar
     refused (app.Step(Append(iid, 1L, a2.Events)))
     ok (app.Step(Save iid))
     Assert.Equal("remotelySynced", app.Status iid)
+
+[<Fact>]
+[<Trait("obligation", "VPO-9d59cc57fd44b927")>]
+[<Trait("obligation", "VPO-34731ac9a977b818")>]
+let ``VPO-9d59cc57fd44b927 VPO-34731ac9a977b818 an investigation missing from the repository on reload keeps the device's copy and says so`` () =
+    let fake = newFake ()
+    let v = investigation "missing-remote" 0
+    seed fake ws v |> ignore
+    let app = App(fake)
+    ok (app.Connect ws)
+    ok (app.Step(Submit(hypothesis v.InvestigationId v.Version "kept")))
+    fake.RemoveFiles(branch, Target.investigationDir (target ws) v.InvestigationId) |> ignore
+    ok (app.Step(ReloadRemote v.InvestigationId))
+    Assert.Equal("conflict", app.Status v.InvestigationId)
+    Assert.Equal(v.Version + 1L, app.Doc(v.InvestigationId).Local.Version)
+    match app.Doc(v.InvestigationId).RemoteConflict with
+    | Some c -> Assert.Contains("gone", c.Detail)
+    | None -> failwith "expected the missing remote copy to be reported"
