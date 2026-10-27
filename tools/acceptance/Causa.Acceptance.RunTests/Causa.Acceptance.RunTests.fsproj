@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Tests of THIS run's pipeline evidence and of the pinned verifiers against it. They need the acceptance job's
+       inputs (Indy-init checkout, causa-data, collected results, the built site) and run only there
+       (.github/workflows/build-and-test.yml, job acceptance); they are deliberately not in App.slnx. -->
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Causa.Acceptance/Causa.Acceptance.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Run.fs" />
+    <Compile Include="VerifierTests.fs" />
+    <Compile Include="EvidenceTests.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+</Project>

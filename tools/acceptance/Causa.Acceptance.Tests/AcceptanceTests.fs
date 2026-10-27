@@ -156,7 +156,8 @@ let ledgerInputs trace producers gates : Ledger.Inputs =
       FrozenFixtureDigest = "f"
       DependencyLockSha = "l"
       InterfaceManifestSha = "i"
-      Command = "test" }
+      Command = "test"
+      Environment = [ "runner.os", "Linux" ] }
 
 let gate id requires : Ledger.GateRule = { Id = id; Title = id; Requires = requires; EvidenceType = "ci"; Note = "" }
 
