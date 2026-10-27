@@ -30,7 +30,7 @@ let credential (t: string) =
     | Ok c -> c
     | Error e -> failwith e
 
-let env = { Engine = HistoryEngine.notWired; Now = fun () -> "2026-10-27T12:00:00.000Z" }
+let env = { Now = fun () -> "2026-10-27T12:00:00.000Z" }
 
 type App(fake: Fake) =
     let mutable model = Sync.initial

@@ -24,7 +24,7 @@ let private build (tamper: Tamper) =
     let extra = if tamper = ExtraInvestigation then [ investigation "not-in-catalog" 0 ] else []
     let files =
         (present @ extra)
-        |> List.collect (fun v -> FileSet.files v |> List.map (fun (n, b) -> Target.investigationDir t v.InvestigationId + "/" + n, b))
+        |> List.collect (fun v -> Store.files v |> List.map (fun (n, b) -> Target.investigationDir t v.InvestigationId + "/" + n, b))
     let case (i: int) (v: Verified) =
         JObj
             [ "caseKey", JStr(sprintf "case-%d" i)
@@ -82,9 +82,9 @@ let ``VPO-c81484cbcf203d4f VPO-d60e3a3a25cb106d VPO-dc48d066cfa2309d after Conne
         let d = app.Doc v.InvestigationId
         Assert.True(d.ReadOnly)
         Assert.Equal(v.StateSha256, d.Local.StateSha256)
-        Assert.True(Result.isError (app.Step(Edit(v.InvestigationId, v.Version, [ hypothesis v.InvestigationId (v.Version + 1L) "x" ]))))
+        Assert.True(Result.isError (app.Step(Submit(hypothesis v.InvestigationId v.Version "x"))))
         Assert.True(Result.isError (app.Step(Save v.InvestigationId)))
-    Assert.True(Result.isError (app.Step(Create(id "new-in-catalog", [ started (id "new-in-catalog") "x" ]))))
+    Assert.True(Result.isError (app.Step(Create(start (id "new-in-catalog") "x"))))
     Assert.True(fake.Requests |> List.forall (fun r -> r.Method = "GET"))
     // Catalog records are never written to the browser store.
     Assert.False(app.Store |> Map.exists (fun _ v -> cases |> List.exists (fun c -> v.Contains c.InvestigationId)))

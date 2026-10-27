@@ -14,7 +14,7 @@ let private ws = "rehearsal-test"
 
 let private seed (fake: Fake) (workspace: string) (v: Verified) =
     let t = target workspace
-    fake.CommitFiles(branch, FileSet.files v |> List.map (fun (n, b) -> Target.investigationDir t v.InvestigationId + "/" + n, b))
+    fake.CommitFiles(branch, Store.files v |> List.map (fun (n, b) -> Target.investigationDir t v.InvestigationId + "/" + n, b))
 
 let private ok (r: Result<unit, string>) =
     match r with
@@ -30,7 +30,7 @@ let private writes (fake: Fake) = fake.Requests |> List.filter (fun r -> r.Metho
 
 let private newId (name: string) = id ("app/" + name)
 
-let private createEvents (iid: string) = [ started iid "Created in the app"; activate iid 2L ]
+let private createCmd (iid: string) = start iid "Created in the app"
 
 [<Fact>]
 [<Trait("obligation", "VPO-d79488f204e14ff8")>]
@@ -95,7 +95,7 @@ let ``VPO-4c2041ba04ba0b31 VPO-57fe23e7c821450f the eight connection states are 
     seen.Add app.Connection |> ignore
     // conflict: another writer changes the investigation after this device read it, then a save is refused.
     let iid = (investigation "states" 0).InvestigationId
-    ok (app.Step(Edit(iid, 2L, [ hypothesis iid 3L "mine" ])))
+    ok (app.Step(Submit(hypothesis iid 2L "mine")))
     seed fake ws (investigation "states" 1) |> ignore
     ok (app.Step(Save iid))
     Assert.Equal("conflict", app.Connection)
@@ -152,7 +152,7 @@ let ``VPO-61b2e81f99761d55 VPO-9c6055c47e4eb07d VPO-d7fbd84e40ded145 VPO-b3efad6
     let headBefore = fake.Head branch
     let iid = newId "create"
     // Explicit create: nothing is written remotely by creating.
-    ok (app.Dispatch(Create(iid, createEvents iid)))
+    ok (app.Dispatch(Create(createCmd iid)))
     Assert.Equal("savingLocally", app.Status iid)
     app.Run()
     Assert.Equal("savedLocally", app.Status iid)
@@ -178,11 +178,11 @@ let ``VPO-61b2e81f99761d55 VPO-9c6055c47e4eb07d VPO-d7fbd84e40ded145 VPO-b3efad6
     // One commit, exactly the three files under the workspace, byte-identical to the local copy.
     Assert.Single(writes fake) |> ignore
     let files = fake.FilesAt(fake.Head branch)
-    for (n, b) in FileSet.files (app.Doc iid).Local do
+    for (n, b) in Store.files (app.Doc iid).Local do
         Assert.Equal<byte[]>(b, files[Target.investigationDir (target ws) iid + "/" + n])
     // The written investigation reads back through the full reader (round trip).
-    let raw = { DirectoryName = iid; Entries = FileSet.names |> List.map (fun n -> n, files[Target.investigationDir (target ws) iid + "/" + n]) }
-    Assert.True(Result.isOk (FileSet.read env.Engine raw))
+    let raw = { DirectoryName = iid; Entries = Store.names |> List.map (fun n -> n, files[Target.investigationDir (target ws) iid + "/" + n]) }
+    Assert.True(Result.isOk (Store.read raw))
 
 [<Fact>]
 [<Trait("obligation", "VPO-b3efad6eb85360be")>]
@@ -191,7 +191,7 @@ let ``VPO-b3efad6eb85360be an acknowledged commit whose re-read fails is unknown
     let app = App(fake)
     ok (app.Connect ws)
     let iid = newId "confirm-fails"
-    ok (app.Step(Create(iid, createEvents iid)))
+    ok (app.Step(Create(createCmd iid)))
     let mutable posted = false
     app.Faults <- (fun r -> if r.Method = "POST" then posted <- true; Deliver elif posted then NotSentFault else Deliver)
     ok (app.Step(Save iid))
@@ -209,7 +209,7 @@ let ``VPO-34731ac9a977b818 VPO-d7fbd84e40ded145 a concurrent remote change is a 
     let app = App(fake)
     ok (app.Connect ws)
     let iid = base'.InvestigationId
-    ok (app.Step(Edit(iid, 2L, [ hypothesis iid 3L "local" ])))
+    ok (app.Step(Submit(hypothesis iid 2L "local")))
     // Another writer appends to the same investigation.
     let theirs = investigation "conflict" 1
     let theirHead = seed fake ws theirs
@@ -221,9 +221,10 @@ let ``VPO-34731ac9a977b818 VPO-d7fbd84e40ded145 a concurrent remote change is a 
     // Saving again is refused until the remote copy is reloaded; reload keeps local work and shows theirs.
     refused (app.Step(Save iid))
     ok (app.Step(ReloadRemote iid))
-    match app.Doc(iid).Remote with
-    | Conflicted(_, Some remote, _) -> Assert.Equal(theirs.EventsSha256, remote.EventsSha256)
+    match app.Doc(iid).RemoteConflict with
+    | Some { Remote = Some remote } -> Assert.Equal(theirs.EventsSha256, remote.EventsSha256)
     | other -> failwithf "expected a conflict with the remote copy, got %A" other
+    Assert.Equal("conflict", app.Status iid)
     Assert.Equal(3L, app.Doc(iid).Local.Version)
     // The person chooses: discard the local change and adopt theirs.
     ok (app.Step(DiscardLocal iid))
@@ -239,7 +240,7 @@ let ``VPO-34731ac9a977b818 a moved branch that did not touch the investigation i
     let app = App(fake)
     ok (app.Connect ws)
     let iid = base'.InvestigationId
-    ok (app.Step(Edit(iid, 2L, [ hypothesis iid 3L "mine" ])))
+    ok (app.Step(Submit(hypothesis iid 2L "mine")))
     fake.CommitFiles(branch, [ "unrelated/file.txt", utf8 "other writer\n" ]) |> ignore
     ok (app.Step(Save iid))
     Assert.Equal("conflict", app.Status iid)
@@ -257,7 +258,7 @@ let ``VPO-b3efad6eb85360be VPO-cd9dd8ec730c3d3e a save whose answer was lost is 
     let app = App(fake)
     ok (app.Connect ws)
     let iid = newId "lost-applied"
-    ok (app.Step(Create(iid, createEvents iid)))
+    ok (app.Step(Create(createCmd iid)))
     app.Faults <- (fun r -> if r.Method = "POST" then ApplyThenLose else Deliver)
     ok (app.Step(Save iid))
     Assert.Equal("unknown", app.Status iid)
@@ -276,7 +277,7 @@ let ``VPO-cd9dd8ec730c3d3e a lost save that was not applied reconciles back to p
     let app = App(fake)
     ok (app.Connect ws)
     let iid = newId "lost-not-applied"
-    ok (app.Step(Create(iid, createEvents iid)))
+    ok (app.Step(Create(createCmd iid)))
     app.Faults <- (fun r -> if r.Method = "POST" then LoseWithoutApplying else Deliver)
     ok (app.Step(Save iid))
     Assert.Equal("unknown", app.Status iid)
@@ -294,7 +295,7 @@ let ``VPO-2d4b7557ce013e50 a revoked token fails the next request, drops the cre
     let app = App(fake)
     ok (app.Connect ws)
     let iid = newId "revoked"
-    ok (app.Step(Create(iid, createEvents iid)))
+    ok (app.Step(Create(createCmd iid)))
     fake.Revoke token
     ok (app.Step(Save iid))
     Assert.Equal("accessDenied", app.Connection)
@@ -319,22 +320,22 @@ let ``VPO-54b0eef91ceeada4 VPO-89ed6170f531961e offline edits survive a reload; 
     ok (app.Connect ws)
     let iid = newId "offline"
     app.Faults <- (fun _ -> NotSentFault)
-    ok (app.Step(Create(iid, createEvents iid)))
-    ok (app.Step(Edit(iid, 2L, [ hypothesis iid 3L "offline" ])))
+    ok (app.Step(Create(createCmd iid)))
+    ok (app.Step(Submit(hypothesis iid 1L "offline")))
     ok (app.Step(Save iid))
     Assert.Equal("offline", app.Connection)
     Assert.Equal("queuedOffline", app.Status iid)
     ok (app.Reload())
     Assert.Equal("disconnected", app.Connection)
     Assert.True(app.Model.Credential.IsNone)
-    Assert.Equal(3L, app.Doc(iid).Local.Version)
+    Assert.Equal(2L, app.Doc(iid).Local.Version)
     Assert.Equal("queuedOffline", app.Status iid)
     refused (app.Step(Save iid))
     app.Faults <- (fun _ -> Deliver)
     ok (app.Connect ws)
     ok (app.Step(Save iid))
     Assert.Equal("remotelySynced", app.Status iid)
-    Assert.Equal(3L, app.Doc(iid).Confirmed.Value.Version)
+    Assert.Equal(2L, app.Doc(iid).Confirmed.Value.Version)
 
 [<Fact>]
 [<Trait("obligation", "VPO-b3efad6eb85360be")>]
@@ -343,7 +344,7 @@ let ``VPO-b3efad6eb85360be a reload during a send restores it as unknown and the
     let app = App(fake)
     ok (app.Connect ws)
     let iid = newId "reload-during-send"
-    ok (app.Step(Create(iid, createEvents iid)))
+    ok (app.Step(Create(createCmd iid)))
     app.Faults <- (fun r -> if r.Method = "POST" then Hold else Deliver)
     ok (app.Step(Save iid))
     // GitHub applies it; the tab is reloaded before the answer arrives.
@@ -363,10 +364,10 @@ let ``VPO-2de744fb2c8bdc70 VPO-bb08b9a414ba4cd7 VPO-ca58030e3eecdf9b VPO-c41f10e
     let app = App(fake)
     ok (app.Connect ws)
     let iid = newId "secret"
-    ok (app.Step(Create(iid, createEvents iid)))
+    ok (app.Step(Create(createCmd iid)))
     ok (app.Step(Save iid))
     fake.Revoke token
-    ok (app.Step(Edit(iid, 2L, [ hypothesis iid 3L "after revoke" ])))
+    ok (app.Step(Submit(hypothesis iid 1L "after revoke")))
     ok (app.Step(Save iid))
     let contains (s: string) = s.Contains(token, StringComparison.Ordinal)
     // Local storage, every request URL/body/header, every refusal, the projection and the model's text form.
@@ -406,13 +407,13 @@ let ``VPO-d7fbd84e40ded145 refused steps change nothing and send nothing`` () =
     let app = App(fake)
     ok (app.Connect ws)
     let iid = newId "refusals"
-    ok (app.Step(Create(iid, createEvents iid)))
+    ok (app.Step(Create(createCmd iid)))
     ok (app.Step(Save iid))
     let before = app.Model
     let effects = app.Effects.Length
     refused (app.Step(Save iid)) // nothing to save
-    refused (app.Step(Create(iid, createEvents iid))) // exists
-    refused (app.Step(Edit(iid, 1L, [ hypothesis iid 2L "stale" ]))) // decided at an old version
+    refused (app.Step(Create(createCmd iid))) // exists
+    refused (app.Step(Submit(hypothesis iid 0L "stale"))) // decided at an old version
     refused (app.Step(Reconcile iid)) // nothing unknown
     refused (app.Step(DiscardLocal iid)) // nothing local
     Assert.Equal(before, app.Model)
@@ -452,7 +453,7 @@ let ``VPO-074f1b1804e54869 writes are confined to the selected workspace of the 
     let fake = newFake ()
     let app = App(fake)
     ok (app.Connect ws)
-    ok (app.Step(Create(iid, createEvents iid)))
+    ok (app.Step(Create(createCmd iid)))
     ok (app.Step(Save iid))
     let changed = fake.FilesAt(fake.Head branch) |> Map.toList |> List.map fst |> List.filter (fun p -> p <> "README.md")
     Assert.True(changed |> List.forall (Target.pathAllowed t))
@@ -465,5 +466,5 @@ let ``VPO-89ed6170f531961e a local store failure is shown as failed, distinct fr
     ok (app.Connect ws)
     app.StoreFails <- true
     let iid = newId "store-fails"
-    ok (app.Step(Create(iid, createEvents iid)))
+    ok (app.Step(Create(createCmd iid)))
     Assert.Equal("failed", app.Status iid)

@@ -1,46 +1,59 @@
-/// A synthetic history generator (EXT-DATA-001-O2: synthetic test generators MAY be included). It produces
-/// contract-shaped events from fixed, invented ids; no investigation record from any data repository is bundled.
+/// A synthetic history generator (EXT-DATA-001-O2: synthetic test generators MAY be included). Every history is
+/// decided by the engine (Kernel.submit) and written by its storage writer; no record from any data repository is
+/// bundled, and no event is built by hand.
 module Persistence.Tests.Synthetic
 
+open System
 open Causa.Persistence
+
+type Envelope = IndyInitRootCauseInvestigator.Engine.CommandEnvelope
 
 let ns = "6ba7b811-9dad-11d1-80b4-00c04fd430c8"
 
 /// A deterministic id for a synthetic entity.
 let id (name: string) = Uuid.v5 ns ("persistence-tests/" + name)
 
-let human = JObj [ "actorId", JStr "tester-01"; "kind", JStr "human" ]
+let private guid (name: string) = Guid(id name)
 
-let at (minute: int) = sprintf "2026-10-27T10:%02d:00.000Z" minute
+let human: IndyInitRootCauseInvestigator.Engine.Actor = { ActorId = "tester-01"; Kind = IndyInitRootCauseInvestigator.Engine.ActorKind.Human }
 
-/// One engine-shaped event at a version; one command per event (fresh correlation id).
-let event (investigationId: string) (version: int64) (eventType: string) (payload: (string * JValue) list) =
-    FileSet.envelope investigationId version (id (sprintf "%s/cmd/%d" investigationId version)) (at (int version)) human eventType (JObj payload)
+let at (minute: int) = DateTimeOffset(2026, 10, 27, 10, 0, 0, TimeSpan.Zero).AddMinutes(float minute)
 
-let started (investigationId: string) (title: string) =
-    event investigationId 1L "InvestigationStarted" [ "title", JStr title; "observationId", JStr(id (investigationId + "/obs")); "original", JStr "The service returned errors." ]
+/// One command envelope, decided at `expected`. The command id is derived from the investigation, the version and
+/// a label, so the same decision always yields the same bytes and different decisions never share an id.
+let envelope (investigationId: string) (expected: int64) (label: string) (command: IndyInitRootCauseInvestigator.Engine.Command) : Envelope =
+    { CommandId = Guid(Uuid.v5 ns (sprintf "persistence-tests/cmd/%s/%d/%s" investigationId expected label))
+      Investigation = IndyInitRootCauseInvestigator.Engine.Id(Guid investigationId)
+      ExpectedVersion = Some expected
+      Actor = human
+      RequestedAt = at (int expected)
+      Command = command }
 
-let hypothesis (investigationId: string) (version: int64) (name: string) =
-    event investigationId version "HypothesisRecorded" [ "hypothesisId", JStr(id (investigationId + "/h/" + name)); "statement", JStr("Hypothesis " + name); "mechanism", JNull ]
+let start (investigationId: string) (title: string) =
+    envelope investigationId 0L "start" (IndyInitRootCauseInvestigator.Engine.StartInvestigation(title, IndyInitRootCauseInvestigator.Engine.Id(guid (investigationId + "/obs")), "The service returned errors."))
 
-let activate (investigationId: string) (version: int64) =
-    event investigationId version "LifecycleChanged" [ "from", JStr "draft"; "to", JStr "active"; "command", JStr "activateInvestigation"; "reason", JNull ]
+let activate (investigationId: string) (expected: int64) =
+    envelope investigationId expected "activate" IndyInitRootCauseInvestigator.Engine.ActivateInvestigation
 
-/// The engine stand-in used where admissibility is not the subject of the test: it says plainly that it did not decide.
-let engine = HistoryEngine.notWired
+let hypothesis (investigationId: string) (expected: int64) (name: string) =
+    envelope investigationId expected ("h/" + name) (IndyInitRootCauseInvestigator.Engine.RecordHypothesis(IndyInitRootCauseInvestigator.Engine.Id(guid (investigationId + "/h/" + name)), "Hypothesis " + name, None))
 
-/// A verified synthetic investigation with `extra` hypotheses after start + activation.
+let private ok r =
+    match r with
+    | Ok v -> v
+    | Error(e: Store.ChangeRefusal) -> failwithf "synthetic command refused: %s %A" e.Code e.Reasons
+
+/// A verified synthetic investigation: start, activate, then `extra` hypotheses.
 let investigation (name: string) (extra: int) =
     let iid = id ("inv/" + name)
-    let events = [ started iid ("Synthetic " + name); activate iid 2L ] @ [ for i in 1..extra -> hypothesis iid (int64 (2 + i)) (string i) ]
-    match FileSet.append engine iid None 0L events with
-    | Ok v -> v
-    | Error e -> failwithf "synthetic investigation invalid: %s %s" e.Code e.Detail
+    let v = Store.create (start iid ("Synthetic " + name)) |> ok
+    let v = Store.submit v (activate iid v.Version) |> ok
+    [ 1..extra ] |> List.fold (fun (v: Verified) i -> Store.submit v (hypothesis iid v.Version (string i)) |> ok) v
 
-let raw (v: Verified) = { DirectoryName = v.InvestigationId; Entries = FileSet.files v }
+let raw (v: Verified) = { DirectoryName = v.InvestigationId; Entries = Store.files v }
 
 let replaceEntry (name: string) (bytes: byte[]) (r: RawFileSet) =
     { r with Entries = r.Entries |> List.map (fun (n, b) -> if n = name then n, bytes else n, b) }
 
-let utf8 (s: string) = System.Text.Encoding.UTF8.GetBytes s
-let text (b: byte[]) = System.Text.Encoding.UTF8.GetString b
+let utf8 (s: string) = Text.Encoding.UTF8.GetBytes s
+let text (b: byte[]) = Text.Encoding.UTF8.GetString b

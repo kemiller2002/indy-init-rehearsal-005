@@ -42,6 +42,7 @@ let private listOf r = GitHub.classify r |> Result.bind GitHub.parseListing |> c
 let private fileOf r = GitHub.classify r |> Result.bind GitHub.parseFile |> classification
 let private blobOf r = GitHub.classify r |> Result.bind GitHub.parseBlob |> classification
 let private commitOf r = GitHub.parseCommit r |> classification
+let private compareOf r = GitHub.classify r |> Result.bind GitHub.parseCompare |> classification
 
 let private graphqlTypes (body: string) =
     match Json.parse body with
@@ -62,8 +63,8 @@ let ``VPO-03b8215501e25334 VPO-74efa48033c82a96 VPO-bb13dc090d4c152b the fake ag
     let bogus = Some(credential "rejected-credential")
     let head0 = fake.Head branch
     let v = Synthetic.investigation "conformance" 0
-    let files = FileSet.files v |> List.map (fun (n, b) -> Target.investigationDir t v.InvestigationId + "/" + n, b)
-    let created = fake.Handle(GitHub.createCommit cred t head0 "create" files)
+    let files = Store.files v |> List.map (fun (n, b) -> Target.investigationDir t v.InvestigationId + "/" + n, b)
+    let created = fake.Handle(GitHub.createCommit cred t head0 "create" "" files)
     let oid = fake.Head branch
     let cases: (string * (unit -> HttpResponse) * (HttpResponse -> string)) list =
         [ "repository.read.authorized", (fun () -> fake.Handle(GitHub.getRepository cred t)), repoOf
@@ -78,9 +79,12 @@ let ``VPO-03b8215501e25334 VPO-74efa48033c82a96 VPO-bb13dc090d4c152b the fake ag
           "contents.read.file", (fun () -> fake.Handle(GitHub.getFile cred t oid (fst files.Head))), fileOf
           "contents.read.file.missing", (fun () -> fake.Handle(GitHub.getFile cred t oid "catalog/active.json")), fileOf
           "blob.read", (fun () -> fake.Handle(GitHub.getBlob cred t (GitHub.gitBlobSha v.Manifest))), blobOf
-          "write.conflict.staleHead", (fun () -> fake.Handle(GitHub.createCommit cred t head0 "stale" files)), commitOf
-          "write.missingBranch", (fun () -> fake.Handle(GitHub.createCommit cred { t with Branch = "causa-missing" } oid "missing" files)), commitOf
-          "write.rejectedCredential", (fun () -> fake.Handle(GitHub.createCommit bogus t oid "rejected" files)), commitOf ]
+          "write.conflict.staleHead", (fun () -> fake.Handle(GitHub.createCommit cred t head0 "stale" "" files)), commitOf
+          "write.missingBranch", (fun () -> fake.Handle(GitHub.createCommit cred { t with Branch = "causa-missing" } oid "missing" "" files)), commitOf
+          "write.rejectedCredential", (fun () -> fake.Handle(GitHub.createCommit bogus t oid "rejected" "" files)), commitOf
+          "compare.ahead", (fun () -> fake.Handle(GitHub.compare cred t head0 oid)), compareOf
+          "compare.identical", (fun () -> fake.Handle(GitHub.compare cred t oid oid)), compareOf
+          "compare.behind", (fun () -> fake.Handle(GitHub.compare cred t oid head0)), compareOf ]
     let divergences =
         cases
         |> List.choose (fun (scenario, run, classify) ->

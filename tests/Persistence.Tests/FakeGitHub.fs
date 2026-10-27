@@ -97,6 +97,8 @@ type Fake(owner: string, repo: string, defaultBranch: string, publicRepo: bool) 
     let mutable branches: Map<string, string> = Map.empty
     let mutable commits: Map<string, Map<string, byte[]>> = Map.empty
     let mutable valid: Set<string> = Set.empty
+    let mutable parents: Map<string, string> = Map.empty
+    let mutable messages: Map<string, string> = Map.empty
     let mutable log: HttpRequest list = []
     let mutable counter = 0
 
@@ -107,9 +109,12 @@ type Fake(owner: string, repo: string, defaultBranch: string, publicRepo: bool) 
     let dirSha (path: string) = Convert.ToHexStringLower(SHA1.HashData(Encoding.UTF8.GetBytes("tree:" + path)))
 
     do
+        // Two initial commits, so that every commit a conversation can name has a parent (as on GitHub).
         let root = newOid ()
-        commits <- commits |> Map.add root (Map.ofList [ "README.md", Encoding.UTF8.GetBytes "fake data repository\n" ])
-        branches <- branches |> Map.add defaultBranch root
+        let first = newOid ()
+        commits <- commits |> Map.add root Map.empty |> Map.add first (Map.ofList [ "README.md", Encoding.UTF8.GetBytes "fake data repository\n" ])
+        parents <- parents |> Map.add first root
+        branches <- branches |> Map.add defaultBranch first
 
     member _.Requests = List.rev log
     member _.Head(branch: string) = Map.find branch branches
@@ -121,13 +126,25 @@ type Fake(owner: string, repo: string, defaultBranch: string, publicRepo: bool) 
     member _.FilesAt(commit: string) = Map.find commit commits
 
     /// Another writer (or setup) commits directly to a branch.
-    member _.CommitFiles(branch: string, files: (string * byte[]) list) =
+    member this.CommitFiles(branch: string, files: (string * byte[]) list) = this.CommitFiles(branch, files, "fake commit")
+
+    member _.CommitFiles(branch: string, files: (string * byte[]) list, message: string) =
         let parent = Map.find branch branches
         let tree = files |> List.fold (fun t (p, b) -> Map.add p b t) (Map.find parent commits)
         let oid = newOid ()
         commits <- commits |> Map.add oid tree
+        parents <- parents |> Map.add oid parent
+        messages <- messages |> Map.add oid message
         branches <- branches |> Map.add branch oid
         oid
+
+    /// The first-parent chain from a commit back to the root, newest first.
+    member _.Chain(oid: string) =
+        let rec go o acc =
+            match Map.tryFind o parents with
+            | Some p -> go p (o :: acc)
+            | None -> List.rev (o :: acc)
+        go oid []
 
     member _.Handle(r: HttpRequest) : HttpResponse =
         log <- r :: log
@@ -201,6 +218,45 @@ type Fake(owner: string, repo: string, defaultBranch: string, publicRepo: bool) 
                         respond
                             "write.create.confirm"
                             (Some(JArr(children |> List.map (fun (n, k, s) -> JObj [ "name", JStr n; "path", JStr(prefix + n); "type", JStr k; "sha", JStr s ]))))
+        | _, "GET" when path.StartsWith(repoPrefix + "/compare/") ->
+            match path.Substring((repoPrefix + "/compare/").Length).Split("...") with
+            | [| b; h |] when commits.ContainsKey b && commits.ContainsKey h ->
+                let headChain = this.Chain h
+                let commitRef (c: string) =
+                    JObj [ "sha", JStr c; "parents", JArr(Map.tryFind c parents |> Option.toList |> List.map (fun p -> JObj [ "sha", JStr p ])) ]
+                let summary status (cs: string list) =
+                    JObj
+                        [ "status", JStr status
+                          "base_commit", commitRef b
+                          "merge_base_commit", commitRef b
+                          "ahead_by", JInt(int64 cs.Length)
+                          "files",
+                          JArr(
+                              let bt, ht = Map.find b commits, Map.find h commits
+                              Set.union (bt |> Map.keys |> Set.ofSeq) (ht |> Map.keys |> Set.ofSeq)
+                              |> Set.toList
+                              |> List.filter (fun k -> Map.tryFind k bt <> Map.tryFind k ht)
+                              |> List.map (fun k -> JObj [ "filename", JStr k; "sha", JStr(Map.tryFind k ht |> Option.map gitBlobSha |> Option.defaultValue "") ])
+                          )
+                          "total_commits", JInt(int64 cs.Length)
+                          "commits",
+                          JArr(
+                              cs
+                              |> List.map (fun c ->
+                                  JObj
+                                      [ "sha", JStr c
+                                        "parents", JArr [ JObj [ "sha", JStr(Map.find c parents) ] ]
+                                        "commit", JObj [ "message", JStr(Map.tryFind c messages |> Option.defaultValue "") ] ])
+                          ) ]
+                if b = h then respond "compare.identical" (Some(summary "identical" []))
+                elif List.contains b headChain then
+                    let after = headChain |> List.takeWhile ((<>) b) |> List.rev
+                    respond "compare.ahead" (Some(summary "ahead" after))
+                elif List.contains h (this.Chain b) then respond "compare.behind" (Some(summary "behind" []))
+                // Not recorded as its own scenario: GitHub answers a diverged comparison in the same form as
+                // "behind" (status value differs); the recorded "behind" form is used.
+                else respond "compare.behind" (Some(summary "diverged" []))
+            | _ -> respond "contents.list.missingPath" None
         | _, "GET" when path.StartsWith(repoPrefix + "/git/blobs/") ->
             let sha = path.Substring((repoPrefix + "/git/blobs/").Length)
             let found = commits |> Map.toSeq |> Seq.collect (fun (_, t) -> Map.values t) |> Seq.tryFind (fun b -> gitBlobSha b = sha)
@@ -240,7 +296,11 @@ type Fake(owner: string, repo: string, defaultBranch: string, publicRepo: bool) 
                 | Some head when head <> expected ->
                     respond "write.conflict.staleHead" (Some(JObj [ "errors", JArr [ JObj [ "type", JStr "STALE_DATA"; "message", JStr "fake: expected head moved"; "path", JArr [ JStr "createCommitOnBranch" ]; "locations", JArr [ JObj [ "line", JInt 1L; "column", JInt 1L ] ] ] ] ]))
                 | Some _ ->
-                    let oid = this.CommitFiles(branch, additions)
+                    let message =
+                        match Json.field "message" i with
+                        | Some(JObj msg) -> (Json.str "headline" msg |> Option.defaultValue "") + "\n\n" + (Json.str "body" msg |> Option.defaultValue "")
+                        | _ -> ""
+                    let oid = this.CommitFiles(branch, additions, message)
                     respond "write.create" (Some(JObj [ "data", JObj [ "createCommitOnBranch", JObj [ "commit", JObj [ "oid", JStr oid ] ] ] ]))
             | _ -> failwith "fake: unrecognized GraphQL body"
         | _ -> failwithf "fake: no recorded behaviour for %s %s" r.Method path

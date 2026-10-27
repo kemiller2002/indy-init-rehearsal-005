@@ -173,7 +173,7 @@ let private programLive (ctx: Ctx) (cred: Credential) (owner: string) (repo: str
             expect ctx "live.app.conflict" (status c2 iid = "conflict" && otherHead.IsSome && headNow = otherHead && localKept) (sprintf "save after a concurrent write -> %s; remote head untouched; local change kept; %d ms" (status c2 iid) sw2.ElapsedMilliseconds)
             let c3, _ = run (fun _ -> false) c2 (ReloadRemote iid)
             let c4, _ = run (fun _ -> false) c3 (DiscardLocal iid)
-            expect ctx "live.app.conflict.resolve" (status c4 iid = "clean" && (c4.Documents |> Map.tryFind iid |> Option.exists (fun d -> d.Local.EventsSha256 = theirs.EventsSha256))) ("reload + discard adopts the other writer's copy -> " + status c4 iid)
+            expect ctx "live.app.conflict.resolve" ((status c4 iid = "clean" || status c4 iid = "remotelySynced") && (c4.Documents |> Map.tryFind iid |> Option.exists (fun d -> d.Local.EventsSha256 = theirs.EventsSha256))) ("reload + discard adopts the other writer's copy -> " + status c4 iid)
             // Unknown outcome: the answer to the save is lost after sending; only Reconcile settles it.
             let u1, _ = run (fun _ -> false) c4 (Submit(Cmd.observe iid theirs.Version "answer will be lost"))
             let u2, _ = run isPost u1 (Save iid)
