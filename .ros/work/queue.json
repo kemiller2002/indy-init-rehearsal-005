@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "repository": "indy-init-rehearsal-005",
-  "nextSeq": 7,
+  "nextSeq": 8,
   "items": [
     {
       "id": "COND-MISSION-001",
@@ -154,6 +154,30 @@
       "attachments": [],
       "createdAt": "2026-10-27T20:43:47Z",
       "updatedAt": "2026-10-27T20:43:50Z",
+      "createdBy": "unknown",
+      "createdByActor": {
+        "kind": "agent",
+        "id": "anthropic/claude-code",
+        "provider": "anthropic",
+        "model": "unknown",
+        "runtime": "claude-code"
+      },
+      "source": "manual",
+      "sourceReference": null
+    },
+    {
+      "id": "WI-0007",
+      "title": "R5 stream ux: presentation language, catalog cards, admin separation, inspector and relationships (UI-001,UI-017..UI-040)",
+      "description": null,
+      "tags": [
+        "r5",
+        "stream-ux"
+      ],
+      "priority": "high",
+      "status": "ready",
+      "attachments": [],
+      "createdAt": "2026-10-27T21:50:55Z",
+      "updatedAt": "2026-10-27T21:50:55Z",
       "createdBy": "unknown",
       "createdByActor": {
         "kind": "agent",
