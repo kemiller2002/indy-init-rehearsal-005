@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "check": "tsc --noEmit",
-    "build": "node scripts/build-site.mjs",
+    "build": "node scripts/build-site.mjs && node scripts/build-site.mjs --test --skip-dotnet",
     "build:test": "node scripts/build-site.mjs --test --skip-dotnet",
     "test:browser": "playwright test",
     "serve": "node scripts/serve.mjs dist 4321"

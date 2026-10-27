@@ -11,7 +11,7 @@ async function started(page) {
 }
 
 test.describe("loading experience (WASM-LOAD, T16)", () => {
-  test("the branded shell shows before the WebAssembly runtime and hands off without a blank frame [VPO-0bd752bd2ac89796] [VPO-cb75698b278332f5]", async ({ page }) => {
+  test("the branded shell shows before the WebAssembly runtime and hands off without a blank frame [VPO-0bd752bd2ac89796] [VPO-cb75698b278332f5]", { tag: ["@stack-smoke-limen", "@webkit"] }, async ({ page }) => {
     let release;
     const gate = new Promise((resolve) => { release = resolve; });
     await page.route("**/wasm/_framework/dotnet.js", async (route) => { await gate; await route.continue(); });
@@ -312,7 +312,7 @@ test.describe("report, timeline and administration views (T22, T26, T29)", () =>
 });
 
 test.describe("integration checkpoint 1: a legal command end to end through Limen and the F# kernel (T17)", () => {
-  test("starting and activating an investigation crosses Limen into the kernel; every view refreshes from the one new version; a refusal changes nothing [VPO-21abf6acd60d0acc] [VPO-be99a964783c59b5] [VPO-f1a416eaeec6c129] [VPO-b3efad6eb85360be]", async ({ page }) => {
+  test("starting and activating an investigation crosses Limen into the kernel; every view refreshes from the one new version; a refusal changes nothing [VPO-21abf6acd60d0acc] [VPO-be99a964783c59b5] [VPO-f1a416eaeec6c129] [VPO-b3efad6eb85360be]", { tag: ["@webkit"] }, async ({ page }) => {
     await page.goto(TEST_SITE + "index.html#/investigations/new");
     await started(page);
     // Test build only: the real kernel over an in-memory workspace (nothing is saved anywhere).
@@ -344,5 +344,82 @@ test.describe("integration checkpoint 1: a legal command end to end through Lime
     await page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Investigations" }).click();
     await expect(page.locator(".causa-card")).toContainText("Active");
     await expect(page.locator(".causa-card")).toContainText("1 hypotheses");
+  });
+});
+
+test.describe("stack smoke (DEP-CURRENT-004) and defect classes", () => {
+  test("Limen starts the F# application and binds its projection into the page", { tag: ["@stack-smoke-limen", "@webkit"] }, async ({ page }) => {
+    await page.goto("index.html#/settings");
+    await started(page);
+    // The title, the navigation list and a bound control all come from one engine projection.
+    await expect(page).toHaveTitle("Settings · Causa");
+    await expect(page.getByRole("navigation", { name: "Primary" }).getByRole("link")).toHaveCount(3);
+    await expect(page.getByLabel("Text size")).toHaveValue("standard");
+    expect(await page.evaluate(() => window.causaDiagnostics.filter((d) => d.kind === "BridgeError").length)).toBe(0);
+  });
+
+  test("a Forma ef-* component renders with Forma's styles and Causa's tokens", { tag: ["@stack-smoke-forma", "@webkit"] }, async ({ page }) => {
+    await page.goto("index.html");
+    await started(page);
+    const button = page.locator(".causa-connect .ef-button[data-ef-variant=primary]");
+    await expect(button).toBeVisible();
+    const style = await button.evaluate((el) => { const s = getComputedStyle(el); return { bg: s.backgroundColor, radius: s.borderRadius, cursor: s.cursor }; });
+    expect(style.bg).toBe("rgb(6, 100, 110)");
+    // Forma's own stylesheet is loaded (its tokens resolve), not only Causa's.
+    const formaToken = await page.evaluate(() => [...document.styleSheets].some((sheet) => (sheet.href ?? "").endsWith("vendor/forma/all.css") && sheet.cssRules.length > 0));
+    expect(formaToken).toBe(true);
+  });
+
+  test("the Folio print page renders the report with Folio's elements and print styles", { tag: ["@stack-smoke-folio"] }, async ({ page }) => {
+    await page.goto(TEST_SITE + "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/report");
+    await started(page);
+    await expect(page.locator("ef-print-document")).toBeVisible();
+    expect(await page.evaluate(() => ["ef-print-document", "ef-print-section", "ef-print-title-page"].every((n) => customElements.get(n) !== undefined))).toBe(true);
+    await page.emulateMedia({ media: "print" });
+    await expect(page.locator("header.causa-masthead")).toBeHidden();
+    await expect(page.locator("ef-print-document")).toContainText("Causa investigation report");
+    await expect(page.locator("ef-print-document")).toContainText("Incomplete");
+    const pdf = await page.pdf({ format: "Letter" });
+    expect(pdf.length).toBeGreaterThan(1000);
+  });
+
+  test("DCT-006-A a 503 on one framework .wasm shows the recoverable failure well before the start timeout, focus on Retry, and Retry reaches ready [VPO-0bd752bd2ac89796] [VPO-97351596eb39e14e]", { tag: ["@webkit"] }, async ({ page }) => {
+    let fail = true;
+    await page.route("**/wasm/_framework/*.wasm", (route) => (fail && route.request().url().includes("dotnet.native") ? route.fulfill({ status: 503, body: "" }) : route.continue()));
+    const t0 = Date.now();
+    await page.goto("index.html");
+    await expect(page.locator("#causa-boot")).toHaveAttribute("data-state", "failed", { timeout: 20_000 });
+    const elapsed = Date.now() - t0;
+    expect(elapsed).toBeLessThan(20_000); // the start timeout is 60 s
+    await expect(page.getByRole("button", { name: "Retry" })).toBeFocused();
+    fail = false;
+    await page.getByRole("button", { name: "Retry" }).click();
+    await started(page);
+    await expect(page.locator("#causa-ready")).toHaveText("Causa is ready.");
+  });
+
+  test("DCT-INPUT-A typed text in bound inputs survives the projections that arrive while typing [VPO-be22751d9b5b8098]", { tag: ["@webkit"] }, async ({ page }) => {
+    // Static half: every editable control whose value is projected declares data-on="input".
+    const html = readFileSync("src/kernel/index.html", "utf8");
+    const bound = [...html.matchAll(/<(input|textarea)\b[^>]*data-bind-value=[^>]*>/g)].map((m) => m[0]);
+    expect(bound.length).toBeGreaterThan(0);
+    for (const tag of bound) expect(tag, tag).toContain('data-on="input"');
+    // Dynamic half: type into two bound fields; each keystroke is a round trip whose projection re-renders the form.
+    await page.goto(TEST_SITE + "index.html#/investigations/new");
+    await started(page);
+    await page.evaluate(() => window.__perceptaSetState({ name: "engine-memory", predicates: [], capabilities: {} }));
+    const title = page.getByLabel("Title");
+    await title.pressSequentially("Pump cavitation on unit 2", { delay: 5 });
+    const statement = page.getByLabel(/Problem statement/);
+    await statement.pressSequentially("Noise reported at 02:10.", { delay: 5 });
+    await expect(title).toHaveValue("Pump cavitation on unit 2");
+    await expect(statement).toHaveValue("Noise reported at 02:10.");
+    // A projection caused by something else (a notice) does not overwrite what was typed either.
+    await title.click();
+    await title.press("End");
+    await title.pressSequentially(" (B)", { delay: 5 });
+    await page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Settings" }).click();
+    await page.goBack();
+    await expect(page.getByLabel("Title")).toHaveValue("Pump cavitation on unit 2 (B)");
   });
 });
