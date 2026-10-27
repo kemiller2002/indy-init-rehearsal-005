@@ -282,7 +282,8 @@ let spliceArray (text: string) (key: string) (value: Text.Json.Nodes.JsonNode) =
             else close (i + 1) depth false false
     let stop = close start 0 false false
     let lineStart = text.LastIndexOf('\n', k) + 1
-    let indent = text.Substring(lineStart, k - lineStart)
+    // Only the line's leading whitespace: on a single-line file the key is preceded by other members.
+    let indent = text.Substring(lineStart, k - lineStart) |> Seq.takeWhile Char.IsWhiteSpace |> Seq.toArray |> String
     let body = (Json.serialize value).TrimEnd('\n').Replace("\n", "\n" + indent)
     text.Substring(0, start) + body + text.Substring(stop + 1)
 
