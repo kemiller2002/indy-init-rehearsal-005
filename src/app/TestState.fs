@@ -87,7 +87,11 @@ let toProjection (s: Injected) : WorkspaceProjection =
           Evidence = [ { Id = "e-1"; Content = "Launch-time temperature was recorded below the qualified range."; Source = Some "Fixture source"; Category = "measurement"; RecordedAt = Some "2026-01-01T00:00:00Z" } ]
           Blockers = blockers
           Causes = [ { Id = "c-1"; Outcome = "The joint failed during ascent."; State = "identified"; Members = [ "h-1", RootCause ] } ]
-          Timeline = [ { Sequence = 1L; EventType = "InvestigationOpened"; OccurredAt = "2026-01-01T00:00:00Z"; RecordedAt = Some "2026-01-01T00:00:00Z"; Actor = Some "Fixture" } ]
+          Proposals = []
+          Findings = None
+          Integrity = None
+          Report = None
+          Timeline = [ { Sequence = 1L; EventType = "InvestigationOpened"; OccurredAt = "2026-01-01T00:00:00Z"; RecordedAt = Some "2026-01-01T00:00:00Z"; Actor = Some "Fixture"; Category = "lifecycle"; Affected = []; ClockBeforePrevious = false } ]
           Capabilities = capabilities }
 
     { Connection = ConnectedTo("fixture/percepta", "main", "test")
@@ -106,4 +110,5 @@ let toProjection (s: Injected) : WorkspaceProjection =
       Capabilities = capabilities
       Blockers = blockers
       Message = None
+      Ai = noAi
       Administration = [ { Id = "fixture"; Section = "persistence"; Label = "Data provider"; Value = "Percepta fixture state " + s.Name; State = "Unknown" } ] }

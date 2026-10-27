@@ -235,6 +235,14 @@ new MutationObserver((records) => {
   }
 }).observe(document.body, { subtree: true, attributes: true, attributeFilter: ["data-selected"] });
 
+// ---- Secrets leave the DOM after submission -------------------------------------------------------------------------
+// When the application has taken a token or provider key (it bumps data-secret-epoch on <body> after handling the
+// submission), password fields in forms marked data-clear-secrets are emptied so the secret does not linger in the
+// page. Mechanism only; the application never projects a secret back.
+new MutationObserver(() => {
+  for (const input of Array.from(document.querySelectorAll("form[data-clear-secrets] input[type=password]"))) (input as HTMLInputElement).value = "";
+}).observe(document.body, { attributes: true, attributeFilter: ["data-secret-epoch"] });
+
 // ---- Report printing (T26) -------------------------------------------------------------------------------------------
 // Printing is a browser presentation action with no domain effect; the application renders the report it prints.
 document.addEventListener("click", (event) => {

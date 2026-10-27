@@ -14,6 +14,7 @@ type Section =
     | Timeline
     | CorrectiveActions
     | Report
+    | AiProposals
 
 type Route =
     | Home
@@ -32,7 +33,8 @@ let sections =
       Hypotheses, "hypotheses", "Hypotheses"
       Timeline, "timeline", "Timeline"
       CorrectiveActions, "corrective-actions", "Corrective actions"
-      Report, "report", "Report" ]
+      Report, "report", "Report"
+      AiProposals, "proposals", "AI proposals" ]
 
 let sectionSlug (s: Section) = sections |> List.pick (fun (x, slug, _) -> if x = s then Some slug else None)
 let sectionLabel (s: Section) = sections |> List.pick (fun (x, _, label) -> if x = s then Some label else None)
@@ -113,3 +115,17 @@ let primaryOf (route: Route) =
     | Administration -> AdministrationArea
     | Settings -> SettingsArea
     | NotFound _ -> Nowhere
+
+/// The version a timeline link selects (`?version=N`, N >= 1), for time travel (T28). Pure and total.
+let versionOf (hash: string) : int64 option =
+    match hash.IndexOf '?' with
+    | -1 -> None
+    | i ->
+        hash.Substring(i + 1).Split('&')
+        |> Array.tryPick (fun kv ->
+            match kv.Split('=') with
+            | [| "version"; v |] ->
+                match Int64.TryParse v with
+                | true, n when n >= 1L && string n = v -> Some n
+                | _ -> None
+            | _ -> None)

@@ -19,6 +19,10 @@ let private inv hypotheses causes =
       Blockers = []
       Causes = causes
       Timeline = []
+      Proposals = []
+      Findings = None
+      Integrity = None
+      Report = None
       Capabilities = [] }
 
 [<Fact>]
