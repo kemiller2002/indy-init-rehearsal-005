@@ -38,9 +38,11 @@ module GitHub =
           Fresh = fresh
           Credential = cred }
 
-    let getRepository (cred: Credential option) (t: Target) = get cred true (repo t)
+    /// The repository: a mutable read (permissions, default branch), sent under a URL unique to this read.
+    let getRepository (cred: Credential option) (t: Target) (nonce: string) = get cred true (repo t + "?causa_fresh=" + seg nonce)
 
-    /// The branch head: a mutable read, never served from a cache (unique query value + Fresh).
+    /// The branch head: a mutable read, never served from a cache. `nonce` must be unique across page loads and
+    /// sessions (DC-005): the program passes its page-load nonce plus the request id.
     let getBranchHead (cred: Credential option) (t: Target) (nonce: string) =
         get cred true (repo t + "/git/ref/heads/" + pathSegs t.Branch + "?causa_fresh=" + seg nonce)
 

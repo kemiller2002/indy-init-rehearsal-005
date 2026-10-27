@@ -110,7 +110,9 @@ type Model =
       Documents: Map<string, Document>
       LoadErrors: (string * ContractError) list
       InFlight: Map<string, InFlight>
-      NextId: int }
+      NextId: int
+      /// The page-load nonce (Env.Nonce) of this session; mutable-read URLs carry it with the request id.
+      Nonce: string }
 
 type Msg =
     /// Restore after a restart from the local store's text (None: nothing stored). First message only.
@@ -140,7 +142,11 @@ type Effect =
 /// A refused step: the model is unchanged and nothing is sent (DCT-002-B).
 type Refusal = { Reason: string }
 
-type Env = { Now: unit -> string }
+type Env =
+    { Now: unit -> string
+      /// Unique per page load (and so per session): every mutable read's URL carries it with the request id, so no
+      /// cache can answer a branch-head or repository read with an earlier one (DC-005).
+      Nonce: string }
 
 [<RequireQualifiedAccess>]
 module Sync =
@@ -158,7 +164,8 @@ module Sync =
           Documents = Map.empty
           LoadErrors = []
           InFlight = Map.empty
-          NextId = 1 }
+          NextId = 1
+          Nonce = "" }
 
     type private Step = Result<Model * Effect list, Refusal>
 
@@ -172,7 +179,7 @@ module Sync =
         | Some t ->
             let id, m = nextId m
             { m with InFlight = m.InFlight |> Map.add id { Purpose = purpose; Generation = m.Generation } },
-            effects @ [ Send(id, build m.Credential t id) ]
+            effects @ [ Send(id, build m.Credential t (m.Nonce + "-" + id)) ]
 
     let private sendWithId purpose build st =
         let m, _ = st
@@ -885,7 +892,7 @@ module Sync =
     let update (env: Env) (msg: Msg) (m: Model) : Step =
         match msg with
         | Restore stored ->
-            if m <> initial then refuse "Restore is only possible at start-up."
+            if { m with Nonce = "" } <> initial then refuse "Restore is only possible at start-up."
             else
                 match stored with
                 | None -> Ok(m, [])
@@ -912,7 +919,7 @@ module Sync =
                         LoadErrors = []
                         InFlight = Map.empty
                         Documents = documents }
-                Ok(send ProbeRepository (fun c t _ -> GitHub.getRepository c t) (m, []))
+                Ok(send ProbeRepository (fun c t nonce -> GitHub.getRepository c t nonce) ({ m with Nonce = env.Nonce }, []))
         | Disconnect ->
             if anyUnsettled m then refuse "A save is still settling; disconnecting now could lose track of it."
             else

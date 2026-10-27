@@ -36,6 +36,8 @@ jobs:
           CAUSA_GITHUB_TOKEN: ${{ secrets.CAUSA_GITHUB_TOKEN }}
           CAUSA_TEST_REPO_SECRET: ${{ secrets.CAUSA_TEST_REPO }}
           CAUSA_TEST_REPO_VAR: ${{ vars.CAUSA_TEST_REPO }}
+          # DC-004: the workflow's own read-only token, which cannot write to the test repository.
+          CAUSA_READONLY_TOKEN: ${{ github.token }}
         run: dotnet src/persistence/Tool/bin/Release/net10.0/causa-persistence.dll record
       # T25 / EXT-DATA-013 / PF-014: load the active historical catalog through the application's own Sync program
       # with a credential (DEC-025: no anonymous mode). The workflow's read-only token is enough for a public read

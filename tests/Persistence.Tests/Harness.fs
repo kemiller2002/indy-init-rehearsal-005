@@ -30,9 +30,13 @@ let credential (t: string) =
     | Ok c -> c
     | Error e -> failwith e
 
-let env = { Now = fun () -> "2026-10-27T12:00:00.000Z" }
+let env = { Now = (fun () -> "2026-10-27T12:00:00.000Z"); Nonce = "page-1" }
 
+let mutable private pages = 0
+
+/// One browser tab: each App (and each Reload) is a new page load with its own nonce.
 type App(fake: Fake) =
+    let mutable env = (pages <- pages + 1; { env with Nonce = sprintf "page-%d" pages })
     let mutable model = Sync.initial
     let mutable store: Map<string, string> = Map.empty
     let mutable queue: Effect list = []
@@ -99,6 +103,8 @@ type App(fake: Fake) =
 
     /// A browser reload: memory (model, credential) is gone; only the store survives.
     member this.Reload() =
+        pages <- pages + 1
+        env <- { env with Nonce = sprintf "page-%d" pages }
         model <- Sync.initial
         queue <- []
         held <- []
