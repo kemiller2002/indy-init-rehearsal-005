@@ -338,3 +338,16 @@ fieldset.causa-panel legend { font-weight: 700; color: var(--causa-color-structu
 .causa-findings { margin: 0.25rem 0; }
 .causa-confirm { border: 2px solid var(--causa-color-conflict); background: var(--causa-coral-wash); padding: 1rem; margin: 0 0 1rem; border-radius: 6px; }
 .causa-confirm h2 { margin-top: 0; }
+
+/* Application type scale (UI-014): Forma's .ef-site maps h1/h2 to its fluid display sizes (up to 7.25rem, 14ch),
+   which suit marketing pages, not an investigation tool. Causa uses Forma's fixed steps instead: h1 = 2xl (2rem),
+   h2 = xl (1.5rem), h3 = lg (1.25rem), and headings take the full measure. */
+body.causa {
+  --ef-type-size-h1: var(--ef-primitive-font-size-2xl);
+  --ef-type-size-h2: var(--ef-primitive-font-size-xl);
+  --ef-type-size-h3: var(--ef-primitive-font-size-lg);
+}
+body.causa :where(h1, h2) { max-inline-size: none; line-height: 1.2; }
+body.causa :where(h1) { font-size: var(--ef-type-size-h1); }
+body.causa :where(h2) { font-size: var(--ef-type-size-h2); }
+body.causa :where(h3) { font-size: var(--ef-type-size-h3); }
