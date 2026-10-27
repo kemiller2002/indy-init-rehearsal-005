@@ -260,6 +260,32 @@ let produce opts =
     Json.write (required opts "out") (jobj [ "producers", jarr (baseProducers @ computed) ]) |> ignore
     0
 
+/// Replaces the array value of the first top-level `"key": [...]` in a JSON text, keeping every other byte. The new
+/// array is written with two-space indentation at the key's nesting depth.
+let spliceArray (text: string) (key: string) (value: Text.Json.Nodes.JsonNode) =
+    let marker = sprintf "\"%s\":" key
+    let k = text.IndexOf marker
+    if k < 0 then failwithf "no %s in the curation file" key
+    let start = text.IndexOf('[', k)
+    let rec close i depth inString escaped =
+        if i >= text.Length then failwithf "unterminated %s array" key
+        else
+            let c = text[i]
+            if inString then
+                if escaped then close (i + 1) depth true false
+                elif c = '\\' then close (i + 1) depth true true
+                elif c = '"' then close (i + 1) depth false false
+                else close (i + 1) depth true false
+            elif c = '"' then close (i + 1) depth true false
+            elif c = '[' || c = '{' then close (i + 1) (depth + 1) false false
+            elif c = ']' || c = '}' then (if depth = 1 then i else close (i + 1) (depth - 1) false false)
+            else close (i + 1) depth false false
+    let stop = close start 0 false false
+    let lineStart = text.LastIndexOf('\n', k) + 1
+    let indent = text.Substring(lineStart, k - lineStart)
+    let body = (Json.serialize value).TrimEnd('\n').Replace("\n", "\n" + indent)
+    text.Substring(0, start) + body + text.Substring(stop + 1)
+
 /// Applies a run's curation-test-bindings.json to a copy of Indy-init's curation/verification-plan.json. Every
 /// binding must name a baseline obligation of the current plan, at least one test, and a known kind; any problem
 /// refuses the whole application (nothing is written).
@@ -285,9 +311,13 @@ let applyCuration opts =
         1
     else
         let sorted = bindings |> List.sortBy (strOr "" "obligation")
-        let out = curation.DeepClone()
-        out["testBindings"] <- jarr sorted
-        Json.write (required opts "out") out |> ignore
+        // Only the testBindings value changes: it is spliced into the original text so every other byte of the
+        // curation file (the owner's formatting included) stays as it was.
+        let text = File.ReadAllText(required opts "curation")
+        let spliced = spliceArray text "testBindings" (jarr sorted)
+        if (Json.parse spliced).ToJsonString() <> (let c = curation.DeepClone() in c["testBindings"] <- jarr sorted; c.ToJsonString()) then
+            failwith "splicing testBindings changed more than testBindings"
+        File.WriteAllText(required opts "out", spliced)
         let bound = sorted |> List.map (strOr "" "obligation") |> Set.ofList
         printfn "testBindings: %d of %d obligations of plan %s bound (%d unbound stay missing)" bound.Count known.Count plan.PlanId (known.Count - bound.Count)
         0
