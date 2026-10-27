@@ -33,5 +33,41 @@
     "title": "R5-DEC-001 Owner approves @echelon-foundry/forma-workflow 1.1.0 for Rehearsal 5",
     "updated": "2026-10-27",
     "version": "1.0.0"
+  },
+  {
+    "created": "2026-10-27",
+    "id": "DF-CAUSA-2026-0002",
+    "owners": [
+      "indy-init-rehearsal-005"
+    ],
+    "path": "research/decisions/DF-CAUSA-2026-0002--r5-dec-002-percepta-s16-not-applicable.md",
+    "provenance": {
+      "contributions": {
+        "EXE-20261027T204350795Z-d44bb1b9": {
+          "actor": {
+            "id": "claude",
+            "kind": "agent",
+            "model": "unknown",
+            "provider": "anthropic",
+            "runtime": "claude-code"
+          },
+          "at": "2026-10-27T23:49:23.007Z",
+          "operations": [
+            "created"
+          ],
+          "reason": "Owner scope decision transcribed by the coordinating agent"
+        }
+      }
+    },
+    "status": "accepted",
+    "tags": [
+      "rehearsal-005",
+      "scope",
+      "percepta",
+      "owner-decision"
+    ],
+    "title": "R5-DEC-002 Owner scope decision: Percepta contract S16 (counterfactual sandbox) is NOT-APPLICABLE to Causa in Rehearsal 5",
+    "updated": "2026-10-27",
+    "version": "1.0.0"
   }
 ]
