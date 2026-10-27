@@ -13,7 +13,7 @@ open Xunit
 open Causa.App
 open Causa.App.Adapter
 
-let private h id state = { Id = id; Statement = "Statement " + id; State = state; Supporting = Known 1; Contradicting = Unknown }
+let private h id state = { Id = id; Statement = "Statement " + id; State = state; Supporting = Known 1; Contradicting = Unknown; Evidence = [] }
 
 let private inv hypotheses causes =
     { Id = "00000000-0000-4000-8000-0000000000a1"
@@ -97,7 +97,7 @@ let ``VPO-b36c63fba6f83d4c VPO-1c3905d9fa746df0 a selected node reveals its auth
 let private fixtureInvestigation = "00000000-0000-4000-8000-00000000a0a0"
 
 let private hyp id state supporting contradicting statement =
-    { Id = id; Statement = statement; State = state; Supporting = supporting; Contradicting = contradicting }
+    { Id = id; Statement = statement; State = state; Supporting = supporting; Contradicting = contradicting; Evidence = [] }
 
 let private projection title hypotheses causes = { inv hypotheses causes with Id = fixtureInvestigation; Title = title }
 
