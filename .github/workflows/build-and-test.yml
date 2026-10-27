@@ -757,8 +757,11 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: read
+    # Shared with persist's persistence-provider.yml: no two runs write to the test repository at once.
     concurrency:
-      group: provider-conformance
+      group: persistence-provider
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
@@ -767,21 +770,72 @@ jobs:
           dotnet-version: "10.0.x"
       - name: Build the recorder
         run: dotnet build src/persistence/Tool/Causa.Persistence.Tool.fsproj -c Release
+      # Exit 0 PASS, 1 FAIL, 2 BLOCKED (missing secret or variable, or the canonical data repository as target),
+      # 3 aborted before printing a secret. Writes only workspaces/demo/rec-<run id>[-app]/ on CAUSA_TEST_REPO.
       - name: Record provider behaviour and run the live write path
+        id: record
         env:
           CAUSA_GITHUB_TOKEN: ${{ secrets.CAUSA_GITHUB_TOKEN }}
           CAUSA_TEST_REPO_SECRET: ${{ secrets.CAUSA_TEST_REPO }}
           CAUSA_TEST_REPO_VAR: ${{ vars.CAUSA_TEST_REPO }}
           # DC-004: the workflow's own read-only token, which cannot write to the test repository.
           CAUSA_READONLY_TOKEN: ${{ github.token }}
-        run: dotnet src/persistence/Tool/bin/Release/net10.0/causa-persistence.dll record
+        run: |
+          mkdir -p "$RUNNER_TEMP/provider"
+          set +e
+          dotnet src/persistence/Tool/bin/Release/net10.0/causa-persistence.dll record | tee "$RUNNER_TEMP/provider/record.log"
+          status=${PIPESTATUS[0]}
+          set -e
+          echo "$status" > "$RUNNER_TEMP/provider/record.exit"
+          exit "$status"
       # T25 / EXT-DATA-013 / PF-014: the active historical catalog through the application's own Sync program, with
       # the workflow's read-only token (DEC-025: no anonymous mode); nothing is written.
       - name: Load the historical catalog live
         if: always()
         env:
           CAUSA_CATALOG_TOKEN: ${{ github.token }}
-        run: dotnet src/persistence/Tool/bin/Release/net10.0/causa-persistence.dll catalog
+        run: |
+          mkdir -p "$RUNNER_TEMP/provider"
+          set +e
+          dotnet src/persistence/Tool/bin/Release/net10.0/causa-persistence.dll catalog | tee "$RUNNER_TEMP/provider/catalog.log"
+          status=${PIPESTATUS[0]}
+          set -e
+          echo "$status" > "$RUNNER_TEMP/provider/catalog.exit"
+          exit "$status"
+      # The evidence record, parsed from the tool's own sanitized output: the observation and check lines between its
+      # markers, the catalog case lines and both RESULT lines. Never the environment. A record that contains the
+      # token is deleted and fails the job (PF-015).
+      - name: Provider-conformance evidence record
+        if: always()
+        env:
+          CAUSA_GITHUB_TOKEN: ${{ secrets.CAUSA_GITHUB_TOKEN }}
+        run: |
+          d="$RUNNER_TEMP/provider"; mkdir -p TestResults/provider-conformance
+          out=TestResults/provider-conformance/provider-conformance.json
+          obs=$(sed -n '/^=== CAUSA-PROVIDER-OBSERVATIONS BEGIN ===$/,/^=== CAUSA-PROVIDER-OBSERVATIONS END ===$/p' "$d/record.log" 2>/dev/null | grep '^{' | jq -s -c '.' 2>/dev/null || echo '[]')
+          cases=$(grep '^{' "$d/catalog.log" 2>/dev/null | jq -s -c 'map(select(has("case")))' 2>/dev/null || echo '[]')
+          jq -n --arg run "${{ github.run_id }}-${{ github.run_attempt }}" --arg sha "${{ github.sha }}" \
+            --arg recordExit "$(cat "$d/record.exit" 2>/dev/null || echo none)" --arg catalogExit "$(cat "$d/catalog.exit" 2>/dev/null || echo none)" \
+            --arg recordResult "$(grep '^RESULT: ' "$d/record.log" 2>/dev/null | tail -n 1)" \
+            --arg catalogResult "$(grep '^RESULT: ' "$d/catalog.log" 2>/dev/null | tail -n 1)" \
+            --argjson observations "$obs" --argjson cases "$cases" \
+            '{schema: "causa.provider-conformance/1", run: $run, sourceSha: $sha,
+              record: {exit: $recordExit, result: $recordResult,
+                       checks: [$observations[] | select(.check? // "" | startswith("live."))],
+                       observations: [$observations[] | select((.check? // "" | startswith("live.")) | not)]},
+              catalog: {exit: $catalogExit, result: $catalogResult, cases: $cases}}' > "$out"
+          jq -r '.record.result, .catalog.result, (.record.checks[] | "\(.check) \(.passed)")' "$out"
+          if [ -n "$CAUSA_GITHUB_TOKEN" ] && grep -qF -- "$CAUSA_GITHUB_TOKEN" "$out"; then
+            rm -f "$out"; echo "::error::the record contained the token and was deleted"; exit 1
+          fi
+      - name: Publish the evidence record (parsed record only; no log, no trace)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: provider-conformance
+          path: TestResults/provider-conformance/provider-conformance.json
+          if-no-files-found: ignore
+          retention-days: 30
 
   # The required check. Passes only when every mandatory job passed: core, lock-gate, site, browser, and on main
   # pushes the live suite. A job that reused an identical earlier pass (branches only) counts as passed here and as
@@ -936,7 +990,7 @@ jobs:
           (cd "$RUNNER_TEMP/indy-init" && dotnet build tools/requirements-compiler/src -c Release)
       - uses: actions/download-artifact@v4
         with:
-          pattern: "{core-results,browser-results,live-results,lock-gate,preservation-gate,percepta,wasm-smoke,deployed-results,preservation-adversarial-results,reuse-plan}"
+          pattern: "{core-results,browser-results,live-results,lock-gate,preservation-gate,percepta,wasm-smoke,deployed-results,preservation-adversarial-results,reuse-plan,provider-conformance}"
           path: collected
         continue-on-error: true
       - name: Collect the results of this run
@@ -952,6 +1006,7 @@ jobs:
           [ -d collected/percepta ] && cp -r collected/percepta gate-records/ || true
           [ -d collected/wasm-smoke ] && cp -r collected/wasm-smoke gate-records/ || true
           [ -d collected/reuse-plan ] && cp -r collected/reuse-plan gate-records/ || true
+          [ -d collected/provider-conformance ] && cp -r collected/provider-conformance gate-records/ || true
           [ -d collected/preservation-adversarial-results ] && mkdir -p TestResults/preservation-adversarial && cp -r collected/preservation-adversarial-results/. TestResults/preservation-adversarial/ || true
           [ -d collected/deployed-results ] && mkdir -p TestResults/deployed && cp collected/deployed-results/deployed-results.json TestResults/deployed/ 2>/dev/null || true
           [ -d collected/deployed-results/screenshots ] && cp -r collected/deployed-results/screenshots gate-records/deployed-screenshots || true
@@ -981,7 +1036,7 @@ jobs:
             {id: "live", status: $live, command: "npx playwright test --grep @live (\($run))", record: "TestResults/live/live-results.json"},
             {id: "deploy", status: $deploy, command: "actions/deploy-pages (\($run))"},
             {id: "deployed-smoke", status: $smoke, command: "version.json at the deployed URL equals the source SHA (\($run))"},
-            {id: "provider-conformance", status: $provider, command: "causa-persistence record && causa-persistence catalog (\($run))"},
+            {id: "provider-conformance", status: $provider, command: "causa-persistence record && causa-persistence catalog (\($run))", record: "gate-records/provider-conformance/provider-conformance.json"},
             {id: "wasm-smoke", status: $wasm, command: "dotnet build -c Release tests/Engine.WasmSmoke && node tests/Engine.WasmSmoke/run.mjs (\($run))", record: "gate-records/wasm-smoke/wasm-smoke.log"},
             {id: "preservation-gate", status: $pres, command: "tools/acceptance/ci/preservation-gate.sh: praxis requirements preservation verify as recorded (\($run))", record: "gate-records/preservation-gate/gate.json"},
             {id: "percepta-verify-app", status: $percepta, command: "percepta verify-app --base-url <built site> (\($run))", record: "gate-records/percepta/verify-app.json"}

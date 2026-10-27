@@ -51,13 +51,22 @@ let ``AR-014 PF-012 only the live provider jobs receive credentials; every other
     Assert.Matches(@"(?m)^permissions:\s*\n  contents: read\s*$", header)
     let withSecrets = jobs.Value |> Map.filter (fun _ t -> t.Contains "secrets.") |> Map.keys |> List.ofSeq
     Assert.Equal<string list>([ "live"; "provider-conformance" ], withSecrets)
-    // In the provider job the secrets reach only the one step that writes to the test repository.
-    Assert.Equal(1, Regex.Matches(job "provider-conformance", @"secrets\.CAUSA_GITHUB_TOKEN").Count)
+    // In the provider job the token reaches the step that writes to the test repository and the leak check only;
+    // the catalog load uses the workflow's read-only token.
+    let provider = job "provider-conformance"
+    Assert.Equal(2, Regex.Matches(provider, @"secrets\.CAUSA_GITHUB_TOKEN").Count)
+    let catalog = provider.Substring(provider.IndexOf "Load the historical catalog live", provider.IndexOf "Provider-conformance evidence record" - provider.IndexOf "Load the historical catalog live")
+    Assert.DoesNotContain("secrets.", catalog)
+    Assert.Contains("group: persistence-provider", provider)
     // The deterministic layers (domain, site, mocked browser, WASM, gates) run without any secret.
     for j in [ "core"; "site"; "browser"; "wasm-smoke"; "lock-gate"; "preservation-gate"; "percepta" ] do
         Assert.DoesNotContain("secrets.", job j)
     // Elevated permissions only where Pages deployment needs them.
-    let elevated = jobs.Value |> Map.filter (fun _ t -> Regex.IsMatch(t, @"(?m)^    permissions:")) |> Map.keys |> List.ofSeq
+    let grants (t: string) =
+        let m = Regex.Match(t, @"(?m)^    permissions:\s*\n((?:      .*\n)+)")
+        if m.Success then m.Groups[1].Value.Split('\n') |> Array.map (fun l -> l.Trim()) |> Array.filter (fun l -> l <> "" && l <> "contents: read") |> List.ofArray
+        else []
+    let elevated = jobs.Value |> Map.filter (fun _ t -> not (grants t).IsEmpty) |> Map.keys |> List.ofSeq
     Assert.Equal<string list>([ "acceptance"; "deploy" ], elevated)
     // The acceptance job reads its own run's job records (timings) and nothing more.
     Assert.Matches(@"(?m)^    permissions:\s*\n      contents: read\s*\n      actions: read\s*$", job "acceptance")
