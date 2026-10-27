@@ -309,6 +309,9 @@ jobs:
           fi
       - name: Type-check the browser kernel
         run: npm run check
+      # npm run build publishes the .NET WebAssembly application (src/wasm).
+      - name: Install the wasm-tools workload
+        run: dotnet workload install wasm-tools
       # The deployable site is whatever `npm run build` writes to dist/ (DEPLOYMENT.md). The build stamps the SHA it
       # was built from into dist/version.json so the deployment can be proved to serve this exact commit.
       - name: Build the site
@@ -367,28 +370,50 @@ jobs:
         with:
           name: site
           path: dist
+      # The test configuration (Percepta state hook enabled) is built from dist/'s WebAssembly output, no .NET SDK.
+      - name: Build the test configuration (obj/site-test)
+        if: needs.reuse.outputs.browser != 'reuse'
+        run: npm run build:test
+      # percepta.spec.js runs `percepta verify-app`: the CLI exactly as the pinned channel resolves it (SHA-256 verified).
+      - name: Install the Percepta CLI and its browser
+        if: needs.reuse.outputs.browser != 'reuse'
+        timeout-minutes: 12
+        run: |
+          dir=$(tools/acceptance/ci/install-host-tool.sh percepta-semantic percepta "$RUNNER_TEMP/host-tools")
+          echo "$dir" >> "$GITHUB_PATH"
+          "$dir/percepta" version
+          timeout 600 "$dir/percepta" install-browser
       - name: Chromium for the installed Playwright version
         if: needs.reuse.outputs.browser != 'reuse'
         id: playwright
-        run: echo "version=$(node -p "require('./node_modules/playwright-core/package.json').version")" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "version=$(node -p "require('./node_modules/playwright-core/package.json').version")" >> "$GITHUB_OUTPUT"
+          # Browsers the config's projects use (WebKit only when a project needs it).
+          browsers=chromium
+          if grep -qiE 'webkit|devices\[.(Desktop Safari|iPad|iPhone)' playwright.config.js; then browsers="chromium webkit"; fi
+          echo "browsers=$browsers" >> "$GITHUB_OUTPUT"
+          # Spec files: live-*.spec.js belong to the live job only.
+          echo "specs=$(ls tests/browser/*.spec.js | grep -v '/live-' | tr '\n' ' ')" >> "$GITHUB_OUTPUT"
       - uses: actions/cache@v4
         if: needs.reuse.outputs.browser != 'reuse'
         env:
           SEGMENT_DOWNLOAD_TIMEOUT_MINS: "2"
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-chromium-${{ runner.os }}-${{ runner.arch }}-${{ steps.playwright.outputs.version }}
+          key: playwright-${{ steps.playwright.outputs.browsers }}-${{ runner.os }}-${{ runner.arch }}-${{ steps.playwright.outputs.version }}
       # Never --with-deps (apt has no overall deadline); ldd proves the OS libraries offline.
-      - name: Install Chromium and verify its OS libraries
+      - name: Install the browsers and verify their OS libraries
         if: needs.reuse.outputs.browser != 'reuse'
-        timeout-minutes: 10
+        timeout-minutes: 15
+        env:
+          BROWSERS: ${{ steps.playwright.outputs.browsers }}
         run: |
-          timeout 300 npx playwright install chromium
+          timeout 300 npx playwright install $BROWSERS
+          printf '%s\n' 'Acquire::Retries "3";' 'Acquire::http::Timeout "30";' 'Acquire::https::Timeout "30";' | sudo tee /etc/apt/apt.conf.d/99-bounded-network > /dev/null
           missing=$(find ~/.cache/ms-playwright -type f \( -name chrome -o -name chrome-headless-shell \) -print0 | xargs -0 --no-run-if-empty ldd | awk '/not found/ { print $1 }' | sort -u)
-          if [ -n "$missing" ]; then
-            printf '%s\n' 'Acquire::Retries "3";' 'Acquire::http::Timeout "30";' 'Acquire::https::Timeout "30";' | sudo tee /etc/apt/apt.conf.d/99-bounded-network > /dev/null
-            timeout 300 npx playwright install-deps chromium || true
-          fi
+          if [ -n "$missing" ]; then timeout 300 npx playwright install-deps chromium || true; fi
+          # WebKit's system libraries are not on the runner image.
+          case " $BROWSERS " in *" webkit "*) timeout 600 npx playwright install-deps webkit ;; esac
       - name: Verify the pages in a real browser (mocked; no @live tests)
         id: mocked
         if: needs.reuse.outputs.browser != 'reuse'
@@ -397,7 +422,7 @@ jobs:
           PLAYWRIGHT_JSON_OUTPUT_FILE: TestResults/playwright/browser-results.json
         run: |
           set +e
-          npx playwright test --grep-invert @live --reporter=list,json
+          npx playwright test ${{ steps.playwright.outputs.specs }} --grep-invert @live --reporter=list,json
           status=$?
           set -e
           ran=$(jq '[.. | objects | select(has("results")) | .results[]?] | length' TestResults/playwright/browser-results.json 2>/dev/null || echo 0)
@@ -466,9 +491,17 @@ jobs:
         with:
           name: site
           path: dist
-      - name: Install Chromium
-        timeout-minutes: 10
-        run: timeout 300 npx playwright install chromium
+      # Playwright serves both builds (dist/ on 4321, obj/site-test/ on 4322).
+      - name: Build the test configuration (obj/site-test)
+        if: needs.site.outputs.built == 'true'
+        run: npm run build:test
+      - name: Install the browsers
+        timeout-minutes: 15
+        run: |
+          browsers=chromium
+          if grep -qiE 'webkit|devices\[.(Desktop Safari|iPad|iPhone)' playwright.config.js; then browsers="chromium webkit"; fi
+          timeout 300 npx playwright install $browsers
+          case " $browsers " in *" webkit "*) timeout 600 npx playwright install-deps webkit ;; esac
       - name: Live suite against the real test repository
         id: live
         env:
@@ -478,7 +511,9 @@ jobs:
           CAUSA_TEST_REPO: ${{ secrets.CAUSA_TEST_REPO || vars.CAUSA_TEST_REPO }}
           PLAYWRIGHT_JSON_OUTPUT_FILE: TestResults/live/live-results.json
         run: |
-          count=$(npx playwright test --list --grep @live 2>/dev/null | grep -cE '^\s+\[' || true)
+          specs=$(ls tests/browser/live-*.spec.js 2>/dev/null | tr '\n' ' ')
+          count=0
+          [ -n "$specs" ] && count=$(npx playwright test $specs --list --grep @live 2>/dev/null | grep -cE '^\s+\[' || true)
           if [ "${count:-0}" -eq 0 ]; then
             echo "ran=false" >> "$GITHUB_OUTPUT"
             echo "::warning::No @live test exists yet; the live producer is NOT produced (G6 stays NOT_RUN)."
@@ -489,7 +524,7 @@ jobs:
             echo "::error::CAUSA_GITHUB_TOKEN / CAUSA_TEST_REPO are not available to this workflow"; exit 1
           fi
           echo "ran=true" >> "$GITHUB_OUTPUT"
-          npx playwright test --grep @live --trace off --reporter=list,json
+          npx playwright test $specs --grep @live --trace off --reporter=list,json
       # PF-015: nothing that leaves the runner may contain the real token. Fails closed and removes the files.
       - name: Refuse to keep any file that contains the token
         if: always()
@@ -601,17 +636,23 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
-  # G5: `percepta verify-app` against the built site (dist/ from the site job) with the committed
-  # .percepta/bindings.json. Not produced (G5 stays NOT_RUN) until both exist; never reused.
+  # G5: `percepta verify-app` against the test configuration of the built site (obj/site-test, built from dist/ with
+  # the Percepta state hook) with the committed .percepta/bindings.json and contracts. Producer status:
+  #   success       exit 0 and the report is complete (every contract bound and PASS)
+  #   not-produced  exit 3 (incomplete: NOT-BOUND contracts remain) with no FAIL, or no site / no bindings
+  #   failure       anything else (a FAIL, an error, no report)
   percepta:
     needs: site
     if: always() && needs.site.result == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     outputs:
       status: ${{ steps.verify.outputs.status }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
       - name: Built site
         if: needs.site.outputs.built == 'true'
         uses: actions/download-artifact@v4
@@ -620,6 +661,7 @@ jobs:
           path: dist
       - name: percepta verify-app
         id: verify
+        timeout-minutes: 20
         env:
           BUILT: ${{ needs.site.outputs.built }}
         run: |
@@ -629,18 +671,28 @@ jobs:
             echo "::warning::percepta verify-app not run: needs the built site (dist/) and .percepta/bindings.json (built=$BUILT). G5 stays NOT_RUN."
             exit 0
           fi
+          npm ci
+          npm run build:test
           export PATH="$(tools/acceptance/ci/install-host-tool.sh percepta-semantic percepta "$RUNNER_TEMP/host-tools"):$PATH"
           percepta version | tee TestResults/percepta/percepta-version.txt
-          timeout 600 percepta install-browser || echo "::warning::percepta install-browser failed; verify-app reports it if no browser is usable"
-          (cd dist && python3 -m http.server 4330 --bind 127.0.0.1 > /dev/null 2>&1 &)
-          for i in $(seq 1 30); do curl -fsS -o /dev/null http://127.0.0.1:4330/ && break; sleep 1; done
+          timeout 600 percepta install-browser
+          (node scripts/serve.mjs obj/site-test 4330 > /dev/null 2>&1 &)
+          for i in $(seq 1 30); do curl -fsS -o /dev/null http://127.0.0.1:4330/index.html && break; sleep 1; done
           set +e
-          percepta verify-app --base-url http://127.0.0.1:4330/ --bindings .percepta/bindings.json \
-            --out TestResults/percepta/verify-app.json 2>&1 | tee TestResults/percepta/verify-app.log
-          status=${PIPESTATUS[0]}
+          percepta verify-app --base-url http://127.0.0.1:4330/ --bindings .percepta/bindings.json --contracts .percepta/contracts \
+            --out TestResults/percepta/verify-app.json > TestResults/percepta/verify-app.log 2>&1
+          code=$?
           set -e
-          if [ "$status" -eq 0 ] && [ -s TestResults/percepta/verify-app.json ]; then
+          cat TestResults/percepta/verify-app.log
+          echo "$code" > TestResults/percepta/exit-code
+          report=TestResults/percepta/verify-app.json
+          counts=$(jq -c '.counts' "$report" 2>/dev/null || echo none)
+          echo "percepta verify-app: exit $code, complete $(jq -r .complete "$report" 2>/dev/null), counts $counts" | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ "$code" -eq 0 ] && jq -e '.complete == true and .counts.FAIL == 0' "$report" > /dev/null 2>&1; then
             echo "status=success" >> "$GITHUB_OUTPUT"
+          elif [ "$code" -eq 3 ] && jq -e '.counts.FAIL == 0 and (.orphanBindings // []) == []' "$report" > /dev/null 2>&1; then
+            echo "status=not-produced" >> "$GITHUB_OUTPUT"
+            echo "::notice::verify-app is incomplete (NOT-BOUND contracts remain; no FAIL): G5 stays NOT_RUN."
           else
             echo "status=failure" >> "$GITHUB_OUTPUT"
             exit 1
