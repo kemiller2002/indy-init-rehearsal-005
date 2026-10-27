@@ -84,10 +84,10 @@ let private retargetingDefect: Stepper =
         | _ -> Sync.step state event
 
 [<Fact>]
-[<Trait("obligation", "VPO-d7fbd84e40ded145")>]
-[<Trait("obligation", "VPO-34731ac9a977b818")>]
+[<Trait("engineEvidenceFor", "EXT-DATA-006-O2")>]
+[<Trait("engineEvidenceFor", "UI-006-O4")>]
 [<Trait("defectClass", "DC-001")>]
-let ``DCT-001-A VPO-d7fbd84e40ded145 VPO-34731ac9a977b818 publication is parented by the decided-at head and a moved branch is a held conflict`` () =
+let ``DCT-001-A publication is parented by the decided-at head and a moved branch is a held conflict`` () =
     Assert.True(parentedByDecidedHead real)
 
 [<Fact>]
@@ -147,9 +147,9 @@ let private refEqualityDefect: Stepper =
         | _ -> Sync.step state event
 
 [<Fact>]
-[<Trait("obligation", "VPO-d7fbd84e40ded145")>]
+[<Trait("engineEvidenceFor", "EXT-DATA-006-O2")>]
 [<Trait("defectClass", "DC-001")>]
-let ``DCT-001-B VPO-d7fbd84e40ded145 reconciliation classifies a head reached through another writer as concurrent`` () =
+let ``DCT-001-B reconciliation classifies a head reached through another writer as concurrent`` () =
     Assert.True(classifiesByAncestry real)
 
 [<Fact>]
@@ -205,11 +205,11 @@ let private ignoresRequestIdentity: Stepper =
         Sync.step state e
 
 [<Fact>]
-[<Trait("obligation", "VPO-2d4b7557ce013e50")>]
-[<Trait("obligation", "VPO-8c435e1ebdf43e7c")>]
-[<Trait("obligation", "VPO-cd9dd8ec730c3d3e")>]
+[<Trait("engineEvidenceFor", "PF-009-O2")>]
+[<Trait("engineEvidenceFor", "PF-009-O3")>]
+[<Trait("engineEvidenceFor", "PF-009-O1")>]
 [<Trait("defectClass", "DC-002")>]
-let ``DCT-002-A VPO-2d4b7557ce013e50 VPO-8c435e1ebdf43e7c VPO-cd9dd8ec730c3d3e a late answer for a replaced write is discarded`` () =
+let ``DCT-002-A a late answer for a replaced write is discarded`` () =
     Assert.True(lateAnswersDiscarded real)
 
 [<Fact>]
@@ -237,10 +237,10 @@ let private reconnectIdentity (stepper: Stepper) =
     stale && own
 
 [<Fact>]
-[<Trait("obligation", "VPO-8c435e1ebdf43e7c")>]
-[<Trait("obligation", "VPO-2d4b7557ce013e50")>]
+[<Trait("engineEvidenceFor", "PF-009-O3")>]
+[<Trait("engineEvidenceFor", "PF-009-O2")>]
 [<Trait("defectClass", "REQUEST-IDENTITY")>]
-let ``REQUEST-IDENTITY VPO-8c435e1ebdf43e7c VPO-2d4b7557ce013e50 an answer to an earlier connection never lands on a newer one`` () =
+let ``REQUEST-IDENTITY an answer to an earlier connection never lands on a newer one`` () =
     Assert.True(reconnectIdentity real)
 
 [<Fact>]
@@ -389,16 +389,16 @@ let private stageBlindClassification: Stepper =
         | _ -> Sync.step state event
 
 [<Fact>]
-[<Trait("obligation", "VPO-b3efad6eb85360be")>]
-[<Trait("obligation", "VPO-89ed6170f531961e")>]
+[<Trait("engineEvidenceFor", "UI-006-O2")>]
+[<Trait("engineEvidenceFor", "UI-006-O1")>]
 [<Trait("defectClass", "DC-003")>]
-let ``DCT-003-A VPO-b3efad6eb85360be VPO-89ed6170f531961e a failure after send is unknown with no retry and reconcile reads the head first`` () =
+let ``DCT-003-A a failure after send is unknown with no retry and reconcile reads the head first`` () =
     Assert.True(sentFailuresAreUnknown real)
 
 [<Fact>]
-[<Trait("obligation", "VPO-b3efad6eb85360be")>]
+[<Trait("engineEvidenceFor", "UI-006-O2")>]
 [<Trait("defectClass", "DC-003")>]
-let ``DCT-003-A VPO-b3efad6eb85360be saved is claimed only after the read-back matches`` () =
+let ``DCT-003-A saved is claimed only after the read-back matches`` () =
     Assert.True(readBackMismatchIsUnknown real)
 
 [<Fact>]
@@ -409,9 +409,9 @@ let ``DCT-003-A negative control VPO-821ce84e76d497b9 VPO-7b54ff75e3784cae the c
     Assert.False(sentFailuresAreUnknown stageBlindClassification)
 
 [<Fact>]
-[<Trait("obligation", "VPO-89ed6170f531961e")>]
+[<Trait("engineEvidenceFor", "UI-006-O1")>]
 [<Trait("defectClass", "DC-003")>]
-let ``UI-006 VPO-89ed6170f531961e pending sending conflicted unknown and failed are distinct statuses`` () =
+let ``UI-006 pending sending conflicted unknown and failed are distinct statuses`` () =
     let statuses = everyPhase real |> List.map (fun s -> Sync.status s.Phase) |> List.distinct
     for expected in [ Unsaved; Saving; Verifying; MayHaveSaved; Checking; Conflicted; Failed; Clean; NotConnected ] do
         Assert.Contains(expected, statuses)
@@ -420,9 +420,9 @@ let ``UI-006 VPO-89ed6170f531961e pending sending conflicted unknown and failed 
 // Durable per-document state (persistence embeds one Sync.State per investigation).
 
 [<Fact>]
-[<Trait("obligation", "VPO-34731ac9a977b818")>]
+[<Trait("engineEvidenceFor", "UI-006-O4")>]
 [<Trait("boundary", "D")>]
-let ``SYNC-DURABLE VPO-34731ac9a977b818 every phase survives encode and decode exactly`` () =
+let ``SYNC-DURABLE every phase survives encode and decode exactly`` () =
     for state in everyPhase real do
         let text = Json.canonical (Sync.encode state)
         match Json.parse text |> Result.bind Sync.decode with
@@ -432,11 +432,11 @@ let ``SYNC-DURABLE VPO-34731ac9a977b818 every phase survives encode and decode e
     Assert.True(Result.isError (Sync.decode (JObject [ "schema", JString "causa.sync-state/9"; "issued", JInt 0L; "state", JObject [] ])))
 
 [<Fact>]
-[<Trait("obligation", "VPO-b3efad6eb85360be")>]
-[<Trait("obligation", "VPO-34731ac9a977b818")>]
-[<Trait("obligation", "VPO-8c435e1ebdf43e7c")>]
+[<Trait("engineEvidenceFor", "UI-006-O2")>]
+[<Trait("engineEvidenceFor", "UI-006-O4")>]
+[<Trait("engineEvidenceFor", "PF-009-O3")>]
 [<Trait("boundary", "D")>]
-let ``SYNC-DURABLE VPO-b3efad6eb85360be VPO-34731ac9a977b818 VPO-8c435e1ebdf43e7c restore after reload never loses a change or forgets a possible write`` () =
+let ``SYNC-DURABLE restore after reload never loses a change or forgets a possible write`` () =
     for state in everyPhase real do
         let restored = Sync.restore state
         Assert.Equal(None, inFlight restored.Phase)
@@ -466,11 +466,11 @@ let ``SYNC-DURABLE VPO-b3efad6eb85360be VPO-34731ac9a977b818 VPO-8c435e1ebdf43e7
 // Hooks for persistence's outer machine (Boundary D).
 
 [<Fact>]
-[<Trait("obligation", "VPO-b3efad6eb85360be")>]
-[<Trait("obligation", "VPO-8c435e1ebdf43e7c")>]
-[<Trait("obligation", "VPO-2d4b7557ce013e50")>]
+[<Trait("engineEvidenceFor", "UI-006-O2")>]
+[<Trait("engineEvidenceFor", "PF-009-O3")>]
+[<Trait("engineEvidenceFor", "PF-009-O2")>]
 [<Trait("boundary", "D")>]
-let ``SYNC-HOOK restoreUnknown VPO-b3efad6eb85360be VPO-8c435e1ebdf43e7c is Unknown with no retry and no pre-reload answer can apply`` () =
+let ``SYNC-HOOK restoreUnknown is Unknown with no retry and no pre-reload answer can apply`` () =
     let c = change A "m-reload"
     let s = Sync.restoreUnknown A c
     match s.Phase with
@@ -498,10 +498,10 @@ let ``SYNC-HOOK restoreUnknown VPO-b3efad6eb85360be VPO-8c435e1ebdf43e7c is Unkn
     Assert.NotEqual((Sync.restoreUnknown A (change A "x")).Issued, (Sync.restoreUnknown A (change A "y")).Issued)
 
 [<Fact>]
-[<Trait("obligation", "VPO-34731ac9a977b818")>]
-[<Trait("obligation", "VPO-d7fbd84e40ded145")>]
+[<Trait("engineEvidenceFor", "UI-006-O4")>]
+[<Trait("engineEvidenceFor", "EXT-DATA-006-O2")>]
 [<Trait("boundary", "D")>]
-let ``SYNC-HOOK Reloaded VPO-34731ac9a977b818 VPO-d7fbd84e40ded145 re-observes the head and keeps the book and the change`` () =
+let ``SYNC-HOOK Reloaded re-observes the head and keeps the book and the change`` () =
     let s = connectedAt real A
     // idle, nothing pending: follow the head
     let s1, fx = run' real s [ Reloaded B ]
