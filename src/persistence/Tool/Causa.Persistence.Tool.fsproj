@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The provider recorder and live checker (T18, T21). It performs the requests that the persistence library
+       describes, against real GitHub, and prints only allow-listed, sanitized observations. Run in CI only, with
+       CAUSA_GITHUB_TOKEN and CAUSA_TEST_REPO passed as step environment (.github/workflows/persistence-provider.yml). -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>causa-persistence</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Causa.Persistence.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Transport.fs" />
+    <Compile Include="Sanitize.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+</Project>

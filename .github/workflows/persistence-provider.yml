@@ -1,0 +1,38 @@
+name: Persistence provider recording
+
+# T18/T21: record real GitHub behaviour for the persistence provider and run the live write path (create, append,
+# re-read, conflict, rejected credential, unknown-outcome reconciliation) against the write-capable test repository.
+# Writes go only to workspaces/demo/rec-<run id>/ on CAUSA_TEST_REPO. Output is sanitized by an allow-list in the
+# tool, which aborts before printing any line that contains a secret value. No artifacts or traces are uploaded.
+
+on:
+  push:
+    branches: [r5/persist]
+    paths:
+      - "src/persistence/**"
+      - ".github/workflows/persistence-provider.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: persistence-provider
+  cancel-in-progress: false
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - name: Build the recorder
+        run: dotnet build src/persistence/Tool/Causa.Persistence.Tool.fsproj -c Release
+      - name: Record provider behaviour and run the live write path
+        env:
+          CAUSA_GITHUB_TOKEN: ${{ secrets.CAUSA_GITHUB_TOKEN }}
+          CAUSA_TEST_REPO: ${{ secrets.CAUSA_TEST_REPO }}
+        run: dotnet src/persistence/Tool/bin/Release/net10.0/causa-persistence.dll record

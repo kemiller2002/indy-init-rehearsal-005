@@ -12,5 +12,7 @@
     <Compile Include="Contract.fs" />
     <Compile Include="Projection.fs" />
     <Compile Include="FileSet.fs" />
+    <Compile Include="Provider.fs" />
+    <Compile Include="GitHub.fs" />
   </ItemGroup>
 </Project>
