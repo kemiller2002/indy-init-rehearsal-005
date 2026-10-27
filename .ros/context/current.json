@@ -4,7 +4,7 @@
   "repository": "indy-init-rehearsal-005",
   "actor": "ros-bootstrap",
   "startedAt": "2026-10-27T20:07:19.258Z",
-  "updatedAt": "2026-10-27T20:07:19.258Z",
+  "updatedAt": "2026-10-27T20:20:44Z",
   "baselineDirtyPaths": [],
   "workItems": [
     {
@@ -20,6 +20,60 @@
       ],
       "updatedAt": "2026-10-27T20:07:19.258Z",
       "completedAt": "2026-10-27T20:07:19.258Z"
+    },
+    {
+      "id": "WI-0002",
+      "type": "task",
+      "state": "complete",
+      "semanticState": "complete",
+      "evidence": [
+        {
+          "type": "implementation",
+          "path": "tools/derive-requirements/Markdown.fs"
+        },
+        {
+          "type": "implementation",
+          "path": "tools/derive-requirements/Derivation.fs"
+        },
+        {
+          "type": "implementation",
+          "path": "research/requirements-preservation/derivation-record.json"
+        },
+        {
+          "type": "tests",
+          "path": "evidence/requirements-preservation/gate-pre-implementation.json"
+        },
+        {
+          "type": "tests",
+          "path": "evidence/requirements-preservation/gate-pre-implementation-command.txt"
+        }
+      ],
+      "updatedAt": "2026-10-27T20:20:44Z",
+      "telemetryExecutionIds": [
+        "EXE-20261027T201410340Z-c35e9b80"
+      ],
+      "latestCheckpoint": {
+        "id": "c064c90648ad83fc070041f8",
+        "recordedAt": "2026-10-27T20:20:18Z",
+        "executionId": "EXE-20261027T201410340Z-c35e9b80",
+        "repository": "indy-init-rehearsal-005",
+        "branch": "main",
+        "commit": "7730f78f0f2b10395ea985ed183273c1f703817a",
+        "remote": {
+          "name": "origin",
+          "url": "https://github.com/kemiller2002/indy-init-rehearsal-005"
+        },
+        "remoteBranch": "main",
+        "remoteCommit": "7730f78f0f2b10395ea985ed183273c1f703817a",
+        "summary": "Derived package re-emitted in Praxis RQ form and pushed (7730f78); preservation gate passes; praxis validate passes",
+        "nextAction": "Complete WI-0002 with the gate and derivation evidence, rebuild the registry, validate and push",
+        "verification": {
+          "status": "verified",
+          "mechanism": "git-remote-observation"
+        }
+      },
+      "completedAt": "2026-10-27T20:20:44Z",
+      "conclusion": "Derived package re-emitted as Praxis RQ documents (tool change, regenerated with the recorded command); the preservation gate, run exactly as recorded, passes: 461 requirements, 0 exclusions, 0 fail/drift/blocked/needs-review. No unit tests exist for tools/derive-requirements; the gate is the verification."
     }
   ]
 }

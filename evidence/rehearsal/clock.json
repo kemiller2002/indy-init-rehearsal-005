@@ -1,0 +1,15 @@
+{
+  "schema": "indy-init.r5-clock/1",
+  "startUtc": "2026-10-27T20:08:38Z",
+  "startBasis": "first green check on bootstrap commit cf86744 (Build and test, green 20:08:38Z); Echelon foundations green 20:09:02Z; Praxis validation failed on the bootstrap range for missing work-item attribution of Conditor-materialized files and was reconciled post hoc in the first timed commit",
+  "deadlineUtc": "2026-10-28T03:08:38Z",
+  "ceilingMinutes": 420,
+  "monotonicOrigin": {
+    "recordedAtUtc": "2026-10-27T20:10:30Z",
+    "procUptimeSeconds": 2018.42,
+    "note": "session host /proc/uptime at recording; elapsed = start..now by UTC"
+  },
+  "implementationHead": "cf86744ed9aec4978f16b1616529da25c152a521",
+  "frozenPreflight": "kemiller2002/indy-init kickoff/rehearsal-005/preflight-record.json @ b942ac4; reviews @ 459f65a",
+  "frozenDependencies": ".conditor/lock.json sha256 0f35e5967eab1dfaf87a919aae23e133c837aa7fa904e1f68408c9bb0986b751 (echelon-current 1.29.0, echelon-registry 402bec21; Conditor 0.10.14)"
+}

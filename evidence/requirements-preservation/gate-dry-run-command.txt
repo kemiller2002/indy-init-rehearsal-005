@@ -1,0 +1,19 @@
+# T08 dry run (2026-10-27), Praxis 3.22.0 (praxis-linux-x64.tar.gz sha256 36edb44b058e417b2e8e6ad321f9f9090ed408b32921ed36489b81cc085745c0)
+# Before any equivalence review is recorded. Exit 3, verdict blocked: 461 requirements, 2293 obligations,
+# 0 exclusions, 0 fail/drift/blocked, 775 needs-review (equivalence-unverified), exactly the obligations
+# in research/requirements-preservation/review-requests.json.
+# <indy-init> is a checkout of kemiller2002/indy-init at b942ac4; <indy-init@aab8f80> a checkout at
+# aab8f80c7743392e794b3b631542903ed4ed6f64 (both run as these literal relative paths).
+dotnet tools/derive-requirements/bin/Release/net10.0/derive-requirements.dll \
+  --baseline '<indy-init>/requirements/causa-requirements-baseline.json' \
+  --normalized '<indy-init>/requirements-compiled/v1/normalized-requirements.json' \
+  --source '<indy-init@aab8f80>' --out research
+praxis requirements preservation verify \
+  --baseline '<indy-init>/requirements/causa-requirements-baseline.json' \
+  --source '<indy-init@aab8f80>' \
+  --derived research/requirements \
+  --disposition research/requirements-preservation/disposition.json \
+  --approvals '<indy-init>/kickoff/rehearsal-005/approvals.json' \
+  --approvals-sha256 711859d610ee6af1174aa33ebc6455ec77a7d107af02aa3fe80da0003616c011 \
+  --trusted-approver kemiller2002 \
+  --output evidence/requirements-preservation/gate-dry-run-no-reviews.json --json
