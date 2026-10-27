@@ -56,7 +56,15 @@ type CardProjection =
       /// The next lifecycle action the F# policy allows now (Records.nextLegalAction); None offers none.
       NextAction: string option }
 
-type HypothesisRow = { Id: string; Statement: string; State: string; Supporting: Count; Contradicting: Count }
+type HypothesisRow =
+    { Id: string
+      Statement: string
+      State: string
+      Supporting: Count
+      Contradicting: Count
+      /// Ids of the evidence the domain relates to this hypothesis (any relationship kind), in admission order
+      /// (UI-005-O4, UI-033: the graph links a hypothesis to its own evidence records).
+      Evidence: string list }
 type EvidenceRow = { Id: string; Content: string; Source: string option; Category: string; RecordedAt: string option }
 type BlockerRow = { Id: string; Question: string; Material: bool }
 type TimelineRow =

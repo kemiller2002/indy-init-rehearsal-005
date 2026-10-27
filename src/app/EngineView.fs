@@ -299,7 +299,14 @@ let ofProjection (writable: bool) (history: DomainEvent list) (p: InvestigationP
                Statement = h.Statement.Value
                State = hypothesisState h.State
                Supporting = count h.Id Supports
-               Contradicting = count h.Id Contradicts }: A.HypothesisRow))
+               Contradicting = count h.Id Contradicts
+               Evidence =
+                 rels
+                 |> List.filter (fun r -> r.Hypothesis = h.Id)
+                 |> List.map (fun r -> r.Evidence)
+                 |> List.distinct
+                 |> List.sortBy (fun e -> (inv.Evidence |> Map.tryFind e |> Option.map (fun x -> x.AdmittedAtVersion) |> Option.defaultValue 0L), e.Text)
+                 |> List.map (fun e -> e.Text) }: A.HypothesisRow))
       Evidence =
         values inv.Evidence
         |> List.sortBy (fun e -> e.AdmittedAtVersion)

@@ -103,14 +103,6 @@
             "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-1",
             "label": "Hypothesis record",
             "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-1"
-          },
-          {
-            "id": "evidence",
-            "system": "org.causa",
-            "type": "evidence",
-            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/evidence",
-            "label": "Evidence records",
-            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/evidence"
           }
         ],
         "interaction": {
@@ -118,7 +110,7 @@
           "target": {
             "reference": "hypothesis"
           },
-          "label": "Open hypothesis record"
+          "label": "Open Hypothesis record"
         }
       },
       {
@@ -149,14 +141,6 @@
             "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-2",
             "label": "Hypothesis record",
             "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-2"
-          },
-          {
-            "id": "evidence",
-            "system": "org.causa",
-            "type": "evidence",
-            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/evidence",
-            "label": "Evidence records",
-            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/evidence"
           }
         ],
         "interaction": {
@@ -164,7 +148,7 @@
           "target": {
             "reference": "hypothesis"
           },
-          "label": "Open hypothesis record"
+          "label": "Open Hypothesis record"
         }
       },
       {
@@ -195,14 +179,6 @@
             "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-3",
             "label": "Hypothesis record",
             "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/hypotheses?item=h-3"
-          },
-          {
-            "id": "evidence",
-            "system": "org.causa",
-            "type": "evidence",
-            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/evidence",
-            "label": "Evidence records",
-            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/evidence"
           }
         ],
         "interaction": {
@@ -210,7 +186,7 @@
           "target": {
             "reference": "hypothesis"
           },
-          "label": "Open hypothesis record"
+          "label": "Open Hypothesis record"
         }
       },
       {
@@ -248,7 +224,7 @@
           "target": {
             "reference": "cause"
           },
-          "label": "Open causal relationship record"
+          "label": "Open Causal relationship record"
         }
       },
       {
@@ -286,7 +262,7 @@
           "target": {
             "reference": "cause"
           },
-          "label": "Open causal relationship record"
+          "label": "Open Causal relationship record"
         }
       }
     ],
