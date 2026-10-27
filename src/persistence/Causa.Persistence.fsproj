@@ -22,6 +22,7 @@
     <Compile Include="Provider.fs" />
     <Compile Include="GitHub.fs" />
     <Compile Include="RecordedGitHub.fs" />
+    <Compile Include="Fixture.fs" />
     <Compile Include="Catalog.fs" />
     <Compile Include="Sync.fs" />
   </ItemGroup>
