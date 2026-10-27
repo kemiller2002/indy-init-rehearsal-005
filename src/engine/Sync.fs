@@ -183,9 +183,7 @@ type Classification =
     | Applied of ours: Oid * advancedTo: Oid option
     | Concurrent
 
-let classify (_attempt: Attempt) (_head: Oid) (_ancestry: Ancestry) : Classification = NotApplied
-
-let private classifyUnused (attempt: Attempt) (head: Oid) (ancestry: Ancestry) : Classification =
+let classify (attempt: Attempt) (head: Oid) (ancestry: Ancestry) : Classification =
     match ancestry with
     | Unrelated -> Concurrent
     | Descends [] -> NotApplied
@@ -229,15 +227,90 @@ let inFlight =
     | Held _ -> None
 
 let step (state: State) (event: Event) : Result<State * Effect list, Fault> =
-    // FAILING-FIRST STUB (T12, R4-01): the write invariants are specified by the tests before this exists.
-    Error
-        { Code = IllegalInState
-          Phase = phaseName state.Phase
-          Event = eventName event
-          Reason = "not implemented" }
+    let fault code reason =
+        Error
+            { Code = code
+              Phase = phaseName state.Phase
+              Event = eventName event
+              Reason = reason }
+
+    let next = state.Issued + 1L
+    let issue () = RequestId next
+    let go phase effects = Ok({ state with Phase = phase }, effects)
+    let goIssued phase effects = Ok({ Phase = phase; Issued = next }, effects)
+
+    match answerOf event, inFlight state.Phase with
+    | Some answered, current when current <> Some answered ->
+        fault StaleAnswer "The answer is for a request instance that is not in flight."
+    | _ ->
+        match state.Phase, event with
+        // connection
+        | (Disconnected | ConnectRefused _), Connect ->
+            let r = issue ()
+            goIssued (Connecting r) [ OpenConnection r ]
+        | Connecting _, Connected(_, head) -> go (Idle(head, None)) []
+        | Connecting _, ConnectFailed(_, failure) -> go (ConnectRefused failure) []
+
+        // local changes
+        | Idle(head, _), (Edit change | Reapply change) ->
+            if change.DecidedAt = head then go (Idle(head, Some change)) []
+            else fault NotDecidedOnHead "The change was decided on a different head than the one read."
+        | Idle(_, None), Write -> fault NothingToWrite "There is no local change to publish."
+        | Idle(head, Some change), Write ->
+            let r = issue ()
+            let attempt = { Request = r; Change = change; Stage = Preparing }
+            goIssued (Writing(head, attempt)) [ Publish(r, change.DecidedAt, change.Marker, change.Files) ]
+        | Held(head, change, NotWritten _), Write ->
+            let r = issue ()
+            let attempt = { Request = r; Change = change; Stage = Preparing }
+            goIssued (Writing(head, attempt)) [ Publish(r, change.DecidedAt, change.Marker, change.Files) ]
+        | Held(_, _, Conflict _), Write ->
+            fault IllegalInState "Another writer changed the repository; reload and reapply before publishing."
+        | Held(head, change, Conflict remote), Discard ->
+            let effects = [ Released change ] @ (remote |> Option.map ReloadRequired |> Option.toList)
+            go (Idle(defaultArg remote head, None)) effects
+        | Held(head, change, NotWritten _), Discard -> go (Idle(head, None)) [ Released change ]
+
+        // the write in flight
+        | Writing(head, attempt), PublicationSent _ ->
+            go (Writing(head, { attempt with Stage = Sent })) []
+        | Writing(head, attempt), PublicationAcknowledged(_, commit) ->
+            let r = issue ()
+            goIssued (Confirming(head, { attempt with Stage = Sent }, commit, r)) [ ReadCommit(r, commit, attempt.Change.Files) ]
+        | Writing(head, attempt), PublicationRefused(_, StaleHead) ->
+            go (Held(head, attempt.Change, Conflict None)) []
+        | Writing(head, attempt), PublicationRefused(_, refusal) ->
+            go (Held(head, attempt.Change, NotWritten(Refused refusal))) []
+        | Writing(head, attempt), PublicationFailed(_, transport) ->
+            match attempt.Stage with
+            | Preparing -> go (Held(head, attempt.Change, NotWritten(NeverSent transport))) []
+            | Sent -> go (Unknown(head, attempt)) []
+
+        // confirmation: never claim saved before re-reading the commit
+        | Confirming(_, _, commit, _), ReadBack(_, true) -> go (Idle(commit, None)) []
+        | Confirming(head, attempt, _, _), ReadBack(_, false) -> go (Unknown(head, attempt)) []
+        | Confirming(head, attempt, _, _), ReadBackFailed _ -> go (Unknown(head, attempt)) []
+
+        // unknown outcome: reconcile by re-reading the head first
+        | Unknown(head, attempt), Reconcile ->
+            let r = issue ()
+            goIssued (Reconciling(head, attempt, r)) [ ReadHead(r, attempt.Change.DecidedAt) ]
+        | Unknown _, Write -> fault OutcomeUnknown "The last publication may have been applied; reconcile before writing again."
+        | Reconciling(head, attempt, _), HeadObserved(_, observed, ancestry) ->
+            match classify attempt observed ancestry with
+            | NotApplied -> go (Idle(head, Some attempt.Change)) []
+            | Applied(ours, None) -> go (Idle(ours, None)) []
+            | Applied(ours, Some advanced) -> go (Idle(ours, None)) [ ReloadRequired advanced ]
+            | Concurrent -> go (Held(head, attempt.Change, Conflict(Some observed))) []
+        | Reconciling(head, attempt, _), HeadReadFailed _ -> go (Unknown(head, attempt)) []
+
+        | _ -> fault IllegalInState "This event is not legal in this state."
 
 /// Whether Retry may be offered: only when nothing was written (DC-003).
-let canRetry (_: Phase) = true
+let canRetry =
+    function
+    | Held(_, _, NotWritten _) -> true
+    | _ -> false
 
 /// Distinct, honest save states for the projection (UI-006-O1). Synced only after a confirmed read-back.
 type Status =
