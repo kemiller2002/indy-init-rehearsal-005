@@ -183,7 +183,9 @@ let commandFor (entropy: A.Entropy) (name: string) (fields: Map<string, string>)
             | "reopen" -> Some Reopen
             | _ -> None
         match Guid.TryParse h, command with
-        | (true, g), Some c -> Ok(TransitionHypothesis(Id.ofGuid g, c, text fields "reason", []))
+        | (true, g), Some c ->
+            let cited = match Guid.TryParse(text fields "evidence") with | true, e -> [ Id.ofGuid e ] | _ -> []
+            Ok(TransitionHypothesis(Id.ofGuid g, c, text fields "reason", cited))
         | _ -> Error "That change is not available for this hypothesis."
     | [| "RecordCause" |] ->
         match Guid.TryParse(text fields "hypothesis") with

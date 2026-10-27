@@ -336,3 +336,5 @@ fieldset.causa-panel legend { font-weight: 700; color: var(--causa-color-structu
 .causa-timeline__entry[data-current="true"] { outline: 3px solid var(--causa-color-action); outline-offset: 2px; }
 .causa-timeline__entry a { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
 .causa-findings { margin: 0.25rem 0; }
+.causa-confirm { border: 2px solid var(--causa-color-conflict); background: var(--causa-coral-wash); padding: 1rem; margin: 0 0 1rem; border-radius: 6px; }
+.causa-confirm h2 { margin-top: 0; }

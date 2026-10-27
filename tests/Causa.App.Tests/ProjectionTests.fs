@@ -125,7 +125,15 @@ let ``VPO-34731ac9a977b818 on a conflict the shell offers reload and discard, an
     Assert.Equal("Connected: someone else changed an investigation", textOf view "connection.label")
     let ev name: SemanticEvent = { Name = name; Key = None; Value = None; Checked = None; Values = None; Submitter = None }
     Shell.update entropy (BrowserToEngineMessage.Event(ev "reload-remote")) model |> ignore
-    Shell.update entropy (BrowserToEngineMessage.Event(ev "discard-local")) model |> ignore
+    // Discarding local work waits for an explicit confirmation (UI-004-O3); cancelling sends nothing.
+    let held, _ = Shell.update entropy (BrowserToEngineMessage.Event(ev "discard-local")) model
+    Assert.Equal<AdapterInput list>([ ReloadRemote id ], List.ofSeq seen)
+    Assert.True(flagOf (View.project held) "confirm.show")
+    let cancelled, _ = Shell.update entropy (BrowserToEngineMessage.Event(ev "confirm-no")) held
+    Assert.Equal<AdapterInput list>([ ReloadRemote id ], List.ofSeq seen)
+    Assert.False(flagOf (View.project cancelled) "confirm.show")
+    let held, _ = Shell.update entropy (BrowserToEngineMessage.Event(ev "discard-local")) model
+    Shell.update entropy (BrowserToEngineMessage.Event(ev "confirm-yes")) held |> ignore
     Assert.Equal<AdapterInput list>([ ReloadRemote id; DiscardLocal id ], List.ofSeq seen)
 
 [<Fact>]
