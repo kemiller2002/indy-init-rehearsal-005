@@ -1,0 +1,121 @@
+{
+  "schema": "causa.acceptance-gates/1",
+  "description": "Gate rules for the acceptance ledger (docs/REHEARSAL-ACCEPTANCE-LEDGER.md G0-G9). A gate is PASS only when it names producers and every one succeeded in the candidate run; FAIL when any failed; NOT_RUN otherwise. Producers are CI jobs/checks reported in producers.json by .github/workflows/build-and-test.yml; 'traceability' is computed from the bound obligations. Add a producer here only when CI really produces it.",
+  "gates": [
+    {
+      "id": "G0",
+      "title": "Scope",
+      "definition": "requirement ids, owner, profile priority, source precedence resolution",
+      "requires": [
+        "preservation-gate"
+      ],
+      "evidenceType": "preservation",
+      "note": "Praxis requirements preservation verify at acceptance (no released build yet: F-004); produced by the coordinator"
+    },
+    {
+      "id": "G1",
+      "title": "Dependencies",
+      "definition": "verified package/SHA/integrity lock, SDK, WASM/Forma/Folio smoke",
+      "requires": [
+        "lock-gate",
+        "stack-smoke"
+      ],
+      "evidenceType": "lock",
+      "note": "lock-gate is the T11 stack lock gate (PASS needs package-lock.json); stack-smoke is the Limen startup / Forma render / Folio print / frozen golden replay smoke (DEP-CURRENT-004), not yet produced"
+    },
+    {
+      "id": "G2",
+      "title": "Interfaces",
+      "definition": "frozen versioned handoff manifest and producer/consumer tests",
+      "requires": [
+        "interface-manifest"
+      ],
+      "evidenceType": "interface",
+      "note": "no interface manifest producer yet"
+    },
+    {
+      "id": "G3",
+      "title": "Domain",
+      "definition": "F# unit tests, illegal-transition and forged-history variants",
+      "requires": [
+        "core",
+        "domain-obligations"
+      ],
+      "evidenceType": "test",
+      "note": "domain-obligations: every G3 requirement bound and passing; not yet produced"
+    },
+    {
+      "id": "G4",
+      "title": "Frozen data",
+      "definition": "five golden scenarios, hashes, negative fixtures",
+      "requires": [
+        "frozen-data"
+      ],
+      "evidenceType": "fixture",
+      "note": "no frozen-data producer yet"
+    },
+    {
+      "id": "G5",
+      "title": "UI",
+      "definition": "P0 screen contracts, startup/error, iPad/keyboard/a11y, projection fidelity",
+      "requires": [
+        "browser",
+        "percepta-verify-app"
+      ],
+      "evidenceType": "ui",
+      "note": "percepta verify-app against the built site; not yet produced"
+    },
+    {
+      "id": "G6",
+      "title": "Persistence",
+      "definition": "local vs remote truth, expected-version conflict, reload, no fixture mutation",
+      "requires": [
+        "live"
+      ],
+      "evidenceType": "live",
+      "note": "the live provider suite (CAUSA_GITHUB_TOKEN / CAUSA_TEST_REPO), main pushes only"
+    },
+    {
+      "id": "G7",
+      "title": "Defect class",
+      "definition": "independent review and SHA-bound closure for critical/recurring classes",
+      "requires": [
+        "defect-class-review"
+      ],
+      "evidenceType": "review",
+      "note": "independent reviewer (T33); recorded in acceptance/defect-classes.json"
+    },
+    {
+      "id": "G8",
+      "title": "Candidate",
+      "definition": "full applicable browser/integration/security/report tests",
+      "requires": [
+        "core",
+        "site",
+        "browser",
+        "live",
+        "lock-gate",
+        "traceability"
+      ],
+      "evidenceType": "ci",
+      "note": "traceability succeeds only when every plan obligation is bound to executed tests that all passed"
+    },
+    {
+      "id": "G9",
+      "title": "Deployment",
+      "definition": "deployed SHA equals verified SHA, successful acceptance job on same SHA",
+      "requires": [
+        "deploy",
+        "deployed-smoke",
+        "core",
+        "site",
+        "browser",
+        "live",
+        "lock-gate",
+        "traceability"
+      ],
+      "evidenceType": "deployment",
+      "note": "deploy and deployed-smoke run on main pushes when DEPLOY_TARGET=github-pages"
+    }
+  ]
+}
