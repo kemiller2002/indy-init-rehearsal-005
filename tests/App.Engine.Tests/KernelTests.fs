@@ -404,3 +404,74 @@ let ``T15 contract 5.2 managed SHA-256 SHA-1 and UUIDv5 equal the platform and t
         Assert.Equal(Convert.ToHexString(Security.Cryptography.SHA256.HashData data).ToLowerInvariant(), Hashing.sha256Hex data)
         Assert.Equal(Convert.ToHexString(Security.Cryptography.SHA1.HashData data).ToLowerInvariant(), Hashing.hex (Hashing.sha1 data))
     Assert.Equal(Guid "241fefd4-c810-5a3a-9cfa-4bbd968ae1cb", Hashing.eventIdNamespace)
+
+// ---- locked invariants (DESIGN-DECISION-BOUNDARIES D-001..D-009) ----
+
+[<Fact>]
+[<Trait("obligation", "VPO-199103f9166730e7")>]
+[<Trait("invariant", "D-008")>]
+[<Trait("task", "T13")>]
+let ``T13 D-008 VPO-199103f9166730e7 implementation is not verification and blocks resolution until verified`` () =
+    let s = run (start ()) ActivateInvestigation
+    let s = run s (RecordHypothesis(id "h/a", "A", Some "m"))
+    let s = run s (AdmitEvidence(id "e/1", TextInput "supports", Log, "log", None))
+    let s = run s (RelateEvidence(id "r/1", id "e/1", id "h/a", Supports, None))
+    let s = run s (TransitionHypothesis(id "h/a", MarkPlausible, "fits", []))
+    let s = run s (TransitionHypothesis(id "h/a", MarkSupported, "support", [ id "e/1" ]))
+    let s = run s (RecordCause(id "c/a", "Outcome", [ { Hypothesis = id "h/a"; Role = RootCause } ], Some "m"))
+    let s = run s (ConfirmCause(id "c/a"))
+    let s = run s (RecordCorrectiveAction(id "ca/1", Correction, "Fix", [ id "c/a" ]))
+    let s = run s (RecordCriterion(id "cr/1", id "ca/1", "Back to baseline", None))
+    let s = [ ApproveCorrection; StartCorrection; MarkImplemented ] |> List.fold (fun s c -> run s (TransitionCorrection(id "ca/1", c))) s
+    // implemented, not yet verifying: a verification is refused
+    match tryRun s human (RecordVerification(id "v/1", id "cr/1", Satisfied, [ id "e/1" ])) with
+    | Error(Refused(e :: _)) -> Assert.Equal("VERIFICATION.NOT_AWAITING", e.Code)
+    | other -> failwithf "%A" other
+    let s = run s (RecordConclusion(id "k/1", "Fix applied", ConfirmedCause, [ id "c/a" ], None))
+    // and the investigation cannot be resolved on implementation alone
+    match tryRun s human ResolveInvestigation with
+    | Error(Refused errors) -> Assert.Contains("RESOLVE.CORRECTION_NOT_VERIFIED", errors |> List.map (fun e -> e.Code))
+    | other -> failwithf "%A" other
+    // evidence admitted before the verification round does not satisfy it (R7.4)
+    let s = run s (TransitionCorrection(id "ca/1", StartVerificationOfEffect))
+    match tryRun s human (RecordVerification(id "v/1", id "cr/1", Satisfied, [ id "e/1" ])) with
+    | Error(Refused(e :: _)) -> Assert.Equal("VERIFICATION.EVIDENCE_PREDATES_ROUND", e.Code)
+    | other -> failwithf "%A" other
+
+[<Fact>]
+[<Trait("obligation", "VPO-199103f9166730e7")>]
+[<Trait("invariant", "D-007")>]
+[<Trait("invariant", "D-003")>]
+[<Trait("task", "T13")>]
+let ``T13 D-007 D-003 VPO-199103f9166730e7 an open blocking unknown blocks the resolution it protects`` () =
+    let resolved = resolvedScript ()
+    // the same history with a blocking unknown identified before resolution cannot resolve
+    let s = run (start ()) ActivateInvestigation
+    let s = run s (IdentifyUnknown(id "u/1", "Was the log complete?", Blocking))
+    let inv = state s
+    let blockers = Policy.resolutionBlockers inv |> List.map (fun e -> e.Code)
+    Assert.Contains("RESOLVE.BLOCKING_UNKNOWN", blockers)
+    // an unknown is not false: it stays open (identified) until explicitly resolved or accepted as residual
+    Assert.Equal(Identified, inv.Unknowns[id "u/1"].State)
+    Assert.Equal(Resolved, (state resolved).Lifecycle)
+
+[<Fact>]
+[<Trait("obligation", "VPO-5933d986a6ba6dc3")>]
+[<Trait("invariant", "D-002")>]
+[<Trait("invariant", "D-001")>]
+[<Trait("task", "T13")>]
+let ``T13 D-001 D-002 VPO-5933d986a6ba6dc3 observations are kept verbatim with provenance through write and read`` () =
+    let verbatim = "  Payments fail\tsince 09:40 — “declined” ​ "
+    let s = run { Session = Kernel.empty; Step = 0 } (StartInvestigation("", id "obs/1", verbatim))
+    let s = run s (RecordObservation(id "obs/2", verbatim, Some t0))
+    let loaded =
+        match Storage.write s.Session.History |> Result.bind (fun set -> Storage.read inv.Text (Storage.filesOf set)) with
+        | Ok l -> l
+        | Error e -> failwithf "%A" e
+    for o in loaded.State.Observations |> Map.toList |> List.map snd do
+        Assert.Equal(verbatim, o.Original.Value)
+        Assert.Equal(human, o.Provenance.Actor)
+    // a blank title falls back to the original observation, verbatim (no trimming)
+    Assert.Equal(verbatim, loaded.State.Title.Value)
+    // observations and hypotheses are distinct record kinds
+    Assert.Empty(loaded.State.Hypotheses)
