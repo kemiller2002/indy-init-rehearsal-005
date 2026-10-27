@@ -22,6 +22,8 @@ type PersistenceInput =
     /// Accepted by the kernel: the new session and exactly the events it produced, decided at `expected`.
     | Accepted of id: string * expected: int64 option * session: Session * events: DomainEvent list
     | Answer of correlation: string * EffectResult
+    /// Re-read the branch to settle a save whose outcome is unknown (the shell's "check now").
+    | CheckRemote
 
 /// The thin persistence interface (until stream persist's program lands).
 type Persistence =
@@ -172,6 +174,7 @@ and private handle (entropy: A.Entropy) (input: A.AdapterInput) (p: Persistence)
     | A.Disconnect -> pass Disconnect
     | A.Open id -> pass (Open id)
     | A.Answer(corr, result) -> pass (Answer(corr, result))
+    | A.CheckRemote -> pass CheckRemote
     | A.Command(investigation, name, fields, expected) ->
         let session, expectedVersion, id =
             match investigation with

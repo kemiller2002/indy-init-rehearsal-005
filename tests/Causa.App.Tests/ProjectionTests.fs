@@ -64,7 +64,7 @@ let ``VPO-56201f80b312c7c8 unknown counts are never shown as zero`` () =
 
 [<Fact>]
 let ``VPO-b3efad6eb85360be only a confirmed remote sync is described as saved to GitHub`` () =
-    for s in [ NoChanges; Unsaved 2; Saving; Conflict; SaveFailed "GitHub refused the token."; ReadOnly ] do
+    for s in [ NoChanges; Unsaved 2; Saving; Conflict; SaveFailed "GitHub refused the token."; ReadOnly; MayHaveSaved "lost" ] do
         Assert.DoesNotContain("Saved to GitHub", Presentation.syncText s)
     Assert.StartsWith("Saved to GitHub", Presentation.syncText (RemotelySynced(Some "12:00")))
 
@@ -92,3 +92,14 @@ let ``VPO-bb08b9a414ba4cd7 the token leaves the shell model when Connect is hand
     let view = View.project m
     for KeyValue(_, v) in view do
         Assert.DoesNotContain("github_pat_secret", sprintf "%A" v)
+
+[<Fact>]
+let ``VPO-89ed6170f531961e an unknown save outcome is its own state: neither saved nor failed, with check now and no retry`` () =
+    let s = MayHaveSaved "the answer was lost"
+    Assert.Equal("Your changes may or may not have reached GitHub; checking the branch before anything else is sent.", Presentation.syncText s)
+    Assert.Equal("unknown", Presentation.syncTone s)
+    Assert.NotEqual<string>(Presentation.syncTone (RemotelySynced None), Presentation.syncTone s)
+    Assert.NotEqual<string>(Presentation.syncTone (SaveFailed "x"), Presentation.syncTone s)
+    let ws = { emptyWorkspace with Connection = ConnectedTo("a/b", "main", "w"); Sync = s }
+    let view = View.project { Shell.initial with Route = Routes.Investigations; Port = Port.fixedAt ws }
+    Assert.True(flagOf view "sync.mayHaveSaved")

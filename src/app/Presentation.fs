@@ -81,12 +81,14 @@ let syncText (s: Adapter.SyncStatus) =
     | Adapter.RemotelySynced None -> "Saved to GitHub"
     | Adapter.Conflict -> "Not saved: someone else changed the repository. Your changes are kept."
     | Adapter.SaveFailed reason -> "Not saved. " + reason
+    | Adapter.MayHaveSaved _ -> "Your changes may or may not have reached GitHub; checking the branch before anything else is sent."
     | Adapter.ReadOnly -> "Read-only demonstration"
 
 let syncTone (s: Adapter.SyncStatus) =
     match s with
     | Adapter.Conflict
     | Adapter.SaveFailed _ -> "conflict"
+    | Adapter.MayHaveSaved _ -> "unknown"
     | Adapter.Unsaved _
     | Adapter.Saving -> "attention"
     | Adapter.RemotelySynced _ -> "action"

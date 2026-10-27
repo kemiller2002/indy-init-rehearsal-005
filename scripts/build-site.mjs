@@ -44,6 +44,7 @@ cpSync(join(root, "node_modules/@echelon-foundry/forma-workflow/dist"), join(sit
 });
 mkdirSync(join(site, "vendor/folio"), { recursive: true });
 cpSync(join(root, "node_modules/@echelon-foundry/print-components/src/styles/print.css"), join(site, "vendor/folio/print.css"));
+cpSync(join(root, "node_modules/@echelon-foundry/print-components/src/components/register.js"), join(site, "vendor/folio/register.js"));
 for (const file of ["index.html", "causa.css", "causa-icon.svg"]) cpSync(join(root, "src/kernel", file), join(site, file));
 
 // The kernel composition root is TypeScript; compile it, then point package specifiers at the vendored copies.
@@ -52,6 +53,7 @@ execFileSync(process.execPath, [join(root, "node_modules/typescript/bin/tsc"), "
 const specifiers = {
   "@echelon-foundry/limen/kernel": "./vendor/limen/kernel/browser-kernel.js",
   "@echelon-foundry/limen/hosts/dotnet-wasm": "./vendor/limen/hosts/dotnet-wasm-transport.js",
+  "@echelon-foundry/print-components": "./vendor/folio/register.js",
 };
 let main = readFileSync(join(kernelJs, "main.js"), "utf8");
 for (const [from, to] of Object.entries(specifiers)) main = main.replaceAll(`"${from}"`, `"${to}"`);
