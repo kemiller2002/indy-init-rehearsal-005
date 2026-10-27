@@ -2,9 +2,9 @@
   "schemaVersion": "1.0.0",
   "protocolVersion": "1.0.0",
   "repository": "indy-init-rehearsal-005",
-  "actor": "ros-bootstrap",
+  "actor": "claude",
   "startedAt": "2026-10-27T20:07:19.258Z",
-  "updatedAt": "2026-10-27T20:20:44Z",
+  "updatedAt": "2026-10-27T20:43:50Z",
   "baselineDirtyPaths": [],
   "workItems": [
     {
@@ -74,6 +74,50 @@
       },
       "completedAt": "2026-10-27T20:20:44Z",
       "conclusion": "Derived package re-emitted as Praxis RQ documents (tool change, regenerated with the recorded command); the preservation gate, run exactly as recorded, passes: 461 requirements, 0 exclusions, 0 fail/drift/blocked/needs-review. No unit tests exist for tools/derive-requirements; the gate is the verification."
+    },
+    {
+      "id": "WI-0003",
+      "type": "task",
+      "state": "active",
+      "semanticState": "active",
+      "evidence": [],
+      "updatedAt": "2026-10-27T20:43:47Z",
+      "telemetryExecutionIds": [
+        "EXE-20261027T204348174Z-d263cd05"
+      ]
+    },
+    {
+      "id": "WI-0004",
+      "type": "task",
+      "state": "active",
+      "semanticState": "active",
+      "evidence": [],
+      "updatedAt": "2026-10-27T20:43:48Z",
+      "telemetryExecutionIds": [
+        "EXE-20261027T204349055Z-3a9b9ad4"
+      ]
+    },
+    {
+      "id": "WI-0005",
+      "type": "task",
+      "state": "active",
+      "semanticState": "active",
+      "evidence": [],
+      "updatedAt": "2026-10-27T20:43:49Z",
+      "telemetryExecutionIds": [
+        "EXE-20261027T204349986Z-9275bbe4"
+      ]
+    },
+    {
+      "id": "WI-0006",
+      "type": "task",
+      "state": "active",
+      "semanticState": "active",
+      "evidence": [],
+      "updatedAt": "2026-10-27T20:43:50Z",
+      "telemetryExecutionIds": [
+        "EXE-20261027T204350795Z-d44bb1b9"
+      ]
     }
   ]
 }
