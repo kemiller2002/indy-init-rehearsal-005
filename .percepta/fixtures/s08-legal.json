@@ -1,0 +1,8 @@
+{
+  "name": "s08-legal",
+  "predicates": [],
+  "capabilities": {
+    "ResolveUnknown": "legal",
+    "ResolveContradiction": "legal"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "s08-blocked",
+  "predicates": [
+    "material-blocker-exists"
+  ],
+  "capabilities": {
+    "ResolveUnknown": "illegal",
+    "ResolveContradiction": "illegal"
+  }
+}

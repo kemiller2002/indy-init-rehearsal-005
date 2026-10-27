@@ -41,6 +41,15 @@
       ]
     },
     {
+      "contract": "S08-epistemic-blocker-detail",
+      "appScreen": "epistemic-blocker-detail",
+      "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1?item=blocker-1",
+      "fixtures": [
+        "fixtures/s08-blocked.json",
+        "fixtures/s08-legal.json"
+      ]
+    },
+    {
       "contract": "S11-cause-review",
       "appScreen": "investigation-causal-analysis",
       "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/causal-analysis",
