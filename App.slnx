@@ -2,10 +2,13 @@
   <Folder Name="/src/">
     <Project Path="src/app/Causa.App.fsproj" />
     <Project Path="src/engine/App.Engine.fsproj" />
+    <Project Path="src/persistence/Causa.Persistence.fsproj" />
+    <Project Path="src/persistence/Tool/Causa.Persistence.Tool.fsproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/App.Engine.Tests/App.Engine.Tests.fsproj" />
     <Project Path="tests/Causa.App.Tests/Causa.App.Tests.fsproj" />
+    <Project Path="tests/Persistence.Tests/Persistence.Tests.fsproj" />
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/acceptance/Causa.Acceptance/Causa.Acceptance.fsproj" />
