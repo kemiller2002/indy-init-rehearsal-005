@@ -20,6 +20,7 @@
     <Compile Include="DcTableTests.fs" />
     <Compile Include="DctProviderTests.fs" />
     <Compile Include="BlockedTests.fs" />
+    <Compile Include="FixtureTests.fs" />
     <Compile Include="ConformanceTests.fs" />
   </ItemGroup>
   <ItemGroup>

@@ -44,7 +44,16 @@ type private State =
       Methods: Map<string, string>
       /// Documents already checked automatically since their save became unknown (checked once, then by hand).
       Checked: Set<string>
+      /// Local fixture mode (test build only): the in-page provider that answers instead of GitHub.
+      Fixture: RecordedGitHub option
       Notice: (string * string) option }
+
+/// Fixture mode exists only where the test build enables it (Dispatch.enableTestHooks); production never has it.
+let mutable private fixtureAllowed = false
+
+let enableFixtureMode () = fixtureAllowed <- true
+
+let private fixtureLabel = "Local fixture: synthetic data, not GitHub"
 
 let private env (entropy: A.Entropy) : Env =
     let t = DateTimeOffset(DateTime.SpecifyKind(entropy.Now, DateTimeKind.Utc))
@@ -80,6 +89,7 @@ let private toLimen (e: Effect) : EffectRequest =
 
 let private connection (m: Model) : A.Connection =
     match Sync.connectionLabel m, m.Target with
+    | ("connected" | "authorizedEmpty" | "conflict"), Some t when Fixture.isFixture t -> A.ConnectedTo(fixtureLabel, "local", t.Workspace)
     | ("connected" | "authorizedEmpty" | "conflict"), Some t -> A.ConnectedTo(Target.fullName t, t.Branch, t.Workspace)
     | ("connecting" | "loading"), _ -> A.Connecting
     | ("incompatible" | "accessDenied" | "offline"), _ ->
@@ -89,6 +99,8 @@ let private connection (m: Model) : A.Connection =
 let private syncStatus (m: Model) (d: Document) : A.SyncStatus =
     let pendingEvents = d.Local.Version - (d.Confirmed |> Option.map (fun c -> c.Version) |> Option.defaultValue 0L)
     if d.ReadOnly then A.ReadOnly
+    // Fixture mode never claims GitHub: changes live in this page only (PF-003-O4).
+    elif m.Target |> Option.exists Fixture.isFixture then A.LocalOnly "Fixture mode: kept in this page only; nothing is saved to GitHub."
     else
         match Sync.documentStatus m d with
         | "clean" -> A.NoChanges
@@ -128,7 +140,7 @@ let rec private persistenceOf (s: State) : EP.Persistence =
         match m.Catalog with
         | CatalogVerified(man, _) -> man.Cases |> List.map (fun c -> c.InvestigationId)
         | _ -> m.Documents |> Map.toList |> List.map fst
-    { Name = "github"
+    { Name = (if s.Fixture.IsSome then "fixture" else "github")
       Connection = connection m
       ConnectionState = connectionState m
       ConnectionDetail = connectionDetail m
@@ -156,27 +168,55 @@ let rec private persistenceOf (s: State) : EP.Persistence =
       Message = s.Notice
       Administration =
         [ { Id = "provider"; Section = "persistence"; Label = "Data provider"
-            Value = (match m.Target with Some t -> "GitHub " + Target.fullName t + " · " + t.Branch + " · " + t.Workspace | None -> "GitHub (not connected)")
+            Value =
+                (match m.Target with
+                 | Some t when Fixture.isFixture t -> "Local fixture: synthetic data generated in this page; nothing is read from or saved to GitHub"
+                 | Some t -> "GitHub " + Target.fullName t + " · " + t.Branch + " · " + t.Workspace
+                 | None -> "GitHub (not connected)")
             State = "Reported by the running application" }
           { Id = "connection"; Section = "persistence"; Label = "Connection"; Value = EP.ConnectionState.label (connectionState m); State = "Reported by the running application" } ]
       Handle = fun entropy input -> handle entropy input s }
 
 /// Apply one program message, then the automatic policies, and translate the effects.
 and private apply (entropy: A.Entropy) (msg: Msg) (s: State) : State * EffectRequest list =
-    let step (s: State, fx: Effect list) (msg: Msg) =
-        match Sync.update (env entropy) msg s.Model with
-        | Ok(m, effects) -> { s with Model = m; Notice = None }, fx @ effects
-        | Error r -> { s with Notice = Some("warning", r.Reason) }, fx
-    let s, effects = step (s, []) msg
-    // Automatic save of pending changes, and one automatic check of an unknown outcome.
-    let s, effects =
+    // One message, then everything it causes. In fixture mode the in-page provider answers every request at once and
+    // nothing is stored in the browser: no effect leaves the program.
+    let rec drain (s: State, out: Effect list) (queue: Msg list) =
+        match queue with
+        | [] -> s, out
+        | msg :: rest ->
+            match Sync.update (env entropy) msg s.Model with
+            // An older local write confirming after a newer one is expected, not news for the person.
+            | Error _ when (match msg with LocalStored _ -> true | _ -> false) -> drain (s, out) rest
+            | Error r -> drain ({ s with Notice = Some("warning", r.Reason) }, out) rest
+            | Ok(m, effects) ->
+                let s = { s with Model = m; Notice = None }
+                match s.Fixture with
+                | Some provider ->
+                    let answers =
+                        effects
+                        |> List.map (fun e ->
+                            match e with
+                            | Send(id, request) -> HttpAnswered(id, provider.Handle request)
+                            | StoreLocal(writeId, _, _) -> LocalStored(writeId, true))
+                    drain (s, out) (rest @ answers)
+                | None -> drain (s, out @ effects) rest
+    let policies (s: State) =
         s.Model.Documents
-        |> Map.fold (fun (s: State, fx) id d ->
-            if Sync.canSave s.Model d && (match d.Book.Phase with Book.Idle(_, Some _) -> true | _ -> false) then step (s, fx) (Save id)
-            elif Sync.canReconcile s.Model d && not (s.Checked.Contains id) then
-                let s2, fx2 = step (s, fx) (Reconcile id)
-                { s2 with Checked = s2.Checked.Add id }, fx2
-            else s, fx) (s, effects)
+        |> Map.toList
+        |> List.choose (fun (id, d) ->
+            if Sync.canSave s.Model d && (match d.Book.Phase with Book.Idle(_, Some _) -> true | _ -> false) then Some(Save id, None)
+            elif Sync.canReconcile s.Model d && not (s.Checked.Contains id) then Some(Reconcile id, Some id)
+            else None)
+    let rec settle (s: State, out: Effect list) (rounds: int) =
+        // Automatic save of pending changes, and one automatic check of an unknown outcome (bounded).
+        match policies s with
+        | [] -> s, out
+        | _ when rounds = 0 -> s, out
+        | due ->
+            let s = { s with Checked = due |> List.choose snd |> List.fold (fun acc id -> Set.add id acc) s.Checked }
+            settle (drain (s, out) (due |> List.map fst)) (rounds - 1)
+    let s, effects = settle (drain (s, []) [ msg ]) 8
     let checkedNow = s.Checked |> Set.filter (fun id -> s.Model.Documents |> Map.tryFind id |> Option.exists (fun d -> Sync.documentStatus s.Model d = "unknown"))
     let methods = effects |> List.fold (fun acc e -> match e with Send(id, r) -> Map.add (prefix + id) r.Method acc | _ -> acc) s.Methods
     { s with Methods = methods; Checked = checkedNow }, effects |> List.map toLimen
@@ -229,7 +269,18 @@ and private handleState (entropy: A.Entropy) (input: EP.PersistenceInput) (s: St
     | NotBooted, _ ->
         { s with Boot = Booting [ input ] }, [ EffectRequest.Storage(StorageEffectRequest.Get(CorrelationId bootId, Sync.storageKey)) ]
     | Booting held, _ -> { s with Boot = Booting(held @ [ input ]) }, []
+    | Booted, EP.Connect r when r.Repository.Trim() = Fixture.owner + "/" + Fixture.repo ->
+        if not fixtureAllowed then
+            { s with Notice = Some("warning", "Fixture mode exists only in the test build. Nothing was sent.") }, []
+        else
+            match Fixture.provider (), Credential.create "fixture-mode-no-credential" with
+            | Ok provider, Ok placeholder ->
+                let t = { Owner = Fixture.owner; Repo = Fixture.repo; Branch = Fixture.branch; Workspace = Fixture.workspace }
+                apply entropy (Msg.Connect(t, placeholder)) { s with Fixture = Some provider }
+            | Error e, _
+            | _, Error e -> { s with Notice = Some("warning", "The fixture could not be generated: " + e) }, []
     | Booted, EP.Connect r ->
+        let s = { s with Fixture = None }
         match r.Repository.Trim().Split('/'), Credential.create r.Token with
         | [| owner; repo |], Ok cred ->
             match Target.create owner repo (r.Branch.Trim()) (r.Workspace.Trim()) with
@@ -262,4 +313,5 @@ let persistence: EP.Persistence =
           Boot = NotBooted
           Methods = Map.empty
           Checked = Set.empty
+          Fixture = None
           Notice = None }

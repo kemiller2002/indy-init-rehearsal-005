@@ -356,6 +356,54 @@ let private recordAll (token: string) (repoFull: string) (runId: string) =
                         expect ctx "live.reconcile" applied "the discarded write was found applied by content at the re-read head"
                     | None -> expect ctx "live.reconcile" false "head could not be re-read"
             programLive ctx cred owner repo t.Branch runId
+            // Bounded writes: every commit this run made (found by its run id or its investigations' ids in the
+            // message, so other writers in between do not count) changed only paths under this run's workspaces.
+            match readHead "ref.read.final" with
+            | Some final when final <> head0 ->
+                let get (r: HttpRequest) = Transport.send r |> Result.toOption |> Option.bind (fun r -> GitHub.classify r |> Result.toOption)
+                let ours (message: string) =
+                    message.Contains(runId, StringComparison.Ordinal)
+                    || message.Contains(iid, StringComparison.Ordinal)
+                    || message.Contains(Uuid.v5 "6ba7b811-9dad-11d1-80b4-00c04fd430c8" ("causa-provider-recorder/app/" + runId), StringComparison.Ordinal)
+                let commits =
+                    get (GitHub.compare (Some cred) t head0 final)
+                    |> Option.bind (fun v ->
+                        match v with
+                        | JObj o ->
+                            match Json.field "commits" o with
+                            | Some(JArr cs) ->
+                                Some(
+                                    cs
+                                    |> List.choose (fun c ->
+                                        match c with
+                                        | JObj co ->
+                                            let message = match Json.field "commit" co with Some(JObj m) -> Json.str "message" m |> Option.defaultValue "" | _ -> ""
+                                            Json.str "sha" co |> Option.filter (fun _ -> ours message)
+                                        | _ -> None)
+                                )
+                            | _ -> None
+                        | _ -> None)
+                let filesOfCommit (sha: string) =
+                    get { GitHub.getBlob (Some cred) t "x" with Url = GitHub.apiBase + "/repos/" + owner + "/" + repo + "/commits/" + sha }
+                    |> Option.bind (fun v ->
+                        match v with
+                        | JObj o ->
+                            match Json.field "files" o with
+                            | Some(JArr fs) -> Some(fs |> List.choose (fun f -> match f with JObj fo -> Json.str "filename" fo | _ -> None))
+                            | _ -> None
+                        | _ -> None)
+                let ownPrefix = "workspaces/demo/rec-" + runId
+                let ok =
+                    match commits with
+                    | Some(_ :: _ as shas) ->
+                        shas
+                        |> List.forall (fun sha ->
+                            match filesOfCommit sha with
+                            | Some paths -> paths |> List.forall (fun p -> p.StartsWith(ownPrefix + "/", StringComparison.Ordinal) || p.StartsWith(ownPrefix + "-app/", StringComparison.Ordinal))
+                            | None -> false)
+                    | _ -> false
+                expect ctx "live.boundedWrites" ok (sprintf "%d commit(s) of this run changed only paths under its own workspaces; nothing under catalog/ or historical-v1" (commits |> Option.map List.length |> Option.defaultValue 0))
+            | _ -> expect ctx "live.boundedWrites" false "the final head could not be read"
             Console.Out.WriteLine endMarker
             if ctx.Failures.IsEmpty then
                 Console.Out.WriteLine "RESULT: PASS (live provider; no mocks)"

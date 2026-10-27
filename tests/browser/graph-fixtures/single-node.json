@@ -1,0 +1,119 @@
+{
+  "name": "single-node",
+  "purpose": "One outcome without members.",
+  "synthetic": true,
+  "document": {
+    "format": "forma-workflow",
+    "formatVersion": "1.0.0",
+    "id": "causal-00000000-0000-4000-8000-00000000a0a0",
+    "title": "Causal analysis: Single node",
+    "language": "en",
+    "forma": {
+      "version": "0.9.0"
+    },
+    "palette": {
+      "navy": "#14283f",
+      "teal": "#087f8c",
+      "amber": "#e9a23b",
+      "coral": "#d66b58",
+      "ivory": "#f5f3ed"
+    },
+    "layout": {
+      "direction": "down"
+    },
+    "presentation": {
+      "legendTitle": "Key",
+      "legend": [
+        {
+          "id": "tone-teal",
+          "label": "Supported or confirmed",
+          "color": {
+            "stroke": "palette:teal"
+          }
+        },
+        {
+          "id": "tone-amber",
+          "label": "Open: proposed, plausible or awaiting work",
+          "color": {
+            "stroke": "palette:amber"
+          }
+        },
+        {
+          "id": "tone-coral",
+          "label": "Weakened or falsified",
+          "color": {
+            "stroke": "palette:coral"
+          }
+        },
+        {
+          "id": "tone-navy",
+          "label": "Other recorded states",
+          "color": {
+            "stroke": "palette:navy"
+          }
+        },
+        {
+          "id": "role-root-cause",
+          "label": "Root cause",
+          "line": "solid"
+        },
+        {
+          "id": "role-trigger",
+          "label": "Trigger",
+          "line": "solid"
+        },
+        {
+          "id": "role-contributing-factor",
+          "label": "Contributing factor",
+          "line": "dashed"
+        },
+        {
+          "id": "role-enabling-condition",
+          "label": "Enabling condition",
+          "line": "dotted"
+        }
+      ]
+    },
+    "nodes": [
+      {
+        "id": "c-c-1",
+        "kind": "org.causa.graph:outcome",
+        "kindLabel": "Outcome",
+        "label": "Single outcome with no recorded members",
+        "description": "Causal relationship \u00B7 0 contributing hypotheses",
+        "variant": "pill",
+        "color": {
+          "fill": "palette:ivory",
+          "stroke": "palette:amber",
+          "accent": "palette:amber"
+        },
+        "status": {
+          "state": "org.causa.state:proposed",
+          "label": "Proposed"
+        },
+        "accessibility": {
+          "name": "Outcome (Proposed): Single outcome with no recorded members",
+          "description": "Single outcome with no recorded members \u00B7 Causal relationship \u00B7 0 contributing hypotheses"
+        },
+        "references": [
+          {
+            "id": "cause",
+            "system": "org.causa",
+            "type": "cause",
+            "key": "#/investigations/00000000-0000-4000-8000-00000000a0a0/causal-analysis?item=c-1",
+            "label": "Causal relationship record",
+            "href": "#/investigations/00000000-0000-4000-8000-00000000a0a0/causal-analysis?item=c-1"
+          }
+        ],
+        "interaction": {
+          "action": "navigate",
+          "target": {
+            "reference": "cause"
+          },
+          "label": "Open causal relationship record"
+        }
+      }
+    ],
+    "edges": []
+  }
+}

@@ -68,6 +68,7 @@ let private build (tamper: Tamper) =
 [<Trait("obligation", "VPO-dc48d066cfa2309d")>]
 [<Trait("obligation", "VPO-7ced47ef45099aab")>]
 [<Trait("obligation", "VPO-557743cb4997c484")>]
+[<Trait("obligation", "VPO-a500f6d5a0f3e254")>]
 let ``VPO-c81484cbcf203d4f VPO-d60e3a3a25cb106d VPO-dc48d066cfa2309d VPO-557743cb4997c484 after Connect every catalog case loads, replays to its manifest digest and is read-only`` () =
     let fake, cases = build NoTamper
     let app = App(fake)

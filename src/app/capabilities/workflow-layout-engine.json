@@ -1,10 +1,20 @@
 {
   "schema": "causa.capability-discovery/1",
   "task": "T24",
-  "requirements": ["WDL-001", "WDL-002", "AR-005", "ADRP-006"],
+  "requirements": [
+    "WDL-001",
+    "WDL-002",
+    "WDL-004",
+    "AR-005",
+    "ADRP-006"
+  ],
   "discoveredAt": "2026-10-27",
   "capability": "workflow layout engine for the causal graph (T23)",
-  "owner": { "repository": "kemiller2002/forma", "directory": "packages/workflow", "system": "Forma" },
+  "owner": {
+    "repository": "kemiller2002/forma",
+    "directory": "packages/workflow",
+    "system": "Forma"
+  },
   "package": {
     "name": "@echelon-foundry/forma-workflow",
     "version": "1.1.0",
@@ -13,7 +23,9 @@
     "gitHead": "e0b088dbbe98b05221c4bc5b5e2224e9bf470827",
     "provenance": "npm SLSA provenance attestation present",
     "publishedAt": "2026-10-27T19:43:57Z",
-    "otherVersions": ["1.0.0 (2026-10-01; used in Rehearsal 4)"],
+    "otherVersions": [
+      "1.0.0 (2026-10-01; used in Rehearsal 4)"
+    ],
     "peerDependency": "@echelon-foundry/design-system >=0.4.0 (this app: 0.9.0)"
   },
   "license": "PolyForm-Noncommercial-1.0.0",
@@ -29,6 +41,12 @@
     "Noncommercial license."
   ],
   "decision": "Reuse; no second layout implementation and no fixed coordinates in Causa (WDL-002). Causa's Graph.fs projects typed causal relationships into the workflow document; forma-workflow lays it out; Forma styles it (WDL-004).",
-  "workingExample": "tests/browser/shell.spec.js: 'the causal analysis renders in the real forma-workflow frame…' loads vendor/forma-workflow/frame.html, sends the projected document and finds the outcome label rendered inside the frame.",
-  "upstreamChangesNeeded": []
+  "workingExample": "tests/browser/graph-layout.spec.js: the installed engine, served by this site in isolated mode, lays out the synthetic Causa graph fixtures (tests/browser/graph-fixtures) and every layout invariant is measured; tests/browser/shell.spec.js renders the application's own graph in the same frame.",
+  "upstreamChangesNeeded": [],
+  "fallback": "none",
+  "usage": {
+    "mode": "isolated (iframe), inspect",
+    "layoutRequest": "direction: down (measured: with direction right the engine placed connector labels over nodes in the dense fixture; down has none, at the cost of measured crossings, see graph-layout.spec.js crossingBudget)",
+    "statusAndColour": "Causa supplies namespaced status states with text labels and UI-016 palette slots; the engine renders them with Forma tokens"
+  }
 }

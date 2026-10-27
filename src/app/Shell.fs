@@ -10,10 +10,23 @@ open Causa.App.Adapter
 
 type Notice = { Tone: string; Text: string }
 
-type Drafts = { Token: string; Repository: string; Branch: string; Workspace: string; Title: string; Statement: string }
+type Drafts =
+    { Token: string
+      Repository: string
+      Branch: string
+      Workspace: string
+      Title: string
+      Statement: string
+      /// The provider key while it is typed; cleared the moment it is handed to the port.
+      AiKey: string
+      AiTask: string }
 
 /// Session-scope preferences (UI-019-O5): kept in this page's memory only, never in browser storage.
-type Settings = { LargeText: bool; ReducedMotion: bool }
+type Settings =
+    { LargeText: bool
+      ReducedMotion: bool
+      /// The AI model id to call: configuration the person enters; there is no default (T27).
+      AiModel: string }
 
 type Model =
     { Route: Route
@@ -28,6 +41,14 @@ type Model =
       /// Correlation ids of requests the shell itself made; every other answer belongs to the port.
       ShellPending: Set<string>
       PageBase: string
+      /// The version the history screen shows (from `?version=` or the picker); None is the latest (T28).
+      HistoryVersion: int64 option
+      /// Timeline category filter ("all" or a category key, UI-003-O2).
+      TimelineFilter: string
+      /// A destructive or irreversible action waiting for the person's confirmation (UI-004-O3), with its words.
+      PendingConfirm: (AdapterInput * string) option
+      /// Bumped each time a token or key is taken, so the page can empty its password fields.
+      SecretEpoch: int
       /// Text typed for a capability that needs one input, by capability id.
       CommandInputs: Map<string, string>
       /// Only the test build enables this (Percepta state injection).
@@ -35,20 +56,24 @@ type Model =
       /// The Percepta fixture state name currently shown, if any.
       InjectedState: string option }
 
-let initialDrafts = { Token = ""; Repository = ""; Branch = "main"; Workspace = ""; Title = ""; Statement = "" }
+let initialDrafts = { Token = ""; Repository = ""; Branch = "main"; Workspace = ""; Title = ""; Statement = ""; AiKey = ""; AiTask = "" }
 
 let initial =
     { Route = Home
       Selected = ""
       Drafts = initialDrafts
       Notice = None
-      Settings = { LargeText = false; ReducedMotion = false }
+      Settings = { LargeText = false; ReducedMotion = false; AiModel = "" }
       Build = NotRequested
       Port = EnginePort.create PersistencePort.persistence
       Counter = 0
       ShellPending = Set.empty
       PageBase = ""
       CommandInputs = Map.empty
+      SecretEpoch = 0
+      PendingConfirm = None
+      HistoryVersion = None
+      TimelineFilter = "all"
       TestHooks = false
       InjectedState = None }
 
@@ -103,7 +128,24 @@ let private toPort (entropy: Entropy) (input: AdapterInput) (model: Model) =
             | _ -> None)
     { model with Port = port; Route = route |> Option.defaultValue model.Route }, effects
 
-let private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
+/// Actions that destroy local work or cannot be undone in the record: each needs an explicit confirmation.
+let confirmationFor (input: AdapterInput) : string option =
+    match input with
+    | DiscardLocal _ -> Some "Discard your local change to this investigation? It has not been saved to GitHub and cannot be recovered."
+    | Command(_, "CloseInvestigation", _, _) -> Some "Close this investigation? A closed investigation accepts no further changes unless it is reopened."
+    | Command(_, name, _, _) when name.StartsWith("TransitionHypothesis:", StringComparison.Ordinal) && name.EndsWith(":falsify", StringComparison.Ordinal) ->
+        Some "Falsify this hypothesis? The falsification is recorded permanently in the investigation history."
+    | Command(_, name, _, _) when name.StartsWith("RejectProposal:", StringComparison.Ordinal) ->
+        Some "Reject this proposal? The rejection and your reason are recorded permanently."
+    | _ -> None
+
+/// Sends an input to the port, or holds it for confirmation when it is destructive.
+let private guarded (entropy: Entropy) (input: AdapterInput) (model: Model) =
+    match confirmationFor input with
+    | Some text -> { model with PendingConfirm = Some(input, text); Notice = None }, []
+    | None -> toPort entropy input model
+
+let rec private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
     let value = e.Value |> Option.defaultValue ""
     let d = model.Drafts
 
@@ -121,14 +163,73 @@ let private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
     | "connect" ->
         let request: ConnectRequest = { Token = d.Token; Repository = d.Repository; Branch = d.Branch; Workspace = d.Workspace }
         // The token leaves the shell's model as soon as it is handed to the port (memory only, OD-INDY-10).
-        toPort entropy (Connect request) { model with Drafts = { d with Token = "" }; Notice = None }
+        toPort entropy (Connect request) { model with Drafts = { d with Token = "" }; Notice = None; SecretEpoch = model.SecretEpoch + 1 }
     | "disconnect" -> toPort entropy Disconnect { model with Notice = Some { Tone = "info"; Text = "Disconnected. The token was forgotten." } }
     | "dismiss" -> { model with Notice = None }, []
+    | "confirm-yes" ->
+        match model.PendingConfirm with
+        | Some(input, _) -> toPort entropy input { model with PendingConfirm = None; Notice = None }
+        | None -> model, []
+    | "confirm-no" -> { model with PendingConfirm = None; Notice = Some { Tone = "info"; Text = "Cancelled. Nothing was changed." } }, []
     | "check-remote" -> toPort entropy CheckRemote model
+    | "discard-local"
+    | "reload-remote" ->
+        match model.Route with
+        | Investigation(id, _) -> guarded entropy (if e.Name = "discard-local" then DiscardLocal id else ReloadRemote id) model
+        | _ -> model, []
     // The graph frame reports the node the person selected; the shell only remembers which (UI-026-O3).
     | "graph-select" when value = "" || Routes.selection ("?item=" + value) = value -> { model with Selected = value }, []
     | "text-size" -> { model with Settings = { model.Settings with LargeText = (value = "large") } }, []
     | "motion" -> { model with Settings = { model.Settings with ReducedMotion = (value = "reduced") } }, []
+    | "history-version" ->
+        match Int64.TryParse value with
+        | true, n when n >= 1L -> { model with HistoryVersion = Some n }, []
+        | _ -> { model with HistoryVersion = None }, []
+    | "timeline-filter" -> { model with TimelineFilter = (if value = "" then "all" else value) }, []
+    | "ai-model" -> { model with Settings = { model.Settings with AiModel = value.Trim() } }, []
+    | "ai-key" -> { model with Drafts = { d with AiKey = value } }, []
+    | "ai-key-set" -> toPort entropy (SetAiKey d.AiKey) { model with Drafts = { d with AiKey = "" }; SecretEpoch = model.SecretEpoch + 1 }
+    | "ai-key-clear" -> toPort entropy ClearAiKey model
+    | "ai-task" -> { model with Drafts = { d with AiTask = value } }, []
+    | "ai-request"
+    | "ai-retry" ->
+        match model.Route with
+        | Investigation(id, _) -> toPort entropy (RequestProposals(id, model.Settings.AiModel, d.AiTask)) model
+        | _ -> model, []
+    | "ai-cancel" -> toPort entropy CancelProposals model
+    | "ai-discard" -> toPort entropy DiscardDrafts model
+    | "ai-record" ->
+        match model.Route with
+        | Investigation(id, _) -> toPort entropy (RecordDrafts(id, model.Settings.AiModel)) model
+        | _ -> model, []
+    | "proposal-reason" ->
+        match e.Key with
+        | Some k -> { model with CommandInputs = model.CommandInputs.Add("RejectProposal:" + k, value) }, []
+        | None -> model, []
+    | "proposal-accept"
+    | "proposal-reject" ->
+        match e.Key with
+        | Some k -> onEvent entropy { e with Name = "command"; Key = Some((if e.Name = "proposal-accept" then "AcceptProposal:" else "RejectProposal:") + k) } model
+        | None -> model, []
+    // Multi-field forms: "field-<Form>.<field>" keeps the typed value; "submit-<Form>" sends the command with them.
+    | name when name.StartsWith("field-", StringComparison.Ordinal) ->
+        { model with CommandInputs = model.CommandInputs.Add(name.Substring 6, value) }, []
+    | name when name.StartsWith("submit-", StringComparison.Ordinal) ->
+        let form = name.Substring 7
+        let fields =
+            model.CommandInputs
+            |> Map.toList
+            |> List.choose (fun (k, v) -> if k.StartsWith(form + ".", StringComparison.Ordinal) then Some(k.Substring(form.Length + 1), v) else None)
+            |> Map.ofList
+        let command =
+            if form = "TransitionHypothesis" then
+                $"""TransitionHypothesis:{fields |> Map.tryFind "hypothesis" |> Option.defaultValue ""}:{fields |> Map.tryFind "change" |> Option.defaultValue ""}"""
+            else form
+        match model.Route, model.Route |> (function Investigation(id, _) -> model.Port.Projection.Opened.TryFind id | _ -> None) with
+        | Investigation(id, _), Some(Loaded inv) ->
+            let cleared = model.CommandInputs |> Map.filter (fun k _ -> not (k.StartsWith(form + ".", StringComparison.Ordinal)) || k.EndsWith(".hypothesis") || k.EndsWith(".evidence"))
+            guarded entropy (Command(Some id, command, fields, inv.Version)) { model with CommandInputs = cleared }
+        | _ -> { model with Notice = Some { Tone = "warning"; Text = "That action is not available here." } }, []
     | "command-input" ->
         match e.Key with
         | Some capability -> { model with CommandInputs = model.CommandInputs.Add(capability, value) }, []
@@ -147,7 +248,7 @@ let private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
         | Some capability, Some v ->
             let fields = model.CommandInputs |> Map.tryFind capability |> Option.map (fun t -> Map.ofList [ "text", t ]) |> Option.defaultValue Map.empty
             let investigation = match model.Route with Investigation(id, _) -> Some id | _ -> None
-            toPort entropy (Command(investigation, capability, fields, v)) { model with CommandInputs = model.CommandInputs.Remove capability }
+            guarded entropy (Command(investigation, capability, fields, v)) { model with CommandInputs = model.CommandInputs.Remove capability }
         | _ -> { model with Notice = Some { Tone = "warning"; Text = "That action is not available here." } }, []
     | _ -> model, []
 
@@ -165,11 +266,13 @@ let update (entropy: Entropy) (message: BrowserToEngineMessage) (model: Model) :
             | -1 -> "/"
             | i -> location.Path.Substring(0, i + 1)
 
-        let model, fx = readBuildInfo { model with Route = Routes.parse location.Hash; Selected = Routes.selection location.Hash; PageBase = location.Origin + dir }
+        let model, fx = readBuildInfo { model with Route = Routes.parse location.Hash; Selected = Routes.selection location.Hash; HistoryVersion = Routes.versionOf location.Hash; PageBase = location.Origin + dir }
+        // Restore this device's work first, so it shows before Connect (persistence's Boot).
+        let model, boot = toPort entropy Boot model
         let model, more = openRoute entropy model
-        model, fx @ more
+        model, fx @ boot @ more
     | BrowserToEngineMessage.LocationChanged location ->
-        openRoute entropy { model with Route = Routes.parse location.Hash; Selected = Routes.selection location.Hash; Notice = None }
+        openRoute entropy { model with Route = Routes.parse location.Hash; Selected = Routes.selection location.Hash; HistoryVersion = Routes.versionOf location.Hash; Notice = None; PendingConfirm = None }
     | BrowserToEngineMessage.Event e -> onEvent entropy e model
     | BrowserToEngineMessage.EffectResult(EffectResult.HttpResult(CorrelationId corr, outcome)) when model.ShellPending.Contains corr ->
         let model = { model with ShellPending = model.ShellPending.Remove corr }

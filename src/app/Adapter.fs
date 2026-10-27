@@ -55,7 +55,31 @@ type CardProjection =
 type HypothesisRow = { Id: string; Statement: string; State: string; Supporting: Count; Contradicting: Count }
 type EvidenceRow = { Id: string; Content: string; Source: string option; Category: string; RecordedAt: string option }
 type BlockerRow = { Id: string; Question: string; Material: bool }
-type TimelineRow = { Sequence: int64; EventType: string; OccurredAt: string; RecordedAt: string option; Actor: string option }
+type TimelineRow =
+    { Sequence: int64
+      EventType: string
+      OccurredAt: string
+      RecordedAt: string option
+      Actor: string option
+      /// The event's category (Timeline.category), as a filter key.
+      Category: string
+      /// Records the event touched, as (section slug, record id, words) for links (UI-003-O4).
+      Affected: (string * string * string) list
+      /// The event's clock is earlier than an event before it in sequence (UI-003-O3).
+      ClockBeforePrevious: bool }
+
+/// The investigation as it was at one version (time travel, T28). Never mixed with the current state.
+type HistoryView =
+    { AtVersion: int64
+      LatestVersion: int64
+      IsHistorical: bool
+      Title: string
+      Lifecycle: string
+      Counts: (string * int) list
+      /// What the command group at AtVersion changed (before -> after).
+      ChangesHere: string list
+      /// Everything that changed from AtVersion to the latest version.
+      ChangesSince: string list }
 
 type CauseRole =
     | RootCause
@@ -65,6 +89,41 @@ type CauseRole =
 
 /// A causal relationship as the domain records it: hypotheses (members, each with its role) explain one outcome.
 type CauseRow = { Id: string; Outcome: string; State: string; Members: (string * CauseRole) list }
+
+/// An agent's proposal as recorded in the investigation; only a human accepts or rejects it (D-004).
+type ProposalRow = { Id: string; Kind: string; Text: string; Rationale: string option; State: string; By: string }
+
+/// One drafted proposal from the AI loop, not yet recorded.
+type DraftRow = { Kind: string; Text: string; Rationale: string option }
+
+/// The AI proposal loop as the shell shows it (T27). The key itself never appears here.
+type AiView =
+    { KeyHeld: bool
+      InFlight: bool
+      /// The investigation the current request or result belongs to.
+      Investigation: string option
+      /// The last result in plain words (AiLoop.describe), its tone and whether a retry is honest (AiLoop.retryable).
+      Result: (string * string * bool) option
+      Drafts: DraftRow list
+      /// Set when the drafts were made from an older version than the current one.
+      Stale: string option
+      /// The last request with its key removed (AiLoop.redacted), for Administration.
+      LastRequest: string option }
+
+let noAi = { KeyHeld = false; InFlight = false; Investigation = None; Result = None; Drafts = []; Stale = None; LastRequest = None }
+
+/// What the domain itself asserts (Projection.verification, UI-023): never derived from data integrity.
+type DomainFindings = { ConfirmedCauses: int; VerifiedCorrections: int; Resolved: bool }
+
+/// The report projection (Projection.report, Boundary E) in words: every explanation from typed records (UI-038).
+type ReportView =
+    { Conclusion: string option
+      Causes: (string * bool * string) list
+      OpenQuestions: string list
+      AcceptedResiduals: string list
+      OpenContradictions: string list
+      UnverifiedAssumptions: string list
+      Corrections: (string * string) list }
 
 type InvestigationProjection =
     { Id: string
@@ -80,6 +139,12 @@ type InvestigationProjection =
       Blockers: BlockerRow list
       Causes: CauseRow list
       Timeline: TimelineRow list
+      Proposals: ProposalRow list
+      /// Domain findings, when the engine projected them; None for a shell-only fixture.
+      Findings: DomainFindings option
+      /// Technical integrity of how the data was obtained, for Administration only (UI-023-O2).
+      Integrity: string option
+      Report: ReportView option
       Capabilities: Capability list }
 
 /// Distinct save and sync states (UI-006-O1). Only `RemotelySynced` may say the provider holds the change.
@@ -93,6 +158,8 @@ type SyncStatus =
     /// The provider's answer to a save was lost: it may or may not have reached GitHub. No Retry is offered (a
     /// retry could write twice); only "check now", which re-reads the branch before anything else is sent.
     | MayHaveSaved of detail: string
+    /// Local fixture mode: the change is kept in this page only; nothing is saved to GitHub (PF-003-O4).
+    | LocalOnly of detail: string
     | ReadOnly
 
 type Connection =
@@ -107,6 +174,8 @@ type AdminFact = { Id: string; Section: string; Label: string; Value: string; St
 
 type WorkspaceProjection =
     { Connection: Connection
+      /// The exact connection state in words and its detail, when persistence reports them (EXT-DATA-007).
+      ConnectionStatus: (string * string option) option
       Investigations: Loadable<CardProjection list>
       Opened: Map<string, Loadable<InvestigationProjection>>
       Sync: SyncStatus
@@ -115,6 +184,7 @@ type WorkspaceProjection =
       Blockers: BlockerRow list
       /// A short, plain-language message for the person, when the adapter has one.
       Message: (string * string) option
+      Ai: AiView
       Administration: AdminFact list }
 
 type ConnectRequest = { Token: string; Repository: string; Branch: string; Workspace: string }
@@ -128,6 +198,15 @@ type AdapterInput =
     | Answer of correlation: string * EffectResult
     /// "Check now": re-read the branch to settle a save whose outcome is unknown (MayHaveSaved).
     | CheckRemote
+    /// The provider key typed on the key screen: held in memory by the port only, never in the shell's model.
+    | SetAiKey of key: string
+    | ClearAiKey
+    /// Ask the AI for proposals about an investigation with the configured model (never a default).
+    | RequestProposals of investigation: string * model: string * task: string
+    | CancelProposals
+    /// Record the drafted proposals (still proposals: a human accepts each one) or discard them.
+    | RecordDrafts of investigation: string * model: string
+    | DiscardDrafts
     /// Conflict resolution: drop this device's change to the investigation and adopt the repository's copy.
     | DiscardLocal of id: string
     /// Re-read the investigation from the repository (after a conflict), keeping this device's change.
@@ -139,42 +218,51 @@ type AdapterInput =
 type Port =
     { Name: string
       Projection: WorkspaceProjection
+      /// The state of an open investigation at a version, when the port can derive it (T28).
+      History: string -> int64 -> HistoryView option
       Handle: Entropy -> AdapterInput -> Port * EffectRequest list }
 
 let emptyWorkspace =
     { Connection = NotConnected
+      ConnectionStatus = None
       Investigations = NotRequested
       Opened = Map.empty
       Sync = NoChanges
       Capabilities = []
       Blockers = []
       Message = None
+      Ai = noAi
       Administration = [] }
 
 module Port =
     /// The shell's stand-in until the engine and persistence ports are composed in. It refuses Connect in plain
     /// words and claims nothing: no connection, no investigation, no saved change.
-    let rec unavailable: Port =
+    let private unavailableProjection =
+        { emptyWorkspace with
+            Administration =
+                [ { Id = "engine"; Section = "persistence"; Label = "Investigation engine"; Value = "Not composed into this build"; State = "Unavailable" }
+                  { Id = "provider"; Section = "persistence"; Label = "Data provider"; Value = "Not composed into this build"; State = "Unavailable" } ] }
+
+    let rec private unavailableAt (projection: WorkspaceProjection) : Port =
         { Name = "unavailable"
-          Projection =
-            { emptyWorkspace with
-                Administration =
-                    [ { Id = "engine"; Section = "persistence"; Label = "Investigation engine"; Value = "Not composed into this build"; State = "Unavailable" }
-                      { Id = "provider"; Section = "persistence"; Label = "Data provider"; Value = "Not composed into this build"; State = "Unavailable" } ] }
+          History = fun _ _ -> None
+          Projection = projection
           Handle =
             fun _ input ->
                 match input with
                 | Connect _ ->
-                    { unavailable with
-                        Projection =
-                            { unavailable.Projection with
-                                Connection = ConnectionFailed "Connecting to a data repository is not available in this build yet. Nothing was sent."
-                                Message = Some("warning", "Connecting is not available in this build yet. Nothing was sent and nothing was stored.") } },
+                    unavailableAt
+                        { unavailableProjection with
+                            Connection = ConnectionFailed "Connecting to a data repository is not available in this build yet. Nothing was sent."
+                            Message = Some("warning", "Connecting is not available in this build yet. Nothing was sent and nothing was stored.") },
                     []
-                | _ -> unavailable, [] }
+                | _ -> unavailableAt unavailableProjection, [] }
+
+    let unavailable: Port = unavailableAt unavailableProjection
 
     /// A port that only shows a fixed projection (Percepta state injection and shell tests). Every input is refused.
     let rec fixedAt (projection: WorkspaceProjection) : Port =
         { Name = "fixture"
+          History = fun _ _ -> None
           Projection = projection
           Handle = fun _ _ -> fixedAt projection, [] }

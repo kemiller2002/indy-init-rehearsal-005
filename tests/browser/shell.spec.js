@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 // Non-live specs use the network guard: GitHub is answered from recordings, any other host fails the test.
 import { expect, test } from "./support/fixtures.js";
 
-const TEST_SITE = "http://127.0.0.1:4322/";
+const TEST_SITE = `http://127.0.0.1:${process.env.CAUSA_TEST_PORT ?? 4322}/`;
 
 /** Waits until the application has replaced the loading shell. */
 async function started(page) {
@@ -164,7 +164,7 @@ test.describe("security of the shell", () => {
 });
 
 test.describe("identity, accessibility and layout (UI-011, UI-014, UI-016)", () => {
-  test("the Causa palette is mapped to named Forma tokens with measured contrast [VPO-cecb71404071030d] [VPO-3d80d031f05ec0dc] [VPO-d0c711c2da0f3800] [VPO-e0e945fc040386e1] [VPO-fbc386df77130f2d] [VPO-8905fd51176a3fc6] [VPO-fe19413526420c16] [VPO-d657e8dd084961b1] [VPO-6051ea46b65ebe27] [VPO-1a1aae8ffa920386]", async ({ page }) => {
+  test("the Causa palette is mapped to named Forma tokens with measured contrast [VPO-cecb71404071030d] [VPO-3d80d031f05ec0dc] [VPO-d0c711c2da0f3800] [VPO-e0e945fc040386e1] [VPO-fbc386df77130f2d] [VPO-8905fd51176a3fc6] [VPO-fe19413526420c16] [VPO-d657e8dd084961b1] [VPO-6051ea46b65ebe27] [VPO-1a1aae8ffa920386] [VPO-5a993f5a761fd6ee]", async ({ page }) => {
     await page.goto("index.html");
     await started(page);
     const tokens = await page.evaluate(() => {
@@ -285,7 +285,7 @@ test.describe("report, timeline and administration views (T22, T26, T29)", () =>
     await started(page);
     await expect(page.locator("[data-percepta-screen]")).toHaveAttribute("data-percepta-screen", "investigation-report");
     await expect(page.locator(".causa-report__incomplete")).toContainText("Incomplete");
-    await expect(page.locator("[data-percepta-region=conclusion]")).toContainText("No cause has been confirmed.");
+    await expect(page.locator("[data-percepta-region=conclusion]")).toContainText("No cause has been confirmed and no conclusion is recorded.");
     await expect(page.locator("[data-percepta-region=verification]")).toContainText("nothing is reported as verified.");
     await expect(page.getByRole("button", { name: "Print the report" })).toBeVisible();
   });
@@ -306,7 +306,7 @@ test.describe("report, timeline and administration views (T22, T26, T29)", () =>
     await started(page);
     for (const name of ["Deployment", "Data and persistence", "AI assistance", "Report", "Security", "Smoke tests"]) await expect(page.getByRole("heading", { level: 2, name })).toBeVisible();
     await expect(page.locator(".causa-attention")).toContainText("Not confirmed ready to demonstrate");
-    await expect(page.getByRole("list", { name: "Items not verified" })).toContainText("AI assistance: Unavailable");
+    await expect(page.getByRole("list", { name: "Items not verified" })).toContainText("AI provider key: Unavailable");
     await expect(page.getByRole("list", { name: "Items not verified" })).toContainText("Smoke tests at this commit: Unknown");
     await expect(page.locator("[data-percepta-region=security]")).toContainText("default-src 'self'");
     // Read-only: no form or action button on the page.
