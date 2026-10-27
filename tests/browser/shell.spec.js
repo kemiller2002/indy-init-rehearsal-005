@@ -249,3 +249,28 @@ test.describe("investigation view through the F# projection (test build)", () =>
     expect(error).toContain("Unsupported predicate(s): write-conflict");
   });
 });
+
+test.describe("causal graph with the Forma workflow engine (T23)", () => {
+  test("the causal analysis renders in the real forma-workflow frame, a selection shows its record, and the text list carries the same structure [VPO-684e6c5f94988bd9] [VPO-db2d02dab493e914] [VPO-b36c63fba6f83d4c] [VPO-05441c1c18ce3dc1] [VPO-0e6a69f7673cace8] [VPO-4c6f9ea0dcc0bd29] [VPO-adec3c95bc6ac2c4] [VPO-3eba4ae44451132f]", async ({ page }) => {
+    await page.goto(TEST_SITE + "index.html#/investigations/00000000-0000-4000-8000-0000000000f1/causal-analysis");
+    await started(page);
+    await page.evaluate(() => window.__perceptaSetState({ name: "graph", predicates: [], capabilities: {} }));
+    const frame = page.locator("iframe.causa-graph__frame");
+    await expect(frame).toHaveAttribute("title", /Causal graph/);
+    // The frame is the packaged engine, not a hand-drawn diagram.
+    await expect(frame).toHaveAttribute("src", /vendor\/forma-workflow\/frame\.html/);
+    const doc = JSON.parse(await page.locator("#causa-graph").getAttribute("data-document"));
+    expect(doc.format).toBe("forma-workflow");
+    expect(doc.nodes.map((n) => n.id)).toEqual(["h-h-1", "c-c-1"]);
+    expect(doc.edges.map((e) => e.label)).toEqual(["Root cause"]);
+    // The workflow engine laid it out and rendered the outcome label inside its own document.
+    await expect(page.frameLocator("iframe.causa-graph__frame").getByText("The joint failed during ascent.").first()).toBeVisible({ timeout: 60_000 });
+    // Read-only: the frame is in inspect mode, so no editing controls are offered.
+    await expect(page.frameLocator("iframe.causa-graph__frame").getByRole("button", { name: /delete|add node/i })).toHaveCount(0);
+    await page.locator("#causa-graph-selection").evaluate((el) => { el.value = "h-h-1"; el.dispatchEvent(new Event("change", { bubbles: true })); });
+    await expect(page.locator(".causa-graph__selection")).toContainText("Hypothesis (Plausible): A seal lost resilience in the cold.");
+    const text = page.getByRole("list", { name: "Causal relationships as text" });
+    await expect(text).toContainText("The joint failed during ascent.");
+    await expect(text).toContainText("Root cause: A seal lost resilience in the cold.");
+  });
+});

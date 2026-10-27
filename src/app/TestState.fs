@@ -84,7 +84,7 @@ let toProjection (s: Injected) : WorkspaceProjection =
           Hypotheses = [ { Id = "h-1"; Statement = "A seal lost resilience in the cold."; State = "plausible"; Supporting = Known 1; Contradicting = Known 0 } ]
           Evidence = [ { Id = "e-1"; Content = "Launch-time temperature was recorded below the qualified range."; Source = Some "Fixture source"; Category = "measurement"; RecordedAt = Some "2026-01-01T00:00:00Z" } ]
           Blockers = blockers
-          Causes = []
+          Causes = [ { Id = "c-1"; Outcome = "The joint failed during ascent."; State = "identified"; Members = [ "h-1", RootCause ] } ]
           Timeline = [ { Sequence = 1L; EventType = "InvestigationOpened"; OccurredAt = "2026-01-01T00:00:00Z"; RecordedAt = Some "2026-01-01T00:00:00Z"; Actor = Some "Fixture" } ]
           Capabilities = capabilities }
 

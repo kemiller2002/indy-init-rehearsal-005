@@ -30,6 +30,12 @@ mkdirSync(join(site, "vendor/forma"), { recursive: true });
 const forma = join(root, "node_modules/@echelon-foundry/design-system/dist");
 for (const file of ["all.css", "tokens.css", "foundations.css", "components.css"]) cpSync(join(forma, file), join(site, "vendor/forma", file));
 
+// The causal graph renders in @echelon-foundry/forma-workflow isolated (iframe) mode: its own .NET runtime in its
+// own document. Forma's split stylesheets are what the frame loads (?forma=).
+cpSync(join(root, "node_modules/@echelon-foundry/forma-workflow/dist"), join(site, "vendor/forma-workflow"), {
+  recursive: true,
+  filter: (src) => !/\.(br|gz|pdb|map)$/.test(src),
+});
 for (const file of ["index.html", "causa.css", "causa-icon.svg"]) cpSync(join(root, "src/kernel", file), join(site, file));
 
 // The kernel composition root is TypeScript; compile it, then point package specifiers at the vendored copies.
@@ -63,6 +69,7 @@ writeFileSync(join(site, "build-info.json"), JSON.stringify({
     "limen (kernel)": version("@echelon-foundry/limen"),
     "limen-fsharp (contract, guest)": lockVersion("EchelonFoundry.Limen.Contract"),
     "forma (design system)": version("@echelon-foundry/design-system"),
+    "forma-workflow (causal graph layout)": version("@echelon-foundry/forma-workflow"),
   },
 }, null, 1) + "\n");
 

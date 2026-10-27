@@ -137,6 +137,87 @@ Promise.race([kernel.start(), timeout]).then(
   (error) => startFailed("Causa took too long to start. Check your connection and retry.", error),
 );
 
+// ---- The causal graph (UI-026, T23) ----------------------------------------------------------------------------------
+// The application projects the causal structure as a Forma workflow document into data-document on #causa-graph.
+// This adapter runs @echelon-foundry/forma-workflow in isolated (iframe) mode: its own .NET runtime in its own
+// document, never beside the Causa runtime. It forwards the projected document in and the selected node id out
+// through a hidden control whose change event the application handles (graph-select). It decides nothing.
+const WORKFLOW_PROTOCOL = "forma-workflow-host/1";
+const workflowBase = new URL("./vendor/forma-workflow/", import.meta.url);
+const formaBase = new URL("./vendor/forma/", import.meta.url).href;
+let graph: { container: Element; frame: HTMLIFrameElement; ready: boolean; sent: string } | null = null;
+let messageId = 0;
+
+const selectionId = (object: unknown): string => {
+  if (typeof object === "string") return object;
+  if (object !== null && typeof object === "object") {
+    const o = object as Record<string, unknown>;
+    for (const key of ["id", "node", "object"]) if (typeof o[key] === "string") return o[key] as string;
+  }
+  return "";
+};
+
+const postToGraph = (message: Record<string, unknown>) => {
+  if (graph === null || graph.frame.contentWindow === null) return;
+  graph.frame.contentWindow.postMessage({ protocol: WORKFLOW_PROTOCOL, id: `causa-${++messageId}`, ...message }, location.origin);
+};
+
+const sendDocument = () => {
+  if (graph === null || !graph.ready) return;
+  const text = graph.container.getAttribute("data-document") ?? "";
+  if (text === "" || text === graph.sent) return;
+  graph.sent = text;
+  try {
+    postToGraph({ type: "load", document: JSON.parse(text) });
+    postToGraph({ type: "mode", mode: "inspect" });
+  } catch (error) {
+    diagnostics.push({ kind: "GraphDocument", detail: String(error) });
+  }
+};
+
+const syncGraph = () => {
+  const container = document.getElementById("causa-graph");
+  if (container === null) {
+    graph = null;
+    return;
+  }
+  if (graph === null || graph.container !== container) {
+    const frame = document.createElement("iframe");
+    const src = new URL("frame.html", workflowBase);
+    src.searchParams.set("parent", location.origin);
+    src.searchParams.set("forma", formaBase);
+    src.searchParams.set("brand", "causa");
+    frame.src = src.href;
+    frame.title = "Causal graph: hypotheses and the outcomes they explain";
+    frame.className = "causa-graph__frame";
+    container.replaceChildren(frame);
+    graph = { container, frame, ready: false, sent: "" };
+  }
+  sendDocument();
+};
+
+window.addEventListener("message", (event) => {
+  if (graph === null || event.source !== graph.frame.contentWindow || event.origin !== location.origin) return;
+  const message = event.data;
+  if (message === null || typeof message !== "object" || message.protocol !== WORKFLOW_PROTOCOL) return;
+  if (message.type === "frame-ready") {
+    graph.ready = true;
+    graph.sent = "";
+    sendDocument();
+  } else if (message.type === "event" && message.event && message.event.type === "selection") {
+    const objects: unknown[] = Array.isArray(message.event.objects) ? message.event.objects : [];
+    const input = document.getElementById("causa-graph-selection");
+    if (input instanceof HTMLInputElement) {
+      input.value = objects.length > 0 ? selectionId(objects[0]) : "";
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  } else if (message.type === "reply" && message.ok === false) {
+    diagnostics.push({ kind: "GraphRefused", detail: String(message.error) });
+  }
+});
+
+new MutationObserver(syncGraph).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["data-document"] });
+
 // ---- Linked records (UI-033) ----------------------------------------------------------------------------------------
 // When the projection marks a record selected (a link with ?item=), move focus to it so keyboard and screen-reader
 // users land where the link pointed. Mechanism only: which record is selected is the application's decision.

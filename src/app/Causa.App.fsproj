@@ -14,6 +14,7 @@
     <Compile Include="Routes.fs" />
     <Compile Include="Adapter.fs" />
     <Compile Include="Presentation.fs" />
+    <Compile Include="Graph.fs" />
     <Compile Include="Shell.fs" />
     <Compile Include="TestState.fs" />
     <Compile Include="View.fs" />

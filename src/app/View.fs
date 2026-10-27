@@ -185,6 +185,32 @@ let project (model: Model) : ViewState =
                       "actor", (t.Actor |> Option.defaultValue "Actor not recorded") ]))
         |> Option.defaultValue []
 
+    let graphDoc = inv |> Option.map (fun i -> Graph.toDocument i.Title i.Id (Graph.ofInvestigation i)) |> Option.defaultValue ""
+    let graphSelection = inv |> Option.map (fun i -> Graph.describeSelection i model.Selected) |> Option.defaultValue ""
+
+    let hypothesisText =
+        inv |> Option.map (fun i -> i.Hypotheses |> List.map (fun h -> h.Id, h.Statement) |> Map.ofList) |> Option.defaultValue Map.empty
+
+    // The same causal structure as text (UI-011-O5, UI-026-O4): the graph is never the only way to read it.
+    let causes =
+        inv
+        |> Option.map (fun i ->
+            i.Causes
+            |> List.sortBy (fun c -> c.Id)
+            |> List.map (fun c ->
+                let members =
+                    c.Members
+                    |> List.sortBy fst
+                    |> List.map (fun (h, role) -> $"""{roleLabel role}: {hypothesisText |> Map.tryFind h |> Option.defaultValue "a hypothesis not in this view"}""")
+
+                item
+                    [ "id", c.Id
+                      "outcome", c.Outcome
+                      "state", label c.State
+                      "tone", tone c.State
+                      "members", (if members.IsEmpty then "No contributing hypotheses recorded." else String.concat "; " members) ]))
+        |> Option.defaultValue []
+
     let adminRows =
         let row id l v st = item [ "id", id; "label", l; "value", v; "state", st ]
 
@@ -284,6 +310,12 @@ let project (model: Model) : ViewState =
       "capabilities.empty", flag (inv.IsSome && capabilities.IsEmpty)
       "timeline", items timeline
       "timeline.empty", flag (inv.IsSome && timeline.IsEmpty)
+      "graph.any", flag (graphDoc <> "")
+      "graph.document", text graphDoc
+      "graph.selected", flag (graphSelection <> "")
+      "graph.selection", text graphSelection
+      "causes", items causes
+      "causes.empty", flag (inv.IsSome && causes.IsEmpty)
       "sync.text", text (syncText ws.Sync)
       "sync.tone", text (syncTone ws.Sync)
       // Administration (UI-018) and Settings (UI-019).

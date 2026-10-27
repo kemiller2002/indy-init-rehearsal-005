@@ -1,0 +1,34 @@
+{
+  "schema": "causa.capability-discovery/1",
+  "task": "T24",
+  "requirements": ["WDL-001", "WDL-002", "AR-005", "ADRP-006"],
+  "discoveredAt": "2026-10-27",
+  "capability": "workflow layout engine for the causal graph (T23)",
+  "owner": { "repository": "kemiller2002/forma", "directory": "packages/workflow", "system": "Forma" },
+  "package": {
+    "name": "@echelon-foundry/forma-workflow",
+    "version": "1.1.0",
+    "registry": "https://registry.npmjs.org/",
+    "integrity": "sha512-20L1AeYGzqdXu9e2isuQSgvTdI8tRKROiUPpsn0oy/Y1SYSv/1PAtqRu1m3Ahf6Ez9+DyNqCU7bhclyr65Dslw==",
+    "gitHead": "e0b088dbbe98b05221c4bc5b5e2224e9bf470827",
+    "provenance": "npm SLSA provenance attestation present",
+    "publishedAt": "2026-10-27T19:43:57Z",
+    "otherVersions": ["1.0.0 (2026-10-01; used in Rehearsal 4)"],
+    "peerDependency": "@echelon-foundry/design-system >=0.4.0 (this app: 0.9.0)"
+  },
+  "license": "PolyForm-Noncommercial-1.0.0",
+  "api": {
+    "element": "<forma-workflow mode=\"view|inspect|edit|pick|runtime\"> backed by the F# Forma.Workflow engine in .NET WebAssembly",
+    "isolatedMode": "dist/frame.html?parent=<origin>&forma=<Forma dist URL>&brand=<brand>; postMessage protocol forma-workflow-host/1: host sends {type:'load', document} and {type:'mode', mode}; frame sends frame-ready, reply, and event {type:'selection', objects}",
+    "documentFormat": "forma-workflow format 1.0.0 (dist/forma-workflow.schema.json); capabilities in dist/workflow-capabilities.json",
+    "layout": "the engine computes placement and edge routing from nodes and edges; the document carries no coordinates"
+  },
+  "constraints": [
+    "Runs its own .NET runtime; Causa uses the isolated (iframe) mode so the two runtimes never share a document.",
+    "Not listed in echelon-registry releases or the echelon-current set (forma releases there cover @echelon-foundry/design-system only): version pinned exactly in package.json and package-lock.json.",
+    "Noncommercial license."
+  ],
+  "decision": "Reuse; no second layout implementation and no fixed coordinates in Causa (WDL-002). Causa's Graph.fs projects typed causal relationships into the workflow document; forma-workflow lays it out; Forma styles it (WDL-004).",
+  "workingExample": "tests/browser/shell.spec.js: 'the causal analysis renders in the real forma-workflow frame…' loads vendor/forma-workflow/frame.html, sends the projected document and finds the outcome label rendered inside the frame.",
+  "upstreamChangesNeeded": []
+}

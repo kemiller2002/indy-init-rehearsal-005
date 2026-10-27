@@ -238,7 +238,23 @@
         <template data-if="section.causal">
           <section aria-labelledby="sec-causal" data-percepta-screen="investigation-causal-analysis">
             <h2 id="sec-causal">Causal analysis</h2>
-            <p class="causa-muted">The causal graph is not available in this build yet.</p>
+            <template data-if="graph.any">
+              <div class="causa-graph">
+                <!-- Laid out by @echelon-foundry/forma-workflow in its isolated frame (WDL-001/002); read-only. -->
+                <div id="causa-graph" class="causa-graph__canvas" data-bind-data-document="graph.document"></div>
+                <input type="hidden" id="causa-graph-selection" data-event="graph-select">
+              </div>
+            </template>
+            <template data-if="graph.selected">
+              <p class="causa-graph__selection" role="status"><span class="causa-label">Selected:</span> <span data-text="graph.selection"></span></p>
+            </template>
+            <h3>Causal relationships</h3>
+            <template data-if="causes.empty"><p class="causa-muted">No causal relationship has been recorded yet.</p></template>
+            <ul class="causa-list" aria-label="Causal relationships as text">
+              <template data-each="causes" data-key="id">
+                <li class="causa-item causa-item--cause"><p><span class="causa-label">Outcome:</span> <span data-text="outcome"></span> <span class="causa-tag" data-bind-data-tone="tone" data-text="state"></span></p><p data-text="members"></p></li>
+              </template>
+            </ul>
           </section>
         </template>
         <template data-if="section.evidence">
