@@ -1,7 +1,7 @@
 // T27: the AI proposal loop in the browser. The provider is a scripted response (page.route) so every result state
 // is deterministic; the live provider is not exercised here and nothing in this file claims it. The real F# kernel
 // runs over the test build's in-memory workspace.
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./support/fixtures.js";
 
 const SITE = `http://127.0.0.1:${process.env.CAUSA_TEST_PORT ?? 4322}/`;
 const KEY = "sk-ant-test-" + "K".repeat(40);

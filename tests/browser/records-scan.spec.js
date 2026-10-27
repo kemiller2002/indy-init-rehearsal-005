@@ -2,7 +2,7 @@
 // the application source, the built bundle or the Pages output. Needs a causa-data checkout: CAUSA_DATA_DIR, or
 // causa-data/ beside or inside this repository (CI checks it out into ./causa-data).
 import { existsSync } from "node:fs";
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./support/fixtures.js";
 import { scan } from "../../scripts/scan-records.mjs";
 
 const causaData = [process.env.CAUSA_DATA_DIR, "causa-data", "../causa-data"].find((d) => d && existsSync(d));

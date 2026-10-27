@@ -3,7 +3,7 @@
 // (never counted as passed here). Requires the percepta CLI (0.3.0) on PATH.
 import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync } from "node:fs";
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./support/fixtures.js";
 
 test("every bound screen satisfies its Percepta contract (verify-app) [VPO-59c5cc78868b7d74] [VPO-447fd64210e3d9e3] [VPO-0684fde6ced06208] [VPO-9659118aa1ef95ff]", async () => {
   test.setTimeout(600_000);

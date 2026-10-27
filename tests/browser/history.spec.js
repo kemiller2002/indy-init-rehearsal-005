@@ -1,6 +1,6 @@
 // T28: history and time travel through the real F# kernel (Timeline.entries/view/changesAt/between) in the test
 // build's in-memory workspace.
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./support/fixtures.js";
 
 const SITE = `http://127.0.0.1:${process.env.CAUSA_TEST_PORT ?? 4322}/`;
 const started = (page) => expect(page.locator("#causa-boot")).toHaveCount(0, { timeout: 60_000 });
