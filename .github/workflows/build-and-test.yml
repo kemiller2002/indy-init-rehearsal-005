@@ -747,11 +747,47 @@ jobs:
           if-no-files-found: ignore
           retention-days: 30
 
+  # The provider-conformance layer (PF-011-O3/O5, T18/T21): the persistence tool (src/persistence/Tool, owned by the
+  # persist stream) records real GitHub behaviour against CAUSA_TEST_REPO (create, append, re-read, conflict, rejected
+  # credential, unknown-outcome reconciliation; writes only under workspaces/demo/rec-<run id>/) and loads the
+  # historical catalog with the workflow's read-only token. Main pushes and manual runs only, required on main like
+  # live. Secrets are given to the one step that needs them; a missing secret is BLOCKED (non-zero), never a pass.
+  # The tool sanitizes its own output by an allow-list; nothing is uploaded.
+  provider-conformance:
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: provider-conformance
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - name: Build the recorder
+        run: dotnet build src/persistence/Tool/Causa.Persistence.Tool.fsproj -c Release
+      - name: Record provider behaviour and run the live write path
+        env:
+          CAUSA_GITHUB_TOKEN: ${{ secrets.CAUSA_GITHUB_TOKEN }}
+          CAUSA_TEST_REPO_SECRET: ${{ secrets.CAUSA_TEST_REPO }}
+          CAUSA_TEST_REPO_VAR: ${{ vars.CAUSA_TEST_REPO }}
+          # DC-004: the workflow's own read-only token, which cannot write to the test repository.
+          CAUSA_READONLY_TOKEN: ${{ github.token }}
+        run: dotnet src/persistence/Tool/bin/Release/net10.0/causa-persistence.dll record
+      # T25 / EXT-DATA-013 / PF-014: the active historical catalog through the application's own Sync program, with
+      # the workflow's read-only token (DEC-025: no anonymous mode); nothing is written.
+      - name: Load the historical catalog live
+        if: always()
+        env:
+          CAUSA_CATALOG_TOKEN: ${{ github.token }}
+        run: dotnet src/persistence/Tool/bin/Release/net10.0/causa-persistence.dll catalog
+
   # The required check. Passes only when every mandatory job passed: core, lock-gate, site, browser, and on main
   # pushes the live suite. A job that reused an identical earlier pass (branches only) counts as passed here and as
   # not produced in the acceptance ledger. (The persistence-provider workflow is deliberately not required here.)
   build-and-test:
-    needs: [reuse, core, lock-gate, site, browser, live, wasm-smoke]
+    needs: [reuse, core, lock-gate, site, browser, live, provider-conformance, wasm-smoke]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -764,10 +800,11 @@ jobs:
           BROWSER: ${{ needs.browser.result }}
           LIVE: ${{ needs.live.result }}
           WASM: ${{ needs.wasm-smoke.result }}
+          PROVIDER: ${{ needs.provider-conformance.result }}
         run: |
           echo "reuse=$REUSE core=$CORE lock-gate=$LOCK site=$SITE browser=$BROWSER wasm-smoke=$WASM live=$LIVE (live required: $IS_MAIN)"
           for r in "$REUSE" "$CORE" "$LOCK" "$SITE" "$BROWSER" "$WASM"; do [ "$r" = success ] || exit 1; done
-          if [ "$IS_MAIN" = true ]; then [ "$LIVE" = success ] || exit 1; fi
+          if [ "$IS_MAIN" = true ]; then [ "$LIVE" = success ] || exit 1; [ "$PROVIDER" = success ] || exit 1; fi
 
   deploy:
     needs: [build-and-test, site]
@@ -853,7 +890,7 @@ jobs:
           retention-days: 90
 
   acceptance:
-    needs: [reuse, core, lock-gate, site, browser, live, wasm-smoke, preservation-gate, preservation-adversarial, percepta, build-and-test, deploy, deployed-smoke]
+    needs: [reuse, core, lock-gate, site, browser, live, provider-conformance, wasm-smoke, preservation-gate, preservation-adversarial, percepta, build-and-test, deploy, deployed-smoke]
     if: always() && needs.reuse.result != 'cancelled'
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -924,12 +961,13 @@ jobs:
           DEPLOY: ${{ needs.deploy.result == 'success' && 'success' || needs.deploy.result == 'failure' && 'failure' || 'not-produced' }}
           SMOKE: ${{ needs.deployed-smoke.result == 'success' && 'success' || needs.deployed-smoke.result == 'failure' && 'failure' || 'not-produced' }}
           WASM: ${{ needs.wasm-smoke.result == 'success' && 'success' || needs.wasm-smoke.result == 'failure' && 'failure' || 'not-produced' }}
+          PROVIDER: ${{ needs.provider-conformance.result == 'success' && 'success' || needs.provider-conformance.result == 'failure' && 'failure' || 'not-produced' }}
           PRESERVATION: ${{ needs.preservation-gate.outputs.status == 'success' && 'success' || needs.preservation-gate.result == 'failure' && 'failure' || 'not-produced' }}
           PERCEPTA: ${{ needs.percepta.outputs.status == 'success' && 'success' || needs.percepta.result == 'failure' && 'failure' || 'not-produced' }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           jq -n --arg core "$CORE" --arg lock "$LOCK" --arg site "$SITE" --arg browser "$BROWSER" --arg live "$LIVE" \
-                --arg deploy "$DEPLOY" --arg smoke "$SMOKE" --arg pres "$PRESERVATION" --arg percepta "$PERCEPTA" --arg wasm "$WASM" \
+                --arg deploy "$DEPLOY" --arg smoke "$SMOKE" --arg pres "$PRESERVATION" --arg percepta "$PERCEPTA" --arg wasm "$WASM" --arg provider "$PROVIDER" \
                 --arg run "$RUN" '{producers: [
             {id: "core", status: $core, command: "dotnet test App.slnx -c Release (\($run))", record: "TestResults/dotnet"},
             {id: "lock-gate", status: $lock, command: "causa-acceptance lock-gate (\($run))", record: "TestResults/lock-gate/lock-gate.json"},
@@ -938,6 +976,7 @@ jobs:
             {id: "live", status: $live, command: "npx playwright test --grep @live (\($run))", record: "TestResults/live/live-results.json"},
             {id: "deploy", status: $deploy, command: "actions/deploy-pages (\($run))"},
             {id: "deployed-smoke", status: $smoke, command: "version.json at the deployed URL equals the source SHA (\($run))"},
+            {id: "provider-conformance", status: $provider, command: "causa-persistence record && causa-persistence catalog (\($run))"},
             {id: "wasm-smoke", status: $wasm, command: "dotnet build -c Release tests/Engine.WasmSmoke && node tests/Engine.WasmSmoke/run.mjs (\($run))", record: "gate-records/wasm-smoke/wasm-smoke.log"},
             {id: "preservation-gate", status: $pres, command: "tools/acceptance/ci/preservation-gate.sh: praxis requirements preservation verify as recorded (\($run))", record: "gate-records/preservation-gate/gate.json"},
             {id: "percepta-verify-app", status: $percepta, command: "percepta verify-app --base-url <built site> (\($run))", record: "gate-records/percepta/verify-app.json"}

@@ -45,12 +45,14 @@ let needsOf name =
     else m.Groups[1].Value.Trim('[', ']').Split(',') |> Array.map (fun s -> s.Trim()) |> Array.filter ((<>) "") |> List.ofArray
 
 [<Fact; Trait("obligation", "VPO-770de2a43b888b53"); Trait("obligation", "VPO-23b26660a58ef990")>]
-let ``AR-014 PF-012 only the live job receives credentials; every other job runs with read-only contents and no secret`` () =
+let ``AR-014 PF-012 only the live provider jobs receive credentials; every other job runs with read-only contents and no secret`` () =
     let text = workflowText.Value
     let header = text.Substring(0, text.IndexOf("\njobs:\n"))
     Assert.Matches(@"(?m)^permissions:\s*\n  contents: read\s*$", header)
     let withSecrets = jobs.Value |> Map.filter (fun _ t -> t.Contains "secrets.") |> Map.keys |> List.ofSeq
-    Assert.Equal<string list>([ "live" ], withSecrets)
+    Assert.Equal<string list>([ "live"; "provider-conformance" ], withSecrets)
+    // In the provider job the secrets reach only the one step that writes to the test repository.
+    Assert.Equal(1, Regex.Matches(job "provider-conformance", @"secrets\.CAUSA_GITHUB_TOKEN").Count)
     // The deterministic layers (domain, site, mocked browser, WASM, gates) run without any secret.
     for j in [ "core"; "site"; "browser"; "wasm-smoke"; "lock-gate"; "preservation-gate"; "percepta" ] do
         Assert.DoesNotContain("secrets.", job j)
@@ -82,7 +84,7 @@ let ``PF-017 the offline layers do not depend on the live provider and an offlin
         Assert.DoesNotContain("CAUSA_GITHUB_TOKEN", job j)
     // The required check fails when live fails on main, whatever the offline layers did.
     Assert.Contains("live", needsOf "build-and-test")
-    Assert.Contains(@"if [ ""$IS_MAIN"" = true ]; then [ ""$LIVE"" = success ] || exit 1; fi", job "build-and-test")
+    Assert.Contains(@"if [ ""$IS_MAIN"" = true ]; then [ ""$LIVE"" = success ] || exit 1; [ ""$PROVIDER"" = success ] || exit 1; fi", job "build-and-test")
 
 [<Fact; Trait("obligation", "VPO-a71f7df7b092e654")>]
 let ``AR-022 CI runs on every push to main and to every stream branch and on every pull request`` () =
@@ -137,3 +139,29 @@ let ``AR-018 missing live credentials fail the live job and the deployment is no
     Assert.Contains(@"[ ""$served"" = ""$GITHUB_SHA"" ] || {", smoke)
     // The ledger names a deployed SHA only from deployed-smoke's verified output.
     Assert.Contains("DEPLOYED_SHA: ${{ needs.deployed-smoke.outputs.sha }}", job "acceptance")
+
+[<Fact; Trait("obligation", "VPO-da8e100075889a8d")>]
+let ``PF-011 each verification level has its own executable command, CI job outcome and published evidence`` () =
+    // domain, UI with local fixtures, provider conformance, live integration
+    Assert.Contains("dotnet test App.slnx", job "core")
+    Assert.Contains("--grep-invert @live", job "browser")
+    Assert.Contains("causa-persistence.dll record", job "provider-conformance")
+    Assert.Contains("--grep @live", job "live")
+    // Each one is a producer of its own in the acceptance ledger, with its command recorded.
+    let acceptance = job "acceptance"
+    for id in [ "core"; "browser"; "provider-conformance"; "live" ] do
+        Assert.Contains(sprintf "{id: \"%s\", status:" id, acceptance)
+    for j in [ "core"; "browser"; "provider-conformance"; "live" ] do
+        Assert.Contains(j, needsOf "build-and-test")
+
+[<Fact; Trait("obligation", "VPO-fe04733e99e5e461")>]
+let ``PF-020 release acceptance requires domain, fixture UI, provider conformance, live and exact-SHA deployed browser verification`` () =
+    let gates = Json.load (Path.Combine(repoRoot, "acceptance/gates.json"))
+    let g9 = items "gates" gates |> List.find (fun g -> str "id" g = Some "G9")
+    for p in [ "core"; "browser"; "provider-conformance"; "live"; "deploy"; "deployed-smoke"; "traceability" ] do
+        Assert.Contains(p, strings "requires" g9)
+    // The deployment itself only follows a green required check, which on main includes live and provider conformance.
+    Assert.Contains("build-and-test", needsOf "deploy")
+    Assert.Contains("needs.build-and-test.result == 'success'", job "deploy")
+    Assert.True(File.Exists(Path.Combine(repoRoot, "tools/acceptance/deployed/deployed.spec.js")))
+    Assert.Contains("npx playwright test -c tools/acceptance/deployed/playwright.config.js", job "deployed-smoke")
