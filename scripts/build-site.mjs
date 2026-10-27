@@ -13,13 +13,19 @@ const wasmOut = join(root, "obj/site-wasm");
 rmSync(site, { recursive: true, force: true });
 mkdirSync(site, { recursive: true });
 
-if (!process.argv.includes("--skip-dotnet") || !existsSync(wasmOut)) {
-  rmSync(wasmOut, { recursive: true, force: true });
-  execFileSync("dotnet", ["publish", "src/wasm/Causa.Wasm.csproj", "-c", "Release", "-o", wasmOut, "-p:DebugType=none", "-p:DebugSymbols=false"], { stdio: "inherit" });
+// The test configuration reuses the production build's WebAssembly output (same engine; only main.js differs), so
+// a CI job that only has dist/ can build it without the .NET SDK.
+const reuseDist = test && process.argv.includes("--skip-dotnet") && !existsSync(wasmOut) && existsSync(join(root, "dist/wasm/_framework"));
+if (reuseDist) {
+  cpSync(join(root, "dist/wasm/_framework"), join(site, "wasm/_framework"), { recursive: true });
+} else {
+  if (!process.argv.includes("--skip-dotnet") || !existsSync(wasmOut)) {
+    rmSync(wasmOut, { recursive: true, force: true });
+    execFileSync("dotnet", ["publish", "src/wasm/Causa.Wasm.csproj", "-c", "Release", "-o", wasmOut, "-p:DebugType=none", "-p:DebugSymbols=false"], { stdio: "inherit" });
+  }
+  // GitHub Pages serves no precompressed variants, and symbols are not shipped.
+  cpSync(join(wasmOut, "wwwroot/_framework"), join(site, "wasm/_framework"), { recursive: true, filter: (src) => !/\.(br|gz|pdb)$/.test(src) });
 }
-
-// GitHub Pages serves no precompressed variants, and symbols are not shipped.
-cpSync(join(wasmOut, "wwwroot/_framework"), join(site, "wasm/_framework"), { recursive: true, filter: (src) => !/\.(br|gz|pdb)$/.test(src) });
 
 const limen = join(root, "node_modules/@echelon-foundry/limen/dist");
 for (const part of ["kernel", "hosts", "protocol.js", "generated", "capability-support"]) {
