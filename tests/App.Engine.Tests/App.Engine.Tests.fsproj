@@ -9,6 +9,7 @@
   <ItemGroup>
     <Compile Include="EngineTests.fs" />
     <Compile Include="RouteTests.fs" />
+    <Compile Include="WriteInvariantTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />

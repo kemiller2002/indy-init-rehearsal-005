@@ -12,5 +12,6 @@
     <Compile Include="Operational.fs" />
     <Compile Include="Routes.fs" />
     <Compile Include="Domain.fs" />
+    <Compile Include="Sync.fs" />
   </ItemGroup>
 </Project>
