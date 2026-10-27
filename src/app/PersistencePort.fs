@@ -100,7 +100,7 @@ let private syncStatus (m: Model) (d: Document) : A.SyncStatus =
     let pendingEvents = d.Local.Version - (d.Confirmed |> Option.map (fun c -> c.Version) |> Option.defaultValue 0L)
     if d.ReadOnly then A.ReadOnly
     // Fixture mode never claims GitHub: changes live in this page only (PF-003-O4).
-    elif m.Target |> Option.exists Fixture.isFixture then A.SaveFailed "Fixture mode: kept in this page only; nothing is saved to GitHub."
+    elif m.Target |> Option.exists Fixture.isFixture then A.LocalOnly "Fixture mode: kept in this page only; nothing is saved to GitHub."
     else
         match Sync.documentStatus m d with
         | "clean" -> A.NoChanges
