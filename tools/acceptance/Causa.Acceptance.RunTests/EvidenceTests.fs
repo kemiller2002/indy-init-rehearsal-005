@@ -162,6 +162,10 @@ let ``AR-002 WDL-015 every baseline obligation, WDL-001 to WDL-015 included, map
     for k in [ "exclusions"; "fail"; "drift"; "blocked"; "needsReview" ] do
         Assert.Equal(0, (gi (summary[k])))
     Assert.Equal(sha256File (baselinePath ()), (gs (gate["baseline"]["sha256"])))
+    // The independent verbatim-carriage check of the same package passed in the same job.
+    let derivation = load (Path.Combine(envPath "GATE_RECORDS", "preservation-gate/derivation-check.json"))
+    Assert.Equal(Some "pass", str "verdict" derivation)
+    Assert.Equal(obligations, gi (derivation["summary"]["obligations"]))
     // WDL-001..WDL-015 are each present in the derived package with every obligation carried.
     let derived = Directory.GetFiles(Path.Combine(repoRoot, "research/requirements"), "*.md") |> Array.map File.ReadAllText |> String.concat "\n"
     for i in 1..15 do

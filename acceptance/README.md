@@ -141,6 +141,23 @@ Run the acceptance-job tests locally with the job's inputs: `INDY_INIT`, `CAUSA_
 results), `PRODUCERS`, `SOURCE_SHA`, `RUN_ID`, `GATE_RECORDS`, `SITE_DIR`; the preservation tests with `INDY_INIT`
 and `INDY_INIT_SOURCE` (Indy-init at aab8f80) and Praxis on PATH.
 
+## Derivation check (AR-002-O2) and the Praxis finding
+
+`causa-acceptance derivation-check` checks the derived package independently of the Praxis preservation gate (its
+parser shares no code with `tools/derive-requirements`): every baseline obligation, through the disposition's
+mapping, must be carried as a derived criterion whose text is byte-identical to its text in the pinned baseline
+(sha256 `621e2f96…`, Indy-init 459f65a), and every derived criterion must come from a baseline obligation. Any
+difference fails with the obligation id, unless the disposition records an `approvedTransformation` whose approval
+is in the pinned approvals file (none is recorded). The preservation-gate job runs both checks on the real package
+and G0's producer succeeds only when both pass (`gate-records/preservation-gate/derivation-check.json`); the
+preservation-adversarial job runs both against omission, negation, weakening, value-swap and role-swap mutations.
+
+**Finding for Praxis (route through its Praxis input after the rehearsal):** `praxis requirements preservation
+verify` 3.22.0 passes a derivation whose tokens are all present but swapped: the WCAG ratios of UI-016-O11
+exchanged, and the source precedence order of ADRP-001-O1 exchanged. The `FINDING …` tests in
+`tools/acceptance/Causa.Acceptance.RunTests/PreservationTests.fs` characterize the gap (they start failing once
+Praxis detects swaps); AR-002-O2 is proven by the derivation check, not by Praxis.
+
 ## Plan curation (the path to ACCEPTED)
 
 `requirements-compiler verify-plan` reports a requirement PASS only when the **plan** gives every one of its
