@@ -236,6 +236,10 @@ let rec private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
         match model.Route with
         | Investigation(id, _) -> toPort entropy (RequestPanel(id, model.Settings.AiModel, d.AiTask)) model
         | _ -> model, []
+    | "panel-record" ->
+        match model.Route, e.Key with
+        | Investigation(id, _), Some role -> toPort entropy (RecordPanelDrafts(id, role)) model
+        | _ -> model, []
     | "tournament-request" ->
         match model.Route with
         | Investigation(id, _) ->

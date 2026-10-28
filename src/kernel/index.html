@@ -984,7 +984,7 @@
                     <ul class="causa-list" aria-label="Panel roles"><template data-each="an.panel.roles" data-key="id"><li class="causa-item"><p data-text="text"></p><p class="causa-muted" data-text="state"></p></li></template></ul></div>
                   <div data-percepta-region="proposals"><h4>What each role proposed</h4>
                     <template data-if="an.panel.answers.empty"><p class="causa-muted">No role has answered yet.</p></template>
-                    <ul class="causa-list" aria-label="Answers by role"><template data-each="an.panel.answers" data-key="id"><li class="causa-item"><p data-text="text"></p><p class="causa-muted" data-text="state"></p></li></template></ul></div>
+                    <ul class="causa-list" aria-label="Answers by role"><template data-each="an.panel.answers" data-key="id"><li class="causa-item"><p data-text="text"></p><p class="causa-muted" data-text="state"></p><template data-if="hasDrafts"><button type="button" class="ef-button" data-event="panel-record">Record this role's drafts as proposals for review</button></template></li></template></ul></div>
                   <div data-percepta-region="disagreements"><h4>Where the roles differ</h4>
                     <template data-if="an.panel.disagreements.empty"><p class="causa-muted">No differences to show: no two roles have answered with drafts.</p></template>
                     <ul class="causa-list" aria-label="Differences between roles"><template data-each="an.panel.disagreements" data-key="id"><li data-text="text"></li></template></ul></div>
