@@ -141,6 +141,16 @@ Run the acceptance-job tests locally with the job's inputs: `INDY_INIT`, `CAUSA_
 results), `PRODUCERS`, `SOURCE_SHA`, `RUN_ID`, `GATE_RECORDS`, `SITE_DIR`; the preservation tests with `INDY_INIT`
 and `INDY_INIT_SOURCE` (Indy-init at aab8f80) and Praxis on PATH.
 
+## The published proof page lags one main run
+
+The deployed site's Requirements proof and factory pages (`evidence/proof.json`, `evidence/factory.json`, shell S20/
+S21) are built by the site job, before this run's tests exist. They therefore publish the traceability of the
+**latest completed main run** (its `acceptance-evidence` artifact, `bundle/traceability.json`, whose `context`
+names that run's id and source SHA) against the pinned plan (`CAUSA_PLAN`, Indy-init at `INDY_INIT_REF`). When no
+such run is available the page publishes traceability as not published; it never falls back to the committed
+`acceptance/traceability.json`. The page is a view of the previous run; the authoritative verdict for a candidate is
+always the acceptance job of that candidate's own run.
+
 ## Derivation check (AR-002-O2) and the Praxis finding
 
 `causa-acceptance derivation-check` checks the derived package independently of the Praxis preservation gate (its

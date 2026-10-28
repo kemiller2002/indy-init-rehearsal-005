@@ -67,7 +67,12 @@ let ``AR-014 PF-012 only the live provider jobs receive credentials; every other
         if m.Success then m.Groups[1].Value.Split('\n') |> Array.map (fun l -> l.Trim()) |> Array.filter (fun l -> l <> "" && l <> "contents: read") |> List.ofArray
         else []
     let elevated = jobs.Value |> Map.filter (fun _ t -> not (grants t).IsEmpty) |> Map.keys |> List.ofSeq
-    Assert.Equal<string list>([ "acceptance"; "deploy" ], elevated)
+    Assert.Equal<string list>([ "acceptance"; "deploy"; "site" ], elevated)
+    // The site job reads the previous main run's acceptance evidence and nothing more.
+    Assert.Matches(@"(?m)^    permissions:\s*\n      contents: read\s*\n      actions: read\s*$", job "site")
+    // The proof page never publishes the committed (stale) traceability file.
+    Assert.Contains("CAUSA_TRACEABILITY: ${{ steps.trace.outputs.path }}", job "site")
+    Assert.Contains("no-traceability-published.json", job "site")
     // The acceptance job reads its own run's job records (timings) and nothing more.
     Assert.Matches(@"(?m)^    permissions:\s*\n      contents: read\s*\n      actions: read\s*$", job "acceptance")
     Assert.Matches(@"pages: write", job "deploy")
@@ -188,7 +193,8 @@ let ``PF-012 the README documents one command for a populated fixture-backed UI 
     Assert.Contains("?percepta=default", fixtureUi)
     // The fixture investigation is rendered only by the test build's hook (main.ts), never by the deployed site.
     let main = File.ReadAllText(Path.Combine(repoRoot, "src/kernel/main.ts"))
-    Assert.Contains(@"TEST_BUILD && new URLSearchParams(location.search).get(""percepta"") === ""default""", main)
+    Assert.Contains(@"new URLSearchParams(location.search).get(""percepta"")", main)
+    Assert.Contains(@"if (TEST_BUILD && (perceptaDefault === ""default""", main)
     let offline = File.ReadAllText(Path.Combine(repoRoot, "tools/acceptance/ci/offline-checks.sh"))
     Assert.Contains("unset CAUSA_GITHUB_TOKEN CAUSA_TEST_REPO", offline)
     Assert.Contains("dotnet test App.slnx", offline)

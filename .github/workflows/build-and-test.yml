@@ -284,10 +284,50 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # actions: read only to download the previous main run's traceability for the published proof page.
+    permissions:
+      contents: read
+      actions: read
     outputs:
       built: ${{ steps.build.outputs.built }}
     steps:
       - uses: actions/checkout@v4
+      # The pinned verification plan (CAUSA_PLAN) for the published proof page (S21).
+      - uses: actions/checkout@v4
+        with:
+          repository: kemiller2002/Indy-init
+          ref: ${{ env.INDY_INIT_REF }}
+          path: .indy-init
+          sparse-checkout: requirements-compiled/v1
+          persist-credentials: false
+      - name: Move the Indy-init checkout out of the tree
+        run: mv .indy-init "$RUNNER_TEMP/indy-init"
+      # CAUSA_TRACEABILITY: this run's tests have not run yet when the site is built, so the proof page publishes the
+      # traceability of the latest COMPLETED main run (its acceptance-evidence artifact, labelled with that run's id
+      # and commit from the file's own context). Never the committed acceptance/traceability.json: with no such run
+      # available the page publishes "not published".
+      - name: Traceability of the latest completed main run
+        id: trace
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          dir="$RUNNER_TEMP/previous-acceptance"
+          target="$RUNNER_TEMP/previous-traceability.json"
+          ids=$(gh run list -R "$GITHUB_REPOSITORY" -w build-and-test.yml -b main --status completed -L 20 --json databaseId -q '.[].databaseId' || true)
+          for id in $ids; do
+            [ "$id" = "$GITHUB_RUN_ID" ] && continue
+            rm -rf "$dir"
+            if gh run download "$id" -R "$GITHUB_REPOSITORY" -n acceptance-evidence -D "$dir" > /dev/null 2>&1 && [ -f "$dir/bundle/traceability.json" ]; then
+              cp "$dir/bundle/traceability.json" "$target"
+              echo "from run $id: $(jq -c '.context' "$target")" | tee -a "$GITHUB_STEP_SUMMARY"
+              break
+            fi
+          done
+          if [ ! -f "$target" ]; then
+            echo "::notice::no completed main run with acceptance evidence; the proof page publishes traceability as not published"
+            target="$RUNNER_TEMP/no-traceability-published.json"
+          fi
+          echo "path=$target" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "10.0.x"
@@ -316,6 +356,9 @@ jobs:
       # was built from into dist/version.json so the deployment can be proved to serve this exact commit.
       - name: Build the site
         id: build
+        env:
+          CAUSA_PLAN: ${{ runner.temp }}/indy-init/${{ env.PLAN_PATH }}
+          CAUSA_TRACEABILITY: ${{ steps.trace.outputs.path }}
         run: |
           if jq -e '.scripts.build' package.json > /dev/null; then
             npm run build
