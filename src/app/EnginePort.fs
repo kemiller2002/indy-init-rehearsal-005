@@ -274,9 +274,13 @@ type Ai =
       Result: AiResult option
       Task: string
       Model: string
-      LastRequest: string option }
+      LastRequest: string option
+      /// S17: the panel batch and when it was sent (latency is measured from it).
+      Panel: (BatchState * DateTimeOffset) option
+      /// S18: the tournament batch, when it was sent, its treatments and task.
+      Tournament: (BatchState * DateTimeOffset * Treatment list * string) option }
 
-let noAi = { Loop = AiLoop.initial; Key = None; Investigation = None; Result = None; Task = ""; Model = ""; LastRequest = None }
+let noAi = { Loop = AiLoop.initial; Key = None; Investigation = None; Result = None; Task = ""; Model = ""; LastRequest = None; Panel = None; Tournament = None }
 
 let private kindText =
     function
@@ -318,12 +322,14 @@ let private aiView (p: Persistence) (ai: Ai) : A.AiView =
       Result = ai.Result |> Option.map (fun r -> AiLoop.describe r, resultTone r, AiLoop.retryable r)
       Drafts = drafts
       Stale = stale
-      LastRequest = ai.LastRequest }
+      LastRequest = ai.LastRequest
+      Panel = ai.Panel |> Option.map (fun (b, _) -> EngineView.panelView b)
+      Tournament = ai.Tournament |> Option.map (fun (b, _, ts, task) -> EngineView.tournamentView task ts b) }
 
 /// The provider call as a Limen Http effect, exactly as AiLoop built it.
-let private httpOf (e: AiHttpEffect) : EffectRequest =
+let private httpWith (prefix: string) (e: AiHttpEffect) : EffectRequest =
     EffectRequest.Http
-        { CorrelationId = CorrelationId($"ai-{e.Request}")
+        { CorrelationId = CorrelationId($"{prefix}-{e.Request}")
           Method = HttpMethod.Post
           Url = e.Url
           Headers = Some(Map.ofList e.Headers)
@@ -333,6 +339,8 @@ let private httpOf (e: AiHttpEffect) : EffectRequest =
           ResponseHeaders = Some [ "retry-after" ]
           Credentials = Some HttpCredentials.Omit
           Xsrf = None }
+
+let private httpOf = httpWith "ai"
 
 /// Limen's outcome for request `n` as AiLoop's outcome. A text response arrives as a JSON string literal.
 let private outcomeOf (n: int64) (result: EffectResult) : AiHttpOutcome option =
@@ -448,7 +456,40 @@ and private handle (entropy: A.Entropy) (input: A.AdapterInput) (p: Persistence)
         | Some(A.Loaded _) -> say "warning" "Describe what the assistant should propose."
         | _ -> say "warning" "That investigation is not open."
 
+    let batchFor (id: string) (model: string) (task: string) (start: Investigation -> Result<BatchState * AiHttpEffect list, Choice<AiResult, BatchFault>>) (keep: BatchState -> Ai) (prefix: string) =
+        match p.Documents.TryFind id with
+        | Some(A.Loaded { Session = { State = Some inv } }) when not (String.IsNullOrWhiteSpace model) && not (String.IsNullOrWhiteSpace task) ->
+            match start inv with
+            | Ok(batch, effects) -> portOf at p None (keep batch), effects |> List.map (httpWith prefix)
+            | Error(Choice1Of2 result) -> portOf at p None { ai with Investigation = Some id; Result = Some result }, []
+            | Error(Choice2Of2 fault) -> say "warning" (match fault with UnknownPromptVersion v -> $"Unknown prompt version {v}; nothing was sent." | DuplicateTreatment t -> $"Treatment {t} is listed twice; nothing was sent." | NoRoles -> "No panel role is defined." | NoTreatments -> "Enter at least one treatment; nothing was sent.")
+        | Some(A.Loaded _) when String.IsNullOrWhiteSpace model -> say "warning" "Set the AI model id first; there is no default model."
+        | Some(A.Loaded _) -> say "warning" "Describe what the assistants should propose."
+        | _ -> say "warning" "That investigation is not open."
+
+    let receiveBatch (corr: string) (prefix: string) (result: EffectResult) (update: AiHttpOutcome -> Ai option) =
+        match Int64.TryParse(corr.Substring(prefix.Length + 1)) with
+        | true, n ->
+            match outcomeOf n result |> Option.bind update with
+            | Some next -> portOf at p None next, []
+            | None -> portOf at p None ai, []
+        | _ -> portOf at p None ai, []
+
+    let latency (sent: DateTimeOffset) = Some(int64 (max 0.0 (at - sent).TotalMilliseconds))
+
     match input with
+    | A.RequestPanel(id, model, task) ->
+        batchFor id model task (fun inv -> Panel.startPanel ai.Key (AiLoop.anthropic (model.Trim())) inv task Panel.roles) (fun b -> { ai with Investigation = Some id; Panel = Some(b, at) }) "panel"
+    | A.RequestTournament(id, pairs, task) ->
+        let treatments = pairs |> List.mapi (fun i (m, v) -> ({ Id = $"Treatment {char (int 'A' + i)}"; Model = m.Trim(); PromptVersion = v }: Treatment))
+        let model = treatments |> List.tryHead |> Option.map (fun t -> t.Model) |> Option.defaultValue ""
+        batchFor id model task (fun inv -> Panel.startTournament ai.Key (AiLoop.anthropic model) inv task treatments) (fun b -> { ai with Investigation = Some id; Tournament = Some(b, at, treatments, task) }) "tour"
+    | A.Answer(corr, result) when corr.StartsWith("panel-", StringComparison.Ordinal) ->
+        receiveBatch corr "panel" result (fun o ->
+            ai.Panel |> Option.bind (fun (b, sent) -> match Panel.receive b o (latency sent) with Ok b -> Some { ai with Panel = Some(b, sent) } | Error _ -> None))
+    | A.Answer(corr, result) when corr.StartsWith("tour-", StringComparison.Ordinal) ->
+        receiveBatch corr "tour" result (fun o ->
+            ai.Tournament |> Option.bind (fun (b, sent, ts, task) -> match Panel.receive b o (latency sent) with Ok b -> Some { ai with Tournament = Some(b, sent, ts, task) } | Error _ -> None))
     | A.Connect r -> pass (Connect r)
     | A.Disconnect -> pass Disconnect
     | A.Open id -> pass (Open id)

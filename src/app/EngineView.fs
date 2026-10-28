@@ -484,3 +484,65 @@ let card (writable: bool) (p: InvestigationProjection) (history: DomainEvent lis
       Hypotheses = A.Known inv.Hypotheses.Count
       Evidence = A.Known inv.Evidence.Count
       Contradictions = A.Known(values inv.Contradictions |> List.filter Policy.isOpenContradiction |> List.length) }
+
+let private draftKind =
+    function
+    | ProposedHypothesis -> "Hypothesis"
+    | ProposedUnknown -> "Open question"
+    | ProposedAction -> "Action"
+
+let private answerRow (a: PanelAnswer) : A.PanelAnswerRow =
+    let roleName = a.Provenance.Role |> Option.bind (fun r -> Panel.roles |> List.tryFind (fun x -> x.Id = r) |> Option.map (fun x -> x.Name))
+    { Label = roleName |> Option.orElse a.Provenance.Treatment |> Option.defaultValue "Unnamed"
+      Model = a.Provenance.Model
+      PromptVersion = a.Provenance.PromptVersion
+      SourceVersion = a.Provenance.SourceVersion
+      Outcome = AiLoop.describe a.Result
+      Drafts =
+        match a.Result with
+        | Drafted(ds, _, _) -> ds |> List.map (fun d -> ({ Kind = draftKind d.Kind; Text = d.Text; Rationale = d.Rationale }: A.DraftRow))
+        | _ -> [] }
+
+/// S17 in words: who proposed what, and where the roles differ. No count is presented as a verdict.
+let panelView (state: BatchState) : A.PanelView =
+    let roleName id = Panel.roles |> List.tryFind (fun r -> r.Id = id) |> Option.map (fun r -> r.Name) |> Option.defaultValue id
+    let names xs = xs |> List.map roleName |> String.concat ", "
+    { SourceVersion = state.SourceVersion
+      Running = not (Panel.complete state)
+      Roles = Panel.roles |> List.map (fun r -> r.Name, r.Focus, r.PromptVersion)
+      Answers = state.Answers |> List.map answerRow
+      Disagreements =
+        Panel.disagreements state
+        |> List.map (fun d ->
+            let other = d.OtherKindBy |> List.map (fun (r, k) -> $"{roleName r} as {(draftKind k).ToLowerInvariant()}")
+            let parts =
+                [ yield $"{draftKind d.Kind} “{d.Text}”: proposed by {names d.ProposedBy}"
+                  if not d.OmittedBy.IsEmpty then yield $"not proposed by {names d.OmittedBy}"
+                  if not other.IsEmpty then yield "proposed differently by " + String.concat ", " other ]
+            String.concat "; " parts + ".")
+      Agreements = Panel.agreements state |> List.map (fun (k, t) -> $"{draftKind k} “{t}”: proposed by every role that answered. Agreement is not evidence.") }
+
+/// S18 in words: each treatment's measurements; the limitations are stated, and nothing is ranked.
+let tournamentView (task: string) (treatments: Treatment list) (state: BatchState) : A.TournamentView =
+    let measured = Panel.metrics state
+    { SourceVersion = state.SourceVersion
+      Running = not (Panel.complete state)
+      Task = task
+      Treatments =
+        treatments
+        |> List.map (fun t ->
+            let lines =
+                match measured |> List.tryFind (fun m -> m.Treatment = t.Id) with
+                | None -> [ "Waiting for the answer." ]
+                | Some m ->
+                    [ "Outcome: " + m.Outcome
+                      "Valid output: " + (match m.ValidOutput with Some true -> "yes" | Some false -> "no" | None -> "not applicable (no answer to check)")
+                      $"Drafts: {m.Drafts}"
+                      "Refused: " + (if m.Refused then "yes" else "no")
+                      "Latency: " + (m.LatencyMs |> Option.map (fun l -> $"{l} ms (measured in this browser)") |> Option.defaultValue "not measured")
+                      "Provider tokens: " + (m.Usage |> Option.map (fun u -> $"{u.InputTokens} in, {u.OutputTokens} out (as reported)") |> Option.defaultValue "not reported") ]
+            ({ Id = t.Id; Model = t.Model; PromptVersion = t.PromptVersion; Measurements = lines }: A.TreatmentRow))
+      Limitations = Panel.limitations state }
+
+/// The fixed role set as (name, focus, prompt version), for the panel screen before any run.
+let panelRoles = Panel.roles |> List.map (fun r -> r.Name, r.Focus, r.PromptVersion)

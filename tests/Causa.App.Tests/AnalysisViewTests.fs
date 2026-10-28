@@ -223,3 +223,45 @@ let ``S19 replay steps through recorded versions read-only, showing the hypothes
     let last = View.project (at (Some 3L)) |> AnalysisView.extend (at (Some 3L))
     Assert.Contains("The valve seal is worn.", sprintf "%A" (last |> Map.find "an.replay.hypotheses"))
     Assert.Equal("This is the last recorded event; nothing follows.", textOf last "an.replay.next")
+
+let private providerAnswer (proposals: (string * string) list) =
+    let items = proposals |> List.map (fun (k, t) -> sprintf """{"kind":"%s","text":"%s"}""" k t) |> String.concat ","
+    let inner = sprintf """{"proposals":[%s]}""" items
+    let body = sprintf """{"content":[{"type":"text","text":%s}],"stop_reason":"end_turn","usage":{"input_tokens":10,"output_tokens":5}}""" (Text.Json.JsonSerializer.Serialize inner)
+    // Limen delivers a text response as a JSON string literal.
+    EffectOutcome.Success(200L, Limen.Contract.RawJson(Text.Json.JsonSerializer.Serialize body), None)
+
+[<Fact>]
+let ``S17 the panel runs one blind request per role through the port and shows structural differences with provenance`` () =
+    let port, id, _ = active ()
+    let port, _ = port.Handle (entropy ()) (SetAiKey "fake-key-for-tests-0000")
+    let port, fx = port.Handle (entropy ()) (RequestPanel(id, "fixture-model", "Propose next steps."))
+    let corrs = fx |> List.choose (fun e -> match e with EffectRequest.Http h -> (let (CorrelationId c) = h.CorrelationId in Some c) | _ -> None)
+    Assert.Equal<string list>([ "panel-1"; "panel-2"; "panel-3" ], corrs)
+    let answers = [ [ "hypothesis", "A certificate expired" ]; [ "hypothesis", "A certificate expired" ]; [ "unknown", "Was the gateway restarted?" ] ]
+    let port =
+        List.zip corrs answers
+        |> List.fold (fun (p: Port) (c, a) -> p.Handle (entropy ()) (Answer(c, EffectResult.HttpResult(CorrelationId c, providerAnswer a))) |> fst) port
+    let route = Routes.Investigation(id, Routes.AiProposals)
+    let v = view port route "panel"
+    Assert.Equal("multi-agent-panel", textOf v "an.proposals.screen")
+    let differences = sprintf "%A" (v |> Map.find "an.panel.disagreements")
+    Assert.Contains("not proposed by Timeline checker", differences)
+    Assert.DoesNotContain("majority", differences.ToLowerInvariant())
+    Assert.Contains("prompt causa.panel-role/timeline-checker/1, source version 3", sprintf "%A" (v |> Map.find "an.panel.provenance"))
+
+[<Fact>]
+let ``S18 the tournament measures each treatment on one frozen version and names no winner`` () =
+    let port, id, _ = active ()
+    let port, _ = port.Handle (entropy ()) (SetAiKey "fake-key-for-tests-0000")
+    let port, fx = port.Handle (entropy ()) (RequestTournament(id, [ "model-a", "causa.proposal-prompt/1"; "model-b", "causa.panel-role/evidence-auditor/1" ], "Propose."))
+    Assert.Equal(2, fx.Length)
+    let port = port.Handle (entropy ()) (Answer("tour-1", EffectResult.HttpResult(CorrelationId "tour-1", providerAnswer [ "hypothesis", "H" ]))) |> fst
+    let v = view port (Routes.Investigation(id, Routes.AiProposals)) "tournament"
+    Assert.True(flagOf v "an.tour.show")
+    Assert.Equal("research-tournament", textOf v "an.proposals.screen")
+    let metrics = sprintf "%A" (v |> Map.find "an.tour.metrics")
+    Assert.Contains("Valid output: yes", metrics)
+    Assert.Contains("Waiting for the answer.", metrics)
+    Assert.DoesNotContain("winner", metrics.ToLowerInvariant())
+    Assert.Contains("No treatment is ranked", sprintf "%A" (v |> Map.find "an.tour.limitations"))

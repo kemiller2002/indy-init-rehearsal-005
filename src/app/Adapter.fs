@@ -110,6 +110,39 @@ type ProposalRow = { Id: string; Kind: string; Text: string; Rationale: string o
 /// One drafted proposal from the AI loop, not yet recorded.
 type DraftRow = { Kind: string; Text: string; Rationale: string option }
 
+/// One role's (S17) or treatment's (S18) answer with its provenance, in words.
+type PanelAnswerRow =
+    { Label: string
+      Model: string
+      PromptVersion: string
+      SourceVersion: int64
+      Outcome: string
+      Drafts: DraftRow list }
+
+/// The multi-agent panel (S17): blind role analyses of one version and their structural disagreements.
+type PanelView =
+    { SourceVersion: int64
+      Running: bool
+      /// Role name, its focus, and its prompt version.
+      Roles: (string * string * string) list
+      Answers: PanelAnswerRow list
+      Disagreements: string list
+      Agreements: string list }
+
+/// One tournament treatment's measurements (S18), each already in words; nothing is ranked.
+type TreatmentRow =
+    { Id: string
+      Model: string
+      PromptVersion: string
+      Measurements: string list }
+
+type TournamentView =
+    { SourceVersion: int64
+      Running: bool
+      Task: string
+      Treatments: TreatmentRow list
+      Limitations: string list }
+
 /// The AI proposal loop as the shell shows it (T27). The key itself never appears here.
 type AiView =
     { KeyHeld: bool
@@ -122,9 +155,11 @@ type AiView =
       /// Set when the drafts were made from an older version than the current one.
       Stale: string option
       /// The last request with its key removed (AiLoop.redacted), for Administration.
-      LastRequest: string option }
+      LastRequest: string option
+      Panel: PanelView option
+      Tournament: TournamentView option }
 
-let noAi = { KeyHeld = false; InFlight = false; Investigation = None; Result = None; Drafts = []; Stale = None; LastRequest = None }
+let noAi = { KeyHeld = false; InFlight = false; Investigation = None; Result = None; Drafts = []; Stale = None; LastRequest = None; Panel = None; Tournament = None }
 
 /// What the domain itself asserts (Projection.verification, UI-023): never derived from data integrity.
 type DomainFindings = { ConfirmedCauses: int; VerifiedCorrections: int; Resolved: bool }
@@ -264,6 +299,10 @@ type AdapterInput =
     /// Ask the AI for proposals about an investigation with the configured model (never a default).
     | RequestProposals of investigation: string * model: string * task: string
     | CancelProposals
+    /// S17: one blind request per panel role against the open version.
+    | RequestPanel of investigation: string * model: string * task: string
+    /// S18: one request per treatment (model id, prompt version) against the open version, frozen.
+    | RequestTournament of investigation: string * treatments: (string * string) list * task: string
     /// Record the drafted proposals (still proposals: a human accepts each one) or discard them.
     | RecordDrafts of investigation: string * model: string
     | DiscardDrafts
