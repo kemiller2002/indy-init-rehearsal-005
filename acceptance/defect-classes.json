@@ -25,9 +25,9 @@
         "DCT-002-A",
         "DCT-002-B"
       ],
-      "status": "NOT_RUN",
-      "fixSha": null,
-      "reviewerEvidence": null
+      "status": "PASS",
+      "fixSha": "e8e32c1ebf6db77344cb8e8bc5bd30b422cdd379",
+      "reviewerEvidence": "acceptance/reviews/R5-independent-review.md#dc-002"
     },
     {
       "id": "DC-003",
@@ -45,9 +45,9 @@
       "tests": [
         "DCT-004-A"
       ],
-      "status": "NOT_RUN",
-      "fixSha": null,
-      "reviewerEvidence": null
+      "status": "PASS",
+      "fixSha": "895fb6da3031da689cd3a6f54b4005f17f07edbe",
+      "reviewerEvidence": "acceptance/reviews/R5-independent-review.md#dc-004"
     },
     {
       "id": "DC-005",
@@ -55,9 +55,9 @@
       "tests": [
         "DCT-005-A"
       ],
-      "status": "NOT_RUN",
-      "fixSha": null,
-      "reviewerEvidence": null
+      "status": "PASS",
+      "fixSha": "895fb6da3031da689cd3a6f54b4005f17f07edbe",
+      "reviewerEvidence": "acceptance/reviews/R5-independent-review.md#dc-005"
     },
     {
       "id": "DC-006",
@@ -65,9 +65,9 @@
       "tests": [
         "DCT-006-A"
       ],
-      "status": "NOT_RUN",
-      "fixSha": null,
-      "reviewerEvidence": null
+      "status": "PASS",
+      "fixSha": "578ebd3b0bbc99862dc2da945e9c3b9e3f719bba",
+      "reviewerEvidence": "acceptance/reviews/R5-independent-review.md#dc-006"
     },
     {
       "id": "R3-LESSON-3",
@@ -75,9 +75,9 @@
       "tests": [
         "DCT-INPUT-A"
       ],
-      "status": "NOT_RUN",
-      "fixSha": null,
-      "reviewerEvidence": null
+      "status": "PASS",
+      "fixSha": "578ebd3b0bbc99862dc2da945e9c3b9e3f719bba",
+      "reviewerEvidence": "acceptance/reviews/R5-independent-review.md#r3-lesson-3"
     },
     {
       "id": "DC-001..DC-005",
