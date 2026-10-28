@@ -1,0 +1,7 @@
+{
+  "name": "s17-blocked",
+  "predicates": [
+    "material-blocker-exists"
+  ],
+  "capabilities": {}
+}

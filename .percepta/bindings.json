@@ -113,6 +113,24 @@
       ]
     },
     {
+      "contract": "S17-multi-agent-panel",
+      "appScreen": "multi-agent-panel",
+      "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/proposals?item=panel",
+      "fixtures": [
+        "fixtures/s17-blocked.json",
+        "fixtures/s17-plain.json"
+      ]
+    },
+    {
+      "contract": "S18-research-tournament",
+      "appScreen": "research-tournament",
+      "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/proposals?item=tournament",
+      "fixtures": [
+        "fixtures/s18-blocked.json",
+        "fixtures/s18-plain.json"
+      ]
+    },
+    {
       "contract": "S19-replay-spectator",
       "appScreen": "replay-spectator",
       "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/timeline?item=replay&version=1",
