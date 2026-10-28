@@ -24,6 +24,10 @@ type Route =
     | NewInvestigation
     | Investigation of id: string * section: Section
     | Administration
+    /// Requirements proof (S21): what proves each requirement, from the evidence published with this build.
+    | RequirementsProof
+    /// Factory view (S20): how this build was made and verified, from the evidence published with it.
+    | FactoryView
     | Settings
     | NotFound of path: string
 
@@ -68,6 +72,8 @@ let parse (hash: string) : Route =
     | [ ""; "investigations"; id; slug ] when isInvestigationId id && sections |> List.exists (fun (_, s, _) -> s = slug) ->
         Investigation(id, sections |> List.pick (fun (x, s, _) -> if s = slug then Some x else None))
     | [ ""; "administration" ] -> Administration
+    | [ ""; "administration"; "proof" ] -> RequirementsProof
+    | [ ""; "administration"; "factory" ] -> FactoryView
     | [ ""; "settings" ] -> Settings
     | _ when path.StartsWith("/", StringComparison.Ordinal) -> NotFound path
     | _ -> NotFound("/" + path)
@@ -81,13 +87,15 @@ let format (route: Route) : string =
     | Investigation(id, Overview) -> "#/investigations/" + id
     | Investigation(id, section) -> "#/investigations/" + id + "/" + sectionSlug section
     | Administration -> "#/administration"
+    | RequirementsProof -> "#/administration/proof"
+    | FactoryView -> "#/administration/factory"
     | Settings -> "#/settings"
     | NotFound path -> "#" + path
 
 /// The record a link points at within a section (UI-033): `?item=<id>`; ids are letters, digits and '-' only.
 /// Anything else selects nothing. Pure and total.
 let selection (hash: string) : string =
-    let safe (v: string) = v.Length > 0 && v.Length <= 80 && v |> Seq.forall (fun c -> Char.IsAsciiLetterOrDigit c || c = '-')
+    let safe (v: string) = v.Length > 0 && v.Length <= 80 && v |> Seq.forall (fun c -> Char.IsAsciiLetterOrDigit c || c = '-' || c = '.')
 
     match hash.IndexOf '?' with
     | -1 -> ""
@@ -115,7 +123,9 @@ let primaryOf (route: Route) =
     | Investigations
     | NewInvestigation
     | Investigation _ -> InvestigationsArea
-    | Administration -> AdministrationArea
+    | Administration
+    | RequirementsProof
+    | FactoryView -> AdministrationArea
     | Settings -> SettingsArea
     | NotFound _ -> Nowhere
 

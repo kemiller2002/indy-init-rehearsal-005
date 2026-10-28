@@ -1104,6 +1104,7 @@
       <section aria-labelledby="admin-heading" data-percepta-screen="administration">
         <h1 id="admin-heading" data-percepta-observation="desktop-reference-semantic-priority">Administration</h1>
         <p class="causa-muted" data-percepta-observation="ipad-portrait-semantic-priority">System information and diagnostics for this build. Read-only. Tokens are never shown.</p>
+        <p><a class="causa-related" href="#/administration/proof">Requirements proof</a> · <a class="causa-related" href="#/administration/factory">How this build was made</a></p>
         <div class="causa-attention" data-tone="attention" data-percepta-observation="desktop-reference-blocked-state">
           <strong data-percepta-observation="narrow-phone-blocked-state">Readiness:</strong>
           <span data-text="admin.readiness" data-percepta-observation="no-false-authority"></span>
@@ -1181,6 +1182,75 @@
         </section>
         <p class="causa-muted" data-percepta-observation="ipad-landscape-semantic-priority">Unknown means not observed by this page; Unavailable means it could not be read or is not part of this build.</p>
         <p class="causa-muted" data-percepta-observation="narrow-phone-semantic-priority">Nothing on this page changes an investigation.</p>
+      </section>
+    </template>
+
+    <!-- Requirements proof (S21): what proves each requirement, from evidence published with this build. -->
+    <template data-if="proof.show">
+      <section aria-labelledby="proof-heading" data-percepta-screen="requirements-proof">
+        <p><a class="causa-back" href="#/administration">Administration</a></p>
+        <h1 id="proof-heading" data-percepta-observation="desktop-reference-semantic-priority">Requirements proof</h1>
+        <p class="causa-muted" data-percepta-observation="ipad-portrait-semantic-priority">Each requirement with the obligations it must meet and the tests that prove them, read from the evidence published with this build. What is not proven is shown as not proven.</p>
+        <template data-if="proof.loading"><p role="status" class="causa-muted">Reading the published evidence…</p></template>
+        <template data-if="proof.failed"><p class="ef-alert causa-notice" data-tone="danger" role="alert" data-text="proof.failure"></p></template>
+        <div class="causa-attention" data-tone="attention" data-percepta-observation="desktop-reference-blocked-state">
+          <strong data-percepta-observation="narrow-phone-blocked-state">Proof status:</strong>
+          <span data-text="proof.summary" data-percepta-observation="ipad-portrait-blocked-state"></span>
+          <span class="causa-attention__blocked" data-text="proof.notProven" data-percepta-observation="no-false-authority"></span>
+          <span data-text="proof.req.status" data-percepta-observation="blocker-visible"></span>
+          <span class="causa-muted" data-percepta-observation="ipad-landscape-blocked-state">A requirement counts as proven only when every one of its obligations has a passing test.</span>
+        </div>
+        <section class="causa-panel" aria-labelledby="proof-req-heading" data-percepta-region="requirement">
+          <h2 id="proof-req-heading" data-text="proof.req.title" data-percepta-observation="ipad-landscape-semantic-priority"></h2>
+          <div class="ef-field causa-filter">
+            <label class="ef-field__label" id="proof-pick-label" for="proof-pick">Requirement</label>
+            <select id="proof-pick" aria-labelledby="proof-pick-label" class="causa-input" data-event="proof-pick" data-bind-value="proof.selected">
+              <template data-each="proof.requirements" data-key="id"><option data-bind-value="value" data-text="label"></option></template>
+            </select>
+          </div>
+          <p><span class="causa-tag" data-bind-data-tone="proof.req.tone" data-text="proof.req.status" data-percepta-observation="narrow-phone-semantic-priority"></span> <span class="causa-muted" data-text="proof.req.priority"></span></p>
+        </section>
+        <section class="causa-panel" aria-labelledby="proof-scn-heading" data-percepta-region="scenario">
+          <h2 id="proof-scn-heading">Obligations</h2>
+          <ul class="causa-list">
+            <template data-each="proof.obligations" data-key="id">
+              <li class="causa-item"><p><strong data-text="source"></strong> <span data-text="text"></span></p><p class="causa-label" data-text="status"></p><p class="causa-muted" data-text="tests"></p></li>
+            </template>
+          </ul>
+        </section>
+        <p class="causa-panel" data-percepta-region="work-item"><span class="causa-label">Work item:</span> <span data-text="proof.workItem"></span></p>
+        <p class="causa-panel" data-percepta-region="source"><span class="causa-label">Source:</span> <span data-text="proof.source"></span></p>
+        <p class="causa-panel" data-percepta-region="test"><span class="causa-label">Tests:</span> listed with each obligation above, with their suite and outcome.</p>
+        <p class="causa-panel" data-percepta-region="commit"><span class="causa-label">Commit:</span> <span data-text="proof.commit"></span></p>
+        <div class="causa-panel" data-percepta-region="runtime-evidence"><p><span class="causa-label">Runtime evidence:</span> <span data-text="proof.evidenceFrom"></span></p><p class="causa-muted" data-text="proof.runtime"></p></div>
+      </section>
+    </template>
+
+    <!-- Factory view (S20): how this build was made and verified, every value read from published evidence. -->
+    <template data-if="factory.show">
+      <section aria-labelledby="factory-heading" data-percepta-screen="factory-view">
+        <p><a class="causa-back" href="#/administration">Administration</a></p>
+        <h1 id="factory-heading" data-percepta-observation="desktop-reference-semantic-priority">How this build was made</h1>
+        <p class="causa-muted" data-percepta-observation="ipad-portrait-semantic-priority">Every value below is read from files published with this build. Anything not published is said to be missing.</p>
+        <template data-if="factory.loading"><p role="status" class="causa-muted">Reading the published evidence…</p></template>
+        <template data-if="factory.failed"><p class="ef-alert causa-notice" data-tone="danger" role="alert" data-text="factory.failure"></p></template>
+        <div class="causa-attention" data-tone="attention" data-percepta-observation="desktop-reference-blocked-state">
+          <strong data-percepta-observation="narrow-phone-blocked-state">Verification:</strong>
+          <span data-text="factory.requirements" data-percepta-observation="blocker-visible"></span>
+          <span class="causa-attention__blocked" data-percepta-observation="no-false-authority">Not-proven requirements are counted as not proven, never as passed.</span>
+          <span data-text="factory.tests" data-percepta-observation="ipad-portrait-blocked-state"></span>
+          <a class="causa-related" href="#/administration/proof" data-percepta-observation="ipad-landscape-blocked-state">See the requirements proof</a>
+        </div>
+        <section class="causa-panel" aria-labelledby="f-ros" data-percepta-region="ros">
+          <h2 id="f-ros" data-percepta-observation="ipad-landscape-semantic-priority">Work (ROS)</h2>
+          <p data-text="factory.ros.summary" data-percepta-observation="narrow-phone-semantic-priority"></p>
+          <ul class="causa-list"><template data-each="factory.ros.items" data-key="id"><li class="causa-item" data-text="text"></li></template></ul>
+        </section>
+        <section class="causa-panel" aria-labelledby="f-req" data-percepta-region="requirements"><h2 id="f-req">Requirements</h2><p data-text="factory.requirements"></p></section>
+        <section class="causa-panel" aria-labelledby="f-tests" data-percepta-region="tests"><h2 id="f-tests">Tests</h2><p data-text="factory.tests"></p></section>
+        <section class="causa-panel" aria-labelledby="f-praxis" data-percepta-region="praxis"><h2 id="f-praxis">Praxis</h2><p data-text="factory.praxis"></p></section>
+        <section class="causa-panel" aria-labelledby="f-aegis" data-percepta-region="aegis"><h2 id="f-aegis">Aegis</h2><p data-text="factory.aegis"></p></section>
+        <section class="causa-panel" aria-labelledby="f-deploy" data-percepta-region="deployment"><h2 id="f-deploy">Deployment</h2><p data-text="factory.deployment"></p></section>
       </section>
     </template>
 
