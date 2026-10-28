@@ -35,9 +35,9 @@
       "tests": [
         "DCT-003-A"
       ],
-      "status": "NOT_RUN",
-      "fixSha": null,
-      "reviewerEvidence": null
+      "status": "PASS",
+      "fixSha": "b07d2a5def150e1cd741f0540667eac31b78330e",
+      "reviewerEvidence": "acceptance/reviews/R5-final-review.md#dc-003-543ddc2"
     },
     {
       "id": "DC-004",
@@ -85,9 +85,9 @@
       "tests": [
         "DCT-LIVE-A"
       ],
-      "status": "NOT_RUN",
-      "fixSha": null,
-      "reviewerEvidence": null
+      "status": "PASS",
+      "fixSha": "b07d2a5def150e1cd741f0540667eac31b78330e",
+      "reviewerEvidence": "acceptance/reviews/R5-final-review.md#dct-live-a-543ddc2"
     }
   ]
 }
