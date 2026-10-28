@@ -67,7 +67,8 @@ test(
     await main.getByLabel("Branch").fill(branch);
     await main.getByLabel("Workspace").fill(active.workspace.replace("workspaces/demo/", ""));
     await main.getByRole("button", { name: "Connect" }).click();
-    await expect(page.locator(".causa-connection")).toContainText(catalogRepo, { timeout: 120_000 });
+    // The connection line shows the state in words, not the repository name.
+    await expect(page.locator(".causa-connection")).toHaveText(/Data repository: Connected$/, { timeout: 120_000 });
 
     for (const c of manifest.cases) {
       const events = (await text(`${c.path}/events.ndjson`)).split("\n").filter((l) => l.length > 0).map((l) => JSON.parse(l));

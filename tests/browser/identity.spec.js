@@ -139,3 +139,32 @@ test("navigation tells a read-only demonstration from a writable copy and keeps 
   await page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Investigations" }).click();
   await expect(page.locator(".causa-card")).toContainText("Your working copy");
 });
+
+test("headings follow Forma's fixed application type steps at every width, not the marketing display scale [VPO-9501908622238a66]", { tag: ["@responsive"] }, async ({ page }) => {
+  for (const width of [1440, 1180, 820, 320]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("index.html");
+    await expect(page.locator("#causa-boot")).toHaveCount(0, { timeout: 60_000 });
+    const h1 = page.getByRole("heading", { level: 1, name: "Connect a data repository" });
+    const size = await h1.evaluate((el) => ({ font: parseFloat(getComputedStyle(el).fontSize), root: parseFloat(getComputedStyle(document.documentElement).fontSize), height: el.getBoundingClientRect().height }));
+    expect(size.font).toBe(2 * size.root); // --ef-primitive-font-size-2xl
+    // One line on desktop and tablet; never more than two at 320px.
+    expect(size.height).toBeLessThanOrEqual(size.font * 1.2 * (width <= 320 ? 2 : 1) + 1);
+  }
+});
+
+test("global and investigation navigation are two separate lists; settings never appear inside an investigation [VPO-dba405d7ed58872b] [VPO-628a11b571e65796]", async ({ page }) => {
+  await engine(page);
+  const primary = page.getByRole("navigation", { name: "Primary" });
+  const sections = page.getByRole("navigation", { name: "Investigation sections" });
+  await expect(primary.getByRole("link")).toHaveText(["Investigations", "Administration", "Settings"]);
+  await expect(sections.getByRole("link")).toHaveText(["Overview", "Causal analysis", "Evidence", "Hypotheses", "Timeline", "Corrective actions", "Report", "AI proposals"]);
+  // Neither list contains the other's destinations, and no investigation view carries settings controls.
+  await expect(sections.getByRole("link", { name: /Settings|Administration/ })).toHaveCount(0);
+  await expect(primary.getByRole("link", { name: /Overview|Timeline|Evidence/ })).toHaveCount(0);
+  for (const name of ["Overview", "Timeline", "Report"]) {
+    await sections.getByRole("link", { name }).click();
+    await expect(page.getByLabel("Text size")).toHaveCount(0);
+    await expect(page.getByLabel("AI model id")).toHaveCount(0);
+  }
+});

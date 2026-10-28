@@ -107,3 +107,41 @@ let ``VPO-b090ff3e3c16c13d VPO-ff3dc45c64bfa0cb VPO-da07c2ac97baa9f1 VPO-d4b0d50
     Assert.Equal(gd.Local.StateSha256, fd.Local.StateSha256)
     Assert.Equal(Sync.documentStatus gm gd, Sync.documentStatus fm fd)
     Assert.Equal("remotelySynced", Sync.documentStatus fm fd)
+
+[<Fact>]
+[<Trait("obligation", "VPO-34731ac9a977b818")>]
+[<Trait("obligation", "VPO-cd9dd8ec730c3d3e")>]
+let ``VPO-34731ac9a977b818 VPO-cd9dd8ec730c3d3e the fixture conflict scenario: a deterministic other writer, then Reload keeps the change and Discard adopts theirs`` () =
+    let provider =
+        match Fixture.providerFor Fixture.conflictWorkspace with
+        | Ok p -> p
+        | Error e -> failwith e
+    let t = { fixtureTarget with Workspace = Fixture.conflictWorkspace }
+    let env = { Now = (fun () -> "2026-10-27T12:00:00.000Z"); Nonce = "page" }
+    let mutable m = Sync.initial
+    let rec run (queue: Msg list) =
+        match queue with
+        | [] -> ()
+        | msg :: rest ->
+            match Sync.update env msg m with
+            | Error _ when (match msg with LocalStored _ -> true | _ -> false) -> run rest
+            | Error r -> failwith r.Reason
+            | Ok(m2, effects) ->
+                m <- m2
+                run (rest @ (effects |> List.map (fun e -> match e with Send(id, r) -> HttpAnswered(id, provider.Handle r) | StoreLocal(w, _, _) -> LocalStored(w, true))))
+    run [ Connect(t, Persistence.Tests.Harness.credential "placeholder") ]
+    let iid = Fixture.investigationId
+    let v = (Map.find iid m.Documents).Local
+    run [ Submit(Persistence.Tests.Synthetic.hypothesis iid v.Version "mine") ]
+    run [ Save iid ]
+    Assert.Equal("conflict", Sync.documentStatus m (Map.find iid m.Documents))
+    run [ ReloadRemote iid ]
+    let d = Map.find iid m.Documents
+    Assert.Equal("conflict", Sync.documentStatus m d)
+    Assert.Equal(v.Version + 1L, d.Local.Version)
+    let theirs = d.RemoteConflict |> Option.bind (fun c -> c.Remote) |> Option.get
+    Assert.Contains("Another writer's hypothesis", System.Text.Encoding.UTF8.GetString theirs.EventsFile)
+    run [ DiscardLocal iid ]
+    let d = Map.find iid m.Documents
+    Assert.Equal(theirs.EventsSha256, d.Local.EventsSha256)
+    Assert.True(d.RemoteConflict.IsNone)

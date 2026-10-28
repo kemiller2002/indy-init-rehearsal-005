@@ -7,8 +7,15 @@ const root = process.argv[2] ?? "dist/site";
 const port = Number(process.argv[3] ?? 4321);
 const types = { ".html": "text/html", ".js": "text/javascript", ".mjs": "text/javascript", ".css": "text/css", ".json": "application/json", ".wasm": "application/wasm", ".dat": "application/octet-stream", ".png": "image/png", ".svg": "image/svg+xml" };
 
+// A request the server cannot decode is answered 400; it must never take the server down, or every later
+// test on this port fails with "connection refused".
+const decodedPath = (url) => {
+  try { return decodeURIComponent(new URL(url ?? "/", "http://x").pathname); } catch { return undefined; }
+};
+
 createServer(async (request, response) => {
-  const path = decodeURIComponent(new URL(request.url ?? "/", "http://x").pathname);
+  const path = decodedPath(request.url);
+  if (path === undefined) { response.writeHead(400).end(); return; }
   const file = normalize(join(root, path.endsWith("/") ? path + "index.html" : path));
   if (!file.startsWith(normalize(root))) { response.writeHead(403).end(); return; }
   try {
