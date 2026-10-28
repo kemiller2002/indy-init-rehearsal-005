@@ -18,6 +18,10 @@
 ///   ConnectionDetail      the plain-language reason for incompatible / accessDenied / offline / conflict.
 /// Policies: a pending change is saved automatically when connected; a save whose outcome is unknown is checked once
 /// automatically (reconcile, which reads the branch first); a failed save is never retried blindly.
+/// Local store: tabs of one browser share one key. Each local write reads the stored record and stores
+/// Sync.mergeRecords of it (another tab's unsaved, held, unknown or conflict changes are kept, never replaced).
+/// Known limit (review R3-F2): the read and the write are two storage calls, not one atomic step, so a write another
+/// tab makes between them can be overwritten. There is no `storage`-event merge or lock yet.
 module Causa.App.PersistencePort
 
 open System

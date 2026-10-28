@@ -435,7 +435,7 @@ module Sync =
             | _ -> None)
 
     /// The record to store: this page's record `mine` merged with what the store holds now (read just before the
-    /// write). A record this page wrote or restored from is superseded. Another tab's record is never overwritten
+    /// write). Only a record this page itself wrote is superseded. Another tab's record is never overwritten
     /// blindly: its investigations this page does not hold are kept, and its unsaved, held or unknown changes that this
     /// page's copy does not include are preserved beside it (never dropped) until a copy that includes them is stored.
     let mergeRecords (mine: string) (stored: string option) : string =
@@ -459,7 +459,9 @@ module Sync =
                     | None -> true
                 let own =
                     match Json.str "writer" o with
-                    | Some w when w <> "" -> Some w = Json.str "writer" m || Some w = Json.str "basedOn" m
+                    // Only a record this page itself wrote (its own page-load nonce) is superseded; a record this page
+                    // restored from belongs to another tab that may still be open and writing (review R3-F1).
+                    | Some w when w <> "" -> Some w = Json.str "writer" m
                     | _ -> false
                 let tOther = Json.field "target" o |> Option.defaultValue JNull
                 let kept, preserved =
