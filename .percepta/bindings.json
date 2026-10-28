@@ -113,6 +113,10 @@
       ]
     },
     {
+      "contract": "S16-counterfactual-sandbox",
+      "notApplicable": "Owner scope decision R5-DEC-002 (research/decisions/DF-CAUSA-2026-0002--r5-dec-002-percepta-s16-not-applicable.md): the counterfactual sandbox is not applicable to Causa in Rehearsal 5; the engine has no counterfactual capability."
+    },
+    {
       "contract": "S17-multi-agent-panel",
       "appScreen": "multi-agent-panel",
       "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/proposals?item=panel",
@@ -137,6 +141,24 @@
       "fixtures": [
         "fixtures/s19-blocked.json",
         "fixtures/s19-legal.json"
+      ]
+    },
+    {
+      "contract": "S20-factory-view",
+      "appScreen": "factory-view",
+      "path": "index.html?percepta=default#/administration/factory",
+      "fixtures": [
+        "fixtures/blocker-only.json",
+        "fixtures/no-predicates.json"
+      ]
+    },
+    {
+      "contract": "S21-requirements-proof",
+      "appScreen": "requirements-proof",
+      "path": "index.html?percepta=default#/administration/proof",
+      "fixtures": [
+        "fixtures/blocker-only.json",
+        "fixtures/no-predicates.json"
       ]
     },
     {
@@ -170,24 +192,6 @@
       "contract": "S25-demo-health",
       "appScreen": "administration",
       "path": "index.html?percepta=default#/administration",
-      "fixtures": [
-        "fixtures/blocker-only.json",
-        "fixtures/no-predicates.json"
-      ]
-    },
-    {
-      "contract": "S20-factory-view",
-      "appScreen": "factory-view",
-      "path": "index.html?percepta=default#/administration/factory",
-      "fixtures": [
-        "fixtures/blocker-only.json",
-        "fixtures/no-predicates.json"
-      ]
-    },
-    {
-      "contract": "S21-requirements-proof",
-      "appScreen": "requirements-proof",
-      "path": "index.html?percepta=default#/administration/proof",
       "fixtures": [
         "fixtures/blocker-only.json",
         "fixtures/no-predicates.json"
