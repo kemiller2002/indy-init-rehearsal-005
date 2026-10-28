@@ -194,7 +194,9 @@ module GitHub =
                 // Observed live (recording run 40584769828): an error with a message and no type, after ~4 s. Nothing
                 // says it was not applied, so it is an unknown outcome, never a refusal that invites a retry.
                 elif kind = "" then Error(Unknown "GitHub answered with an untyped error")
-                else Error(Rejected(200, kind))
+                // An error type not documented as "not applied" says nothing either way about a write already sent:
+                // unknown, reconciled before anything else (review F-2), never a refusal that offers Retry.
+                else Error(Unknown("GitHub answered with an error of type " + kind))
 
     /// The trailer that carries a change's marker in its commit message (audit metadata only, CONTRACT §9.4.5).
     let markerTrailer = "Causa-Marker: "

@@ -22,9 +22,7 @@ let private saveOffered (app: App) (form: string) (push: bool) =
     iid
 
 [<Fact>]
-[<Trait("obligation", "VPO-d7fbd84e40ded145")>]
-[<Trait("obligation", "VPO-0b0fb80724185366")>]
-let ``DCT-004-A VPO-d7fbd84e40ded145 VPO-0b0fb80724185366 an absent permissions field is not denial; only GitHub's answer to the write decides`` () =
+let ``DCT-004-A an absent permissions field is not denial; only GitHub's answer to the write decides`` () =
     // The recorded repository form without a permissions field (a real answer, recordings/run-40585189886).
     let fake = newFake ()
     fake.RepositoryForm <- "repository.read.anonymous"
@@ -37,8 +35,7 @@ let ``DCT-004-A VPO-d7fbd84e40ded145 VPO-0b0fb80724185366 an absent permissions 
     Assert.Equal("remotelySynced", app.Status iid)
 
 [<Fact>]
-[<Trait("obligation", "VPO-d7fbd84e40ded145")>]
-let ``DCT-004-A VPO-d7fbd84e40ded145 push false is advisory; a refused write is held as write-denied and a renewed credential saves it`` () =
+let ``DCT-004-A push false is advisory; a refused write is held as write-denied and a renewed credential saves it`` () =
     let fake = newFake ()
     fake.RepositoryForm <- "repository.read.installationToken"
     fake.Push <- false
@@ -90,8 +87,7 @@ let ``DCT-005-A VPO-2d4b7557ce013e50 every mutable read has a URL unique across 
 
 [<Fact>]
 [<Trait("obligation", "VPO-533a2328decf91cb")>]
-[<Trait("obligation", "VPO-b3efad6eb85360be")>]
-let ``VPO-533a2328decf91cb VPO-b3efad6eb85360be an untyped GraphQL error (recorded live) is an unknown outcome, never a refusal`` () =
+let ``VPO-533a2328decf91cb an untyped GraphQL error (recorded live) is an unknown outcome, never a refusal`` () =
     match GitHub.parseCommit (respond "write.create.untypedError" (Some(JObj [ "errors", JArr [ JObj [ "message", JStr "Something went wrong" ] ] ]))) with
     | Error(ProviderFailure.Unknown _) -> ()
     | other -> failwithf "%A" other

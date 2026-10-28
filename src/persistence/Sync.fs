@@ -93,6 +93,9 @@ type Purpose =
     | BookReadCommit of investigationId: string * Book.RequestId * expected: (string * string) list
     | BookReadHead of investigationId: string * Book.RequestId * since: string
     | BookCompare of investigationId: string * Book.RequestId * since: string * head: string
+    /// Reconcile found a commit on the decided-at parent carrying our marker: before the book may take it as ours, its
+    /// investigation directory is read back and must hold exactly the files this device sent (review F-1).
+    | BookReconcileRead of investigationId: string * Book.RequestId * head: string * ancestry: Book.CommitInfo list * expected: (string * string) list
 
 type InFlight = { Purpose: Purpose; Generation: int }
 
@@ -172,6 +175,11 @@ module Sync =
     let private refuse reason : Step = Error { Reason = reason }
 
     let private nextId (m: Model) = sprintf "r%d" m.NextId, { m with NextId = m.NextId + 1 }
+
+    /// The marker a change carries in its commit (review F-1): the investigation, this page load's random nonce
+    /// (Env.Nonce, fresh on every load and in every tab) and the counter, so no other tab, device or later load of this
+    /// page can produce it. Reconcile still never trusts it alone: the commit is read back first.
+    let private markerFor (m: Model) (id: string) = sprintf "%s-%s-%d" id m.Nonce m.NextId
 
     let private send (purpose: Purpose) (build: Credential option -> Target -> string -> HttpRequest) (m: Model, effects: Effect list) =
         match m.Target with
@@ -462,7 +470,7 @@ module Sync =
     /// re-observed at the new head only when nothing is in flight or unknown; then a pending change is re-offered to
     /// it as decided at that head (it does not touch the investigation's remote files: a rebase, CONTRACT §9.4.2 a).
     let private integrate (head: string) (id: string) (remote: Verified option) (readOnly: bool) (m: Model) : Model =
-        let marker = sprintf "%s-%d" id m.NextId
+        let marker = markerFor m id
         let m = { m with NextId = m.NextId + 1 }
         let fresh (v: Verified) =
             { InvestigationId = id
@@ -634,7 +642,7 @@ module Sync =
             Generation = m.Generation + 1
             Connection = AccessDenied "GitHub rejected the credential. Reconnect with a valid token."
             Load = None
-            InFlight = m.InFlight |> Map.filter (fun _ f -> match f.Purpose with BookPublish _ | BookReadCommit _ | BookReadHead _ | BookCompare _ -> true | _ -> false)
+            InFlight = m.InFlight |> Map.filter (fun _ f -> match f.Purpose with BookPublish _ | BookReadCommit _ | BookReadHead _ | BookCompare _ | BookReconcileRead _ -> true | _ -> false)
             Documents = m.Documents |> Map.map (fun _ d -> { d with Reload = None }) }
 
     let private failureConnection (f: ProviderFailure) =
@@ -657,7 +665,8 @@ module Sync =
         | BookPublish _
         | BookReadCommit _
         | BookReadHead _
-        | BookCompare _ -> true
+        | BookCompare _
+        | BookReconcileRead _ -> true
         | _ -> false
 
     let private answered (env: Env) (requestId: string) (outcome: Result<HttpResponse, TransportFailure>) (m: Model) : Step =
@@ -812,11 +821,27 @@ module Sync =
             | BookCompare(id, r, _, h) ->
                 match read GitHub.parseCompare with
                 | Ok(GitHub.Descends commits) ->
-                    let ancestry =
-                        Book.Descends(commits |> List.map (fun c -> { Book.CommitInfo.Oid = Book.Oid c.Sha; Parent = Book.Oid c.Parent; Marker = c.Marker }))
-                    stepBook env id (Book.HeadObserved(r, Book.Oid h, ancestry)) st |> Result.map (persistLocal [ id ])
+                    let infos = commits |> List.map (fun c -> ({ Oid = Book.Oid c.Sha; Parent = Book.Oid c.Parent; Marker = c.Marker }: Book.CommitInfo))
+                    let attempt =
+                        m.Documents |> Map.tryFind id |> Option.bind (fun d -> match d.Book.Phase with Book.Reconciling(_, a, _) -> Some a | _ -> None)
+                    match infos, attempt with
+                    | first :: _, Some a when first.Parent = a.Change.DecidedAt && first.Marker = Some a.Change.Marker ->
+                        // The marker alone never proves the commit is ours: read its investigation files back first.
+                        Ok(send (BookReconcileRead(id, r, h, infos, blobShasOf a.Change.Files)) (fun c t _ -> GitHub.listDirectory c t (oidText first.Oid) (Target.investigationDir t id)) st)
+                    | _ -> stepBook env id (Book.HeadObserved(r, Book.Oid h, Book.Descends infos)) st |> Result.map (persistLocal [ id ])
                 | Ok GitHub.Unrelated -> stepBook env id (Book.HeadObserved(r, Book.Oid h, Book.Unrelated)) st |> Result.map (persistLocal [ id ])
                 | Error _ -> stepBook env id (Book.HeadReadFailed r) st |> Result.map (persistLocal [ id ])
+            | BookReconcileRead(id, r, h, infos, expected) ->
+                match read GitHub.parseListing with
+                | Ok entries when (entries |> List.map (fun e -> e.Name, e.Sha) |> List.sort) = expected ->
+                    stepBook env id (Book.HeadObserved(r, Book.Oid h, Book.Descends infos)) st |> Result.map (persistLocal [ id ])
+                | Ok _ ->
+                    // Same parent and marker, other bytes: not our write. Another writer's commit, so a conflict.
+                    let notOurs = infos |> List.mapi (fun i c -> if i = 0 then { c with Marker = None } else c)
+                    stepBook env id (Book.HeadObserved(r, Book.Oid h, Book.Descends notOurs)) st |> Result.map (persistLocal [ id ])
+                | Error e ->
+                    let m = if e = Unauthorized then credentialRejected m else m
+                    stepBook env id (Book.HeadReadFailed r) (m, []) |> Result.map (persistLocal [ id ])
 
     /// A new local investigation (from Create or an accepted start command).
     let private createWith (m: Model) (id: string) (created: Result<Verified, Store.ChangeRefusal>) : Step =
@@ -828,7 +853,7 @@ module Sync =
             match created with
             | Error r -> refuse (String.Join(" ", r.Reasons))
             | Ok local ->
-                let marker = sprintf "%s-%d" id m.NextId
+                let marker = markerFor m id
                 let book =
                     match m.Head with
                     | Some h when canWrite m ->
@@ -862,7 +887,7 @@ module Sync =
             match change d with
             | Error r -> refuse (String.Join(" ", r.Reasons))
             | Ok local ->
-                let marker = sprintf "%s-%d" id m.NextId
+                let marker = markerFor m id
                 let book =
                     match d.Book.Phase with
                     | Book.Idle(h, _) -> Book.step d.Book (Book.Edit(changeOf t marker (oidText h) local)) |> Result.map fst
@@ -880,6 +905,8 @@ module Sync =
     /// The single entry point the shell drives: every load, edit, save, confirmation and reconciliation goes
     /// through here. A refused step returns Error and the caller keeps the previous model (nothing changes).
     let update (env: Env) (msg: Msg) (m: Model) : Step =
+        // Markers and fresh-read URLs always carry this page load's nonce, from the first message on (review F-1).
+        let m = if m.Nonce = env.Nonce then m else { m with Nonce = env.Nonce }
         match msg with
         | Restore stored ->
             if { m with Nonce = "" } <> initial then refuse "Restore is only possible at start-up."

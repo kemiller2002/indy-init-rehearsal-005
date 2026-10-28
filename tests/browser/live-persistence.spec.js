@@ -107,7 +107,7 @@ const syncStatus = (page) => page.locator(".causa-sync [role=status]");
 
 test(
   "DCT-LIVE-A create, write, reload, conflict (resolved by Reload) and rejected token against the real test repository, each confirmed by an independent SHA re-read",
-  { tag: ["@live", "@VPO-05eeddad528e2cd4", "@VPO-c6c90d9f4acc5fe6", "@VPO-37d860d18826cf0a", "@VPO-d87bf2493f9268ae", "@VPO-6292ea3728a2532b", "@VPO-7672a3ef81f74ac5", "@VPO-903077d337faf198", "@VPO-d7fbd84e40ded145", "@VPO-61b2e81f99761d55", "@VPO-b3efad6eb85360be", "@VPO-34731ac9a977b818", "@VPO-89ed6170f531961e", "@VPO-4c06d10238d15c5c", "@VPO-54b0eef91ceeada4", "@VPO-2de744fb2c8bdc70", "@VPO-bb08b9a414ba4cd7", "@VPO-ca58030e3eecdf9b", "@VPO-c135d16c59f5baf8", "@VPO-57fe23e7c821450f", "@VPO-fbcff0eece408886", "@VPO-5581f11810c02191"] },
+  { tag: ["@live", "@VPO-05eeddad528e2cd4", "@VPO-c6c90d9f4acc5fe6", "@VPO-37d860d18826cf0a", "@VPO-d87bf2493f9268ae", "@VPO-6292ea3728a2532b", "@VPO-7672a3ef81f74ac5", "@VPO-903077d337faf198", "@VPO-61b2e81f99761d55", "@VPO-34731ac9a977b818", "@VPO-89ed6170f531961e", "@VPO-4c06d10238d15c5c", "@VPO-54b0eef91ceeada4", "@VPO-2de744fb2c8bdc70", "@VPO-bb08b9a414ba4cd7", "@VPO-ca58030e3eecdf9b", "@VPO-c135d16c59f5baf8", "@VPO-57fe23e7c821450f", "@VPO-fbcff0eece408886", "@VPO-5581f11810c02191"] },
   async ({ page, browser }) => {
     test.setTimeout(300_000);
     blockedUnlessConfigured();
@@ -253,7 +253,7 @@ function siteFiles(dir = "dist") {
 
 test(
   "EXT-DATA-013 after Connect the browser loads exactly the catalog's three historical cases, verified and read-only; no record ships with the site and none is served by it",
-  { tag: ["@live", "@VPO-c81484cbcf203d4f", "@VPO-4b4747eaff96e385", "@VPO-d60e3a3a25cb106d", "@VPO-dc48d066cfa2309d", "@VPO-acd13bfa08dba51a", "@VPO-557743cb4997c484", "@VPO-c81b5785b2ffa1c2", "@VPO-903077d337faf198", "@VPO-a59ccf551bbd8407", "@VPO-43aef41e6256b122", "@VPO-f8cbaa452cd4eb0b", "@VPO-0304a8342e7147dd", "@VPO-77f6e22e08d5bba0"] },
+  { tag: ["@live", "@VPO-c81484cbcf203d4f", "@VPO-4b4747eaff96e385", "@VPO-d60e3a3a25cb106d", "@VPO-dc48d066cfa2309d", "@VPO-acd13bfa08dba51a", "@VPO-557743cb4997c484", "@VPO-c81b5785b2ffa1c2", "@VPO-903077d337faf198", "@VPO-43aef41e6256b122", "@VPO-f8cbaa452cd4eb0b", "@VPO-0304a8342e7147dd", "@VPO-77f6e22e08d5bba0"] },
   async ({ page }) => {
     test.setTimeout(300_000);
     blockedUnlessConfigured();

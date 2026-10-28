@@ -102,8 +102,7 @@ let ``VPO-c135d16c59f5baf8 a self-consistent but forged snapshot is refused as n
     Assert.Equal(Codes.snapshotMismatch, codeOf (Store.read input))
 
 [<Fact>]
-[<Trait("obligation", "VPO-d7fbd84e40ded145")>]
-let ``VPO-d7fbd84e40ded145 a change decided at an older version is refused by the engine and builds nothing`` () =
+let ``a change decided at an older version is refused by the engine and builds nothing`` () =
     let v = investigation "stale" 1
     match Store.submit v (hypothesis v.InvestigationId (v.Version - 1L) "late") with
     | Error r -> Assert.Equal("VERSION.STALE", r.Code)
@@ -111,8 +110,7 @@ let ``VPO-d7fbd84e40ded145 a change decided at an older version is refused by th
     Assert.True(Result.isOk (Store.submit v (hypothesis v.InvestigationId v.Version "late")))
 
 [<Fact>]
-[<Trait("obligation", "VPO-d7fbd84e40ded145")>]
-let ``VPO-d7fbd84e40ded145 a successor that rewrites accepted history is refused`` () =
+let ``a successor that rewrites accepted history is refused`` () =
     let a = investigation "rewrite-a" 1
     let b = investigation "rewrite-a" 2
     Assert.Equal("OK", codeOf (Store.successor a b))
