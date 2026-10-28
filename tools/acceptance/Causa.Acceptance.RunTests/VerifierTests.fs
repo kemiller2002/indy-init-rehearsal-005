@@ -37,6 +37,9 @@ let ``AR-019 AR-001 the verdict is computed from the pinned baseline, plan, appr
     Assert.Equal(verdictOf v, strOr "" "verdict" (load (Path.Combine(b.Out, "verdict.json"))))
     let report = File.ReadAllText(Path.Combine(b.Out, "report.md"))
     Assert.Contains(sprintf "<!-- acceptance-verdict: %s -->" (verdictOf v), report)
+    // Every reviewer closure the ledger reports PASS carries bundled, manifest-pinned review evidence the verifier accepts.
+    let reasons = (items "reasons" v.Json @ items "claim_problems" v.Json) |> List.map (fun n -> n.ToJsonString())
+    Assert.DoesNotContain(reasons, fun r -> r.Contains "defect class" && (r.Contains "absent from the trusted manifest" || r.Contains "independent review evidence is missing"))
 
 [<Fact; Trait("obligation", "VPO-a96869ed8f00e776"); Trait("obligation", "VPO-a191144b5315b64a")>]
 let ``AR-019 a false accepted flag in the ledger is a contradictory claim, never an acceptance`` () =

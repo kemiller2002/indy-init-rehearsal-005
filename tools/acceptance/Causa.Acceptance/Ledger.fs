@@ -66,6 +66,12 @@ type Inputs =
       DependencyLockSha: string
       InterfaceManifestSha: string
       Command: string
+      /// Every executed test result of this run (a closed defect class's failing-first tests are found here).
+      Results: TestResult list
+      /// Whether a commit is an ancestor of (or equal to) the candidate source commit.
+      IsAncestor: string -> bool
+      /// A repository file's bytes, or None when absent (the reviewer's evidence).
+      ReadRepoFile: string -> byte[] option
       /// Where the evidence was produced (runner OS/image, .NET runtime, CI run URL): cited by every evidence file.
       Environment: (string * string) list }
 
@@ -243,30 +249,81 @@ let build (i: Inputs) : Built =
     let gateRows = i.Gates |> List.map gateRow
 
     // Defect classes ---------------------------------------------------------------------------------------
+    // A class is PASS only when the independent reviewer closed it in acceptance/defect-classes.json (status PASS,
+    // fix SHA, reviewer evidence) AND this run verifies that closure: the fix SHA is in the candidate's history, the
+    // reviewer's evidence file exists in the candidate, and every failing-first test it lists ran and passed here.
+    // Its bundle evidence (evidence_type "review") carries all of that, so the verifiers can check it. A class the
+    // reviewer left open is never PASS.
     let defectRow (d: DefectClass) =
-        let closed = d.Status = "PASS" && d.FixSha.IsSome && d.ReviewerEvidence.IsSome
-        let status = if closed then "PASS" elif d.Status = "FAIL" then "FAIL" else "NOT_RUN"
-        jobj
-            [ "id", jstr d.Id
-              "severity", jstr d.Severity
-              "status", jstr status
-              "fix_sha", (match d.FixSha with Some s -> jstr s | None -> jnull)
-              "reviewer_evidence", (match d.ReviewerEvidence with Some s -> jstr s | None -> jnull)
-              "evidence_paths", (match d.ReviewerEvidence with Some s when closed -> jstrs [ s ] | _ -> jarr [])
-              "tests", jstrs d.Tests
-              "reason",
-              jstr (
-                  if closed then "closed with fix SHA and independent reviewer evidence"
-                  else "class closure not recorded: needs failing-first tests, fix SHA and independent review (G7)"
-              ) ]
+        let reviewerClosed = d.Status = "PASS" && d.FixSha.IsSome && d.ReviewerEvidence.IsSome
+        let reviewPath, anchor =
+            match d.ReviewerEvidence with
+            | Some e ->
+                let h = e.IndexOf '#'
+                if h >= 0 then e.Substring(0, h), e.Substring(h + 1) else e, ""
+            | None -> "", ""
+        let reviewBytes = if reviewPath = "" then None else i.ReadRepoFile reviewPath
+        let testRuns =
+            d.Tests
+            |> List.map (fun t ->
+                t,
+                i.Results
+                |> List.filter (fun r -> r.DisplayName.Contains(t, StringComparison.Ordinal) || r.TestId.Contains(t, StringComparison.Ordinal)))
+        let failedTests = testRuns |> List.filter (fun (_, rs) -> rs |> List.exists (fun r -> r.Outcome <> Passed && r.Outcome <> Skipped)) |> List.map fst
+        let notRun = testRuns |> List.filter (fun (_, rs) -> rs.IsEmpty || rs |> List.exists (fun r -> r.Outcome = Skipped)) |> List.map fst
+        let ancestor = d.FixSha |> Option.map i.IsAncestor |> Option.defaultValue false
+        let status, reason =
+            if not reviewerClosed then
+                (if d.Status = "FAIL" then "FAIL" else "NOT_RUN"), "class closure not recorded by the independent reviewer: needs fix SHA, reviewer evidence and status PASS (G7)"
+            elif not ancestor then "FAIL", sprintf "the recorded fix %s is not in the candidate's history" d.FixSha.Value
+            elif reviewBytes.IsNone then "FAIL", sprintf "the reviewer evidence %s is not in the candidate" reviewPath
+            elif not failedTests.IsEmpty then "FAIL", sprintf "failing-first tests failed in this run: %s" (String.Join(", ", failedTests))
+            elif not notRun.IsEmpty then "NOT_RUN", sprintf "failing-first tests did not run in this run: %s" (String.Join(", ", notRun))
+            else "PASS", sprintf "closed by the independent reviewer at fix %s; the fix is in the candidate's history and every failing-first test passed in run %s" d.FixSha.Value i.RunId
+        let safeId = Text.RegularExpressions.Regex.Replace(d.Id, "[^A-Za-z0-9-]", "_")
+        let path = sprintf "evidence/defects/%s.json" safeId
+        let ev =
+            if status <> "PASS" then None
+            else
+                Some(
+                    path,
+                    evidence i "defect" d.Id "PASS" "review" [
+                        "fix_sha", jstr d.FixSha.Value
+                        "fix_in_source_history", jbool true
+                        "reviewer_evidence",
+                        jobj
+                            [ "path", jstr reviewPath
+                              "anchor", jstr anchor
+                              "sha256", jstr (sha256Hex reviewBytes.Value) ]
+                        "tests",
+                        jarr (
+                            testRuns
+                            |> List.collect (fun (t, rs) ->
+                                rs |> List.map (fun r -> jobj [ "test", jstr t; "testId", jstr r.TestId; "outcome", jstr (outcomeName r.Outcome); "resultFile", jstr r.Source ]))
+                        )
+                    ]
+                )
+        let row =
+            jobj
+                [ "id", jstr d.Id
+                  "severity", jstr d.Severity
+                  "status", jstr status
+                  "fix_sha", (match d.FixSha with Some s -> jstr s | None -> jnull)
+                  "reviewer_evidence", (match d.ReviewerEvidence with Some s -> jstr s | None -> jnull)
+                  "evidence_paths", (match ev with Some(p, _) -> jstrs [ p ] | None -> jarr [])
+                  "tests", jstrs d.Tests
+                  "reason", jstr reason ]
+        row, ev
 
-    let allEvidence = (reqRows |> List.choose snd) @ (gateRows |> List.choose snd)
+    let defectRows = i.DefectClasses |> List.map defectRow
+
+    let allEvidence = (reqRows |> List.choose snd) @ (gateRows |> List.choose snd) @ (defectRows |> List.choose snd)
 
     let localAccepted =
         i.DeployedSha = Some i.SourceSha
         && gateRows |> List.forall (fun (g, _) -> str "status" g = Some "PASS")
         && reqRows |> List.forall (fun (r, _) -> str "status" r = Some "PASS")
-        && i.DefectClasses |> List.forall (fun d -> d.Status = "PASS" && d.FixSha.IsSome && d.ReviewerEvidence.IsSome)
+        && defectRows |> List.forall (fun (d, _) -> str "status" d = Some "PASS")
 
     let ledger =
         jobj
@@ -290,7 +347,7 @@ let build (i: Inputs) : Built =
               "scope_changes", jarr []
               "requirements", jarr (reqRows |> List.map fst)
               "gates", jarr (gateRows |> List.map fst)
-              "defect_classes", jarr (i.DefectClasses |> List.map defectRow)
+              "defect_classes", jarr (defectRows |> List.map fst)
               "unresolved_decisions", jarr []
               "accepted", jbool localAccepted ]
 
