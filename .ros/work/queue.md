@@ -10,4 +10,5 @@
 | WI-0004 | R5 stream shell: Limen host, WASM app shell, UI, Percepta (T16,T17,T22-T24,T26,T29) | active | r5, stream-shell | high |
 | WI-0005 | R5 stream persist: provider conformance, Sync, GitHub provider, historical catalog (T18-T21,T25) | active | r5, stream-persist | high |
 | WI-0006 | R5 stream acc: stack lock gate and acceptance pipeline (T11) | active | r5, stream-acc | high |
-| WI-0007 | R5 stream ux: presentation language, catalog cards, admin separation, inspector and relationships (UI-001,UI-017..UI-040) | ready | r5, stream-ux | high |
+| WI-0007 | R5 stream ux: presentation language, catalog cards, admin separation, inspector and relationships (UI-001,UI-017..UI-040) | active | r5, stream-ux | high |
+| WI-0008 | R5 independent review (T30/T32/T33): findings and defect-class decisions | ready | r5, review | high |
