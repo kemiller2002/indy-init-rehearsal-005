@@ -26,7 +26,7 @@ let private opened (port: Port) id =
     | other -> failwithf "not loaded: %A" other
 
 [<Fact>]
-let ``VPO-be99a964783c59b5 VPO-21abf6acd60d0acc a started investigation is projected by the engine at version 1 and opened`` () =
+let ``VPO-21abf6acd60d0acc a started investigation is projected by the engine at version 1 and opened`` () =
     let port, fx, id = start (memory ())
     let inv = opened port id
     Assert.Equal(1L, inv.Version)

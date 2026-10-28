@@ -38,7 +38,7 @@ async function setUp(page) {
   await page.getByLabel("What should the assistant propose?").fill("Propose hypotheses.");
 }
 
-test("proposals are drafted, recorded only on request, and applied only when a person accepts one; the key goes only in the auth header [VPO-be99a964783c59b5] [VPO-04eb901270c2994a] [VPO-f97eb988899c23af] [VPO-bb08b9a414ba4cd7] [VPO-c41f10e4ed8a086b]", { tag: ["@webkit"] }, async ({ page }) => {
+test("proposals are drafted, recorded only on request, and applied only when a person accepts one; the key goes only in the auth header [VPO-04eb901270c2994a] [VPO-f97eb988899c23af] [VPO-bb08b9a414ba4cd7] [VPO-c41f10e4ed8a086b]", { tag: ["@webkit"] }, async ({ page }) => {
   const requests = [];
   await page.route(ENDPOINT, async (route) => {
     const r = route.request();

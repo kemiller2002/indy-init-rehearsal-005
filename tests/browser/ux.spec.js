@@ -423,3 +423,46 @@ test.describe("identity, failures and component ownership (UI-017-O4, UI-022-O1,
     expect(display).not.toBe("");
   });
 });
+
+test("overview, graph, timeline, evidence inspector, comparison and report all refer to the same investigation id and authoritative version [VPO-f1a416eaeec6c129]", async ({ page }) => {
+  const id = await buildCase(page);
+  const latest = 9;
+  const header = page.locator(".causa-inv-meta");
+  const sameId = () => expect(page).toHaveURL(new RegExp(`#/investigations/${id}(/|\\?|$)`));
+  // Overview (dashboard).
+  await section(page, "Overview");
+  await sameId();
+  await expect(header).toContainText(`Version ${latest}`);
+  // Graph: the document is the investigation's own, and every record it links to is in this investigation.
+  await section(page, "Causal analysis");
+  await sameId();
+  await expect(header).toContainText(`Version ${latest}`);
+  const doc = JSON.parse(await page.locator("#causa-graph").getAttribute("data-document"));
+  expect(JSON.stringify(doc)).toContain(`causal-${id}`);
+  const hrefs = JSON.stringify(doc).match(/#\/investigations\/[0-9a-f-]{36}/g) ?? [];
+  expect(hrefs.length).toBeGreaterThan(0);
+  for (const h of hrefs) expect(h).toBe(`#/investigations/${id}`);
+  // Timeline.
+  await section(page, "Timeline");
+  await sameId();
+  await expect(page.locator("[data-percepta-region=version-state]")).toHaveText(`Showing the investigation as of version ${latest}, the latest recorded version.`);
+  await expect(page.locator(".causa-timeline__entry")).toHaveCount(latest);
+  // Comparison: a past version is compared against the same latest version of the same investigation.
+  await page.locator(".causa-timeline__entry").nth(0).getByRole("link", { name: "#1", exact: true }).click();
+  await sameId();
+  await expect(page.locator("[data-percepta-region=version-state]")).toHaveText(`Historical view: version 1 of ${latest}. This is not the current state.`);
+  // Evidence inspector.
+  await section(page, "Evidence");
+  await page.locator("[data-percepta-screen=investigation-evidence] .causa-item--evidence").first().getByRole("link", { name: /^Details:/ }).click();
+  await sameId();
+  await expect(header).toContainText(`Version ${latest}`);
+  await expect(evidenceDetail(page).getByRole("link", { name: "Back to all evidence" })).toHaveAttribute("href", new RegExp(`^#/investigations/${id}/evidence`));
+  for (const href of await evidenceDetail(page).locator("a[href^='#/investigations/']").evaluateAll((as) => as.map((a) => a.getAttribute("href")))) {
+    expect(href.startsWith(`#/investigations/${id}`)).toBe(true);
+  }
+  // Report.
+  await section(page, "Report");
+  await sameId();
+  await expect(page.locator("[data-percepta-region=source-version]")).toContainText(`Overheating inverter, version ${latest}`);
+  await expect(header).toContainText(`Version ${latest}`);
+});

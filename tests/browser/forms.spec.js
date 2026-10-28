@@ -7,7 +7,7 @@ const started = (page) => expect(page.locator("#causa-boot")).toHaveCount(0, { t
 const section = (page, name) => page.getByRole("navigation", { name: "Investigation sections" }).getByRole("link", { name }).click();
 const version = (page, n) => expect(page.locator(".causa-inv-meta")).toContainText(`Version ${n}`);
 
-test("evidence, links, hypothesis changes, causes and corrective actions are recorded through validated forms the engine decides [VPO-b9af1bcfc961c8bb] [VPO-ff2e466b7aaa3e12] [VPO-be99a964783c59b5]", { tag: ["@webkit"] }, async ({ page }) => {
+test("evidence, links, hypothesis changes, causes and corrective actions are recorded through validated forms the engine decides [VPO-b9af1bcfc961c8bb] [VPO-ff2e466b7aaa3e12]", { tag: ["@webkit"] }, async ({ page }) => {
   await page.goto(SITE + "index.html#/investigations/new");
   await started(page);
   await page.evaluate(() => window.__perceptaSetState({ name: "engine-memory", predicates: [], capabilities: {} }));

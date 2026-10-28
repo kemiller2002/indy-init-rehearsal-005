@@ -73,3 +73,45 @@ let ``VPO-141be05c7de03e17 when the engine's records are unavailable, next steps
     Assert.True(flagOf v "next.unavailable")
     Assert.False(flagOf v "next.none")
     Assert.False(flagOf v "next.available")
+
+/// The capabilities the engine allows for the investigation's current version, by the ids the shell renders.
+let private engineAllowed (inv: InvestigationProjection) =
+    let src = Option.get inv.Typed
+    src.Projection.Capabilities
+    |> List.choose (fun c -> EngineView.describe src.Projection.State c.Action |> Option.map (fun (id, _, _, _) -> id, c.Allowed))
+    |> List.distinctBy fst
+    |> List.sort
+
+[<Fact>]
+let ``VPO-be99a964783c59b5 the rendered commands are exactly the F# engine's capabilities for the current version, and move with it`` () =
+    let entropy () = { Now = System.DateTime(2026, 10, 27, 12, 0, 0, System.DateTimeKind.Utc); Ids = List.init 4 (fun _ -> System.Guid.NewGuid()); Nonce = "n" }
+    let port = EnginePort.create (EnginePort.Persistence.memory Map.empty [])
+    let port, _ = port.Handle (entropy ()) (Command(None, "StartInvestigation", Map.ofList [ "title", "Valve leak"; "problemStatement", "Coolant found under valve 3." ], 0L))
+    let id = match port.Projection.Investigations with Loaded [ c ] -> c.Id | o -> failwithf "%A" o
+    let check (port: Port) (version: int64) =
+        let inv = match port.Projection.Opened.TryFind id with Some(Loaded i) -> i | o -> failwithf "%A" o
+        Assert.Equal(version, inv.Version)
+        // The typed projection the capabilities came from is the current version, not an older one.
+        Assert.Equal(version, (Option.get inv.Typed).Projection.Version)
+        let rendered = inv.Capabilities |> List.map (fun c -> c.Id, c.Legal) |> List.distinctBy fst |> List.sort
+        Assert.Equal<(string * bool) list>(engineAllowed inv, rendered)
+        // And the view binds exactly those: every command button is one of them, legal only when the engine allows it.
+        let view = View.project { Shell.initial with Port = port; Route = Routes.Investigation(id, Routes.Overview) }
+        let allowed = Map.ofList (engineAllowed inv)
+        match view.TryFind "capabilities" with
+        | Some(ViewValue.Items items) ->
+            for i in items do
+                let cid = match i["id"] with ViewPrimitive.Text t -> t | _ -> ""
+                let legal = (i.TryFind "legal" = Some(ViewPrimitive.Flag true)) || (i.TryFind "legalInput" = Some(ViewPrimitive.Flag true))
+                Assert.True(allowed.ContainsKey cid, $"{cid} is not an engine capability")
+                Assert.Equal(allowed[cid], legal)
+        | o -> failwithf "%A" o
+        for form in [ "AdmitEvidence"; "RelateEvidence"; "RecordCause"; "RecordCorrectiveAction" ] do
+            Assert.Equal(view.TryFind("not." + form), Some(ViewValue.Flag(not (allowed.TryFind form |> Option.defaultValue false))))
+        allowed
+    let v1 = check port 1L
+    Assert.True(v1["ActivateInvestigation"])
+    let port, _ = port.Handle (entropy ()) (Command(Some id, "ActivateInvestigation", Map.empty, 1L))
+    let v2 = check port 2L
+    // Activation is no longer offered once the engine has applied it.
+    Assert.False(v2["ActivateInvestigation"])

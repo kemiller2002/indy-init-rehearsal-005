@@ -137,7 +137,7 @@ test.describe("Administration and Settings (UI-018, UI-019, VER-007)", () => {
 });
 
 test.describe("security of the shell", () => {
-  test("a typed token never reaches the page, the URL or browser storage [VPO-bb08b9a414ba4cd7] [VPO-fba8a61be6d12adf] [VPO-06e616ae2378cfcd]", async ({ page }) => {
+  test("a typed token never reaches the page, the URL or browser storage [VPO-bb08b9a414ba4cd7] [VPO-fba8a61be6d12adf]", async ({ page }) => {
     const token = "github_pat_" + "X".repeat(40);
     await page.goto("index.html");
     await started(page);
@@ -224,7 +224,7 @@ test.describe("identity, accessibility and layout (UI-011, UI-014, UI-016)", () 
 });
 
 test.describe("investigation view through the F# projection (test build)", () => {
-  test("an injected state renders through the normal view: illegal commands are explained and linked to their blocker [VPO-be99a964783c59b5] [VPO-9659118aa1ef95ff] [VPO-04eb901270c2994a] [VPO-628a11b571e65796] [VPO-12f35805677987db] [VPO-56201f80b312c7c8]", async ({ page }) => {
+  test("an injected state renders through the normal view: illegal commands are explained and linked to their blocker [VPO-9659118aa1ef95ff] [VPO-04eb901270c2994a] [VPO-628a11b571e65796] [VPO-12f35805677987db] [VPO-56201f80b312c7c8]", async ({ page }) => {
     await page.goto(TEST_SITE + "index.html#/investigations/00000000-0000-4000-8000-0000000000f1");
     await started(page);
     await page.evaluate(() => window.__perceptaSetState({ name: "blocked", predicates: ["material-blocker-exists"], capabilities: { RecordObservation: "legal", ConfirmCause: "illegal" } }));
@@ -290,7 +290,7 @@ test.describe("report, timeline and administration views (T22, T26, T29)", () =>
     await expect(page.getByRole("button", { name: "Print the report" })).toBeVisible();
   });
 
-  test("the timeline shows event time, recorded time and the version it was rendered from [VPO-33324aeb860bce06] [VPO-7fe0d0f0d00df8a0] [VPO-f1a416eaeec6c129]", async ({ page }) => {
+  test("the timeline shows event time, recorded time and the version it was rendered from [VPO-33324aeb860bce06] [VPO-7fe0d0f0d00df8a0]", async ({ page }) => {
     await page.goto(TEST_SITE + "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/timeline");
     await started(page);
     const entry = page.locator(".causa-timeline__entry").first();
@@ -315,7 +315,7 @@ test.describe("report, timeline and administration views (T22, T26, T29)", () =>
 });
 
 test.describe("integration checkpoint 1: a legal command end to end through Limen and the F# kernel (T17)", () => {
-  test("starting and activating an investigation crosses Limen into the kernel; every view refreshes from the one new version; a refusal changes nothing [VPO-21abf6acd60d0acc] [VPO-be99a964783c59b5] [VPO-f1a416eaeec6c129] [VPO-b3efad6eb85360be]", { tag: ["@webkit"] }, async ({ page }) => {
+  test("starting and activating an investigation crosses Limen into the kernel; every view refreshes from the one new version; a refusal changes nothing [VPO-21abf6acd60d0acc] [VPO-b3efad6eb85360be]", { tag: ["@webkit"] }, async ({ page }) => {
     await page.goto(TEST_SITE + "index.html#/investigations/new");
     await started(page);
     // Test build only: the real kernel over an in-memory workspace (nothing is saved anywhere).
