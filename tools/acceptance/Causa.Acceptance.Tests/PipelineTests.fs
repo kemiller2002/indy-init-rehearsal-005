@@ -212,3 +212,24 @@ let ``UI-015 G5 succeeds only with 0 FAIL, 0 NOT-BOUND, no orphans, and NOT-APPL
     Assert.Contains(@".complete == true and .counts.FAIL == 0 and .counts[""NOT-BOUND""] == 0 and (.orphanBindings // []) == []", p)
     // An incomplete report is never success.
     Assert.Contains(@"echo ""status=not-produced"" >> ""$GITHUB_OUTPUT""", p)
+
+[<Fact>]
+let ``AR-028 no browser spec hardcodes a host port; port defaults match playwright.config.js`` () =
+    let config = File.ReadAllText(Path.Combine(repoRoot, "playwright.config.js"))
+    let defaultOf name =
+        let m = Regex.Match(config, sprintf @"process\.env\.%s \?\? (\d+)" name)
+        Assert.True(m.Success, sprintf "playwright.config.js declares no %s default" name)
+        m.Groups[1].Value
+    let defaults = Map [ "CAUSA_PORT", defaultOf "CAUSA_PORT"; "CAUSA_TEST_PORT", defaultOf "CAUSA_TEST_PORT" ]
+    let specs = Directory.GetFiles(Path.Combine(repoRoot, "tests/browser"), "*.js", SearchOption.AllDirectories)
+    Assert.NotEmpty specs
+    let problems =
+        [ for f in specs do
+              let rel = Path.GetRelativePath(repoRoot, f)
+              let text = File.ReadAllText f
+              for m in Regex.Matches(text, @"(?:127\.0\.0\.1|localhost|\[::1\]):(\d{2,5})") do
+                  yield sprintf "%s hardcodes port %s" rel m.Groups[1].Value
+              for m in Regex.Matches(text, @"process\.env\.(CAUSA_(?:TEST_)?PORT) \?\? (\d+)") do
+                  let name, value = m.Groups[1].Value, m.Groups[2].Value
+                  if defaults[name] <> value then yield sprintf "%s defaults %s to %s, the config to %s" rel name value defaults[name] ]
+    Assert.Empty problems
