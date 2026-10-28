@@ -35,9 +35,8 @@ let private withChange (name: string) =
     fake, app, v.InvestigationId, readAt
 
 [<Fact>]
-[<Trait("obligation", "VPO-d7fbd84e40ded145")>]
 [<Trait("obligation", "VPO-34731ac9a977b818")>]
-let ``DCT-001-A VPO-d7fbd84e40ded145 VPO-34731ac9a977b818 the publication is parented by the decided-at commit and a moved branch is a held conflict without retry`` () =
+let ``DCT-001-A VPO-34731ac9a977b818 the publication is parented by the decided-at commit and a moved branch is a held conflict without retry`` () =
     let fake, app, iid, readAt = withChange "dct-001-a"
     let moved = fake.CommitFiles(branch, [ "elsewhere/x.txt", utf8 "another writer\n" ])
     ok (app.Step(Save iid))
@@ -50,8 +49,7 @@ let ``DCT-001-A VPO-d7fbd84e40ded145 VPO-34731ac9a977b818 the publication is par
     Assert.Single(posts fake) |> ignore
 
 [<Fact>]
-[<Trait("obligation", "VPO-d7fbd84e40ded145")>]
-let ``DCT-001-B VPO-d7fbd84e40ded145 reconciliation classifies a head reached through another writer as concurrent, by ancestry and marker`` () =
+let ``DCT-001-B reconciliation classifies a head reached through another writer as concurrent, by ancestry and marker`` () =
     let fake, app, iid, _ = withChange "dct-001-b"
     // The write is lost before GitHub applies it; then another writer advances the branch.
     app.Faults <- (fun r -> if r.Method = "POST" then LoseWithoutApplying else Deliver)
@@ -65,8 +63,7 @@ let ``DCT-001-B VPO-d7fbd84e40ded145 reconciliation classifies a head reached th
     Assert.True(fake.Requests |> List.exists (fun r -> r.Url.Contains "/compare/"))
 
 [<Fact>]
-[<Trait("obligation", "VPO-d7fbd84e40ded145")>]
-let ``DCT-001-B VPO-d7fbd84e40ded145 an applied write followed by another writer is recognised as ours and a reload follows`` () =
+let ``DCT-001-B an applied write followed by another writer is recognised as ours and a reload follows`` () =
     let fake, app, iid, _ = withChange "dct-001-b-ours"
     app.Faults <- (fun r -> if r.Method = "POST" then ApplyThenLose else Deliver)
     ok (app.Step(Save iid))
@@ -80,9 +77,8 @@ let ``DCT-001-B VPO-d7fbd84e40ded145 an applied write followed by another writer
 
 [<Fact>]
 [<Trait("obligation", "VPO-2d4b7557ce013e50")>]
-[<Trait("obligation", "VPO-8c435e1ebdf43e7c")>]
 [<Trait("obligation", "VPO-cd9dd8ec730c3d3e")>]
-let ``DCT-002-A VPO-2d4b7557ce013e50 VPO-8c435e1ebdf43e7c VPO-cd9dd8ec730c3d3e a late answer for a replaced write is discarded`` () =
+let ``DCT-002-A VPO-2d4b7557ce013e50 VPO-cd9dd8ec730c3d3e a late answer for a replaced write is discarded`` () =
     let fake, app, iid, _ = withChange "dct-002-a"
     // First attempt never leaves the device (held, not written); the retry is held in flight.
     app.Faults <- (fun r -> if r.Method = "POST" then NotSentFault else Deliver)
@@ -108,9 +104,8 @@ let ``DCT-002-A VPO-2d4b7557ce013e50 VPO-8c435e1ebdf43e7c VPO-cd9dd8ec730c3d3e a
     Assert.Equal("remotelySynced", app.Status iid)
 
 [<Fact>]
-[<Trait("obligation", "VPO-8c435e1ebdf43e7c")>]
 [<Trait("obligation", "VPO-2d4b7557ce013e50")>]
-let ``REQUEST-IDENTITY VPO-8c435e1ebdf43e7c VPO-2d4b7557ce013e50 an answer to an earlier connection never lands on a newer one`` () =
+let ``REQUEST-IDENTITY VPO-2d4b7557ce013e50 an answer to an earlier connection never lands on a newer one`` () =
     let fake = newFake ()
     let app = App(fake)
     app.Faults <- (fun _ -> Hold)
@@ -155,9 +150,8 @@ let ``DCT-002-B VPO-199103f9166730e7 VPO-6886a2a6e612f704 every user event is ac
     ignore fake
 
 [<Fact>]
-[<Trait("obligation", "VPO-b3efad6eb85360be")>]
 [<Trait("obligation", "VPO-89ed6170f531961e")>]
-let ``DCT-003-A VPO-b3efad6eb85360be VPO-89ed6170f531961e a failure after send is unknown with no retry and reconcile reads the head first`` () =
+let ``DCT-003-A VPO-89ed6170f531961e a failure after send is unknown with no retry and reconcile reads the head first`` () =
     let fake, app, iid, _ = withChange "dct-003-a"
     app.Faults <- (fun r -> if r.Method = "POST" then ApplyThenLose else Deliver)
     ok (app.Step(Save iid))
@@ -262,7 +256,7 @@ let ``DCT-001-B two tabs or devices never write the same marker, and a reloaded 
     ok (a.Connect ws)
     // Connect settles the unknown write by reading (it was never applied); then a new change on the new page load.
     Assert.NotEqual<string>("unknown", a.Status iid)
-    ok (a.Step(Submit(hypothesis iid v.Version "a again")))
+    ok (a.Step(Submit(hypothesis iid (a.Doc(iid).Local.Version) "a again")))
     let ma2 = marker a
     Assert.NotEqual<string>(ma, ma2)
     Assert.NotEqual<string>(mb, ma2)

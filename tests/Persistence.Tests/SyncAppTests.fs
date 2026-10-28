@@ -141,11 +141,9 @@ let ``VPO-7ced47ef45099aab connecting and reading never mutate the repository`` 
 [<Fact>]
 [<Trait("obligation", "VPO-61b2e81f99761d55")>]
 [<Trait("obligation", "VPO-9c6055c47e4eb07d")>]
-[<Trait("obligation", "VPO-d7fbd84e40ded145")>]
-[<Trait("obligation", "VPO-b3efad6eb85360be")>]
 [<Trait("obligation", "VPO-4c06d10238d15c5c")>]
 [<Trait("obligation", "VPO-89ed6170f531961e")>]
-let ``VPO-61b2e81f99761d55 VPO-9c6055c47e4eb07d VPO-d7fbd84e40ded145 VPO-b3efad6eb85360be VPO-4c06d10238d15c5c VPO-89ed6170f531961e explicit create is saved locally, written in one guarded commit and claimed synced only after the re-read`` () =
+let ``VPO-61b2e81f99761d55 VPO-9c6055c47e4eb07d VPO-4c06d10238d15c5c VPO-89ed6170f531961e explicit create is saved locally, written in one guarded commit and claimed synced only after the re-read`` () =
     let fake = newFake ()
     let app = App(fake)
     ok (app.Connect ws)
@@ -201,8 +199,7 @@ let ``VPO-b3efad6eb85360be an acknowledged commit whose re-read fails is unknown
 
 [<Fact>]
 [<Trait("obligation", "VPO-34731ac9a977b818")>]
-[<Trait("obligation", "VPO-d7fbd84e40ded145")>]
-let ``VPO-34731ac9a977b818 VPO-d7fbd84e40ded145 a concurrent remote change is a conflict that keeps local edits and never overwrites remote history`` () =
+let ``VPO-34731ac9a977b818 a concurrent remote change is a conflict that keeps local edits and never overwrites remote history`` () =
     let fake = newFake ()
     let base' = investigation "conflict" 0
     seed fake ws base' |> ignore
@@ -386,8 +383,7 @@ let ``VPO-2de744fb2c8bdc70 VPO-bb08b9a414ba4cd7 VPO-ca58030e3eecdf9b VPO-c41f10e
 
 [<Fact>]
 [<Trait("obligation", "VPO-2d4b7557ce013e50")>]
-[<Trait("obligation", "VPO-8c435e1ebdf43e7c")>]
-let ``VPO-2d4b7557ce013e50 VPO-8c435e1ebdf43e7c answers for unknown requests or an earlier connection are refused and change nothing`` () =
+let ``VPO-2d4b7557ce013e50 answers for unknown requests or an earlier connection are refused and change nothing`` () =
     let fake = newFake ()
     let app = App(fake)
     app.Faults <- (fun _ -> Hold)
@@ -403,8 +399,7 @@ let ``VPO-2d4b7557ce013e50 VPO-8c435e1ebdf43e7c answers for unknown requests or 
     Assert.Equal(before, app.Model)
 
 [<Fact>]
-[<Trait("obligation", "VPO-d7fbd84e40ded145")>]
-let ``VPO-d7fbd84e40ded145 refused steps change nothing and send nothing`` () =
+let ``refused steps change nothing and send nothing`` () =
     let fake = newFake ()
     let app = App(fake)
     ok (app.Connect ws)
@@ -472,9 +467,8 @@ let ``VPO-89ed6170f531961e a local store failure is shown as failed, distinct fr
     Assert.Equal("failed", app.Status iid)
 
 [<Fact>]
-[<Trait("obligation", "VPO-d7fbd84e40ded145")>]
 [<Trait("obligation", "VPO-9c6055c47e4eb07d")>]
-let ``VPO-d7fbd84e40ded145 VPO-9c6055c47e4eb07d events accepted by the kernel are appended by the storage writer, saved, and a stale append is refused`` () =
+let ``VPO-9c6055c47e4eb07d events accepted by the kernel are appended by the storage writer, saved, and a stale append is refused`` () =
     let fake = newFake ()
     let app = App(fake)
     ok (app.Connect ws)
