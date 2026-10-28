@@ -1,0 +1,106 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "UI-003",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-33324aeb860bce06",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:history.spec.js > the timeline lists events in sequence with event type, actor, event time and version; filtering by category works; an entry links to the record it touched [VPO-33324aeb860bce06] [VPO-c3326322b8ed473a] [VPO-7fe0d0f0d00df8a0] [VPO-db25c20e9414ab46] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:history.spec.js > the timeline lists events in sequence with event type, actor, event time and version; filtering by category works; an entry links to the record it touched [VPO-33324aeb860bce06] [VPO-c3326322b8ed473a] [VPO-7fe0d0f0d00df8a0] [VPO-db25c20e9414ab46] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > report, timeline and administration views (T22, T26, T29) > the timeline shows event time, recorded time and the version it was rendered from [VPO-33324aeb860bce06] [VPO-7fe0d0f0d00df8a0] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-c3326322b8ed473a",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:history.spec.js > a past version is shown labelled historical with what it changed and what changed since; the latest is never mixed in [VPO-d08de632c7c1a4ab] [VPO-c3326322b8ed473a] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:history.spec.js > a past version is shown labelled historical with what it changed and what changed since; the latest is never mixed in [VPO-d08de632c7c1a4ab] [VPO-c3326322b8ed473a] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:history.spec.js > the timeline lists events in sequence with event type, actor, event time and version; filtering by category works; an entry links to the record it touched [VPO-33324aeb860bce06] [VPO-c3326322b8ed473a] [VPO-7fe0d0f0d00df8a0] [VPO-db25c20e9414ab46] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:history.spec.js > the timeline lists events in sequence with event type, actor, event time and version; filtering by category works; an entry links to the record it touched [VPO-33324aeb860bce06] [VPO-c3326322b8ed473a] [VPO-7fe0d0f0d00df8a0] [VPO-db25c20e9414ab46] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-7fe0d0f0d00df8a0",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:history.spec.js > the timeline lists events in sequence with event type, actor, event time and version; filtering by category works; an entry links to the record it touched [VPO-33324aeb860bce06] [VPO-c3326322b8ed473a] [VPO-7fe0d0f0d00df8a0] [VPO-db25c20e9414ab46] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:history.spec.js > the timeline lists events in sequence with event type, actor, event time and version; filtering by category works; an entry links to the record it touched [VPO-33324aeb860bce06] [VPO-c3326322b8ed473a] [VPO-7fe0d0f0d00df8a0] [VPO-db25c20e9414ab46] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > report, timeline and administration views (T22, T26, T29) > the timeline shows event time, recorded time and the version it was rendered from [VPO-33324aeb860bce06] [VPO-7fe0d0f0d00df8a0] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-db25c20e9414ab46",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:history.spec.js > the timeline lists events in sequence with event type, actor, event time and version; filtering by category works; an entry links to the record it touched [VPO-33324aeb860bce06] [VPO-c3326322b8ed473a] [VPO-7fe0d0f0d00df8a0] [VPO-db25c20e9414ab46] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:history.spec.js > the timeline lists events in sequence with event type, actor, event time and version; filtering by category works; an entry links to the record it touched [VPO-33324aeb860bce06] [VPO-c3326322b8ed473a] [VPO-7fe0d0f0d00df8a0] [VPO-db25c20e9414ab46] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    }
+  ]
+}

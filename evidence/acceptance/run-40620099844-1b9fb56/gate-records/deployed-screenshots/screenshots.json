@@ -1,0 +1,36 @@
+{
+  "schema": "causa.deployed-screenshots/1",
+  "url": "http://kevinmmiller.us/indy-init-rehearsal-005/",
+  "sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "credentials": "none",
+  "screenshots": [
+    {
+      "size": "desktop",
+      "width": 1440,
+      "height": 900,
+      "file": "desktop-1440x900-1b9fb56873fe.png",
+      "sha256": "6b2b197c14f9624fb1c034bb8bbcd7f098234cf907bc8db150a1efde07fd51e6"
+    },
+    {
+      "size": "ipad-portrait",
+      "width": 820,
+      "height": 1180,
+      "file": "ipad-portrait-820x1180-1b9fb56873fe.png",
+      "sha256": "283e4d640432b7f2118a92e1fc78689a13b083b4137b132bc26fbf831c4cb6f2"
+    },
+    {
+      "size": "ipad-landscape",
+      "width": 1180,
+      "height": 820,
+      "file": "ipad-landscape-1180x820-1b9fb56873fe.png",
+      "sha256": "e1e6bb9906ec9ad2a8e0d1f7a0a2999a66c43527ebe0759a8614423207cf85b1"
+    },
+    {
+      "size": "mobile",
+      "width": 390,
+      "height": 844,
+      "file": "mobile-390x844-1b9fb56873fe.png",
+      "sha256": "a7ea69fd583112fb2697c3632e07d8f11ba0eb35e622dd43045fea9b7797fbea"
+    }
+  ]
+}

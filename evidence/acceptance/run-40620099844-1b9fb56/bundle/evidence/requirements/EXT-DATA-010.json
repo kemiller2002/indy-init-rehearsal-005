@@ -1,0 +1,55 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "EXT-DATA-010",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-d8a63d43b7a2cf56",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.Acceptance.RunTests.EvidenceTests.EXT-DATA-010 R001 is unchanged: its repository head is still the commit Indy-init records as the R1 baseline",
+          "outcome": "passed",
+          "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-c6c90d9f4acc5fe6",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:live-persistence.spec.js > DCT-LIVE-A create, write, reload, conflict (resolved by Reload), two tabs with a lost write (never reconciled as saved) and rejected token against the real test repository, each confirmed by an independent SHA re-read [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/live/live-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-37d860d18826cf0a",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:live-persistence.spec.js > DCT-LIVE-A create, write, reload, conflict (resolved by Reload), two tabs with a lost write (never reconciled as saved) and rejected token against the real test repository, each confirmed by an independent SHA re-read [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/live/live-results.json"
+        }
+      ]
+    }
+  ]
+}

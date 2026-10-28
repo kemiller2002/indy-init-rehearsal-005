@@ -1,0 +1,55 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "PF-012",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-89df49b291078827",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.Acceptance.Tests.PipelineTests.PF-012 the README documents one command for a populated fixture-backed UI and one for the fast offline checks",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-23b26660a58ef990",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.Acceptance.Tests.PipelineTests.AR-014 PF-012 only the live provider jobs receive credentials; every other job runs with read-only contents and no secret",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-39d6eb77cb2097af",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.Acceptance.RunTests.EvidenceTests.PF-012 this run recorded each layer's measured time and outcome, and sets no budget before a baseline",
+          "outcome": "passed",
+          "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx"
+        }
+      ]
+    }
+  ]
+}

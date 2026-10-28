@@ -1,0 +1,77 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "defect",
+  "subject_id": "DC-002",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "review",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "fix_sha": "e8e32c1ebf6db77344cb8e8bc5bd30b422cdd379",
+  "fix_in_source_history": true,
+  "reviewer_evidence": {
+    "path": "acceptance/reviews/R5-independent-review.md",
+    "anchor": "dc-002",
+    "sha256": "9391bbd5abe5c24e663ee785a301bd67bd895ccea688c62baf72e51bd6375720"
+  },
+  "tests": [
+    {
+      "test": "DCT-002-A",
+      "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-A negative control VPO-821ce84e76d497b9 VPO-7b54ff75e3784cae the check fails when answers are matched by kind",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+    },
+    {
+      "test": "DCT-002-A",
+      "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-A a late answer for a replaced write is discarded",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+    },
+    {
+      "test": "DCT-002-A",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-002-A VPO-2d4b7557ce013e50 VPO-cd9dd8ec730c3d3e a late answer for a replaced write is discarded",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-002-B",
+      "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-B VPO-199103f9166730e7 VPO-6886a2a6e612f704 every user event is accepted only in its legal source states",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+    },
+    {
+      "test": "DCT-002-B",
+      "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-B R3 D-04 resubmitting an unchanged held change keeps its target parent",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+    },
+    {
+      "test": "DCT-002-B",
+      "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-B negative control VPO-821ce84e76d497b9 VPO-787e24f3c23195e9 the check fails on a book that writes during an unknown outcome",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+    },
+    {
+      "test": "DCT-002-B",
+      "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-B VPO-199103f9166730e7 a refused event leaves the state unchanged and is a typed fault",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+    },
+    {
+      "test": "DCT-002-B",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-002-B VPO-199103f9166730e7 VPO-6886a2a6e612f704 every user event is accepted only in its legal source states and a refusal changes nothing",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    }
+  ]
+}

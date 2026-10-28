@@ -1,0 +1,55 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "VER-006",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-4e417c6f238cb460",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.Acceptance.RunTests.EvidenceTests.VER-006 every integrated Echelon system accepted this candidate's real inputs in this run",
+          "outcome": "passed",
+          "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-b82b86a55e20e54f",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.Acceptance.RunTests.EvidenceTests.VER-006 the integrations were exercised in this run, not only compared as version strings",
+          "outcome": "passed",
+          "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-86b8bffb323a80b7",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:deployed.spec.js > EXT-DATA-009 EXT-DATA-001 VER-006 the Pages deployment serves exactly the verified build of this SHA, byte for byte, and it starts in a browser [VPO-b50ee1d4e3e78f25] [VPO-f8cbaa452cd4eb0b] [VPO-86b8bffb323a80b7] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/deployed/deployed-results.json"
+        }
+      ]
+    }
+  ]
+}

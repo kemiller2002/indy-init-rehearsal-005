@@ -1,0 +1,79 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "AR-009",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-821ce84e76d497b9",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 VPO-f52d9071426e82b3 all 90 negative fixtures are refused with their expected code and domain code",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.HistoryAndProposalTests.T27 VPO-199103f9166730e7 VPO-821ce84e76d497b9 agent output that is anything but proposals is refused whole",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-001-A negative control VPO-821ce84e76d497b9 VPO-7b54ff75e3784cae the check fails on a book that re-targets stale decisions",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-001-B negative control VPO-821ce84e76d497b9 VPO-7b54ff75e3784cae the check fails on ref-equality reconciliation",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-A negative control VPO-821ce84e76d497b9 VPO-7b54ff75e3784cae the check fails when answers are matched by kind",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-B negative control VPO-821ce84e76d497b9 VPO-787e24f3c23195e9 the check fails on a book that writes during an unknown outcome",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-003-A negative control VPO-821ce84e76d497b9 VPO-7b54ff75e3784cae the check fails on stage-blind failure classification",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.REQUEST-IDENTITY negative control VPO-821ce84e76d497b9 the check fails when connection answers are matched by kind",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-787e24f3c23195e9",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-B negative control VPO-821ce84e76d497b9 VPO-787e24f3c23195e9 the check fails on a book that writes during an unknown outcome",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        }
+      ]
+    }
+  ]
+}

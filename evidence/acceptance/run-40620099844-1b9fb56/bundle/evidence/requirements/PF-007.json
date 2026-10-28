@@ -1,0 +1,64 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "PF-007",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-9d59cc57fd44b927",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Persistence.Tests.CatalogAppTests.VPO-9d59cc57fd44b927 VPO-f52d9071426e82b3 a malformed catalog pointer or manifest fails closed and presents no case",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.CatalogAppTests.VPO-c81484cbcf203d4f VPO-9d59cc57fd44b927 a missing catalog case fails the catalog closed",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-9d59cc57fd44b927 VPO-34731ac9a977b818 an investigation missing from the repository on reload keeps the device's copy and says so",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-f52d9071426e82b3",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 VPO-f52d9071426e82b3 all 90 negative fixtures are refused with their expected code and domain code",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.CatalogAppTests.VPO-9d59cc57fd44b927 VPO-f52d9071426e82b3 a malformed catalog pointer or manifest fails closed and presents no case",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.StoreTests.VPO-c135d16c59f5baf8 VPO-f52d9071426e82b3 malformed and forged file sets fail closed at the first failing stage",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        }
+      ]
+    }
+  ]
+}

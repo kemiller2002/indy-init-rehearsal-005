@@ -1,0 +1,97 @@
+{
+  "producers": [
+    {
+      "id": "core",
+      "status": "success",
+      "command": "dotnet test App.slnx -c Release (https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844)",
+      "record": "TestResults/dotnet"
+    },
+    {
+      "id": "lock-gate",
+      "status": "success",
+      "command": "causa-acceptance lock-gate (https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844)",
+      "record": "TestResults/lock-gate/lock-gate.json"
+    },
+    {
+      "id": "site",
+      "status": "success",
+      "command": "npm run build (https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844)"
+    },
+    {
+      "id": "browser",
+      "status": "success",
+      "command": "npx playwright test --grep-invert @live (https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844)",
+      "record": "TestResults/playwright/browser-results.json"
+    },
+    {
+      "id": "live",
+      "status": "success",
+      "command": "npx playwright test --grep @live (https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844)",
+      "record": "TestResults/live/live-results.json"
+    },
+    {
+      "id": "deploy",
+      "status": "success",
+      "command": "actions/deploy-pages (https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844)"
+    },
+    {
+      "id": "deployed-smoke",
+      "status": "success",
+      "command": "version.json at the deployed URL equals the source SHA (https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844)"
+    },
+    {
+      "id": "provider-conformance",
+      "status": "success",
+      "command": "causa-persistence record && causa-persistence catalog (https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844)",
+      "record": "gate-records/provider-conformance/provider-conformance.json"
+    },
+    {
+      "id": "wasm-smoke",
+      "status": "success",
+      "command": "dotnet build -c Release tests/Engine.WasmSmoke && node tests/Engine.WasmSmoke/run.mjs (https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844)",
+      "record": "gate-records/wasm-smoke/wasm-smoke.log"
+    },
+    {
+      "id": "preservation-gate",
+      "status": "success",
+      "command": "tools/acceptance/ci/preservation-gate.sh: praxis requirements preservation verify as recorded (https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844)",
+      "record": "gate-records/preservation-gate/gate.json"
+    },
+    {
+      "id": "percepta-verify-app",
+      "status": "success",
+      "command": "percepta verify-app --base-url <built site> (https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844)",
+      "record": "gate-records/percepta/verify-app.json"
+    },
+    {
+      "id": "stack-smoke",
+      "status": "success",
+      "command": "causa-acceptance produce (acceptance/gates.json producers.stack-smoke)",
+      "record": "producers/stack-smoke.json"
+    },
+    {
+      "id": "interface-manifest",
+      "status": "success",
+      "command": "causa-acceptance produce (acceptance/gates.json producers.interface-manifest)",
+      "record": "producers/interface-manifest.json"
+    },
+    {
+      "id": "domain-obligations",
+      "status": "success",
+      "command": "causa-acceptance produce (acceptance/gates.json producers.domain-obligations)",
+      "record": "producers/domain-obligations.json"
+    },
+    {
+      "id": "frozen-data",
+      "status": "success",
+      "command": "causa-acceptance produce (acceptance/gates.json producers.frozen-data)",
+      "record": "producers/frozen-data.json"
+    },
+    {
+      "id": "defect-class-review",
+      "status": "success",
+      "command": "causa-acceptance produce (acceptance/gates.json producers.defect-class-review)",
+      "record": "producers/defect-class-review.json"
+    }
+  ]
+}

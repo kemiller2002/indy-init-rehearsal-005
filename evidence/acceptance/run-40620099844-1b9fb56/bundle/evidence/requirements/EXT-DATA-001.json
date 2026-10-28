@@ -1,0 +1,64 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "EXT-DATA-001",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-f8cbaa452cd4eb0b",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.Acceptance.RunTests.EvidenceTests.EXT-DATA-001 EXT-DATA-013 the built site and application source contain none of the eight investigation records",
+          "outcome": "passed",
+          "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx"
+        },
+        {
+          "testId": "playwright:deployed.spec.js > EXT-DATA-009 EXT-DATA-001 VER-006 the Pages deployment serves exactly the verified build of this SHA, byte for byte, and it starts in a browser [VPO-b50ee1d4e3e78f25] [VPO-f8cbaa452cd4eb0b] [VPO-86b8bffb323a80b7] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/deployed/deployed-results.json"
+        },
+        {
+          "testId": "playwright:live-persistence.spec.js > EXT-DATA-013 after Connect the browser loads exactly the catalog's three historical cases, verified and read-only; no record ships with the site and none is served by it [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/live/live-results.json"
+        },
+        {
+          "testId": "playwright:records-scan.spec.js > no causa-data investigation record is in the source, the test build or the deployable site [VPO-f8cbaa452cd4eb0b] [VPO-77f6e22e08d5bba0] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-0304a8342e7147dd",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.Acceptance.RunTests.EvidenceTests.EXT-DATA-001 EXT-DATA-013 the built site and application source contain none of the eight investigation records",
+          "outcome": "passed",
+          "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx"
+        },
+        {
+          "testId": "playwright:live-persistence.spec.js > EXT-DATA-013 after Connect the browser loads exactly the catalog's three historical cases, verified and read-only; no record ships with the site and none is served by it [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/live/live-results.json"
+        }
+      ]
+    }
+  ]
+}

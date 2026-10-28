@@ -1,0 +1,2038 @@
+{
+  "schema": "causa.provider-conformance/1",
+  "run": "40620099844-1",
+  "sourceSha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "record": {
+    "exit": "0",
+    "result": "RESULT: PASS (live provider; no mocks)",
+    "checks": [
+      {
+        "check": "live.create",
+        "detail": "first verified remote write in 1661 ms",
+        "passed": true
+      },
+      {
+        "check": "live.read.file",
+        "detail": "the file read through the contents API is byte-identical",
+        "passed": true
+      },
+      {
+        "check": "live.reload.head",
+        "detail": "the branch head is the acknowledged commit",
+        "passed": true
+      },
+      {
+        "check": "live.append",
+        "detail": "appended bytes re-read at the new commit",
+        "passed": true
+      },
+      {
+        "check": "live.compare.ancestry",
+        "detail": "the compare API gives first parents and commit markers, oldest first",
+        "passed": true
+      },
+      {
+        "check": "live.conflict",
+        "detail": "stale write refused and head unchanged; conflict handled in 1063 ms",
+        "passed": true
+      },
+      {
+        "check": "live.forbidden.head",
+        "detail": "a refused write moved nothing",
+        "passed": true
+      },
+      {
+        "check": "live.rejectedToken",
+        "detail": "a rejected credential writes nothing",
+        "passed": true
+      },
+      {
+        "check": "live.rejectedToken.head",
+        "detail": "the head did not move",
+        "passed": true
+      },
+      {
+        "check": "live.reconcile",
+        "detail": "the discarded write was found applied by content at the re-read head",
+        "passed": true
+      },
+      {
+        "check": "live.app.connect",
+        "detail": "a new workspace connects as authorizedEmpty",
+        "passed": true
+      },
+      {
+        "check": "live.app.create",
+        "detail": "create + save -> remotelySynced in 2316 ms (claimed only after the re-read)",
+        "passed": true
+      },
+      {
+        "check": "live.app.append",
+        "detail": "append + save -> remotelySynced",
+        "passed": true
+      },
+      {
+        "check": "live.app.reload",
+        "detail": "after reload the investigation is remotelySynced",
+        "passed": true
+      },
+      {
+        "check": "live.app.conflict",
+        "detail": "save after a concurrent write -> conflict; remote head untouched; local change kept; 3221 ms",
+        "passed": true
+      },
+      {
+        "check": "live.app.conflict.resolve",
+        "detail": "reload + discard adopts the other writer's copy -> remotelySynced",
+        "passed": true
+      },
+      {
+        "check": "live.app.unknown",
+        "detail": "lost answer -> unknown, save refused, reconcile -> remotelySynced",
+        "passed": true
+      },
+      {
+        "check": "live.app.rejectedToken",
+        "detail": "a rejected token connects as accessDenied",
+        "passed": true
+      },
+      {
+        "check": "live.boundedWrites",
+        "detail": "7 commit(s) of this run changed only paths under its own workspaces; nothing under catalog/ or historical-v1",
+        "passed": true
+      }
+    ],
+    "observations": [
+      {
+        "recordedAt": "2026-10-28T02:24:18.814Z",
+        "recording": "causa.provider-observations/1",
+        "sourceRunId": "40620099844"
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "allow_auto_merge": "boolean",
+          "allow_forking": "boolean",
+          "allow_merge_commit": "boolean",
+          "allow_rebase_merge": "boolean",
+          "allow_squash_merge": "boolean",
+          "allow_update_branch": "boolean",
+          "archive_url": "string",
+          "archived": "boolean",
+          "assignees_url": "string",
+          "blobs_url": "string",
+          "branches_url": "string",
+          "clone_url": "string",
+          "collaborators_url": "string",
+          "comments_url": "string",
+          "commits_url": "string",
+          "compare_url": "string",
+          "contents_url": "string",
+          "contributors_url": "string",
+          "created_at": "string",
+          "default_branch": "string",
+          "delete_branch_on_merge": "boolean",
+          "deployments_url": "string",
+          "description": "null",
+          "disabled": "boolean",
+          "downloads_url": "string",
+          "events_url": "string",
+          "fork": "boolean",
+          "forks": "integer",
+          "forks_count": "integer",
+          "forks_url": "string",
+          "full_name": "string",
+          "git_commits_url": "string",
+          "git_refs_url": "string",
+          "git_tags_url": "string",
+          "git_url": "string",
+          "has_discussions": "boolean",
+          "has_downloads": "boolean",
+          "has_issues": "boolean",
+          "has_pages": "boolean",
+          "has_projects": "boolean",
+          "has_pull_requests": "boolean",
+          "has_wiki": "boolean",
+          "homepage": "null",
+          "hooks_url": "string",
+          "html_url": "string",
+          "id": "integer",
+          "is_template": "boolean",
+          "issue_comment_url": "string",
+          "issue_events_url": "string",
+          "issues_url": "string",
+          "keys_url": "string",
+          "labels_url": "string",
+          "language": "null",
+          "languages_url": "string",
+          "license": "null",
+          "merge_commit_message": "string",
+          "merge_commit_title": "string",
+          "merges_url": "string",
+          "milestones_url": "string",
+          "mirror_url": "null",
+          "name": "string",
+          "network_count": "integer",
+          "node_id": "string",
+          "notifications_url": "string",
+          "open_issues": "integer",
+          "open_issues_count": "integer",
+          "owner": {
+            "avatar_url": "string",
+            "events_url": "string",
+            "followers_url": "string",
+            "following_url": "string",
+            "gists_url": "string",
+            "gravatar_id": "string",
+            "html_url": "string",
+            "id": "integer",
+            "login": "string",
+            "node_id": "string",
+            "organizations_url": "string",
+            "received_events_url": "string",
+            "repos_url": "string",
+            "site_admin": "boolean",
+            "starred_url": "string",
+            "subscriptions_url": "string",
+            "type": "string",
+            "url": "string",
+            "user_view_type": "string"
+          },
+          "permissions": {
+            "admin": "boolean",
+            "maintain": "boolean",
+            "pull": "boolean",
+            "push": "boolean",
+            "triage": "boolean"
+          },
+          "private": "boolean",
+          "pull_request_creation_policy": "string",
+          "pulls_url": "string",
+          "pushed_at": "string",
+          "releases_url": "string",
+          "size": "integer",
+          "squash_merge_commit_message": "string",
+          "squash_merge_commit_title": "string",
+          "ssh_url": "string",
+          "stargazers_count": "integer",
+          "stargazers_url": "string",
+          "statuses_url": "string",
+          "subscribers_count": "integer",
+          "subscribers_url": "string",
+          "subscription_url": "string",
+          "svn_url": "string",
+          "tags_url": "string",
+          "teams_url": "string",
+          "topics": [],
+          "trees_url": "string",
+          "updated_at": "string",
+          "url": "string",
+          "use_squash_pr_title_as_default": "boolean",
+          "visibility": "string",
+          "watchers": "integer",
+          "watchers_count": "integer",
+          "web_commit_signoff_required": "boolean"
+        },
+        "classification": "ok",
+        "elapsedMs": 485,
+        "fresh": true,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "cache-control": "max-age=60, s-maxage=60, private",
+          "content-type": "application/json; charset=utf-8",
+          "etag": "\"233e6d8394d45496a7d4abfb65e000d0d2f205b78774d2beaab69e602c4c1e66\"",
+          "last-modified": "Wed, 28 Oct 2026 02:11:45 GMT",
+          "vary": "Accept, Authorization, Cookie, X-GitHub-OTP, Accept-Encoding, Accept, X-Requested-With",
+          "x-accepted-github-permissions": "metadata=read",
+          "x-github-api-version-selected": "2022-11-28",
+          "x-github-media-type": "github.v3; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4401",
+          "x-ratelimit-resource": "core",
+          "x-ratelimit-used": "599"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}",
+        "scenario": "repository.read.authorized",
+        "status": 200
+      },
+      {
+        "permissions": {
+          "admin": true,
+          "maintain": true,
+          "pull": true,
+          "push": true,
+          "triage": true
+        },
+        "scenario": "repository.permissions"
+      },
+      {
+        "authenticated": false,
+        "bodyShape": {
+          "documentation_url": "string",
+          "message": "string"
+        },
+        "classification": "RateLimited",
+        "elapsedMs": 54,
+        "fresh": true,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "x-github-media-type": "github.v3; format=json",
+          "x-ratelimit-limit": "60",
+          "x-ratelimit-remaining": "0",
+          "x-ratelimit-resource": "core",
+          "x-ratelimit-used": "60"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}",
+        "scenario": "repository.read.anonymous",
+        "status": 403
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "documentation_url": "string",
+          "message": "string",
+          "status": "string"
+        },
+        "classification": "Unauthorized",
+        "elapsedMs": 53,
+        "fresh": true,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "vary": "Accept-Encoding, Accept, X-Requested-With",
+          "x-github-media-type": "github.v3; format=json"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}",
+        "scenario": "repository.read.rejectedCredential",
+        "status": 401
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "node_id": "string",
+          "object": {
+            "sha": "string",
+            "type": "string",
+            "url": "string"
+          },
+          "ref": "string",
+          "url": "string"
+        },
+        "classification": "ok",
+        "elapsedMs": 346,
+        "fresh": true,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "cache-control": "max-age=60, s-maxage=60, private",
+          "content-type": "application/json; charset=utf-8",
+          "etag": "\"5baa8851c63ed784d79c646b6be4a9652f09efefdc0bc951f2dcd5bb963f8baf\"",
+          "last-modified": "Wed, 28 Oct 2026 02:11:45 GMT",
+          "vary": "Accept, Authorization, Cookie, X-GitHub-OTP, Accept-Encoding, Accept, X-Requested-With",
+          "x-accepted-github-permissions": "contents=read",
+          "x-github-api-version-selected": "2022-11-28",
+          "x-github-media-type": "github.v3; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4400",
+          "x-ratelimit-resource": "core",
+          "x-ratelimit-used": "600"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}/git/ref/heads/{branch}?causa_fresh={nonce}",
+        "scenario": "ref.read.head",
+        "status": 200
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "node_id": "string",
+          "object": {
+            "sha": "string",
+            "type": "string",
+            "url": "string"
+          },
+          "ref": "string",
+          "url": "string"
+        },
+        "classification": "ok",
+        "elapsedMs": 213,
+        "fresh": false,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "cache-control": "max-age=60, s-maxage=60, private",
+          "content-type": "application/json; charset=utf-8",
+          "etag": "\"5baa8851c63ed784d79c646b6be4a9652f09efefdc0bc951f2dcd5bb963f8baf\"",
+          "last-modified": "Wed, 28 Oct 2026 02:11:45 GMT",
+          "vary": "Accept, Authorization, Cookie, X-GitHub-OTP, Accept-Encoding, Accept, X-Requested-With",
+          "x-accepted-github-permissions": "contents=read",
+          "x-github-api-version-selected": "2022-11-28",
+          "x-github-media-type": "github.v3; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4399",
+          "x-ratelimit-resource": "core",
+          "x-ratelimit-used": "601"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}/git/ref/heads/{branch}",
+        "scenario": "ref.read.head.cacheable",
+        "status": 200
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "documentation_url": "string",
+          "message": "string",
+          "status": "string"
+        },
+        "classification": "NotFound",
+        "elapsedMs": 217,
+        "fresh": true,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "vary": "Accept-Encoding, Accept, X-Requested-With",
+          "x-accepted-github-permissions": "contents=read",
+          "x-github-api-version-selected": "2022-11-28",
+          "x-github-media-type": "github.v3; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4398",
+          "x-ratelimit-resource": "core",
+          "x-ratelimit-used": "602"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}/git/ref/heads/{missing}",
+        "scenario": "ref.read.missingBranch",
+        "status": 404
+      },
+      {
+        "oid": "head0",
+        "value": "cb2f69fffbde72f8ba1354fd540a2b2b9ce03bce"
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "documentation_url": "string",
+          "message": "string",
+          "status": "string"
+        },
+        "classification": "NotFound",
+        "elapsedMs": 192,
+        "fresh": false,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "vary": "Accept-Encoding, Accept, X-Requested-With",
+          "x-accepted-github-permissions": "contents=read",
+          "x-github-api-version-selected": "2022-11-28",
+          "x-github-media-type": "github.v3; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4397",
+          "x-ratelimit-resource": "core",
+          "x-ratelimit-used": "603"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}/contents/{path}?ref={commit}",
+        "scenario": "contents.list.missingPath",
+        "status": 404
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "documentation_url": "string",
+          "message": "string",
+          "status": "string"
+        },
+        "classification": "NotFound",
+        "elapsedMs": 157,
+        "fresh": false,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "vary": "Accept-Encoding, Accept, X-Requested-With",
+          "x-accepted-github-permissions": "contents=read",
+          "x-github-api-version-selected": "2022-11-28",
+          "x-github-media-type": "github.v3; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4396",
+          "x-ratelimit-resource": "core",
+          "x-ratelimit-used": "604"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}/contents/{path}?ref={missingBranch}",
+        "scenario": "contents.list.missingRef",
+        "status": 404
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "documentation_url": "string",
+          "message": "string",
+          "status": "string"
+        },
+        "classification": "MissingRef",
+        "elapsedMs": 227,
+        "fresh": false,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "vary": "Accept-Encoding, Accept, X-Requested-With",
+          "x-accepted-github-permissions": "contents=read",
+          "x-github-api-version-selected": "2022-11-28",
+          "x-github-media-type": "github.v3; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4395",
+          "x-ratelimit-resource": "core",
+          "x-ratelimit-used": "605"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}/commits/{missingSha}",
+        "scenario": "commits.read.missingSha",
+        "status": 422
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "data": {
+            "createCommitOnBranch": {
+              "commit": {
+                "oid": "string"
+              }
+            }
+          }
+        },
+        "classification": "ok",
+        "elapsedMs": 1490,
+        "fresh": true,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "vary": "Accept-Encoding, Accept, X-Requested-With",
+          "x-github-media-type": "github.v4; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4977",
+          "x-ratelimit-resource": "graphql",
+          "x-ratelimit-used": "23"
+        },
+        "method": "POST",
+        "route": "POST /graphql createCommitOnBranch",
+        "scenario": "write.create",
+        "status": 200
+      },
+      {
+        "oid": "create",
+        "value": "e767fea6e2779311cf4060280af52406626cfb94"
+      },
+      {
+        "authenticated": true,
+        "bodyShape": [
+          {
+            "_links": {
+              "git": "string",
+              "html": "string",
+              "self": "string"
+            },
+            "download_url": "string",
+            "git_url": "string",
+            "html_url": "string",
+            "name": "string",
+            "path": "string",
+            "sha": "string",
+            "size": "integer",
+            "type": "string",
+            "url": "string"
+          }
+        ],
+        "classification": "ok",
+        "elapsedMs": 157,
+        "fresh": false,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "cache-control": "max-age=60, s-maxage=60, private",
+          "content-type": "application/json; charset=utf-8",
+          "etag": "\"3d53870cf146c41f87d5183d635c4d56652b03fe\"",
+          "last-modified": "Wed, 28 Oct 2026 02:11:45 GMT",
+          "vary": "Accept, Authorization, Cookie, X-GitHub-OTP, Accept-Encoding, Accept, X-Requested-With",
+          "x-accepted-github-permissions": "contents=read",
+          "x-github-api-version-selected": "2022-11-28",
+          "x-github-media-type": "github.v3; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4394",
+          "x-ratelimit-resource": "core",
+          "x-ratelimit-used": "606"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}/contents/{path}?ref={commit}",
+        "scenario": "write.create.confirm",
+        "status": 200
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "content": "string",
+          "encoding": "string",
+          "node_id": "string",
+          "sha": "string",
+          "size": "integer",
+          "url": "string"
+        },
+        "classification": "ok",
+        "elapsedMs": 233,
+        "fresh": false,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "cache-control": "max-age=86400, s-maxage=86400, private",
+          "content-type": "application/json; charset=utf-8",
+          "etag": "\"e3067c84b82564f4443ab1e046410d5524967436dbb91d3eb356f708163aa5b0\"",
+          "vary": "Accept, Authorization, Cookie, X-GitHub-OTP, Accept-Encoding, Accept, X-Requested-With",
+          "x-accepted-github-permissions": "contents=read",
+          "x-github-api-version-selected": "2022-11-28",
+          "x-github-media-type": "github.v3; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4393",
+          "x-ratelimit-resource": "core",
+          "x-ratelimit-used": "607"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}/git/blobs/{sha}",
+        "scenario": "blob.read",
+        "status": 200
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "_links": {
+            "git": "string",
+            "html": "string",
+            "self": "string"
+          },
+          "content": "string",
+          "download_url": "string",
+          "encoding": "string",
+          "git_url": "string",
+          "html_url": "string",
+          "name": "string",
+          "path": "string",
+          "sha": "string",
+          "size": "integer",
+          "type": "string",
+          "url": "string"
+        },
+        "classification": "ok",
+        "elapsedMs": 205,
+        "fresh": false,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "cache-control": "max-age=60, s-maxage=60, private",
+          "content-type": "application/json; charset=utf-8",
+          "etag": "\"12a5abb04e569daa5dd2adae93034c8c8b4e1f8b\"",
+          "last-modified": "Wed, 28 Oct 2026 02:24:21 GMT",
+          "vary": "Accept, Authorization, Cookie, X-GitHub-OTP, Accept-Encoding, Accept, X-Requested-With",
+          "x-accepted-github-permissions": "contents=read",
+          "x-github-api-version-selected": "2022-11-28",
+          "x-github-media-type": "github.v3; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4392",
+          "x-ratelimit-resource": "core",
+          "x-ratelimit-used": "608"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}/contents/{path}?ref={commit}",
+        "scenario": "contents.read.file",
+        "status": 200
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "documentation_url": "string",
+          "message": "string",
+          "status": "string"
+        },
+        "classification": "NotFound",
+        "elapsedMs": 157,
+        "fresh": false,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "vary": "Accept-Encoding, Accept, X-Requested-With",
+          "x-accepted-github-permissions": "contents=read",
+          "x-github-api-version-selected": "2022-11-28",
+          "x-github-media-type": "github.v3; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4391",
+          "x-ratelimit-resource": "core",
+          "x-ratelimit-used": "609"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}/contents/{path}?ref={commit}",
+        "scenario": "contents.read.file.missing",
+        "status": 404
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "node_id": "string",
+          "object": {
+            "sha": "string",
+            "type": "string",
+            "url": "string"
+          },
+          "ref": "string",
+          "url": "string"
+        },
+        "classification": "ok",
+        "elapsedMs": 196,
+        "fresh": true,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "cache-control": "max-age=60, s-maxage=60, private",
+          "content-type": "application/json; charset=utf-8",
+          "etag": "\"76c8f5162184e2d491e2200ba9e034f6fa2bac6347616be795e3ff5be5f1afe6\"",
+          "last-modified": "Wed, 28 Oct 2026 02:11:45 GMT",
+          "vary": "Accept, Authorization, Cookie, X-GitHub-OTP, Accept-Encoding, Accept, X-Requested-With",
+          "x-accepted-github-permissions": "contents=read",
+          "x-github-api-version-selected": "2022-11-28",
+          "x-github-media-type": "github.v3; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4390",
+          "x-ratelimit-resource": "core",
+          "x-ratelimit-used": "610"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}/git/ref/heads/{branch}?causa_fresh={nonce}",
+        "scenario": "ref.read.afterCreate",
+        "status": 200
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "data": {
+            "createCommitOnBranch": {
+              "commit": {
+                "oid": "string"
+              }
+            }
+          }
+        },
+        "classification": "ok",
+        "elapsedMs": 1553,
+        "fresh": true,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "vary": "Accept-Encoding, Accept, X-Requested-With",
+          "x-github-media-type": "github.v4; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4976",
+          "x-ratelimit-resource": "graphql",
+          "x-ratelimit-used": "24"
+        },
+        "method": "POST",
+        "route": "POST /graphql createCommitOnBranch",
+        "scenario": "write.append",
+        "status": 200
+      },
+      {
+        "oid": "append",
+        "value": "f4617a27fddfd16dd9712d3ac3f5e7275a4891e3"
+      },
+      {
+        "authenticated": true,
+        "bodyShape": [
+          {
+            "_links": {
+              "git": "string",
+              "html": "string",
+              "self": "string"
+            },
+            "download_url": "string",
+            "git_url": "string",
+            "html_url": "string",
+            "name": "string",
+            "path": "string",
+            "sha": "string",
+            "size": "integer",
+            "type": "string",
+            "url": "string"
+          }
+        ],
+        "classification": "ok",
+        "elapsedMs": 165,
+        "fresh": false,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "cache-control": "max-age=60, s-maxage=60, private",
+          "content-type": "application/json; charset=utf-8",
+          "etag": "\"0bb66d41bf524b78890206883c69e4a56baebda3\"",
+          "last-modified": "Wed, 28 Oct 2026 02:11:45 GMT",
+          "vary": "Accept, Authorization, Cookie, X-GitHub-OTP, Accept-Encoding, Accept, X-Requested-With",
+          "x-accepted-github-permissions": "contents=read",
+          "x-github-api-version-selected": "2022-11-28",
+          "x-github-media-type": "github.v3; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4389",
+          "x-ratelimit-resource": "core",
+          "x-ratelimit-used": "611"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}/contents/{path}?ref={commit}",
+        "scenario": "write.append.confirm",
+        "status": 200
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "ahead_by": "integer",
+          "base_commit": {
+            "author": {
+              "avatar_url": "string",
+              "events_url": "string",
+              "followers_url": "string",
+              "following_url": "string",
+              "gists_url": "string",
+              "gravatar_id": "string",
+              "html_url": "string",
+              "id": "integer",
+              "login": "string",
+              "node_id": "string",
+              "organizations_url": "string",
+              "received_events_url": "string",
+              "repos_url": "string",
+              "site_admin": "boolean",
+              "starred_url": "string",
+              "subscriptions_url": "string",
+              "type": "string",
+              "url": "string",
+              "user_view_type": "string"
+            },
+            "comments_url": "string",
+            "commit": {
+              "author": {
+                "date": "string",
+                "email": "string",
+                "name": "string"
+              },
+              "comment_count": "integer",
+              "committer": {
+                "date": "string",
+                "email": "string",
+                "name": "string"
+              },
+              "message": "string",
+              "tree": {
+                "sha": "string",
+                "url": "string"
+              },
+              "url": "string",
+              "verification": {
+                "payload": "string",
+                "reason": "string",
+                "signature": "string",
+                "verified": "boolean",
+                "verified_at": "string"
+              }
+            },
+            "committer": {
+              "avatar_url": "string",
+              "events_url": "string",
+              "followers_url": "string",
+              "following_url": "string",
+              "gists_url": "string",
+              "gravatar_id": "string",
+              "html_url": "string",
+              "id": "integer",
+              "login": "string",
+              "node_id": "string",
+              "organizations_url": "string",
+              "received_events_url": "string",
+              "repos_url": "string",
+              "site_admin": "boolean",
+              "starred_url": "string",
+              "subscriptions_url": "string",
+              "type": "string",
+              "url": "string",
+              "user_view_type": "string"
+            },
+            "html_url": "string",
+            "node_id": "string",
+            "parents": [
+              {
+                "html_url": "string",
+                "sha": "string",
+                "url": "string"
+              }
+            ],
+            "sha": "string",
+            "url": "string"
+          },
+          "behind_by": "integer",
+          "commits": [
+            {
+              "author": {
+                "avatar_url": "string",
+                "events_url": "string",
+                "followers_url": "string",
+                "following_url": "string",
+                "gists_url": "string",
+                "gravatar_id": "string",
+                "html_url": "string",
+                "id": "integer",
+                "login": "string",
+                "node_id": "string",
+                "organizations_url": "string",
+                "received_events_url": "string",
+                "repos_url": "string",
+                "site_admin": "boolean",
+                "starred_url": "string",
+                "subscriptions_url": "string",
+                "type": "string",
+                "url": "string",
+                "user_view_type": "string"
+              },
+              "comments_url": "string",
+              "commit": {
+                "author": {
+                  "date": "string",
+                  "email": "string",
+                  "name": "string"
+                },
+                "comment_count": "integer",
+                "committer": {
+                  "date": "string",
+                  "email": "string",
+                  "name": "string"
+                },
+                "message": "string",
+                "tree": {
+                  "sha": "string",
+                  "url": "string"
+                },
+                "url": "string",
+                "verification": {
+                  "payload": "string",
+                  "reason": "string",
+                  "signature": "string",
+                  "verified": "boolean",
+                  "verified_at": "string"
+                }
+              },
+              "committer": {
+                "avatar_url": "string",
+                "events_url": "string",
+                "followers_url": "string",
+                "following_url": "string",
+                "gists_url": "string",
+                "gravatar_id": "string",
+                "html_url": "string",
+                "id": "integer",
+                "login": "string",
+                "node_id": "string",
+                "organizations_url": "string",
+                "received_events_url": "string",
+                "repos_url": "string",
+                "site_admin": "boolean",
+                "starred_url": "string",
+                "subscriptions_url": "string",
+                "type": "string",
+                "url": "string",
+                "user_view_type": "string"
+              },
+              "html_url": "string",
+              "node_id": "string",
+              "parents": [
+                {
+                  "html_url": "string",
+                  "sha": "string",
+                  "url": "string"
+                }
+              ],
+              "sha": "string",
+              "url": "string"
+            }
+          ],
+          "diff_url": "string",
+          "files": [
+            {
+              "additions": "integer",
+              "blob_url": "string",
+              "changes": "integer",
+              "contents_url": "string",
+              "deletions": "integer",
+              "filename": "string",
+              "patch": "string",
+              "raw_url": "string",
+              "sha": "string",
+              "status": "string"
+            }
+          ],
+          "html_url": "string",
+          "merge_base_commit": {
+            "author": {
+              "avatar_url": "string",
+              "events_url": "string",
+              "followers_url": "string",
+              "following_url": "string",
+              "gists_url": "string",
+              "gravatar_id": "string",
+              "html_url": "string",
+              "id": "integer",
+              "login": "string",
+              "node_id": "string",
+              "organizations_url": "string",
+              "received_events_url": "string",
+              "repos_url": "string",
+              "site_admin": "boolean",
+              "starred_url": "string",
+              "subscriptions_url": "string",
+              "type": "string",
+              "url": "string",
+              "user_view_type": "string"
+            },
+            "comments_url": "string",
+            "commit": {
+              "author": {
+                "date": "string",
+                "email": "string",
+                "name": "string"
+              },
+              "comment_count": "integer",
+              "committer": {
+                "date": "string",
+                "email": "string",
+                "name": "string"
+              },
+              "message": "string",
+              "tree": {
+                "sha": "string",
+                "url": "string"
+              },
+              "url": "string",
+              "verification": {
+                "payload": "string",
+                "reason": "string",
+                "signature": "string",
+                "verified": "boolean",
+                "verified_at": "string"
+              }
+            },
+            "committer": {
+              "avatar_url": "string",
+              "events_url": "string",
+              "followers_url": "string",
+              "following_url": "string",
+              "gists_url": "string",
+              "gravatar_id": "string",
+              "html_url": "string",
+              "id": "integer",
+              "login": "string",
+              "node_id": "string",
+              "organizations_url": "string",
+              "received_events_url": "string",
+              "repos_url": "string",
+              "site_admin": "boolean",
+              "starred_url": "string",
+              "subscriptions_url": "string",
+              "type": "string",
+              "url": "string",
+              "user_view_type": "string"
+            },
+            "html_url": "string",
+            "node_id": "string",
+            "parents": [
+              {
+                "html_url": "string",
+                "sha": "string",
+                "url": "string"
+              }
+            ],
+            "sha": "string",
+            "url": "string"
+          },
+          "patch_url": "string",
+          "permalink_url": "string",
+          "status": "string",
+          "total_commits": "integer",
+          "url": "string"
+        },
+        "classification": "ok",
+        "elapsedMs": 490,
+        "fresh": false,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "cache-control": "max-age=60, s-maxage=60, private",
+          "content-type": "application/json; charset=utf-8",
+          "etag": "\"abc0deb02faf8b8895466461c2b755f713ac15be9c0062b3d93e9819115df167\"",
+          "last-modified": "Wed, 28 Oct 2026 02:24:24 GMT",
+          "vary": "Accept, Authorization, Cookie, X-GitHub-OTP, Accept-Encoding, Accept, X-Requested-With",
+          "x-accepted-github-permissions": "contents=read",
+          "x-github-api-version-selected": "2022-11-28",
+          "x-github-media-type": "github.v3; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4388",
+          "x-ratelimit-resource": "core",
+          "x-ratelimit-used": "612"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}/compare/{base}...{head}",
+        "scenario": "compare.ahead",
+        "status": 200
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "ahead_by": "integer",
+          "base_commit": {
+            "author": {
+              "avatar_url": "string",
+              "events_url": "string",
+              "followers_url": "string",
+              "following_url": "string",
+              "gists_url": "string",
+              "gravatar_id": "string",
+              "html_url": "string",
+              "id": "integer",
+              "login": "string",
+              "node_id": "string",
+              "organizations_url": "string",
+              "received_events_url": "string",
+              "repos_url": "string",
+              "site_admin": "boolean",
+              "starred_url": "string",
+              "subscriptions_url": "string",
+              "type": "string",
+              "url": "string",
+              "user_view_type": "string"
+            },
+            "comments_url": "string",
+            "commit": {
+              "author": {
+                "date": "string",
+                "email": "string",
+                "name": "string"
+              },
+              "comment_count": "integer",
+              "committer": {
+                "date": "string",
+                "email": "string",
+                "name": "string"
+              },
+              "message": "string",
+              "tree": {
+                "sha": "string",
+                "url": "string"
+              },
+              "url": "string",
+              "verification": {
+                "payload": "string",
+                "reason": "string",
+                "signature": "string",
+                "verified": "boolean",
+                "verified_at": "string"
+              }
+            },
+            "committer": {
+              "avatar_url": "string",
+              "events_url": "string",
+              "followers_url": "string",
+              "following_url": "string",
+              "gists_url": "string",
+              "gravatar_id": "string",
+              "html_url": "string",
+              "id": "integer",
+              "login": "string",
+              "node_id": "string",
+              "organizations_url": "string",
+              "received_events_url": "string",
+              "repos_url": "string",
+              "site_admin": "boolean",
+              "starred_url": "string",
+              "subscriptions_url": "string",
+              "type": "string",
+              "url": "string",
+              "user_view_type": "string"
+            },
+            "html_url": "string",
+            "node_id": "string",
+            "parents": [
+              {
+                "html_url": "string",
+                "sha": "string",
+                "url": "string"
+              }
+            ],
+            "sha": "string",
+            "url": "string"
+          },
+          "behind_by": "integer",
+          "commits": [],
+          "diff_url": "string",
+          "files": [],
+          "html_url": "string",
+          "merge_base_commit": {
+            "author": {
+              "avatar_url": "string",
+              "events_url": "string",
+              "followers_url": "string",
+              "following_url": "string",
+              "gists_url": "string",
+              "gravatar_id": "string",
+              "html_url": "string",
+              "id": "integer",
+              "login": "string",
+              "node_id": "string",
+              "organizations_url": "string",
+              "received_events_url": "string",
+              "repos_url": "string",
+              "site_admin": "boolean",
+              "starred_url": "string",
+              "subscriptions_url": "string",
+              "type": "string",
+              "url": "string",
+              "user_view_type": "string"
+            },
+            "comments_url": "string",
+            "commit": {
+              "author": {
+                "date": "string",
+                "email": "string",
+                "name": "string"
+              },
+              "comment_count": "integer",
+              "committer": {
+                "date": "string",
+                "email": "string",
+                "name": "string"
+              },
+              "message": "string",
+              "tree": {
+                "sha": "string",
+                "url": "string"
+              },
+              "url": "string",
+              "verification": {
+                "payload": "string",
+                "reason": "string",
+                "signature": "string",
+                "verified": "boolean",
+                "verified_at": "string"
+              }
+            },
+            "committer": {
+              "avatar_url": "string",
+              "events_url": "string",
+              "followers_url": "string",
+              "following_url": "string",
+              "gists_url": "string",
+              "gravatar_id": "string",
+              "html_url": "string",
+              "id": "integer",
+              "login": "string",
+              "node_id": "string",
+              "organizations_url": "string",
+              "received_events_url": "string",
+              "repos_url": "string",
+              "site_admin": "boolean",
+              "starred_url": "string",
+              "subscriptions_url": "string",
+              "type": "string",
+              "url": "string",
+              "user_view_type": "string"
+            },
+            "html_url": "string",
+            "node_id": "string",
+            "parents": [
+              {
+                "html_url": "string",
+                "sha": "string",
+                "url": "string"
+              }
+            ],
+            "sha": "string",
+            "url": "string"
+          },
+          "patch_url": "string",
+          "permalink_url": "string",
+          "status": "string",
+          "total_commits": "integer",
+          "url": "string"
+        },
+        "classification": "ok",
+        "elapsedMs": 349,
+        "fresh": false,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "cache-control": "max-age=60, s-maxage=60, private",
+          "content-type": "application/json; charset=utf-8",
+          "etag": "\"07fe026221180a22e2d5338e24caf81c52fd9829a421095e2dc6fc2343d0bbed\"",
+          "last-modified": "Wed, 28 Oct 2026 02:24:24 GMT",
+          "vary": "Accept, Authorization, Cookie, X-GitHub-OTP, Accept-Encoding, Accept, X-Requested-With",
+          "x-accepted-github-permissions": "contents=read",
+          "x-github-api-version-selected": "2022-11-28",
+          "x-github-media-type": "github.v3; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4387",
+          "x-ratelimit-resource": "core",
+          "x-ratelimit-used": "613"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}/compare/{base}...{head}",
+        "scenario": "compare.identical",
+        "status": 200
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "ahead_by": "integer",
+          "base_commit": {
+            "author": {
+              "avatar_url": "string",
+              "events_url": "string",
+              "followers_url": "string",
+              "following_url": "string",
+              "gists_url": "string",
+              "gravatar_id": "string",
+              "html_url": "string",
+              "id": "integer",
+              "login": "string",
+              "node_id": "string",
+              "organizations_url": "string",
+              "received_events_url": "string",
+              "repos_url": "string",
+              "site_admin": "boolean",
+              "starred_url": "string",
+              "subscriptions_url": "string",
+              "type": "string",
+              "url": "string",
+              "user_view_type": "string"
+            },
+            "comments_url": "string",
+            "commit": {
+              "author": {
+                "date": "string",
+                "email": "string",
+                "name": "string"
+              },
+              "comment_count": "integer",
+              "committer": {
+                "date": "string",
+                "email": "string",
+                "name": "string"
+              },
+              "message": "string",
+              "tree": {
+                "sha": "string",
+                "url": "string"
+              },
+              "url": "string",
+              "verification": {
+                "payload": "string",
+                "reason": "string",
+                "signature": "string",
+                "verified": "boolean",
+                "verified_at": "string"
+              }
+            },
+            "committer": {
+              "avatar_url": "string",
+              "events_url": "string",
+              "followers_url": "string",
+              "following_url": "string",
+              "gists_url": "string",
+              "gravatar_id": "string",
+              "html_url": "string",
+              "id": "integer",
+              "login": "string",
+              "node_id": "string",
+              "organizations_url": "string",
+              "received_events_url": "string",
+              "repos_url": "string",
+              "site_admin": "boolean",
+              "starred_url": "string",
+              "subscriptions_url": "string",
+              "type": "string",
+              "url": "string",
+              "user_view_type": "string"
+            },
+            "html_url": "string",
+            "node_id": "string",
+            "parents": [
+              {
+                "html_url": "string",
+                "sha": "string",
+                "url": "string"
+              }
+            ],
+            "sha": "string",
+            "url": "string"
+          },
+          "behind_by": "integer",
+          "commits": [],
+          "diff_url": "string",
+          "files": [],
+          "html_url": "string",
+          "merge_base_commit": {
+            "author": {
+              "avatar_url": "string",
+              "events_url": "string",
+              "followers_url": "string",
+              "following_url": "string",
+              "gists_url": "string",
+              "gravatar_id": "string",
+              "html_url": "string",
+              "id": "integer",
+              "login": "string",
+              "node_id": "string",
+              "organizations_url": "string",
+              "received_events_url": "string",
+              "repos_url": "string",
+              "site_admin": "boolean",
+              "starred_url": "string",
+              "subscriptions_url": "string",
+              "type": "string",
+              "url": "string",
+              "user_view_type": "string"
+            },
+            "comments_url": "string",
+            "commit": {
+              "author": {
+                "date": "string",
+                "email": "string",
+                "name": "string"
+              },
+              "comment_count": "integer",
+              "committer": {
+                "date": "string",
+                "email": "string",
+                "name": "string"
+              },
+              "message": "string",
+              "tree": {
+                "sha": "string",
+                "url": "string"
+              },
+              "url": "string",
+              "verification": {
+                "payload": "string",
+                "reason": "string",
+                "signature": "string",
+                "verified": "boolean",
+                "verified_at": "string"
+              }
+            },
+            "committer": {
+              "avatar_url": "string",
+              "events_url": "string",
+              "followers_url": "string",
+              "following_url": "string",
+              "gists_url": "string",
+              "gravatar_id": "string",
+              "html_url": "string",
+              "id": "integer",
+              "login": "string",
+              "node_id": "string",
+              "organizations_url": "string",
+              "received_events_url": "string",
+              "repos_url": "string",
+              "site_admin": "boolean",
+              "starred_url": "string",
+              "subscriptions_url": "string",
+              "type": "string",
+              "url": "string",
+              "user_view_type": "string"
+            },
+            "html_url": "string",
+            "node_id": "string",
+            "parents": [
+              {
+                "html_url": "string",
+                "sha": "string",
+                "url": "string"
+              }
+            ],
+            "sha": "string",
+            "url": "string"
+          },
+          "patch_url": "string",
+          "permalink_url": "string",
+          "status": "string",
+          "total_commits": "integer",
+          "url": "string"
+        },
+        "classification": "ok",
+        "elapsedMs": 368,
+        "fresh": false,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "cache-control": "max-age=60, s-maxage=60, private",
+          "content-type": "application/json; charset=utf-8",
+          "etag": "\"2eeedd84e3ac4cbbad326566d2accca415d27b4fce8c650b8d230f2f02cfb3ca\"",
+          "last-modified": "Wed, 28 Oct 2026 02:24:24 GMT",
+          "vary": "Accept, Authorization, Cookie, X-GitHub-OTP, Accept-Encoding, Accept, X-Requested-With",
+          "x-accepted-github-permissions": "contents=read",
+          "x-github-api-version-selected": "2022-11-28",
+          "x-github-media-type": "github.v3; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4386",
+          "x-ratelimit-resource": "core",
+          "x-ratelimit-used": "614"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}/compare/{base}...{head}",
+        "scenario": "compare.behind",
+        "status": 200
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "data": {
+            "createCommitOnBranch": "null"
+          },
+          "errors": [
+            {
+              "locations": [
+                {
+                  "column": "integer",
+                  "line": "integer"
+                }
+              ],
+              "message": "string",
+              "path": [
+                "string"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "classification": "HeadMoved",
+        "elapsedMs": 856,
+        "fresh": true,
+        "graphqlErrorTypes": [
+          "STALE_DATA"
+        ],
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "vary": "Accept-Encoding, Accept, X-Requested-With",
+          "x-github-media-type": "github.v4; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4975",
+          "x-ratelimit-resource": "graphql",
+          "x-ratelimit-used": "25"
+        },
+        "method": "POST",
+        "route": "POST /graphql createCommitOnBranch",
+        "scenario": "write.conflict.staleHead",
+        "status": 200
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "node_id": "string",
+          "object": {
+            "sha": "string",
+            "type": "string",
+            "url": "string"
+          },
+          "ref": "string",
+          "url": "string"
+        },
+        "classification": "ok",
+        "elapsedMs": 202,
+        "fresh": true,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "cache-control": "max-age=60, s-maxage=60, private",
+          "content-type": "application/json; charset=utf-8",
+          "etag": "\"3216626cdf1ad0c9d9441cfe55c8df193f1ee35a94be97e9bdcf1de17afb7938\"",
+          "last-modified": "Wed, 28 Oct 2026 02:24:26 GMT",
+          "vary": "Accept, Authorization, Cookie, X-GitHub-OTP, Accept-Encoding, Accept, X-Requested-With",
+          "x-accepted-github-permissions": "contents=read",
+          "x-github-api-version-selected": "2022-11-28",
+          "x-github-media-type": "github.v3; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4385",
+          "x-ratelimit-resource": "core",
+          "x-ratelimit-used": "615"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}/git/ref/heads/{branch}?causa_fresh={nonce}",
+        "scenario": "ref.read.afterConflict",
+        "status": 200
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "allow_forking": "boolean",
+          "archive_url": "string",
+          "archived": "boolean",
+          "assignees_url": "string",
+          "blobs_url": "string",
+          "branches_url": "string",
+          "clone_url": "string",
+          "collaborators_url": "string",
+          "comments_url": "string",
+          "commits_url": "string",
+          "compare_url": "string",
+          "contents_url": "string",
+          "contributors_url": "string",
+          "created_at": "string",
+          "default_branch": "string",
+          "deployments_url": "string",
+          "description": "null",
+          "disabled": "boolean",
+          "downloads_url": "string",
+          "events_url": "string",
+          "fork": "boolean",
+          "forks": "integer",
+          "forks_count": "integer",
+          "forks_url": "string",
+          "full_name": "string",
+          "git_commits_url": "string",
+          "git_refs_url": "string",
+          "git_tags_url": "string",
+          "git_url": "string",
+          "has_discussions": "boolean",
+          "has_downloads": "boolean",
+          "has_issues": "boolean",
+          "has_pages": "boolean",
+          "has_projects": "boolean",
+          "has_pull_requests": "boolean",
+          "has_wiki": "boolean",
+          "homepage": "null",
+          "hooks_url": "string",
+          "html_url": "string",
+          "id": "integer",
+          "is_template": "boolean",
+          "issue_comment_url": "string",
+          "issue_events_url": "string",
+          "issues_url": "string",
+          "keys_url": "string",
+          "labels_url": "string",
+          "language": "null",
+          "languages_url": "string",
+          "license": "null",
+          "merges_url": "string",
+          "milestones_url": "string",
+          "mirror_url": "null",
+          "name": "string",
+          "network_count": "integer",
+          "node_id": "string",
+          "notifications_url": "string",
+          "open_issues": "integer",
+          "open_issues_count": "integer",
+          "owner": {
+            "avatar_url": "string",
+            "events_url": "string",
+            "followers_url": "string",
+            "following_url": "string",
+            "gists_url": "string",
+            "gravatar_id": "string",
+            "html_url": "string",
+            "id": "integer",
+            "login": "string",
+            "node_id": "string",
+            "organizations_url": "string",
+            "received_events_url": "string",
+            "repos_url": "string",
+            "site_admin": "boolean",
+            "starred_url": "string",
+            "subscriptions_url": "string",
+            "type": "string",
+            "url": "string",
+            "user_view_type": "string"
+          },
+          "permissions": {
+            "admin": "boolean",
+            "maintain": "boolean",
+            "pull": "boolean",
+            "push": "boolean",
+            "triage": "boolean"
+          },
+          "private": "boolean",
+          "pull_request_creation_policy": "string",
+          "pulls_url": "string",
+          "pushed_at": "string",
+          "releases_url": "string",
+          "size": "integer",
+          "ssh_url": "string",
+          "stargazers_count": "integer",
+          "stargazers_url": "string",
+          "statuses_url": "string",
+          "subscribers_count": "integer",
+          "subscribers_url": "string",
+          "subscription_url": "string",
+          "svn_url": "string",
+          "tags_url": "string",
+          "teams_url": "string",
+          "temp_clone_token": "string",
+          "topics": [],
+          "trees_url": "string",
+          "updated_at": "string",
+          "url": "string",
+          "visibility": "string",
+          "watchers": "integer",
+          "watchers_count": "integer",
+          "web_commit_signoff_required": "boolean"
+        },
+        "classification": "ok",
+        "elapsedMs": 278,
+        "fresh": true,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "cache-control": "max-age=60, s-maxage=60, private",
+          "content-type": "application/json; charset=utf-8",
+          "etag": "\"6514832deb2081f80a19eed910892f8a4938e714e7783d54b4be83aeebc1c163\"",
+          "last-modified": "Wed, 28 Oct 2026 02:24:26 GMT",
+          "vary": "Accept, Authorization, Cookie, X-GitHub-OTP, Accept-Encoding, Accept, X-Requested-With",
+          "x-accepted-github-permissions": "metadata=read",
+          "x-github-api-version-selected": "2022-11-28",
+          "x-github-media-type": "github.v3; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4998",
+          "x-ratelimit-resource": "core",
+          "x-ratelimit-used": "2"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}",
+        "scenario": "repository.read.installationToken",
+        "status": 200
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "data": {
+            "createCommitOnBranch": "null"
+          },
+          "errors": [
+            {
+              "extensions": {
+                "ip_allow_list_failure": "boolean",
+                "saml_failure": "boolean"
+              },
+              "locations": [
+                {
+                  "column": "integer",
+                  "line": "integer"
+                }
+              ],
+              "message": "string",
+              "path": [
+                "string"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "classification": "Forbidden",
+        "elapsedMs": 212,
+        "fresh": true,
+        "graphqlErrorTypes": [
+          "FORBIDDEN"
+        ],
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "vary": "Accept-Encoding, Accept, X-Requested-With",
+          "x-github-media-type": "github.v4; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4998",
+          "x-ratelimit-resource": "graphql",
+          "x-ratelimit-used": "2"
+        },
+        "method": "POST",
+        "route": "POST /graphql createCommitOnBranch",
+        "scenario": "write.forbidden",
+        "status": 200
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "node_id": "string",
+          "object": {
+            "sha": "string",
+            "type": "string",
+            "url": "string"
+          },
+          "ref": "string",
+          "url": "string"
+        },
+        "classification": "ok",
+        "elapsedMs": 215,
+        "fresh": true,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "cache-control": "max-age=60, s-maxage=60, private",
+          "content-type": "application/json; charset=utf-8",
+          "etag": "\"3216626cdf1ad0c9d9441cfe55c8df193f1ee35a94be97e9bdcf1de17afb7938\"",
+          "last-modified": "Wed, 28 Oct 2026 02:24:26 GMT",
+          "vary": "Accept, Authorization, Cookie, X-GitHub-OTP, Accept-Encoding, Accept, X-Requested-With",
+          "x-accepted-github-permissions": "contents=read",
+          "x-github-api-version-selected": "2022-11-28",
+          "x-github-media-type": "github.v3; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4384",
+          "x-ratelimit-resource": "core",
+          "x-ratelimit-used": "616"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}/git/ref/heads/{branch}?causa_fresh={nonce}",
+        "scenario": "ref.read.afterForbidden",
+        "status": 200
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "data": {
+            "createCommitOnBranch": "null"
+          },
+          "errors": [
+            {
+              "locations": [
+                {
+                  "column": "integer",
+                  "line": "integer"
+                }
+              ],
+              "message": "string",
+              "path": [
+                "string"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "classification": "NotFound",
+        "elapsedMs": 493,
+        "fresh": true,
+        "graphqlErrorTypes": [
+          "NOT_FOUND"
+        ],
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "vary": "Accept-Encoding, Accept, X-Requested-With",
+          "x-github-media-type": "github.v4; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4974",
+          "x-ratelimit-resource": "graphql",
+          "x-ratelimit-used": "26"
+        },
+        "method": "POST",
+        "route": "POST /graphql createCommitOnBranch",
+        "scenario": "write.missingBranch",
+        "status": 200
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "documentation_url": "string",
+          "message": "string",
+          "status": "string"
+        },
+        "classification": "Unauthorized",
+        "elapsedMs": 54,
+        "fresh": true,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "vary": "Accept-Encoding, Accept, X-Requested-With",
+          "x-github-media-type": "github.v3; format=json"
+        },
+        "method": "POST",
+        "route": "POST /graphql createCommitOnBranch",
+        "scenario": "write.rejectedCredential",
+        "status": 401
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "node_id": "string",
+          "object": {
+            "sha": "string",
+            "type": "string",
+            "url": "string"
+          },
+          "ref": "string",
+          "url": "string"
+        },
+        "classification": "ok",
+        "elapsedMs": 326,
+        "fresh": true,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "cache-control": "max-age=60, s-maxage=60, private",
+          "content-type": "application/json; charset=utf-8",
+          "etag": "\"3216626cdf1ad0c9d9441cfe55c8df193f1ee35a94be97e9bdcf1de17afb7938\"",
+          "last-modified": "Wed, 28 Oct 2026 02:24:26 GMT",
+          "vary": "Accept, Authorization, Cookie, X-GitHub-OTP, Accept-Encoding, Accept, X-Requested-With",
+          "x-accepted-github-permissions": "contents=read",
+          "x-github-api-version-selected": "2022-11-28",
+          "x-github-media-type": "github.v3; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4383",
+          "x-ratelimit-resource": "core",
+          "x-ratelimit-used": "617"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}/git/ref/heads/{branch}?causa_fresh={nonce}",
+        "scenario": "ref.read.afterRejected",
+        "status": 200
+      },
+      {
+        "note": "answer deliberately discarded; outcome reconciled by re-reading",
+        "scenario": "write.unknownOutcome"
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "node_id": "string",
+          "object": {
+            "sha": "string",
+            "type": "string",
+            "url": "string"
+          },
+          "ref": "string",
+          "url": "string"
+        },
+        "classification": "ok",
+        "elapsedMs": 245,
+        "fresh": true,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "cache-control": "max-age=60, s-maxage=60, private",
+          "content-type": "application/json; charset=utf-8",
+          "etag": "\"352ce23361f258df77237047cfb95175a45ab9cefde15c698e124c7980d9417a\"",
+          "last-modified": "Wed, 28 Oct 2026 02:24:26 GMT",
+          "vary": "Accept, Authorization, Cookie, X-GitHub-OTP, Accept-Encoding, Accept, X-Requested-With",
+          "x-accepted-github-permissions": "contents=read",
+          "x-github-api-version-selected": "2022-11-28",
+          "x-github-media-type": "github.v3; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4382",
+          "x-ratelimit-resource": "core",
+          "x-ratelimit-used": "618"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}/git/ref/heads/{branch}?causa_fresh={nonce}",
+        "scenario": "ref.read.reconcile",
+        "status": 200
+      },
+      {
+        "authenticated": true,
+        "bodyShape": [
+          {
+            "_links": {
+              "git": "string",
+              "html": "string",
+              "self": "string"
+            },
+            "download_url": "string",
+            "git_url": "string",
+            "html_url": "string",
+            "name": "string",
+            "path": "string",
+            "sha": "string",
+            "size": "integer",
+            "type": "string",
+            "url": "string"
+          }
+        ],
+        "classification": "ok",
+        "elapsedMs": 166,
+        "fresh": false,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "cache-control": "max-age=60, s-maxage=60, private",
+          "content-type": "application/json; charset=utf-8",
+          "etag": "\"c26928f8787f3e5f414026ecffba047987fad93c\"",
+          "last-modified": "Wed, 28 Oct 2026 02:24:26 GMT",
+          "vary": "Accept, Authorization, Cookie, X-GitHub-OTP, Accept-Encoding, Accept, X-Requested-With",
+          "x-accepted-github-permissions": "contents=read",
+          "x-github-api-version-selected": "2022-11-28",
+          "x-github-media-type": "github.v3; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4381",
+          "x-ratelimit-resource": "core",
+          "x-ratelimit-used": "619"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}/contents/{path}?ref={commit}",
+        "scenario": "write.reconcile.listing",
+        "status": 200
+      },
+      {
+        "authenticated": true,
+        "bodyShape": {
+          "node_id": "string",
+          "object": {
+            "sha": "string",
+            "type": "string",
+            "url": "string"
+          },
+          "ref": "string",
+          "url": "string"
+        },
+        "classification": "ok",
+        "elapsedMs": 296,
+        "fresh": true,
+        "graphqlErrorTypes": [],
+        "headers": {
+          "cache-control": "max-age=60, s-maxage=60, private",
+          "content-type": "application/json; charset=utf-8",
+          "etag": "\"029402c2bdcbc0efa9cd495f27b71d2fc97733e0c341441690dfd2bb2fcd1342\"",
+          "last-modified": "Wed, 28 Oct 2026 02:24:42 GMT",
+          "vary": "Accept, Authorization, Cookie, X-GitHub-OTP, Accept-Encoding, Accept, X-Requested-With",
+          "x-accepted-github-permissions": "contents=read",
+          "x-github-api-version-selected": "2022-11-28",
+          "x-github-media-type": "github.v3; format=json",
+          "x-ratelimit-limit": "5000",
+          "x-ratelimit-remaining": "4357",
+          "x-ratelimit-resource": "core",
+          "x-ratelimit-used": "643"
+        },
+        "method": "GET",
+        "route": "GET /repos/{owner}/{repo}/git/ref/heads/{branch}?causa_fresh={nonce}",
+        "scenario": "ref.read.final",
+        "status": 200
+      }
+    ]
+  },
+  "catalog": {
+    "exit": "0",
+    "result": "RESULT: PASS (live catalog load; digests and replayed state digests match the catalog manifest; every case admitted by the engine's History.validate)",
+    "cases": [
+      {
+        "case": "apollo-1",
+        "expectedStateSha256": "67af9c9f05db07d67279f84bb185600f12604b5af67a3954c337581dfdd6552f",
+        "investigationId": "c6b26614-fc43-5013-a15c-cf95942ee07b",
+        "lifecycle": "awaitingVerification",
+        "readOnly": true,
+        "replayedBy": "engine Storage.read (History.validate, stage 15)",
+        "stateSha256": "67af9c9f05db07d67279f84bb185600f12604b5af67a3954c337581dfdd6552f",
+        "title": "Apollo 1 (AS-204) Command Module fire, 27 January 1967",
+        "version": 432
+      },
+      {
+        "case": "apollo-11",
+        "expectedStateSha256": "b82ac9ce37f218fbb53709945bd83283b06bc85e8cb4e4121bd1eaf1dc914f92",
+        "investigationId": "e3adbee5-5096-5a10-bbfb-cecda86a154b",
+        "lifecycle": "awaitingEvidence",
+        "readOnly": true,
+        "replayedBy": "engine Storage.read (History.validate, stage 15)",
+        "stateSha256": "b82ac9ce37f218fbb53709945bd83283b06bc85e8cb4e4121bd1eaf1dc914f92",
+        "title": "Apollo 11 lunar landing, July 1969: why the descent succeeded despite program alarms",
+        "version": 431
+      },
+      {
+        "case": "challenger-sts-51l",
+        "expectedStateSha256": "296bdf273968cf15a8526126a242852738cc5fa811bc853f6467fb3e3c67a7e8",
+        "investigationId": "1784da3c-7141-59ee-a495-1d5d44bf2284",
+        "lifecycle": "active",
+        "readOnly": true,
+        "replayedBy": "engine Storage.read (History.validate, stage 15)",
+        "stateSha256": "296bdf273968cf15a8526126a242852738cc5fa811bc853f6467fb3e3c67a7e8",
+        "title": "Space Shuttle Challenger (STS-51-L) loss, 28 January 1986",
+        "version": 452
+      }
+    ]
+  }
+}

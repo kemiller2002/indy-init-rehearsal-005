@@ -12,6 +12,22 @@
       "planVerifier": "INCOMPLETE",
       "accepted": false,
       "note": "First computed verdict (branch r5/acc, not deployed): nothing implemented. Obligations 326: bound 3 (acceptance tool tests), missing 323. P0 requirements: ledger PASS 1 (VER-008), NOT_RUN 107; plan verifier UNBOUND 1, NOT_RUN 107. Gates G0-G9 NOT_RUN. 8 defect classes open."
+    },
+    {
+      "path": "evidence/acceptance/run-40620099844-1b9fb56",
+      "run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+      "artifact": {
+        "name": "acceptance-evidence",
+        "id": 12787916261,
+        "sha256": "6dfb67895ec4b1fe5c430d1e8030a14718d4c1d72562658127864bfae9db734c"
+      },
+      "sourceSha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+      "deployedSha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+      "planId": "VP-e77a2134e1b0",
+      "ledgerVerifier": "INCOMPLETE",
+      "planVerifier": "INCOMPLETE",
+      "accepted": false,
+      "note": "FINAL Rehearsal 5 candidate (main, deployed, every CI job green). Gates G0-G7 PASS, G8/G9 NOT_RUN. P0 requirements: ledger PASS 77, NOT_RUN 31, FAIL 0. Obligations 326: PASS 277, NOT_RUN 49 (no proving test), FAIL 0. All 8 defect classes PASS (closed by the independent T33 reviewer, verified in this run). Copied verbatim after the run; the artifact digest is GitHub's."
     }
   ]
 }

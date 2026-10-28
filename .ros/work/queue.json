@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
   "repository": "indy-init-rehearsal-005",
-  "nextSeq": 9,
+  "nextSeq": 10,
   "items": [
     {
       "id": "COND-MISSION-001",
@@ -202,6 +202,29 @@
       "attachments": [],
       "createdAt": "2026-10-28T01:06:55Z",
       "updatedAt": "2026-10-28T01:06:56Z",
+      "createdBy": "unknown",
+      "createdByActor": {
+        "kind": "agent",
+        "id": "anthropic/claude-code",
+        "provider": "anthropic",
+        "model": "unknown",
+        "runtime": "claude-code"
+      },
+      "source": "manual",
+      "sourceReference": null
+    },
+    {
+      "id": "WI-0009",
+      "title": "R5 post-run record: final computed verdict evidence and rehearsal summary",
+      "description": null,
+      "tags": [
+        "r5"
+      ],
+      "priority": "medium",
+      "status": "ready",
+      "attachments": [],
+      "createdAt": "2026-10-28T06:16:19Z",
+      "updatedAt": "2026-10-28T06:16:26Z",
       "createdBy": "unknown",
       "createdByActor": {
         "kind": "agent",

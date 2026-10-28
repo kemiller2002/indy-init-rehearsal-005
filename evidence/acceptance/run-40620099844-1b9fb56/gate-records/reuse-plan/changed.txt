@@ -1,0 +1,7 @@
+.ros/events/events.jsonl
+acceptance/defect-classes.json
+acceptance/reviews/R5-final-review.md
+src/app/PersistencePort.fs
+src/persistence/Sync.fs
+tests/Persistence.Tests/DcTableTests.fs
+tools/acceptance/Causa.Acceptance.Tests/PipelineTests.fs

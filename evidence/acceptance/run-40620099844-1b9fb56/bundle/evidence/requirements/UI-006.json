@@ -1,0 +1,248 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "UI-006",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-89ed6170f531961e",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.ProjectionTests.VPO-89ed6170f531961e an unknown save outcome is its own state: neither saved nor failed, with check now and no retry",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A VPO-89ed6170f531961e a failure after send is unknown with no retry and reconcile reads the head first",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-54b0eef91ceeada4 VPO-89ed6170f531961e offline edits survive a reload; the credential does not and must be supplied again",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-61b2e81f99761d55 VPO-9c6055c47e4eb07d VPO-4c06d10238d15c5c VPO-89ed6170f531961e explicit create is saved locally, written in one guarded commit and claimed synced only after the re-read",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-89ed6170f531961e a local store failure is shown as failed, distinct from every other state",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "playwright:live-persistence.spec.js > DCT-LIVE-A create, write, reload, conflict (resolved by Reload), two tabs with a lost write (never reconciled as saved) and rejected token against the real test repository, each confirmed by an independent SHA re-read [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/live/live-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-b3efad6eb85360be",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.EnginePortTests.VPO-b3efad6eb85360be the in-memory workspace never claims a save",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "dotnet:Causa.App.Tests.ProjectionTests.VPO-b3efad6eb85360be only a confirmed remote sync is described as saved to GitHub",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-B DCT-003-A VPO-b3efad6eb85360be a commit carrying our marker but other bytes is a conflict, never saved",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-B DCT-003-A VPO-b3efad6eb85360be a write applied before its answer was lost is confirmed only after its bytes are read back",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-B DCT-003-A VPO-b3efad6eb85360be two devices: a lost write is never reconciled as applied because another device's commit followed the same head",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A VPO-b3efad6eb85360be a GraphQL error of an unrecognised type after send is unknown, never not-written with retry",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A VPO-b3efad6eb85360be a reconcile whose read-back fails stays unknown",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A VPO-b3efad6eb85360be saved is claimed only after the read-back matches the sent bytes",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-b3efad6eb85360be VPO-cd9dd8ec730c3d3e a save whose answer was lost is unknown and is settled only by re-reading",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-b3efad6eb85360be a reload during a send restores it as unknown and the next connect settles it by reading",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-b3efad6eb85360be an acknowledged commit whose re-read fails is unknown, never saved",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "playwright:shell.spec.js > integration checkpoint 1: a legal command end to end through Limen and the F# kernel (T17) > starting and activating an investigation crosses Limen into the kernel; every view refreshes from the one new version; a refusal changes nothing [VPO-21abf6acd60d0acc] [VPO-b3efad6eb85360be] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > integration checkpoint 1: a legal command end to end through Limen and the F# kernel (T17) > starting and activating an investigation crosses Limen into the kernel; every view refreshes from the one new version; a refusal changes nothing [VPO-21abf6acd60d0acc] [VPO-b3efad6eb85360be] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-4c06d10238d15c5c",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-61b2e81f99761d55 VPO-9c6055c47e4eb07d VPO-4c06d10238d15c5c VPO-89ed6170f531961e explicit create is saved locally, written in one guarded commit and claimed synced only after the re-read",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "playwright:live-persistence.spec.js > DCT-LIVE-A create, write, reload, conflict (resolved by Reload), two tabs with a lost write (never reconciled as saved) and rejected token against the real test repository, each confirmed by an independent SHA re-read [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/live/live-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-34731ac9a977b818",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.ProjectionTests.VPO-34731ac9a977b818 on a conflict the shell offers reload and discard, and each reaches persistence for that investigation only",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-A VPO-34731ac9a977b818 the publication is parented by the decided-at commit and a moved branch is a held conflict without retry",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.FixtureTests.VPO-34731ac9a977b818 VPO-cd9dd8ec730c3d3e the fixture conflict scenario: a deterministic other writer, then Reload keeps the change and Discard adopts theirs",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-34731ac9a977b818 a concurrent remote change is a conflict that keeps local edits and never overwrites remote history",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-34731ac9a977b818 a moved branch that did not touch the investigation is reloaded and the change rebased, then saved",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-9d59cc57fd44b927 VPO-34731ac9a977b818 an investigation missing from the repository on reload keeps the device's copy and says so",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "playwright:fixture-mode.spec.js > a conflict is resolved in the browser: Reload keeps this device's change beside the repository's copy, Discard (confirmed) adopts the repository's copy [VPO-34731ac9a977b818] [VPO-cd9dd8ec730c3d3e] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:live-persistence.spec.js > DCT-LIVE-A create, write, reload, conflict (resolved by Reload), two tabs with a lost write (never reconciled as saved) and rejected token against the real test repository, each confirmed by an independent SHA re-read [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/live/live-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-d60e3a3a25cb106d",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Persistence.Tests.CatalogAppTests.VPO-c81484cbcf203d4f VPO-d60e3a3a25cb106d VPO-dc48d066cfa2309d VPO-557743cb4997c484 after Connect every catalog case loads, replays to its manifest digest and is read-only",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "playwright:live-persistence.spec.js > EXT-DATA-013 after Connect the browser loads exactly the catalog's three historical cases, verified and read-only; no record ships with the site and none is served by it [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/live/live-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-bb08b9a414ba4cd7",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.ProjectionTests.VPO-bb08b9a414ba4cd7 the token leaves the shell model when Connect is handed to the port",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-2d4b7557ce013e50 VPO-c135d16c59f5baf8 a revoked token fails the next request, drops the credential and keeps local work; a replacement token saves it",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-2de744fb2c8bdc70 VPO-bb08b9a414ba4cd7 VPO-ca58030e3eecdf9b VPO-c41f10e4ed8a086b the token appears only in the Authorization header",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "playwright:live-persistence.spec.js > DCT-LIVE-A create, write, reload, conflict (resolved by Reload), two tabs with a lost write (never reconciled as saved) and rejected token against the real test repository, each confirmed by an independent SHA re-read [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/live/live-results.json"
+        },
+        {
+          "testId": "playwright:proposals.spec.js > proposals are drafted, recorded only on request, and applied only when a person accepts one; the key goes only in the auth header [VPO-04eb901270c2994a] [VPO-f97eb988899c23af] [VPO-bb08b9a414ba4cd7] [VPO-c41f10e4ed8a086b] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:proposals.spec.js > proposals are drafted, recorded only on request, and applied only when a person accepts one; the key goes only in the auth header [VPO-04eb901270c2994a] [VPO-f97eb988899c23af] [VPO-bb08b9a414ba4cd7] [VPO-c41f10e4ed8a086b] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > security of the shell > a typed token never reaches the page, the URL or browser storage [VPO-bb08b9a414ba4cd7] [VPO-fba8a61be6d12adf] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    }
+  ]
+}

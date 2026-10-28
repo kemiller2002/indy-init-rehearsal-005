@@ -1,0 +1,402 @@
+{
+  "schema": "causa.acceptance-producer/1",
+  "id": "domain-obligations",
+  "description": "G3: every plan requirement routed to G3 bound and passing; the F# engine suite ran and passed, including illegal-transition and forged-history variants.",
+  "status": "success",
+  "checks": [
+    {
+      "name": "plan requirements routed to G3",
+      "status": "PASS",
+      "detail": "the verification plan routes no P0 requirement to G3",
+      "tests": []
+    },
+    {
+      "name": "F# engine suite",
+      "status": "PASS",
+      "detail": "71 selected tests ran and passed",
+      "tests": [
+        {
+          "testId": "dotnet:App.Engine.Tests.WasmSafetyTests.WASM-SAFETY the kernel references no process file thread network or crypto-provider API",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.PanelTests.S18 treatments run on one frozen version; metrics are measured per treatment with no winner, and limitations are explicit",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.PanelTests.S18 an unknown prompt version or a duplicate treatment is refused before anything is sent",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 VPO-3d67d1f2b8287e39 golden scenarios.json agrees with the replayed histories (no CAUSA.GOLDEN_MISMATCH)",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.SYNC-HOOK Discard VPO-199103f9166730e7 a local unsent change can be discarded and is handed back",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-A negative control VPO-821ce84e76d497b9 VPO-7b54ff75e3784cae the check fails when answers are matched by kind",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-B VPO-199103f9166730e7 VPO-6886a2a6e612f704 every user event is accepted only in its legal source states",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.PanelTests.S17 the panel sends one request per role, all against the same version, each with its own versioned role prompt",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 VPO-199103f9166730e7 stale duplicate unauthorized and illegal submissions are typed rejections that change nothing",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 VPO-6886a2a6e612f704 VPO-199103f9166730e7 hypothesis transitions follow the table and there is no generic state setter",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 D-007 D-003 VPO-199103f9166730e7 an open blocking unknown blocks the resolution it protects",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 G3 forged histories are refused by replay with their domain code",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.SYNC-HOOK Reloaded re-observes the head and keeps the book and the change",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-B R3 D-04 resubmitting an unchanged held change keeps its target parent",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.HistoryAndProposalTests.T27 VPO-199103f9166730e7 VPO-821ce84e76d497b9 agent output that is anything but proposals is refused whole",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.AiLoopTests.T27 the key goes only in the auth header and is never printed",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.RouteTests.format (parse url) is the canonical url",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.HistoryAndProposalTests.T27 R5.4 VPO-199103f9166730e7 an agent cannot re-propose a falsified explanation",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.PanelTests.S17 a role that fails is not counted as omitting anything",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 VPO-9c6055c47e4eb07d the writer reproduces every frozen file set byte for byte from the decoded events",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-001-A publication is parented by the decided-at head and a moved branch is a held conflict",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.SYNC-DURABLE restore after reload never loses a change or forgets a possible write",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.PanelTests.S17 roles are blind: every prompt is built before any answer, so no role's output can enter another's request",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 UI-004 capabilities come from the decision path with every blocking reason",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.REQUEST-IDENTITY negative control VPO-821ce84e76d497b9 the check fails when connection answers are matched by kind",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.HistoryAndProposalTests.T27 R11.4 VPO-199103f9166730e7 instructions inside evidence are data and change nothing they name",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-001-A negative control VPO-821ce84e76d497b9 VPO-7b54ff75e3784cae the check fails on a book that re-targets stale decisions",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.AiLoopTests.T27 a late answer never lands on a newer request and one request runs at a time",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 D-004 VPO-199103f9166730e7 an agent proposal needs a human to accept it",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-001-B negative control VPO-821ce84e76d497b9 VPO-7b54ff75e3784cae the check fails on ref-equality reconciliation",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 concurrent readers all verify (regression: the schema regex cache raced under parallel reads)",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.HistoryAndProposalTests.T28 UI-013 time travel yields the state at any version labelled historical",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 UI-023 verification is asserted only by a resolved investigation with a verified-effective correction",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-A a late answer for a replaced write is discarded",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-003-A saved is claimed only after the read-back matches",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-B negative control VPO-821ce84e76d497b9 VPO-787e24f3c23195e9 the check fails on a book that writes during an unknown outcome",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-003-A a failure after send is unknown with no retry and reconcile reads the head first",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.AiLoopTests.T27 R11.4 VPO-199103f9166730e7 instructions are fixed and investigation content travels only as delimited data",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 every frozen file still has its locked digest after the replay run",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 an append decided against a stale version is refused and nothing is written",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-B VPO-199103f9166730e7 a refused event leaves the state unchanged and is a typed fault",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.EngineTests.the scaffold engine starts uninitialized",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.HistoryAndProposalTests.T28 UI-003 the timeline follows the canonical sequence and flags clocks that run backwards",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.InterfaceManifestTests.T14 VPO-6886a2a6e612f704 the committed interface manifest equals the extraction from the compiled kernel",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.UI-006 pending sending conflicted unknown and failed are distinct statuses",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-003-A negative control VPO-821ce84e76d497b9 VPO-7b54ff75e3784cae the check fails on stage-blind failure classification",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 VPO-f52d9071426e82b3 all 90 negative fixtures are refused with their expected code and domain code",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.EngineTests.the Aegis configuration validates at startup",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.SYNC-DURABLE every phase survives encode and decode exactly",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 UI-005-O2 VPO-cc57508f3ac056de original evidence is never altered when its interpretation changes",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.HistoryAndProposalTests.T28 UI-003 each event has its before and after semantic change and links to its entities",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 UI-023 a cleanly loaded investigation with disputed findings is not verified and nothing is elevated",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 VPO-6886a2a6e612f704 VPO-199103f9166730e7 lifecycle commands are accepted exactly where the transition table allows them",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 D-001 D-002 VPO-5933d986a6ba6dc3 observations are kept verbatim with provenance through write and read",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.RouteTests.parse (format route) is the route",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.RouteTests.the home route is the empty and the root hash",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.PanelTests.S17 disagreement is structural (omission or a different kind), never a vote, and provenance stays on every answer",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.AiLoopTests.T27 every provider outcome is classified and only the honest ones offer retry",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 EXT-DATA-008 VPO-9c6055c47e4eb07d a command-created investigation is schema-valid replayable and round-trips",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T15 contract 5.2 managed SHA-256 SHA-1 and UUIDv5 equal the platform and the contract namespace",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-001-B reconciliation classifies a head reached through another writer as concurrent",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.REQUEST-IDENTITY an answer to an earlier connection never lands on a newer one",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 STORAGE-007 VPO-5933d986a6ba6dc3 VPO-2d84a4c6df612b0d the three release identities match the contract this engine implements",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 D-008 VPO-199103f9166730e7 implementation is not verification and blocks resolution until verified",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.HistoryAndProposalTests.T27 D-004 VPO-199103f9166730e7 VPO-6886a2a6e612f704 agent output enters only as proposals and becomes state only on human acceptance",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 EXT-DATA-013 VPO-4b4747eaff96e385 the active historical catalog loads all three cases through the engine to their catalog states",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 G3 an ungated confirmation in a stored history is refused as HISTORY.UNGATED_CONFIRMATION",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.AiLoopTests.T27 D-004 a successful answer yields drafts that are recorded only as agent proposals",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 VPO-3d67d1f2b8287e39 five golden scenarios replay through the engine to their pinned digests and golden states",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.HistoryAndProposalTests.T28 over every frozen scenario each command group changes the projection and every prefix is admissible",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.SYNC-HOOK restoreUnknown is Unknown with no retry and no pre-reload answer can apply",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        }
+      ]
+    },
+    {
+      "name": "illegal-transition variants",
+      "status": "PASS",
+      "detail": "1 selected tests ran and passed",
+      "tests": [
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 VPO-199103f9166730e7 stale duplicate unauthorized and illegal submissions are typed rejections that change nothing",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        }
+      ]
+    },
+    {
+      "name": "forged-history variants",
+      "status": "PASS",
+      "detail": "1 selected tests ran and passed",
+      "tests": [
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 G3 forged histories are refused by replay with their domain code",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        }
+      ]
+    }
+  ],
+  "runId": "40620099844-1",
+  "sourceSha": "1b9fb56873fe7a98dffd5172066d909449c17eae"
+}

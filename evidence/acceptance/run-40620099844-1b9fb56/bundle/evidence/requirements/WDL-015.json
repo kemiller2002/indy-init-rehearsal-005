@@ -1,0 +1,49 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "WDL-015",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-b55ed2a4a2fd465c",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.Acceptance.RunTests.EvidenceTests.AR-002 WDL-015 every baseline obligation, WDL-001 to WDL-015 included, maps to a derived criterion or a recorded disposition",
+          "outcome": "passed",
+          "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-97136db88b6c60fb",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.Acceptance.RunTests.PreservationTests.AR-002 PF-018 WDL-015 omitting a derived requirement (WDL-005) fails the gate",
+          "outcome": "passed",
+          "resultFile": "TestResults/preservation-adversarial/preservation-adversarial_net10.0_20261028022424.trx"
+        },
+        {
+          "testId": "dotnet:Causa.Acceptance.RunTests.PreservationTests.AR-002 WDL-015 the derivation check fails an omitted document and names every obligation it carried",
+          "outcome": "passed",
+          "resultFile": "TestResults/preservation-adversarial/preservation-adversarial_net10.0_20261028022424.trx"
+        }
+      ]
+    }
+  ]
+}

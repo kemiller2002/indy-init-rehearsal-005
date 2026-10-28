@@ -1,0 +1,59 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "AR-018",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-9827ff5a95a7c74f",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.Acceptance.RunTests.VerifierTests.AR-018 AR-019 a gate claimed PASS without its CI evidence in the bundle is not accepted",
+          "outcome": "passed",
+          "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx"
+        },
+        {
+          "testId": "dotnet:Causa.Acceptance.RunTests.VerifierTests.AR-018 evidence presented for another source SHA, or a tampered manifest, is not accepted",
+          "outcome": "passed",
+          "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx"
+        },
+        {
+          "testId": "dotnet:Causa.Acceptance.Tests.PipelineTests.AR-018 missing live credentials fail the live job and the deployment is not claimed without proof of the served SHA",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-b65e916f00fd843a",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.Acceptance.RunTests.VerifierTests.AR-007 AR-018 rows forged to PASS without their evidence are not accepted by either verifier",
+          "outcome": "passed",
+          "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx"
+        },
+        {
+          "testId": "dotnet:Causa.Acceptance.RunTests.VerifierTests.AR-018 a report narrating acceptance cannot override the computed verdict",
+          "outcome": "passed",
+          "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx"
+        }
+      ]
+    }
+  ]
+}

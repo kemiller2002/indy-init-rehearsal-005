@@ -1,0 +1,378 @@
+{
+  "schema": "causa.acceptance-producer/1",
+  "id": "defect-class-review",
+  "description": "G7: every defect class in acceptance/defect-classes.json closed by the independent reviewer (status PASS, fix SHA in the candidate's history, reviewer evidence), and its failing-first tests passed in this run. Only the reviewer edits closures.",
+  "status": "success",
+  "checks": [
+    {
+      "name": "DC-001 closure",
+      "status": "PASS",
+      "detail": "closed by the reviewer: fix 5336ec40372323dbdbbb821878ad87c51597af7a, evidence acceptance/reviews/R5-final-review.md#dc-001",
+      "tests": []
+    },
+    {
+      "name": "DC-001 DCT-001-A",
+      "status": "PASS",
+      "detail": "3 selected tests ran and passed",
+      "tests": [
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-001-A publication is parented by the decided-at head and a moved branch is a held conflict",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-001-A negative control VPO-821ce84e76d497b9 VPO-7b54ff75e3784cae the check fails on a book that re-targets stale decisions",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-A VPO-34731ac9a977b818 the publication is parented by the decided-at commit and a moved branch is a held conflict without retry",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        }
+      ]
+    },
+    {
+      "name": "DC-001 DCT-001-B",
+      "status": "PASS",
+      "detail": "8 selected tests ran and passed",
+      "tests": [
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-001-B negative control VPO-821ce84e76d497b9 VPO-7b54ff75e3784cae the check fails on ref-equality reconciliation",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-001-B reconciliation classifies a head reached through another writer as concurrent",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-B DCT-003-A VPO-b3efad6eb85360be a commit carrying our marker but other bytes is a conflict, never saved",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-B two tabs or devices never write the same marker, and a reloaded page never reuses one",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-B DCT-003-A VPO-b3efad6eb85360be a write applied before its answer was lost is confirmed only after its bytes are read back",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-B reconciliation classifies a head reached through another writer as concurrent, by ancestry and marker",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-B DCT-003-A VPO-b3efad6eb85360be two devices: a lost write is never reconciled as applied because another device's commit followed the same head",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-B an applied write followed by another writer is recognised as ours and a reload follows",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        }
+      ]
+    },
+    {
+      "name": "DC-002 closure",
+      "status": "PASS",
+      "detail": "closed by the reviewer: fix e8e32c1ebf6db77344cb8e8bc5bd30b422cdd379, evidence acceptance/reviews/R5-independent-review.md#dc-002",
+      "tests": []
+    },
+    {
+      "name": "DC-002 DCT-002-A",
+      "status": "PASS",
+      "detail": "3 selected tests ran and passed",
+      "tests": [
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-A negative control VPO-821ce84e76d497b9 VPO-7b54ff75e3784cae the check fails when answers are matched by kind",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-A a late answer for a replaced write is discarded",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-002-A VPO-2d4b7557ce013e50 VPO-cd9dd8ec730c3d3e a late answer for a replaced write is discarded",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        }
+      ]
+    },
+    {
+      "name": "DC-002 DCT-002-B",
+      "status": "PASS",
+      "detail": "5 selected tests ran and passed",
+      "tests": [
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-B VPO-199103f9166730e7 VPO-6886a2a6e612f704 every user event is accepted only in its legal source states",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-B R3 D-04 resubmitting an unchanged held change keeps its target parent",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-B negative control VPO-821ce84e76d497b9 VPO-787e24f3c23195e9 the check fails on a book that writes during an unknown outcome",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-B VPO-199103f9166730e7 a refused event leaves the state unchanged and is a typed fault",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-002-B VPO-199103f9166730e7 VPO-6886a2a6e612f704 every user event is accepted only in its legal source states and a refusal changes nothing",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        }
+      ]
+    },
+    {
+      "name": "DC-003 closure",
+      "status": "PASS",
+      "detail": "closed by the reviewer: fix b07d2a5def150e1cd741f0540667eac31b78330e, evidence acceptance/reviews/R5-final-review.md#dc-003-543ddc2",
+      "tests": []
+    },
+    {
+      "name": "DC-003 DCT-003-A",
+      "status": "PASS",
+      "detail": "23 selected tests ran and passed",
+      "tests": [
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-003-A saved is claimed only after the read-back matches",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-003-A a failure after send is unknown with no retry and reconcile reads the head first",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-003-A negative control VPO-821ce84e76d497b9 VPO-7b54ff75e3784cae the check fails on stage-blind failure classification",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A an unrecognised HTTP status after the write was sent is unknown and reconciled, never not-written with retry",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-B DCT-003-A VPO-b3efad6eb85360be a commit carrying our marker but other bytes is a conflict, never saved",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A an unrecognised HTTP status after the write was sent is unknown and reconciled, never not-written with retry",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A an unrecognised HTTP status after the write was sent is unknown and reconciled, never not-written with retry",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-B DCT-003-A VPO-b3efad6eb85360be a write applied before its answer was lost is confirmed only after its bytes are read back",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A VPO-b3efad6eb85360be a reconcile whose read-back fails stays unknown",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A a 200 answer that names a commit is never a refusal, even with a typed error",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-B DCT-003-A VPO-b3efad6eb85360be two devices: a lost write is never reconciled as applied because another device's commit followed the same head",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A VPO-b3efad6eb85360be saved is claimed only after the read-back matches the sent bytes",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A an unrecognised HTTP status after the write was sent is unknown and reconciled, never not-written with retry",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A an unrecognised HTTP status after the write was sent is unknown and reconciled, never not-written with retry",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A an unrecognised HTTP status after the write was sent is unknown and reconciled, never not-written with retry",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A VPO-89ed6170f531961e a failure after send is unknown with no retry and reconcile reads the head first",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A a 200 answer that names a commit is never a refusal, even with a typed error",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A an unrecognised HTTP status after the write was sent is unknown and reconciled, never not-written with retry",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A VPO-b3efad6eb85360be a GraphQL error of an unrecognised type after send is unknown, never not-written with retry",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A a 200 answer that names a commit is never a refusal, even with a typed error",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A an unrecognised HTTP status after the write was sent is unknown and reconciled, never not-written with retry",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A an unrecognised HTTP status after the write was sent is unknown and reconciled, never not-written with retry",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A a 200 answer that names a commit is never a refusal, even with a typed error",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        }
+      ]
+    },
+    {
+      "name": "DC-004 closure",
+      "status": "PASS",
+      "detail": "closed by the reviewer: fix 895fb6da3031da689cd3a6f54b4005f17f07edbe, evidence acceptance/reviews/R5-independent-review.md#dc-004",
+      "tests": []
+    },
+    {
+      "name": "DC-004 DCT-004-A",
+      "status": "PASS",
+      "detail": "2 selected tests ran and passed",
+      "tests": [
+        {
+          "testId": "dotnet:Persistence.Tests.DctProviderTests.DCT-004-A an absent permissions field is not denial; only GitHub's answer to the write decides",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DctProviderTests.DCT-004-A push false is advisory; a refused write is held as write-denied and a renewed credential saves it",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        }
+      ]
+    },
+    {
+      "name": "DC-005 closure",
+      "status": "PASS",
+      "detail": "closed by the reviewer: fix 895fb6da3031da689cd3a6f54b4005f17f07edbe, evidence acceptance/reviews/R5-independent-review.md#dc-005",
+      "tests": []
+    },
+    {
+      "name": "DC-005 DCT-005-A",
+      "status": "PASS",
+      "detail": "1 selected tests ran and passed",
+      "tests": [
+        {
+          "testId": "dotnet:Persistence.Tests.DctProviderTests.DCT-005-A VPO-2d4b7557ce013e50 every mutable read has a URL unique across sessions and page loads, and the new head is observed",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        }
+      ]
+    },
+    {
+      "name": "DC-006 closure",
+      "status": "PASS",
+      "detail": "closed by the reviewer: fix 578ebd3b0bbc99862dc2da945e9c3b9e3f719bba, evidence acceptance/reviews/R5-independent-review.md#dc-006",
+      "tests": []
+    },
+    {
+      "name": "DC-006 DCT-006-A",
+      "status": "PASS",
+      "detail": "2 selected tests ran and passed",
+      "tests": [
+        {
+          "testId": "playwright:shell.spec.js > stack smoke (DEP-CURRENT-004) and defect classes > DCT-006-A a 503 on one framework .wasm shows the recoverable failure well before the start timeout, focus on Retry, and Retry reaches ready [VPO-0bd752bd2ac89796] [VPO-97351596eb39e14e] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > stack smoke (DEP-CURRENT-004) and defect classes > DCT-006-A a 503 on one framework .wasm shows the recoverable failure well before the start timeout, focus on Retry, and Retry reaches ready [VPO-0bd752bd2ac89796] [VPO-97351596eb39e14e] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "name": "R3-LESSON-3 closure",
+      "status": "PASS",
+      "detail": "closed by the reviewer: fix 578ebd3b0bbc99862dc2da945e9c3b9e3f719bba, evidence acceptance/reviews/R5-independent-review.md#r3-lesson-3",
+      "tests": []
+    },
+    {
+      "name": "R3-LESSON-3 DCT-INPUT-A",
+      "status": "PASS",
+      "detail": "2 selected tests ran and passed",
+      "tests": [
+        {
+          "testId": "playwright:shell.spec.js > stack smoke (DEP-CURRENT-004) and defect classes > DCT-INPUT-A typed text in bound inputs survives the projections that arrive while typing [VPO-be22751d9b5b8098] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > stack smoke (DEP-CURRENT-004) and defect classes > DCT-INPUT-A typed text in bound inputs survives the projections that arrive while typing [VPO-be22751d9b5b8098] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "name": "DC-001..DC-005 closure",
+      "status": "PASS",
+      "detail": "closed by the reviewer: fix b07d2a5def150e1cd741f0540667eac31b78330e, evidence acceptance/reviews/R5-final-review.md#dct-live-a-543ddc2",
+      "tests": []
+    },
+    {
+      "name": "DC-001..DC-005 DCT-LIVE-A",
+      "status": "PASS",
+      "detail": "1 selected tests ran and passed",
+      "tests": [
+        {
+          "testId": "playwright:live-persistence.spec.js > DCT-LIVE-A create, write, reload, conflict (resolved by Reload), two tabs with a lost write (never reconciled as saved) and rejected token against the real test repository, each confirmed by an independent SHA re-read [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/live/live-results.json"
+        }
+      ]
+    }
+  ],
+  "runId": "40620099844-1",
+  "sourceSha": "1b9fb56873fe7a98dffd5172066d909449c17eae"
+}

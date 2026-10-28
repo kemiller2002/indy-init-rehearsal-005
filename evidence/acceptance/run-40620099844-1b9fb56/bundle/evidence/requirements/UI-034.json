@@ -1,0 +1,130 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "UI-034",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-f3ebcdbe15cdf92d",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > closing the inspector returns focus to the record's row, and the inspector reflows on every viewport @responsive [VPO-8f8156f91b64963b] [VPO-f3ebcdbe15cdf92d] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > closing the inspector returns focus to the record's row, and the inspector reflows on every viewport @responsive [VPO-8f8156f91b64963b] [VPO-f3ebcdbe15cdf92d] [ipad-landscape]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > closing the inspector returns focus to the record's row, and the inspector reflows on every viewport @responsive [VPO-8f8156f91b64963b] [VPO-f3ebcdbe15cdf92d] [ipad-portrait]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > closing the inspector returns focus to the record's row, and the inspector reflows on every viewport @responsive [VPO-8f8156f91b64963b] [VPO-f3ebcdbe15cdf92d] [phone-320]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > traversal follows recorded relationships with stable addresses and explicit absent links, and closing restores focus @responsive [VPO-5a85f3ea85db30b2] [VPO-63d89380e8017050] [VPO-f3ebcdbe15cdf92d] [VPO-8f8156f91b64963b] [VPO-ad49e5ff43f1ace6] [VPO-8a5de7e5afae98cb] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > traversal follows recorded relationships with stable addresses and explicit absent links, and closing restores focus @responsive [VPO-5a85f3ea85db30b2] [VPO-63d89380e8017050] [VPO-f3ebcdbe15cdf92d] [VPO-8f8156f91b64963b] [VPO-ad49e5ff43f1ace6] [VPO-8a5de7e5afae98cb] [ipad-landscape]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > traversal follows recorded relationships with stable addresses and explicit absent links, and closing restores focus @responsive [VPO-5a85f3ea85db30b2] [VPO-63d89380e8017050] [VPO-f3ebcdbe15cdf92d] [VPO-8f8156f91b64963b] [VPO-ad49e5ff43f1ace6] [VPO-8a5de7e5afae98cb] [ipad-portrait]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > traversal follows recorded relationships with stable addresses and explicit absent links, and closing restores focus @responsive [VPO-5a85f3ea85db30b2] [VPO-63d89380e8017050] [VPO-f3ebcdbe15cdf92d] [VPO-8f8156f91b64963b] [VPO-ad49e5ff43f1ace6] [VPO-8a5de7e5afae98cb] [phone-320]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:ux.spec.js > identity, failures and component ownership (UI-017-O4, UI-022-O1, UI-030-O4, UI-034-O3, UI-039-O2) > the inspector is composed from Forma's own record header, key-value list and relationship index, which the served Forma stylesheet defines and Causa does not redefine [VPO-a2099d5e8abc8ef0] [VPO-f1f1bfbfc325fa21] [VPO-f3ebcdbe15cdf92d] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-8f8156f91b64963b",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > closing the inspector returns focus to the record's row, and the inspector reflows on every viewport @responsive [VPO-8f8156f91b64963b] [VPO-f3ebcdbe15cdf92d] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > closing the inspector returns focus to the record's row, and the inspector reflows on every viewport @responsive [VPO-8f8156f91b64963b] [VPO-f3ebcdbe15cdf92d] [ipad-landscape]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > closing the inspector returns focus to the record's row, and the inspector reflows on every viewport @responsive [VPO-8f8156f91b64963b] [VPO-f3ebcdbe15cdf92d] [ipad-portrait]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > closing the inspector returns focus to the record's row, and the inspector reflows on every viewport @responsive [VPO-8f8156f91b64963b] [VPO-f3ebcdbe15cdf92d] [phone-320]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > traversal follows recorded relationships with stable addresses and explicit absent links, and closing restores focus @responsive [VPO-5a85f3ea85db30b2] [VPO-63d89380e8017050] [VPO-f3ebcdbe15cdf92d] [VPO-8f8156f91b64963b] [VPO-ad49e5ff43f1ace6] [VPO-8a5de7e5afae98cb] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > traversal follows recorded relationships with stable addresses and explicit absent links, and closing restores focus @responsive [VPO-5a85f3ea85db30b2] [VPO-63d89380e8017050] [VPO-f3ebcdbe15cdf92d] [VPO-8f8156f91b64963b] [VPO-ad49e5ff43f1ace6] [VPO-8a5de7e5afae98cb] [ipad-landscape]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > traversal follows recorded relationships with stable addresses and explicit absent links, and closing restores focus @responsive [VPO-5a85f3ea85db30b2] [VPO-63d89380e8017050] [VPO-f3ebcdbe15cdf92d] [VPO-8f8156f91b64963b] [VPO-ad49e5ff43f1ace6] [VPO-8a5de7e5afae98cb] [ipad-portrait]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > traversal follows recorded relationships with stable addresses and explicit absent links, and closing restores focus @responsive [VPO-5a85f3ea85db30b2] [VPO-63d89380e8017050] [VPO-f3ebcdbe15cdf92d] [VPO-8f8156f91b64963b] [VPO-ad49e5ff43f1ace6] [VPO-8a5de7e5afae98cb] [phone-320]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-a2099d5e8abc8ef0",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:ux.spec.js > identity, failures and component ownership (UI-017-O4, UI-022-O1, UI-030-O4, UI-034-O3, UI-039-O2) > the inspector is composed from Forma's own record header, key-value list and relationship index, which the served Forma stylesheet defines and Causa does not redefine [VPO-a2099d5e8abc8ef0] [VPO-f1f1bfbfc325fa21] [VPO-f3ebcdbe15cdf92d] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    }
+  ]
+}

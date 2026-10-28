@@ -1,0 +1,135 @@
+{
+  "schema": "causa.layer-timings/1",
+  "run": "40620099844-1",
+  "sourceSha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "budgets": null,
+  "budgetsNote": "no budget is set before a baseline of measured runs exists (PF-012-O3)",
+  "jobs": [
+    {
+      "name": "wasm-smoke",
+      "layer": "wasm",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-28T02:23:56Z",
+      "completedAt": "2026-10-28T02:25:01Z",
+      "seconds": 65
+    },
+    {
+      "name": "preservation-gate",
+      "layer": "requirements",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-28T02:23:56Z",
+      "completedAt": "2026-10-28T02:24:22Z",
+      "seconds": 26
+    },
+    {
+      "name": "preservation-adversarial",
+      "layer": "requirements",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-28T02:23:56Z",
+      "completedAt": "2026-10-28T02:24:29Z",
+      "seconds": 33
+    },
+    {
+      "name": "reuse",
+      "layer": "reuse",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-28T02:23:56Z",
+      "completedAt": "2026-10-28T02:24:24Z",
+      "seconds": 28
+    },
+    {
+      "name": "provider-conformance",
+      "layer": "provider-conformance",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-28T02:23:56Z",
+      "completedAt": "2026-10-28T02:24:54Z",
+      "seconds": 58
+    },
+    {
+      "name": "site",
+      "layer": "build",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-28T02:24:27Z",
+      "completedAt": "2026-10-28T02:26:35Z",
+      "seconds": 128
+    },
+    {
+      "name": "lock-gate",
+      "layer": "dependencies",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-28T02:24:27Z",
+      "completedAt": "2026-10-28T02:25:32Z",
+      "seconds": 65
+    },
+    {
+      "name": "core",
+      "layer": "domain",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-28T02:24:27Z",
+      "completedAt": "2026-10-28T02:25:29Z",
+      "seconds": 62
+    },
+    {
+      "name": "browser",
+      "layer": "ui",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-28T02:26:38Z",
+      "completedAt": "2026-10-28T02:38:23Z",
+      "seconds": 705
+    },
+    {
+      "name": "percepta",
+      "layer": "ui-contracts",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-28T02:26:38Z",
+      "completedAt": "2026-10-28T02:28:44Z",
+      "seconds": 126
+    },
+    {
+      "name": "live",
+      "layer": "live-integration",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-28T02:26:38Z",
+      "completedAt": "2026-10-28T02:28:23Z",
+      "seconds": 105
+    },
+    {
+      "name": "build-and-test",
+      "layer": "required-check",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-28T02:38:25Z",
+      "completedAt": "2026-10-28T02:38:28Z",
+      "seconds": 3
+    },
+    {
+      "name": "deploy",
+      "layer": "deploy",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-28T02:38:31Z",
+      "completedAt": "2026-10-28T02:38:45Z",
+      "seconds": 14
+    },
+    {
+      "name": "deployed-smoke",
+      "layer": "deployed",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-28T02:38:48Z",
+      "completedAt": "2026-10-28T02:39:37Z",
+      "seconds": 49
+    }
+  ]
+}

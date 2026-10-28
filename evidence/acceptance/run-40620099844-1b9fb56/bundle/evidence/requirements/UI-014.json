@@ -1,0 +1,120 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "UI-014",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-9501908622238a66",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:identity.spec.js > headings follow Forma's fixed application type steps at every width, not the marketing display scale [VPO-9501908622238a66] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:identity.spec.js > headings follow Forma's fixed application type steps at every width, not the marketing display scale [VPO-9501908622238a66] [ipad-landscape]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:identity.spec.js > headings follow Forma's fixed application type steps at every width, not the marketing display scale [VPO-9501908622238a66] [ipad-portrait]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:identity.spec.js > headings follow Forma's fixed application type steps at every width, not the marketing display scale [VPO-9501908622238a66] [phone-320]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > identity, accessibility and layout (UI-011, UI-014, UI-016) > keyboard: skip link first, visible focus, landmarks and a favicon [VPO-447fd64210e3d9e3] [VPO-9501908622238a66] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-0bd752bd2ac89796",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:shell.spec.js > loading experience (WASM-LOAD, T16) > a 503 for the runtime ends in an explained failure with Retry focused, and Retry then starts Causa [VPO-0bd752bd2ac89796] [VPO-4355a83607ddc8da] [VPO-e54ee03f405cdc8f] [VPO-97351596eb39e14e] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > loading experience (WASM-LOAD, T16) > the branded shell shows before the WebAssembly runtime and hands off without a blank frame [VPO-0bd752bd2ac89796] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > loading experience (WASM-LOAD, T16) > the branded shell shows before the WebAssembly runtime and hands off without a blank frame [VPO-0bd752bd2ac89796] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > stack smoke (DEP-CURRENT-004) and defect classes > DCT-006-A a 503 on one framework .wasm shows the recoverable failure well before the start timeout, focus on Retry, and Retry reaches ready [VPO-0bd752bd2ac89796] [VPO-97351596eb39e14e] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > stack smoke (DEP-CURRENT-004) and defect classes > DCT-006-A a 503 on one framework .wasm shows the recoverable failure well before the start timeout, focus on Retry, and Retry reaches ready [VPO-0bd752bd2ac89796] [VPO-97351596eb39e14e] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:start-smoke.spec.js > the production starts on every primary route with no engine fault [VPO-0bd752bd2ac89796] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:start-smoke.spec.js > the production starts on every primary route with no engine fault [VPO-0bd752bd2ac89796] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:start-smoke.spec.js > the test build starts on every primary route with no engine fault [VPO-0bd752bd2ac89796] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:start-smoke.spec.js > the test build starts on every primary route with no engine fault [VPO-0bd752bd2ac89796] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-014f5e1139ed692b",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.ProjectionTests.VPO-014f5e1139ed692b a frozen demonstration and a writable copy are labelled apart in the catalog and the investigation header",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "playwright:identity.spec.js > navigation tells a read-only demonstration from a writable copy and keeps the current investigation in view [VPO-014f5e1139ed692b] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    }
+  ]
+}

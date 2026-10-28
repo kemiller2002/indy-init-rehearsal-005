@@ -1,0 +1,44 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "WDL-009",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-531b33816ba9cddf",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.GraphTests.VPO-531b33816ba9cddf VPO-7f9018a0a0d1e32b determinism: the same projection in any order gives the same document",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-7f9018a0a0d1e32b",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.GraphTests.VPO-531b33816ba9cddf VPO-7f9018a0a0d1e32b determinism: the same projection in any order gives the same document",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        }
+      ]
+    }
+  ]
+}

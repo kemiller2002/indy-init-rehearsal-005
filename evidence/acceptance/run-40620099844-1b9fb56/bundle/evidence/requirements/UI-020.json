@@ -1,0 +1,81 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "UI-020",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-e5cfc842f2367421",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:shell.spec.js > routes and navigation (T16) > the three primary destinations are distinct, reachable and mark the current one [VPO-e5cfc842f2367421] [VPO-7bb1e8c5bdccc2f2] [VPO-625e96f365f2c1b8] [VPO-41642822de594b56] [VPO-23d8a096e64b2625] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-9eb8f87800355c73",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:ux.spec.js > investigation work apart from Administration and Settings (UI-017, UI-018, UI-020, UI-021, UI-023, UI-029, UI-030, UI-031) > workflow actions stay in the investigation, operational facts in Administration, preferences in Settings; two-level navigation [VPO-9eb8f87800355c73] [VPO-e5017d9f8ae702fb] [VPO-dba405d7ed58872b] [VPO-7fe69b1e93fa0c7f] [VPO-2ad36bd062191d2b] [VPO-fcf404b4a7afa635] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-86dfcce77d8a048f",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:shell.spec.js > identity, accessibility and layout (UI-011, UI-014, UI-016) > reflows without horizontal scrolling and keeps 44px targets @responsive [VPO-0684fde6ced06208] [VPO-86dfcce77d8a048f] [VPO-3b9b2a8a4bf56535] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > identity, accessibility and layout (UI-011, UI-014, UI-016) > reflows without horizontal scrolling and keeps 44px targets @responsive [VPO-0684fde6ced06208] [VPO-86dfcce77d8a048f] [VPO-3b9b2a8a4bf56535] [ipad-landscape]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > identity, accessibility and layout (UI-011, UI-014, UI-016) > reflows without horizontal scrolling and keeps 44px targets @responsive [VPO-0684fde6ced06208] [VPO-86dfcce77d8a048f] [VPO-3b9b2a8a4bf56535] [ipad-portrait]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > identity, accessibility and layout (UI-011, UI-014, UI-016) > reflows without horizontal scrolling and keeps 44px targets @responsive [VPO-0684fde6ced06208] [VPO-86dfcce77d8a048f] [VPO-3b9b2a8a4bf56535] [phone-320]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-e5017d9f8ae702fb",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:ux.spec.js > investigation work apart from Administration and Settings (UI-017, UI-018, UI-020, UI-021, UI-023, UI-029, UI-030, UI-031) > workflow actions stay in the investigation, operational facts in Administration, preferences in Settings; two-level navigation [VPO-9eb8f87800355c73] [VPO-e5017d9f8ae702fb] [VPO-dba405d7ed58872b] [VPO-7fe69b1e93fa0c7f] [VPO-2ad36bd062191d2b] [VPO-fcf404b4a7afa635] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    }
+  ]
+}

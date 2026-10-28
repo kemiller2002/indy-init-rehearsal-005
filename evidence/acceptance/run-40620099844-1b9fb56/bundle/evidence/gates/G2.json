@@ -1,0 +1,28 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "gate",
+  "subject_id": "G2",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "interface",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "producers": [
+    {
+      "id": "interface-manifest",
+      "status": "success",
+      "command": "causa-acceptance produce (acceptance/gates.json producers.interface-manifest)",
+      "record": "producers/interface-manifest.json"
+    }
+  ]
+}

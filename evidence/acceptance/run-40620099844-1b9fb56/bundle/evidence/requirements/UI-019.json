@@ -1,0 +1,98 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "UI-019",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-23d8a096e64b2625",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:shell.spec.js > routes and navigation (T16) > the three primary destinations are distinct, reachable and mark the current one [VPO-e5cfc842f2367421] [VPO-7bb1e8c5bdccc2f2] [VPO-625e96f365f2c1b8] [VPO-41642822de594b56] [VPO-23d8a096e64b2625] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-1224fd4d58ddcaa6",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:shell.spec.js > Administration and Settings (UI-018, UI-019, VER-007) > Settings apply for the session only, show effective values and store nothing in the browser [VPO-1224fd4d58ddcaa6] [VPO-d39e3d1f28d9e2ac] [VPO-c5d77a4b2eb52927] [VPO-fc28e815f45f2e9b] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-d39e3d1f28d9e2ac",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:shell.spec.js > Administration and Settings (UI-018, UI-019, VER-007) > Settings apply for the session only, show effective values and store nothing in the browser [VPO-1224fd4d58ddcaa6] [VPO-d39e3d1f28d9e2ac] [VPO-c5d77a4b2eb52927] [VPO-fc28e815f45f2e9b] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-fc28e815f45f2e9b",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:shell.spec.js > Administration and Settings (UI-018, UI-019, VER-007) > Settings apply for the session only, show effective values and store nothing in the browser [VPO-1224fd4d58ddcaa6] [VPO-d39e3d1f28d9e2ac] [VPO-c5d77a4b2eb52927] [VPO-fc28e815f45f2e9b] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-c5d77a4b2eb52927",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:shell.spec.js > Administration and Settings (UI-018, UI-019, VER-007) > Settings apply for the session only, show effective values and store nothing in the browser [VPO-1224fd4d58ddcaa6] [VPO-d39e3d1f28d9e2ac] [VPO-c5d77a4b2eb52927] [VPO-fc28e815f45f2e9b] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-a500f6d5a0f3e254",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Persistence.Tests.CatalogAppTests.VPO-c81484cbcf203d4f VPO-d60e3a3a25cb106d VPO-dc48d066cfa2309d VPO-557743cb4997c484 after Connect every catalog case loads, replays to its manifest digest and is read-only",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.ConformanceTests.VPO-a460a95198e68863 VPO-0e682dd716a12d49 a classic token with repo or admin scope is refused at connect",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-2de744fb2c8bdc70 VPO-bb08b9a414ba4cd7 VPO-ca58030e3eecdf9b VPO-c41f10e4ed8a086b the token appears only in the Authorization header",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        }
+      ]
+    }
+  ]
+}

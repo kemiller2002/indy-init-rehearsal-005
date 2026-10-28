@@ -1,0 +1,40 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "gate",
+  "subject_id": "G1",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "lock",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "producers": [
+    {
+      "id": "lock-gate",
+      "status": "success",
+      "command": "causa-acceptance lock-gate (https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844)",
+      "record": "TestResults/lock-gate/lock-gate.json"
+    },
+    {
+      "id": "wasm-smoke",
+      "status": "success",
+      "command": "dotnet build -c Release tests/Engine.WasmSmoke && node tests/Engine.WasmSmoke/run.mjs (https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844)",
+      "record": "gate-records/wasm-smoke/wasm-smoke.log"
+    },
+    {
+      "id": "stack-smoke",
+      "status": "success",
+      "command": "causa-acceptance produce (acceptance/gates.json producers.stack-smoke)",
+      "record": "producers/stack-smoke.json"
+    }
+  ]
+}

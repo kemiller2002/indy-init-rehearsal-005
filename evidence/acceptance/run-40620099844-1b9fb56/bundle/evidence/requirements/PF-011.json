@@ -1,0 +1,93 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "PF-011",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-8579de88e6b699f8",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.Acceptance.RunTests.EvidenceTests.PF-011 the domain layer is deterministic F# validation, replay and transition tests that ran and passed without credentials",
+          "outcome": "passed",
+          "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-91b97073e4e85125",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.Acceptance.RunTests.EvidenceTests.PF-011 the UI layer ran in a real browser against local builds, covering responsive, keyboard, palette, loading and failure",
+          "outcome": "passed",
+          "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-74efa48033c82a96",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Persistence.Tests.ConformanceTests.VPO-03b8215501e25334 VPO-74efa48033c82a96 VPO-bb13dc090d4c152b the fake agrees with every recorded GitHub scenario through the production interpreters",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-903077d337faf198",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:live-persistence.spec.js > DCT-LIVE-A create, write, reload, conflict (resolved by Reload), two tabs with a lost write (never reconciled as saved) and rejected token against the real test repository, each confirmed by an independent SHA re-read [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/live/live-results.json"
+        },
+        {
+          "testId": "playwright:live-persistence.spec.js > EXT-DATA-013 after Connect the browser loads exactly the catalog's three historical cases, verified and read-only; no record ships with the site and none is served by it [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/live/live-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-da8e100075889a8d",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.Acceptance.Tests.PipelineTests.PF-011 each verification level has its own executable command, CI job outcome and published evidence",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-2a6aa540f193ab6c",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.Acceptance.Tests.AcceptanceTests.gates pass only on producers that succeeded in this run; absent, reused or failed producers do not",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx"
+        }
+      ]
+    }
+  ]
+}

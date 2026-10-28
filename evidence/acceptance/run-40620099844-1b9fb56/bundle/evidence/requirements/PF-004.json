@@ -1,0 +1,75 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "PF-004",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-557743cb4997c484",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Persistence.Tests.CatalogAppTests.VPO-c81484cbcf203d4f VPO-d60e3a3a25cb106d VPO-dc48d066cfa2309d VPO-557743cb4997c484 after Connect every catalog case loads, replays to its manifest digest and is read-only",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.FixtureTests.VPO-b090ff3e3c16c13d VPO-ff3dc45c64bfa0cb VPO-da07c2ac97baa9f1 VPO-d4b0d50550578aeb fixture and GitHub providers share one port and one program with the same semantics",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "playwright:live-persistence.spec.js > EXT-DATA-013 after Connect the browser loads exactly the catalog's three historical cases, verified and read-only; no record ships with the site and none is served by it [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/live/live-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-3d67d1f2b8287e39",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 VPO-3d67d1f2b8287e39 five golden scenarios replay through the engine to their pinned digests and golden states",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 VPO-3d67d1f2b8287e39 golden scenarios.json agrees with the replayed histories (no CAUSA.GOLDEN_MISMATCH)",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-dc48d066cfa2309d",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Persistence.Tests.CatalogAppTests.VPO-c81484cbcf203d4f VPO-d60e3a3a25cb106d VPO-dc48d066cfa2309d VPO-557743cb4997c484 after Connect every catalog case loads, replays to its manifest digest and is read-only",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "playwright:live-persistence.spec.js > EXT-DATA-013 after Connect the browser loads exactly the catalog's three historical cases, verified and read-only; no record ships with the site and none is served by it [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/live/live-results.json"
+        }
+      ]
+    }
+  ]
+}

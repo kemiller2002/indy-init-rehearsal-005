@@ -1,0 +1,69 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "EXT-DATA-008",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-61b2e81f99761d55",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-61b2e81f99761d55 VPO-9c6055c47e4eb07d VPO-4c06d10238d15c5c VPO-89ed6170f531961e explicit create is saved locally, written in one guarded commit and claimed synced only after the re-read",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "playwright:live-persistence.spec.js > DCT-LIVE-A create, write, reload, conflict (resolved by Reload), two tabs with a lost write (never reconciled as saved) and rejected token against the real test repository, each confirmed by an independent SHA re-read [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/live/live-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-9c6055c47e4eb07d",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 VPO-9c6055c47e4eb07d the writer reproduces every frozen file set byte for byte from the decoded events",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 EXT-DATA-008 VPO-9c6055c47e4eb07d a command-created investigation is schema-valid replayable and round-trips",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.StoreTests.VPO-9c6055c47e4eb07d VPO-5933d986a6ba6dc3 a command-created investigation is a v1 file set that reads back byte-identically through the engine",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-61b2e81f99761d55 VPO-9c6055c47e4eb07d VPO-4c06d10238d15c5c VPO-89ed6170f531961e explicit create is saved locally, written in one guarded commit and claimed synced only after the re-read",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-9c6055c47e4eb07d events accepted by the kernel are appended by the storage writer, saved, and a stale append is refused",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        }
+      ]
+    }
+  ]
+}

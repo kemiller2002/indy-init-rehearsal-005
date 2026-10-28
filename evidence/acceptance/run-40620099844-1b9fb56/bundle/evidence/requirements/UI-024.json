@@ -1,0 +1,113 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "UI-024",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-d8ac36bdb18a7b39",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.LanguageTests.VPO-d8ac36bdb18a7b39 every typed domain state has one concise user-facing label, none raw or technical",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "dotnet:Causa.App.Tests.LanguageTests.VPO-d8ac36bdb18a7b39 the shell's wire-spelling labels agree with the typed mapping",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-e8570ba5427ce32b",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.LanguageTests.VPO-e8570ba5427ce32b VPO-885e4767b84371de findings wording never claims a confirmed cause or verification the domain does not assert",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "dotnet:Causa.App.Tests.LanguageTests.VPO-e8570ba5427ce32b views cannot invent a permission, a reason or a recommendation",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-d4a9c8fd05795e00",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.ProjectionTests.VPO-d4a9c8fd05795e00 unmapped domain values are never echoed raw",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-6f0a2e18f9a19003",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.LanguageTests.VPO-6f0a2e18f9a19003 wording never implies an unsaved, ephemeral, read-only or in-flight change was saved",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "playwright:ux.spec.js > investigation work apart from Administration and Settings (UI-017, UI-018, UI-020, UI-021, UI-023, UI-029, UI-030, UI-031) > an investigation that loaded correctly but has unresolved findings is never labelled Verified; findings come from the domain [VPO-d0e33c8aaaf705f2] [VPO-c8114e2b7bd759fa] [VPO-f0256bc31283be14] [VPO-58231f4725864068] [VPO-885e4767b84371de] [VPO-6f0a2e18f9a19003] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-e1fb14be4ca10f5f",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.LanguageTests.VPO-e1fb14be4ca10f5f technical codes and data-integrity details stay out of routine wording",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "playwright:ux.spec.js > investigation work apart from Administration and Settings (UI-017, UI-018, UI-020, UI-021, UI-023, UI-029, UI-030, UI-031) > routine investigation views carry no implementation prose, codes or versions; Administration keeps them [VPO-7b0ba1d1f6f663a5] [VPO-78541ad7e7bfc045] [VPO-0b37bb6a955165e2] [VPO-18e6fc4dd0730354] [VPO-2ad36bd062191d2b] [VPO-026da8a495857549] [VPO-5c147c83f19f2c8c] [VPO-bff050b54a481780] [VPO-e1fb14be4ca10f5f] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-7fff10ce82e7c162",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.LanguageTests.VPO-7fff10ce82e7c162 domain terms and provenance are kept precisely",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "playwright:ux.spec.js > investigation work apart from Administration and Settings (UI-017, UI-018, UI-020, UI-021, UI-023, UI-029, UI-030, UI-031) > evidence views keep source attribution and the record's provenance after technical details moved out [VPO-5c147c83f19f2c8c] [VPO-5fe930a650a08b04] [VPO-c18f969a9c8b65bf] [VPO-7fff10ce82e7c162] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    }
+  ]
+}

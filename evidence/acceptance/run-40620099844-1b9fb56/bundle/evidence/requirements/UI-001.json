@@ -1,0 +1,113 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "UI-001",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-2f4f9de66ddd6434",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.EnginePortTests.VPO-2f4f9de66ddd6434 the production port refuses Connect and claims no connection",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "dotnet:Causa.App.Tests.ProjectionTests.VPO-2f4f9de66ddd6434 before Connect only the empty, disconnected workspace with Connect is shown",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "playwright:shell.spec.js > routes and navigation (T16) > before Connect the workspace is empty and offers the explicit Connect action [VPO-2f4f9de66ddd6434] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-02b53bd16db4ee17",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.UxViewTests.VPO-885e4767b84371de VPO-02b53bd16db4ee17 an unknown count on a card is never shown as zero, and no next action is invented",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "playwright:ux.spec.js > investigation catalog (UI-001, UI-022) > cards show title, actual status, latest activity, domain counts, the policy's next action, an Open action and the reference id; no severity, owner or technical text [VPO-02b53bd16db4ee17] [VPO-05f9c2a398ed7454] [VPO-985886de7f012c74] [VPO-3fc89c9d18b678a4] [VPO-c6f789b832466ab9] [VPO-78852bf4d2da804b] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-05f9c2a398ed7454",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:ux.spec.js > investigation catalog (UI-001, UI-022) > cards show title, actual status, latest activity, domain counts, the policy's next action, an Open action and the reference id; no severity, owner or technical text [VPO-02b53bd16db4ee17] [VPO-05f9c2a398ed7454] [VPO-985886de7f012c74] [VPO-3fc89c9d18b678a4] [VPO-c6f789b832466ab9] [VPO-78852bf4d2da804b] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-985886de7f012c74",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:ux.spec.js > investigation catalog (UI-001, UI-022) > cards show title, actual status, latest activity, domain counts, the policy's next action, an Open action and the reference id; no severity, owner or technical text [VPO-02b53bd16db4ee17] [VPO-05f9c2a398ed7454] [VPO-985886de7f012c74] [VPO-3fc89c9d18b678a4] [VPO-c6f789b832466ab9] [VPO-78852bf4d2da804b] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-1cd1f428fe646f06",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.UxViewTests.VPO-1cd1f428fe646f06 cards sort by latest activity, title or status, and the selected card is marked",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "dotnet:Causa.App.Tests.UxViewTests.VPO-1cd1f428fe646f06 the catalog has distinct loading, error and empty states",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "playwright:ux.spec.js > investigation catalog (UI-001, UI-022) > the catalog sorts, shows an empty state, keeps the selection, and opening keeps identity and context [VPO-1cd1f428fe646f06] [VPO-b3ea3d93850c4c8f] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-b3ea3d93850c4c8f",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:ux.spec.js > investigation catalog (UI-001, UI-022) > the catalog sorts, shows an empty state, keeps the selection, and opening keeps identity and context [VPO-1cd1f428fe646f06] [VPO-b3ea3d93850c4c8f] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    }
+  ]
+}

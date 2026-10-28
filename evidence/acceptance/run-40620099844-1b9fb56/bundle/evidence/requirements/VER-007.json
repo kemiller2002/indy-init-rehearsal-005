@@ -1,0 +1,44 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "VER-007",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-b93e86bd3809524a",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:shell.spec.js > Administration and Settings (UI-018, UI-019, VER-007) > Administration shows the versions actually loaded, and no investigation page or footer shows them [VPO-b93e86bd3809524a] [VPO-183d6671da7467b8] [VPO-a07751ce0dce5689] [VPO-a74264901d267d03] [VPO-3f3db98e519aa95c] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-183d6671da7467b8",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:shell.spec.js > Administration and Settings (UI-018, UI-019, VER-007) > Administration shows the versions actually loaded, and no investigation page or footer shows them [VPO-b93e86bd3809524a] [VPO-183d6671da7467b8] [VPO-a07751ce0dce5689] [VPO-a74264901d267d03] [VPO-3f3db98e519aa95c] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    }
+  ]
+}

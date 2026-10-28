@@ -1,0 +1,1706 @@
+{
+  "schema": "percepta.application-verification/1",
+  "application": "causa",
+  "baseUrl": "http://127.0.0.1:4330/",
+  "revisionBoundEvidence": false,
+  "allowNotApplicable": true,
+  "complete": true,
+  "counts": {
+    "PASS": 24,
+    "FAIL": 0,
+    "NOT-BOUND": 0,
+    "NOT-APPLICABLE": 1
+  },
+  "orphanBindings": [],
+  "screens": [
+    {
+      "contract": "S01-investigation-start",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s01-investigation-start.json",
+      "verdict": "PASS",
+      "appScreen": "investigation-start",
+      "url": "http://127.0.0.1:4330/index.html?percepta=default#/investigations/new",
+      "evidence": [
+        {
+          "requirement": "contract",
+          "kind": "contract-validation",
+          "required": true,
+          "status": "Passed",
+          "summary": "Typed contract parsed and validated successfully.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s01-investigation-start.json"
+          ]
+        },
+        {
+          "requirement": "structural",
+          "kind": "structural",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantic structure is present.",
+          "references": []
+        },
+        {
+          "requirement": "state",
+          "kind": "state-projection",
+          "required": true,
+          "status": "Passed",
+          "summary": "All declared state projections are exercised and visible.",
+          "references": [
+            "start-blocked",
+            "start-legal"
+          ]
+        },
+        {
+          "requirement": "interaction",
+          "kind": "interaction",
+          "required": true,
+          "status": "Passed",
+          "summary": "Capability exposure and legality projections are correct.",
+          "references": [
+            "start-blocked",
+            "start-legal"
+          ]
+        },
+        {
+          "requirement": "accessibility",
+          "kind": "accessibility",
+          "required": true,
+          "status": "Passed",
+          "summary": "Basic accessibility invariants pass.",
+          "references": []
+        },
+        {
+          "requirement": "responsive",
+          "kind": "responsive",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantics survive all declared viewport classes.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S01-investigation-start/screenshots/ipad-portrait.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S01-investigation-start/screenshots/ipad-landscape.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S01-investigation-start/screenshots/narrow-phone.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S01-investigation-start/screenshots/desktop-reference.png"
+          ]
+        }
+      ]
+    },
+    {
+      "contract": "S02-investigation-workspace",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s02-investigation-workspace.json",
+      "verdict": "PASS",
+      "appScreen": "investigation-overview",
+      "url": "http://127.0.0.1:4330/index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1",
+      "evidence": [
+        {
+          "requirement": "contract",
+          "kind": "contract-validation",
+          "required": true,
+          "status": "Passed",
+          "summary": "Typed contract parsed and validated successfully.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s02-investigation-workspace.json"
+          ]
+        },
+        {
+          "requirement": "structural",
+          "kind": "structural",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantic structure is present.",
+          "references": []
+        },
+        {
+          "requirement": "state",
+          "kind": "state-projection",
+          "required": true,
+          "status": "Passed",
+          "summary": "All declared state projections are exercised and visible.",
+          "references": [
+            "material-blocker",
+            "all-legal",
+            "all-blocked"
+          ]
+        },
+        {
+          "requirement": "interaction",
+          "kind": "interaction",
+          "required": true,
+          "status": "Passed",
+          "summary": "Capability exposure and legality projections are correct.",
+          "references": [
+            "material-blocker",
+            "all-legal",
+            "all-blocked"
+          ]
+        },
+        {
+          "requirement": "accessibility",
+          "kind": "accessibility",
+          "required": true,
+          "status": "Passed",
+          "summary": "Basic accessibility invariants pass.",
+          "references": []
+        },
+        {
+          "requirement": "responsive",
+          "kind": "responsive",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantics survive all declared viewport classes.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S02-investigation-workspace/screenshots/ipad-portrait.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S02-investigation-workspace/screenshots/ipad-landscape.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S02-investigation-workspace/screenshots/narrow-phone.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S02-investigation-workspace/screenshots/desktop-reference.png"
+          ]
+        }
+      ]
+    },
+    {
+      "contract": "S03-hypothesis-battlefield",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s03-hypothesis-battlefield.json",
+      "verdict": "PASS",
+      "appScreen": "investigation-hypotheses",
+      "url": "http://127.0.0.1:4330/index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/hypotheses",
+      "evidence": [
+        {
+          "requirement": "contract",
+          "kind": "contract-validation",
+          "required": true,
+          "status": "Passed",
+          "summary": "Typed contract parsed and validated successfully.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s03-hypothesis-battlefield.json"
+          ]
+        },
+        {
+          "requirement": "structural",
+          "kind": "structural",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantic structure is present.",
+          "references": []
+        },
+        {
+          "requirement": "state",
+          "kind": "state-projection",
+          "required": true,
+          "status": "Passed",
+          "summary": "All declared state projections are exercised and visible.",
+          "references": [
+            "s03-blocked",
+            "s03-legal"
+          ]
+        },
+        {
+          "requirement": "interaction",
+          "kind": "interaction",
+          "required": true,
+          "status": "Passed",
+          "summary": "Capability exposure and legality projections are correct.",
+          "references": [
+            "s03-blocked",
+            "s03-legal"
+          ]
+        },
+        {
+          "requirement": "accessibility",
+          "kind": "accessibility",
+          "required": true,
+          "status": "Passed",
+          "summary": "Basic accessibility invariants pass.",
+          "references": []
+        },
+        {
+          "requirement": "responsive",
+          "kind": "responsive",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantics survive all declared viewport classes.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S03-hypothesis-battlefield/screenshots/ipad-portrait.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S03-hypothesis-battlefield/screenshots/ipad-landscape.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S03-hypothesis-battlefield/screenshots/narrow-phone.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S03-hypothesis-battlefield/screenshots/desktop-reference.png"
+          ]
+        }
+      ]
+    },
+    {
+      "contract": "S04-hypothesis-detail",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s04-hypothesis-detail.json",
+      "verdict": "PASS",
+      "appScreen": "hypothesis-detail",
+      "url": "http://127.0.0.1:4330/index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/hypotheses?item=h-1",
+      "evidence": [
+        {
+          "requirement": "contract",
+          "kind": "contract-validation",
+          "required": true,
+          "status": "Passed",
+          "summary": "Typed contract parsed and validated successfully.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s04-hypothesis-detail.json"
+          ]
+        },
+        {
+          "requirement": "structural",
+          "kind": "structural",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantic structure is present.",
+          "references": []
+        },
+        {
+          "requirement": "state",
+          "kind": "state-projection",
+          "required": true,
+          "status": "Passed",
+          "summary": "All declared state projections are exercised and visible.",
+          "references": [
+            "s04-blocked",
+            "s04-legal"
+          ]
+        },
+        {
+          "requirement": "interaction",
+          "kind": "interaction",
+          "required": true,
+          "status": "Passed",
+          "summary": "Capability exposure and legality projections are correct.",
+          "references": [
+            "s04-blocked",
+            "s04-legal"
+          ]
+        },
+        {
+          "requirement": "accessibility",
+          "kind": "accessibility",
+          "required": true,
+          "status": "Passed",
+          "summary": "Basic accessibility invariants pass.",
+          "references": []
+        },
+        {
+          "requirement": "responsive",
+          "kind": "responsive",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantics survive all declared viewport classes.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S04-hypothesis-detail/screenshots/ipad-portrait.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S04-hypothesis-detail/screenshots/ipad-landscape.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S04-hypothesis-detail/screenshots/narrow-phone.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S04-hypothesis-detail/screenshots/desktop-reference.png"
+          ]
+        }
+      ]
+    },
+    {
+      "contract": "S05-evidence-capture",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s05-evidence-capture.json",
+      "verdict": "PASS",
+      "appScreen": "investigation-evidence",
+      "url": "http://127.0.0.1:4330/index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/evidence",
+      "evidence": [
+        {
+          "requirement": "contract",
+          "kind": "contract-validation",
+          "required": true,
+          "status": "Passed",
+          "summary": "Typed contract parsed and validated successfully.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s05-evidence-capture.json"
+          ]
+        },
+        {
+          "requirement": "structural",
+          "kind": "structural",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantic structure is present.",
+          "references": []
+        },
+        {
+          "requirement": "state",
+          "kind": "state-projection",
+          "required": true,
+          "status": "Passed",
+          "summary": "All declared state projections are exercised and visible.",
+          "references": [
+            "evidence-legal",
+            "evidence-blocked"
+          ]
+        },
+        {
+          "requirement": "interaction",
+          "kind": "interaction",
+          "required": true,
+          "status": "Passed",
+          "summary": "Capability exposure and legality projections are correct.",
+          "references": [
+            "evidence-legal",
+            "evidence-blocked"
+          ]
+        },
+        {
+          "requirement": "accessibility",
+          "kind": "accessibility",
+          "required": true,
+          "status": "Passed",
+          "summary": "Basic accessibility invariants pass.",
+          "references": []
+        },
+        {
+          "requirement": "responsive",
+          "kind": "responsive",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantics survive all declared viewport classes.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S05-evidence-capture/screenshots/ipad-portrait.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S05-evidence-capture/screenshots/ipad-landscape.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S05-evidence-capture/screenshots/narrow-phone.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S05-evidence-capture/screenshots/desktop-reference.png"
+          ]
+        }
+      ]
+    },
+    {
+      "contract": "S06-evidence-detail",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s06-evidence-detail.json",
+      "verdict": "PASS",
+      "appScreen": "investigation-evidence-detail",
+      "url": "http://127.0.0.1:4330/index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/evidence?item=00000000-0000-4000-8000-0000000000e1",
+      "evidence": [
+        {
+          "requirement": "contract",
+          "kind": "contract-validation",
+          "required": true,
+          "status": "Passed",
+          "summary": "Typed contract parsed and validated successfully.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s06-evidence-detail.json"
+          ]
+        },
+        {
+          "requirement": "structural",
+          "kind": "structural",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantic structure is present.",
+          "references": []
+        },
+        {
+          "requirement": "state",
+          "kind": "state-projection",
+          "required": true,
+          "status": "Passed",
+          "summary": "All declared state projections are exercised and visible.",
+          "references": [
+            "evidence-legal",
+            "evidence-blocked"
+          ]
+        },
+        {
+          "requirement": "interaction",
+          "kind": "interaction",
+          "required": true,
+          "status": "Passed",
+          "summary": "Capability exposure and legality projections are correct.",
+          "references": [
+            "evidence-legal",
+            "evidence-blocked"
+          ]
+        },
+        {
+          "requirement": "accessibility",
+          "kind": "accessibility",
+          "required": true,
+          "status": "Passed",
+          "summary": "Basic accessibility invariants pass.",
+          "references": []
+        },
+        {
+          "requirement": "responsive",
+          "kind": "responsive",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantics survive all declared viewport classes.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S06-evidence-detail/screenshots/ipad-portrait.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S06-evidence-detail/screenshots/ipad-landscape.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S06-evidence-detail/screenshots/narrow-phone.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S06-evidence-detail/screenshots/desktop-reference.png"
+          ]
+        }
+      ]
+    },
+    {
+      "contract": "S07-evidence-dependency",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s07-evidence-dependency.json",
+      "verdict": "PASS",
+      "appScreen": "investigation-evidence-detail",
+      "url": "http://127.0.0.1:4330/index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/evidence?item=00000000-0000-4000-8000-0000000000e1",
+      "evidence": [
+        {
+          "requirement": "contract",
+          "kind": "contract-validation",
+          "required": true,
+          "status": "Passed",
+          "summary": "Typed contract parsed and validated successfully.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s07-evidence-dependency.json"
+          ]
+        },
+        {
+          "requirement": "structural",
+          "kind": "structural",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantic structure is present.",
+          "references": []
+        },
+        {
+          "requirement": "state",
+          "kind": "state-projection",
+          "required": true,
+          "status": "Passed",
+          "summary": "All declared state projections are exercised and visible.",
+          "references": [
+            "blocker-only",
+            "no-predicates"
+          ]
+        },
+        {
+          "requirement": "interaction",
+          "kind": "interaction",
+          "required": true,
+          "status": "Passed",
+          "summary": "Capability exposure and legality projections are correct.",
+          "references": [
+            "blocker-only",
+            "no-predicates"
+          ]
+        },
+        {
+          "requirement": "accessibility",
+          "kind": "accessibility",
+          "required": true,
+          "status": "Passed",
+          "summary": "Basic accessibility invariants pass.",
+          "references": []
+        },
+        {
+          "requirement": "responsive",
+          "kind": "responsive",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantics survive all declared viewport classes.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S07-evidence-dependency/screenshots/ipad-portrait.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S07-evidence-dependency/screenshots/ipad-landscape.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S07-evidence-dependency/screenshots/narrow-phone.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S07-evidence-dependency/screenshots/desktop-reference.png"
+          ]
+        }
+      ]
+    },
+    {
+      "contract": "S08-epistemic-blocker-detail",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s08-epistemic-blocker-detail.json",
+      "verdict": "PASS",
+      "appScreen": "epistemic-blocker-detail",
+      "url": "http://127.0.0.1:4330/index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1?item=blocker-1",
+      "evidence": [
+        {
+          "requirement": "contract",
+          "kind": "contract-validation",
+          "required": true,
+          "status": "Passed",
+          "summary": "Typed contract parsed and validated successfully.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s08-epistemic-blocker-detail.json"
+          ]
+        },
+        {
+          "requirement": "structural",
+          "kind": "structural",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantic structure is present.",
+          "references": []
+        },
+        {
+          "requirement": "state",
+          "kind": "state-projection",
+          "required": true,
+          "status": "Passed",
+          "summary": "All declared state projections are exercised and visible.",
+          "references": [
+            "s08-blocked",
+            "s08-legal"
+          ]
+        },
+        {
+          "requirement": "interaction",
+          "kind": "interaction",
+          "required": true,
+          "status": "Passed",
+          "summary": "Capability exposure and legality projections are correct.",
+          "references": [
+            "s08-blocked",
+            "s08-legal"
+          ]
+        },
+        {
+          "requirement": "accessibility",
+          "kind": "accessibility",
+          "required": true,
+          "status": "Passed",
+          "summary": "Basic accessibility invariants pass.",
+          "references": []
+        },
+        {
+          "requirement": "responsive",
+          "kind": "responsive",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantics survive all declared viewport classes.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S08-epistemic-blocker-detail/screenshots/ipad-portrait.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S08-epistemic-blocker-detail/screenshots/ipad-landscape.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S08-epistemic-blocker-detail/screenshots/narrow-phone.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S08-epistemic-blocker-detail/screenshots/desktop-reference.png"
+          ]
+        }
+      ]
+    },
+    {
+      "contract": "S09-action-experiment-designer",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s09-action-experiment-designer.json",
+      "verdict": "PASS",
+      "appScreen": "action-experiment-designer",
+      "url": "http://127.0.0.1:4330/index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/actions",
+      "evidence": [
+        {
+          "requirement": "contract",
+          "kind": "contract-validation",
+          "required": true,
+          "status": "Passed",
+          "summary": "Typed contract parsed and validated successfully.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s09-action-experiment-designer.json"
+          ]
+        },
+        {
+          "requirement": "structural",
+          "kind": "structural",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantic structure is present.",
+          "references": []
+        },
+        {
+          "requirement": "state",
+          "kind": "state-projection",
+          "required": true,
+          "status": "Passed",
+          "summary": "All declared state projections are exercised and visible.",
+          "references": [
+            "s09-blocked",
+            "s09-legal"
+          ]
+        },
+        {
+          "requirement": "interaction",
+          "kind": "interaction",
+          "required": true,
+          "status": "Passed",
+          "summary": "Capability exposure and legality projections are correct.",
+          "references": [
+            "s09-blocked",
+            "s09-legal"
+          ]
+        },
+        {
+          "requirement": "accessibility",
+          "kind": "accessibility",
+          "required": true,
+          "status": "Passed",
+          "summary": "Basic accessibility invariants pass.",
+          "references": []
+        },
+        {
+          "requirement": "responsive",
+          "kind": "responsive",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantics survive all declared viewport classes.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S09-action-experiment-designer/screenshots/ipad-portrait.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S09-action-experiment-designer/screenshots/ipad-landscape.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S09-action-experiment-designer/screenshots/narrow-phone.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S09-action-experiment-designer/screenshots/desktop-reference.png"
+          ]
+        }
+      ]
+    },
+    {
+      "contract": "S10-finding-result-capture",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s10-finding-result-capture.json",
+      "verdict": "PASS",
+      "appScreen": "finding-result-capture",
+      "url": "http://127.0.0.1:4330/index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/actions?item=act-1",
+      "evidence": [
+        {
+          "requirement": "contract",
+          "kind": "contract-validation",
+          "required": true,
+          "status": "Passed",
+          "summary": "Typed contract parsed and validated successfully.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s10-finding-result-capture.json"
+          ]
+        },
+        {
+          "requirement": "structural",
+          "kind": "structural",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantic structure is present.",
+          "references": []
+        },
+        {
+          "requirement": "state",
+          "kind": "state-projection",
+          "required": true,
+          "status": "Passed",
+          "summary": "All declared state projections are exercised and visible.",
+          "references": [
+            "s10-blocked",
+            "s10-legal"
+          ]
+        },
+        {
+          "requirement": "interaction",
+          "kind": "interaction",
+          "required": true,
+          "status": "Passed",
+          "summary": "Capability exposure and legality projections are correct.",
+          "references": [
+            "s10-blocked",
+            "s10-legal"
+          ]
+        },
+        {
+          "requirement": "accessibility",
+          "kind": "accessibility",
+          "required": true,
+          "status": "Passed",
+          "summary": "Basic accessibility invariants pass.",
+          "references": []
+        },
+        {
+          "requirement": "responsive",
+          "kind": "responsive",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantics survive all declared viewport classes.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S10-finding-result-capture/screenshots/ipad-portrait.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S10-finding-result-capture/screenshots/ipad-landscape.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S10-finding-result-capture/screenshots/narrow-phone.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S10-finding-result-capture/screenshots/desktop-reference.png"
+          ]
+        }
+      ]
+    },
+    {
+      "contract": "S11-cause-review",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s11-cause-review.json",
+      "verdict": "PASS",
+      "appScreen": "investigation-causal-analysis",
+      "url": "http://127.0.0.1:4330/index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/causal-analysis",
+      "evidence": [
+        {
+          "requirement": "contract",
+          "kind": "contract-validation",
+          "required": true,
+          "status": "Passed",
+          "summary": "Typed contract parsed and validated successfully.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s11-cause-review.json"
+          ]
+        },
+        {
+          "requirement": "structural",
+          "kind": "structural",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantic structure is present.",
+          "references": []
+        },
+        {
+          "requirement": "state",
+          "kind": "state-projection",
+          "required": true,
+          "status": "Passed",
+          "summary": "All declared state projections are exercised and visible.",
+          "references": [
+            "s11-blocked",
+            "s11-legal"
+          ]
+        },
+        {
+          "requirement": "interaction",
+          "kind": "interaction",
+          "required": true,
+          "status": "Passed",
+          "summary": "Capability exposure and legality projections are correct.",
+          "references": [
+            "s11-blocked",
+            "s11-legal"
+          ]
+        },
+        {
+          "requirement": "accessibility",
+          "kind": "accessibility",
+          "required": true,
+          "status": "Passed",
+          "summary": "Basic accessibility invariants pass.",
+          "references": []
+        },
+        {
+          "requirement": "responsive",
+          "kind": "responsive",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantics survive all declared viewport classes.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S11-cause-review/screenshots/ipad-portrait.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S11-cause-review/screenshots/ipad-landscape.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S11-cause-review/screenshots/narrow-phone.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S11-cause-review/screenshots/desktop-reference.png"
+          ]
+        }
+      ]
+    },
+    {
+      "contract": "S12-corrective-action",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s12-corrective-action.json",
+      "verdict": "PASS",
+      "appScreen": "investigation-corrective-actions",
+      "url": "http://127.0.0.1:4330/index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/corrective-actions",
+      "evidence": [
+        {
+          "requirement": "contract",
+          "kind": "contract-validation",
+          "required": true,
+          "status": "Passed",
+          "summary": "Typed contract parsed and validated successfully.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s12-corrective-action.json"
+          ]
+        },
+        {
+          "requirement": "structural",
+          "kind": "structural",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantic structure is present.",
+          "references": []
+        },
+        {
+          "requirement": "state",
+          "kind": "state-projection",
+          "required": true,
+          "status": "Passed",
+          "summary": "All declared state projections are exercised and visible.",
+          "references": [
+            "s12-blocked",
+            "s12-legal"
+          ]
+        },
+        {
+          "requirement": "interaction",
+          "kind": "interaction",
+          "required": true,
+          "status": "Passed",
+          "summary": "Capability exposure and legality projections are correct.",
+          "references": [
+            "s12-blocked",
+            "s12-legal"
+          ]
+        },
+        {
+          "requirement": "accessibility",
+          "kind": "accessibility",
+          "required": true,
+          "status": "Passed",
+          "summary": "Basic accessibility invariants pass.",
+          "references": []
+        },
+        {
+          "requirement": "responsive",
+          "kind": "responsive",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantics survive all declared viewport classes.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S12-corrective-action/screenshots/ipad-portrait.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S12-corrective-action/screenshots/ipad-landscape.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S12-corrective-action/screenshots/narrow-phone.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S12-corrective-action/screenshots/desktop-reference.png"
+          ]
+        }
+      ]
+    },
+    {
+      "contract": "S13-verification",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s13-verification.json",
+      "verdict": "PASS",
+      "appScreen": "verification",
+      "url": "http://127.0.0.1:4330/index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/corrective-actions?item=cr-1",
+      "evidence": [
+        {
+          "requirement": "contract",
+          "kind": "contract-validation",
+          "required": true,
+          "status": "Passed",
+          "summary": "Typed contract parsed and validated successfully.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s13-verification.json"
+          ]
+        },
+        {
+          "requirement": "structural",
+          "kind": "structural",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantic structure is present.",
+          "references": []
+        },
+        {
+          "requirement": "state",
+          "kind": "state-projection",
+          "required": true,
+          "status": "Passed",
+          "summary": "All declared state projections are exercised and visible.",
+          "references": [
+            "s13-blocked",
+            "s13-legal"
+          ]
+        },
+        {
+          "requirement": "interaction",
+          "kind": "interaction",
+          "required": true,
+          "status": "Passed",
+          "summary": "Capability exposure and legality projections are correct.",
+          "references": [
+            "s13-blocked",
+            "s13-legal"
+          ]
+        },
+        {
+          "requirement": "accessibility",
+          "kind": "accessibility",
+          "required": true,
+          "status": "Passed",
+          "summary": "Basic accessibility invariants pass.",
+          "references": []
+        },
+        {
+          "requirement": "responsive",
+          "kind": "responsive",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantics survive all declared viewport classes.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S13-verification/screenshots/ipad-portrait.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S13-verification/screenshots/ipad-landscape.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S13-verification/screenshots/narrow-phone.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S13-verification/screenshots/desktop-reference.png"
+          ]
+        }
+      ]
+    },
+    {
+      "contract": "S14-history-time-travel",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s14-history-time-travel.json",
+      "verdict": "PASS",
+      "appScreen": "investigation-timeline",
+      "url": "http://127.0.0.1:4330/index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/timeline",
+      "evidence": [
+        {
+          "requirement": "contract",
+          "kind": "contract-validation",
+          "required": true,
+          "status": "Passed",
+          "summary": "Typed contract parsed and validated successfully.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s14-history-time-travel.json"
+          ]
+        },
+        {
+          "requirement": "structural",
+          "kind": "structural",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantic structure is present.",
+          "references": []
+        },
+        {
+          "requirement": "state",
+          "kind": "state-projection",
+          "required": true,
+          "status": "Passed",
+          "summary": "All declared state projections are exercised and visible.",
+          "references": [
+            "blocker-only",
+            "no-predicates"
+          ]
+        },
+        {
+          "requirement": "interaction",
+          "kind": "interaction",
+          "required": true,
+          "status": "Passed",
+          "summary": "Capability exposure and legality projections are correct.",
+          "references": [
+            "blocker-only",
+            "no-predicates"
+          ]
+        },
+        {
+          "requirement": "accessibility",
+          "kind": "accessibility",
+          "required": true,
+          "status": "Passed",
+          "summary": "Basic accessibility invariants pass.",
+          "references": []
+        },
+        {
+          "requirement": "responsive",
+          "kind": "responsive",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantics survive all declared viewport classes.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S14-history-time-travel/screenshots/ipad-portrait.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S14-history-time-travel/screenshots/ipad-landscape.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S14-history-time-travel/screenshots/narrow-phone.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S14-history-time-travel/screenshots/desktop-reference.png"
+          ]
+        }
+      ]
+    },
+    {
+      "contract": "S15-semantic-diff",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s15-semantic-diff.json",
+      "verdict": "PASS",
+      "appScreen": "semantic-diff",
+      "url": "http://127.0.0.1:4330/index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/timeline?version=1",
+      "evidence": [
+        {
+          "requirement": "contract",
+          "kind": "contract-validation",
+          "required": true,
+          "status": "Passed",
+          "summary": "Typed contract parsed and validated successfully.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s15-semantic-diff.json"
+          ]
+        },
+        {
+          "requirement": "structural",
+          "kind": "structural",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantic structure is present.",
+          "references": []
+        },
+        {
+          "requirement": "state",
+          "kind": "state-projection",
+          "required": true,
+          "status": "Passed",
+          "summary": "All declared state projections are exercised and visible.",
+          "references": [
+            "s15-blocked",
+            "s15-legal"
+          ]
+        },
+        {
+          "requirement": "interaction",
+          "kind": "interaction",
+          "required": true,
+          "status": "Passed",
+          "summary": "Capability exposure and legality projections are correct.",
+          "references": [
+            "s15-blocked",
+            "s15-legal"
+          ]
+        },
+        {
+          "requirement": "accessibility",
+          "kind": "accessibility",
+          "required": true,
+          "status": "Passed",
+          "summary": "Basic accessibility invariants pass.",
+          "references": []
+        },
+        {
+          "requirement": "responsive",
+          "kind": "responsive",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantics survive all declared viewport classes.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S15-semantic-diff/screenshots/ipad-portrait.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S15-semantic-diff/screenshots/ipad-landscape.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S15-semantic-diff/screenshots/narrow-phone.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S15-semantic-diff/screenshots/desktop-reference.png"
+          ]
+        }
+      ]
+    },
+    {
+      "contract": "S16-counterfactual-sandbox",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s16-counterfactual-sandbox.json",
+      "verdict": "NOT-APPLICABLE",
+      "reason": "Owner scope decision R5-DEC-002 (research/decisions/DF-CAUSA-2026-0002--r5-dec-002-percepta-s16-not-applicable.md): the counterfactual sandbox is not applicable to Causa in Rehearsal 5; the engine has no counterfactual capability.",
+      "evidence": []
+    },
+    {
+      "contract": "S17-multi-agent-panel",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s17-multi-agent-panel.json",
+      "verdict": "PASS",
+      "appScreen": "multi-agent-panel",
+      "url": "http://127.0.0.1:4330/index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/proposals?item=panel",
+      "evidence": [
+        {
+          "requirement": "contract",
+          "kind": "contract-validation",
+          "required": true,
+          "status": "Passed",
+          "summary": "Typed contract parsed and validated successfully.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s17-multi-agent-panel.json"
+          ]
+        },
+        {
+          "requirement": "structural",
+          "kind": "structural",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantic structure is present.",
+          "references": []
+        },
+        {
+          "requirement": "state",
+          "kind": "state-projection",
+          "required": true,
+          "status": "Passed",
+          "summary": "All declared state projections are exercised and visible.",
+          "references": [
+            "s17-blocked",
+            "s17-plain"
+          ]
+        },
+        {
+          "requirement": "interaction",
+          "kind": "interaction",
+          "required": true,
+          "status": "Passed",
+          "summary": "Capability exposure and legality projections are correct.",
+          "references": [
+            "s17-blocked",
+            "s17-plain"
+          ]
+        },
+        {
+          "requirement": "accessibility",
+          "kind": "accessibility",
+          "required": true,
+          "status": "Passed",
+          "summary": "Basic accessibility invariants pass.",
+          "references": []
+        },
+        {
+          "requirement": "responsive",
+          "kind": "responsive",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantics survive all declared viewport classes.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S17-multi-agent-panel/screenshots/ipad-portrait.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S17-multi-agent-panel/screenshots/ipad-landscape.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S17-multi-agent-panel/screenshots/narrow-phone.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S17-multi-agent-panel/screenshots/desktop-reference.png"
+          ]
+        }
+      ]
+    },
+    {
+      "contract": "S18-research-tournament",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s18-research-tournament.json",
+      "verdict": "PASS",
+      "appScreen": "research-tournament",
+      "url": "http://127.0.0.1:4330/index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/proposals?item=tournament",
+      "evidence": [
+        {
+          "requirement": "contract",
+          "kind": "contract-validation",
+          "required": true,
+          "status": "Passed",
+          "summary": "Typed contract parsed and validated successfully.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s18-research-tournament.json"
+          ]
+        },
+        {
+          "requirement": "structural",
+          "kind": "structural",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantic structure is present.",
+          "references": []
+        },
+        {
+          "requirement": "state",
+          "kind": "state-projection",
+          "required": true,
+          "status": "Passed",
+          "summary": "All declared state projections are exercised and visible.",
+          "references": [
+            "s18-blocked",
+            "s18-plain"
+          ]
+        },
+        {
+          "requirement": "interaction",
+          "kind": "interaction",
+          "required": true,
+          "status": "Passed",
+          "summary": "Capability exposure and legality projections are correct.",
+          "references": [
+            "s18-blocked",
+            "s18-plain"
+          ]
+        },
+        {
+          "requirement": "accessibility",
+          "kind": "accessibility",
+          "required": true,
+          "status": "Passed",
+          "summary": "Basic accessibility invariants pass.",
+          "references": []
+        },
+        {
+          "requirement": "responsive",
+          "kind": "responsive",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantics survive all declared viewport classes.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S18-research-tournament/screenshots/ipad-portrait.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S18-research-tournament/screenshots/ipad-landscape.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S18-research-tournament/screenshots/narrow-phone.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S18-research-tournament/screenshots/desktop-reference.png"
+          ]
+        }
+      ]
+    },
+    {
+      "contract": "S19-replay-spectator",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s19-replay-spectator.json",
+      "verdict": "PASS",
+      "appScreen": "replay-spectator",
+      "url": "http://127.0.0.1:4330/index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/timeline?item=replay\u0026version=1",
+      "evidence": [
+        {
+          "requirement": "contract",
+          "kind": "contract-validation",
+          "required": true,
+          "status": "Passed",
+          "summary": "Typed contract parsed and validated successfully.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s19-replay-spectator.json"
+          ]
+        },
+        {
+          "requirement": "structural",
+          "kind": "structural",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantic structure is present.",
+          "references": []
+        },
+        {
+          "requirement": "state",
+          "kind": "state-projection",
+          "required": true,
+          "status": "Passed",
+          "summary": "All declared state projections are exercised and visible.",
+          "references": [
+            "s19-blocked",
+            "s19-legal"
+          ]
+        },
+        {
+          "requirement": "interaction",
+          "kind": "interaction",
+          "required": true,
+          "status": "Passed",
+          "summary": "Capability exposure and legality projections are correct.",
+          "references": [
+            "s19-blocked",
+            "s19-legal"
+          ]
+        },
+        {
+          "requirement": "accessibility",
+          "kind": "accessibility",
+          "required": true,
+          "status": "Passed",
+          "summary": "Basic accessibility invariants pass.",
+          "references": []
+        },
+        {
+          "requirement": "responsive",
+          "kind": "responsive",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantics survive all declared viewport classes.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S19-replay-spectator/screenshots/ipad-portrait.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S19-replay-spectator/screenshots/ipad-landscape.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S19-replay-spectator/screenshots/narrow-phone.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S19-replay-spectator/screenshots/desktop-reference.png"
+          ]
+        }
+      ]
+    },
+    {
+      "contract": "S20-factory-view",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s20-factory-view.json",
+      "verdict": "PASS",
+      "appScreen": "factory-view",
+      "url": "http://127.0.0.1:4330/index.html?percepta=default#/administration/factory",
+      "evidence": [
+        {
+          "requirement": "contract",
+          "kind": "contract-validation",
+          "required": true,
+          "status": "Passed",
+          "summary": "Typed contract parsed and validated successfully.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s20-factory-view.json"
+          ]
+        },
+        {
+          "requirement": "structural",
+          "kind": "structural",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantic structure is present.",
+          "references": []
+        },
+        {
+          "requirement": "state",
+          "kind": "state-projection",
+          "required": true,
+          "status": "Passed",
+          "summary": "All declared state projections are exercised and visible.",
+          "references": [
+            "blocker-only",
+            "no-predicates"
+          ]
+        },
+        {
+          "requirement": "interaction",
+          "kind": "interaction",
+          "required": true,
+          "status": "Passed",
+          "summary": "Capability exposure and legality projections are correct.",
+          "references": [
+            "blocker-only",
+            "no-predicates"
+          ]
+        },
+        {
+          "requirement": "accessibility",
+          "kind": "accessibility",
+          "required": true,
+          "status": "Passed",
+          "summary": "Basic accessibility invariants pass.",
+          "references": []
+        },
+        {
+          "requirement": "responsive",
+          "kind": "responsive",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantics survive all declared viewport classes.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S20-factory-view/screenshots/ipad-portrait.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S20-factory-view/screenshots/ipad-landscape.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S20-factory-view/screenshots/narrow-phone.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S20-factory-view/screenshots/desktop-reference.png"
+          ]
+        }
+      ]
+    },
+    {
+      "contract": "S21-requirements-proof",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s21-requirements-proof.json",
+      "verdict": "PASS",
+      "appScreen": "requirements-proof",
+      "url": "http://127.0.0.1:4330/index.html?percepta=default#/administration/proof",
+      "evidence": [
+        {
+          "requirement": "contract",
+          "kind": "contract-validation",
+          "required": true,
+          "status": "Passed",
+          "summary": "Typed contract parsed and validated successfully.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s21-requirements-proof.json"
+          ]
+        },
+        {
+          "requirement": "structural",
+          "kind": "structural",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantic structure is present.",
+          "references": []
+        },
+        {
+          "requirement": "state",
+          "kind": "state-projection",
+          "required": true,
+          "status": "Passed",
+          "summary": "All declared state projections are exercised and visible.",
+          "references": [
+            "blocker-only",
+            "no-predicates"
+          ]
+        },
+        {
+          "requirement": "interaction",
+          "kind": "interaction",
+          "required": true,
+          "status": "Passed",
+          "summary": "Capability exposure and legality projections are correct.",
+          "references": [
+            "blocker-only",
+            "no-predicates"
+          ]
+        },
+        {
+          "requirement": "accessibility",
+          "kind": "accessibility",
+          "required": true,
+          "status": "Passed",
+          "summary": "Basic accessibility invariants pass.",
+          "references": []
+        },
+        {
+          "requirement": "responsive",
+          "kind": "responsive",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantics survive all declared viewport classes.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S21-requirements-proof/screenshots/ipad-portrait.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S21-requirements-proof/screenshots/ipad-landscape.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S21-requirements-proof/screenshots/narrow-phone.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S21-requirements-proof/screenshots/desktop-reference.png"
+          ]
+        }
+      ]
+    },
+    {
+      "contract": "S22-report-preview",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s22-report-preview.json",
+      "verdict": "PASS",
+      "appScreen": "investigation-report",
+      "url": "http://127.0.0.1:4330/index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/report",
+      "evidence": [
+        {
+          "requirement": "contract",
+          "kind": "contract-validation",
+          "required": true,
+          "status": "Passed",
+          "summary": "Typed contract parsed and validated successfully.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s22-report-preview.json"
+          ]
+        },
+        {
+          "requirement": "structural",
+          "kind": "structural",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantic structure is present.",
+          "references": []
+        },
+        {
+          "requirement": "state",
+          "kind": "state-projection",
+          "required": true,
+          "status": "Passed",
+          "summary": "All declared state projections are exercised and visible.",
+          "references": [
+            "blocker-only",
+            "no-predicates"
+          ]
+        },
+        {
+          "requirement": "interaction",
+          "kind": "interaction",
+          "required": true,
+          "status": "Passed",
+          "summary": "Capability exposure and legality projections are correct.",
+          "references": [
+            "blocker-only",
+            "no-predicates"
+          ]
+        },
+        {
+          "requirement": "accessibility",
+          "kind": "accessibility",
+          "required": true,
+          "status": "Passed",
+          "summary": "Basic accessibility invariants pass.",
+          "references": []
+        },
+        {
+          "requirement": "responsive",
+          "kind": "responsive",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantics survive all declared viewport classes.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S22-report-preview/screenshots/ipad-portrait.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S22-report-preview/screenshots/ipad-landscape.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S22-report-preview/screenshots/narrow-phone.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S22-report-preview/screenshots/desktop-reference.png"
+          ]
+        }
+      ]
+    },
+    {
+      "contract": "S23-persistence-conflict-recovery",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s23-persistence-conflict-recovery.json",
+      "verdict": "PASS",
+      "appScreen": "persistence-conflict-recovery",
+      "url": "http://127.0.0.1:4330/index.html?percepta=conflict#/investigations/00000000-0000-4000-8000-0000000000f1",
+      "evidence": [
+        {
+          "requirement": "contract",
+          "kind": "contract-validation",
+          "required": true,
+          "status": "Passed",
+          "summary": "Typed contract parsed and validated successfully.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s23-persistence-conflict-recovery.json"
+          ]
+        },
+        {
+          "requirement": "structural",
+          "kind": "structural",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantic structure is present.",
+          "references": []
+        },
+        {
+          "requirement": "state",
+          "kind": "state-projection",
+          "required": true,
+          "status": "Passed",
+          "summary": "All declared state projections are exercised and visible.",
+          "references": [
+            "s23-blocked",
+            "s23-legal"
+          ]
+        },
+        {
+          "requirement": "interaction",
+          "kind": "interaction",
+          "required": true,
+          "status": "Passed",
+          "summary": "Capability exposure and legality projections are correct.",
+          "references": [
+            "s23-blocked",
+            "s23-legal"
+          ]
+        },
+        {
+          "requirement": "accessibility",
+          "kind": "accessibility",
+          "required": true,
+          "status": "Passed",
+          "summary": "Basic accessibility invariants pass.",
+          "references": []
+        },
+        {
+          "requirement": "responsive",
+          "kind": "responsive",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantics survive all declared viewport classes.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S23-persistence-conflict-recovery/screenshots/ipad-portrait.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S23-persistence-conflict-recovery/screenshots/ipad-landscape.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S23-persistence-conflict-recovery/screenshots/narrow-phone.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S23-persistence-conflict-recovery/screenshots/desktop-reference.png"
+          ]
+        }
+      ]
+    },
+    {
+      "contract": "S24-settings-semantic-manifest",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s24-settings-semantic-manifest.json",
+      "verdict": "PASS",
+      "appScreen": "settings",
+      "url": "http://127.0.0.1:4330/index.html?percepta=default#/settings",
+      "evidence": [
+        {
+          "requirement": "contract",
+          "kind": "contract-validation",
+          "required": true,
+          "status": "Passed",
+          "summary": "Typed contract parsed and validated successfully.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s24-settings-semantic-manifest.json"
+          ]
+        },
+        {
+          "requirement": "structural",
+          "kind": "structural",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantic structure is present.",
+          "references": []
+        },
+        {
+          "requirement": "state",
+          "kind": "state-projection",
+          "required": true,
+          "status": "Passed",
+          "summary": "All declared state projections are exercised and visible.",
+          "references": [
+            "s24-blocked",
+            "s24-legal"
+          ]
+        },
+        {
+          "requirement": "interaction",
+          "kind": "interaction",
+          "required": true,
+          "status": "Passed",
+          "summary": "Capability exposure and legality projections are correct.",
+          "references": [
+            "s24-blocked",
+            "s24-legal"
+          ]
+        },
+        {
+          "requirement": "accessibility",
+          "kind": "accessibility",
+          "required": true,
+          "status": "Passed",
+          "summary": "Basic accessibility invariants pass.",
+          "references": []
+        },
+        {
+          "requirement": "responsive",
+          "kind": "responsive",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantics survive all declared viewport classes.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S24-settings-semantic-manifest/screenshots/ipad-portrait.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S24-settings-semantic-manifest/screenshots/ipad-landscape.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S24-settings-semantic-manifest/screenshots/narrow-phone.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S24-settings-semantic-manifest/screenshots/desktop-reference.png"
+          ]
+        }
+      ]
+    },
+    {
+      "contract": "S25-demo-health",
+      "contractPath": "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s25-demo-health.json",
+      "verdict": "PASS",
+      "appScreen": "administration",
+      "url": "http://127.0.0.1:4330/index.html?percepta=default#/administration",
+      "evidence": [
+        {
+          "requirement": "contract",
+          "kind": "contract-validation",
+          "required": true,
+          "status": "Passed",
+          "summary": "Typed contract parsed and validated successfully.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/contracts/s25-demo-health.json"
+          ]
+        },
+        {
+          "requirement": "structural",
+          "kind": "structural",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantic structure is present.",
+          "references": []
+        },
+        {
+          "requirement": "state",
+          "kind": "state-projection",
+          "required": true,
+          "status": "Passed",
+          "summary": "All declared state projections are exercised and visible.",
+          "references": [
+            "blocker-only",
+            "no-predicates"
+          ]
+        },
+        {
+          "requirement": "interaction",
+          "kind": "interaction",
+          "required": true,
+          "status": "Passed",
+          "summary": "Capability exposure and legality projections are correct.",
+          "references": [
+            "blocker-only",
+            "no-predicates"
+          ]
+        },
+        {
+          "requirement": "accessibility",
+          "kind": "accessibility",
+          "required": true,
+          "status": "Passed",
+          "summary": "Basic accessibility invariants pass.",
+          "references": []
+        },
+        {
+          "requirement": "responsive",
+          "kind": "responsive",
+          "required": true,
+          "status": "Passed",
+          "summary": "Required semantics survive all declared viewport classes.",
+          "references": [
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S25-demo-health/screenshots/ipad-portrait.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S25-demo-health/screenshots/ipad-landscape.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S25-demo-health/screenshots/narrow-phone.png",
+            "/home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/.percepta/evidence/application/S25-demo-health/screenshots/desktop-reference.png"
+          ]
+        }
+      ]
+    }
+  ]
+}

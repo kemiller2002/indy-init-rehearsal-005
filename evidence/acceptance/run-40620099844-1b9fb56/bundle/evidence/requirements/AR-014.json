@@ -1,0 +1,64 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "AR-014",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-770de2a43b888b53",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.Acceptance.Tests.PipelineTests.AR-014 PF-012 only the live provider jobs receive credentials; every other job runs with read-only contents and no secret",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-c41f10e4ed8a086b",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Persistence.Tests.ConformanceTests.VPO-ab625062f52606bb VPO-c41f10e4ed8a086b VPO-3d7d8f82a053dce7 recordings are sanitized, versioned and name their source run",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-2de744fb2c8bdc70 VPO-bb08b9a414ba4cd7 VPO-ca58030e3eecdf9b VPO-c41f10e4ed8a086b the token appears only in the Authorization header",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "playwright:production-hooks.spec.js > the production .NET build has no EnableTestHooks export; the test build does (negative control) [VPO-c41f10e4ed8a086b] [VPO-fba8a61be6d12adf] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:proposals.spec.js > proposals are drafted, recorded only on request, and applied only when a person accepts one; the key goes only in the auth header [VPO-04eb901270c2994a] [VPO-f97eb988899c23af] [VPO-bb08b9a414ba4cd7] [VPO-c41f10e4ed8a086b] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:proposals.spec.js > proposals are drafted, recorded only on request, and applied only when a person accepts one; the key goes only in the auth header [VPO-04eb901270c2994a] [VPO-f97eb988899c23af] [VPO-bb08b9a414ba4cd7] [VPO-c41f10e4ed8a086b] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    }
+  ]
+}

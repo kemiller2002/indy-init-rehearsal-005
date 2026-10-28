@@ -1,0 +1,95 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "defect",
+  "subject_id": "DC-001",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "review",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "fix_sha": "5336ec40372323dbdbbb821878ad87c51597af7a",
+  "fix_in_source_history": true,
+  "reviewer_evidence": {
+    "path": "acceptance/reviews/R5-final-review.md",
+    "anchor": "dc-001",
+    "sha256": "31db648bd0410ca560bfd6e40f776c87edcf198b338e08fab01dc96a178b6313"
+  },
+  "tests": [
+    {
+      "test": "DCT-001-A",
+      "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-001-A publication is parented by the decided-at head and a moved branch is a held conflict",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+    },
+    {
+      "test": "DCT-001-A",
+      "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-001-A negative control VPO-821ce84e76d497b9 VPO-7b54ff75e3784cae the check fails on a book that re-targets stale decisions",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+    },
+    {
+      "test": "DCT-001-A",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-A VPO-34731ac9a977b818 the publication is parented by the decided-at commit and a moved branch is a held conflict without retry",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-001-B",
+      "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-001-B negative control VPO-821ce84e76d497b9 VPO-7b54ff75e3784cae the check fails on ref-equality reconciliation",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+    },
+    {
+      "test": "DCT-001-B",
+      "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-001-B reconciliation classifies a head reached through another writer as concurrent",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+    },
+    {
+      "test": "DCT-001-B",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-B DCT-003-A VPO-b3efad6eb85360be a commit carrying our marker but other bytes is a conflict, never saved",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-001-B",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-B two tabs or devices never write the same marker, and a reloaded page never reuses one",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-001-B",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-B DCT-003-A VPO-b3efad6eb85360be a write applied before its answer was lost is confirmed only after its bytes are read back",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-001-B",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-B reconciliation classifies a head reached through another writer as concurrent, by ancestry and marker",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-001-B",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-B DCT-003-A VPO-b3efad6eb85360be two devices: a lost write is never reconciled as applied because another device's commit followed the same head",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-001-B",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-B an applied write followed by another writer is recognised as ours and a reload follows",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    }
+  ]
+}

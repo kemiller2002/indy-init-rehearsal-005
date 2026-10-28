@@ -1,0 +1,3864 @@
+{
+  "schema": "causa.test-requirement-map/1",
+  "sourceSha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "requirementsSource": {
+    "planId": "VP-e77a2134e1b0",
+    "repository": "kemiller2002/indy-init",
+    "commit": "aab8f80c7743392e794b3b631542903ed4ed6f64",
+    "baselineSha256": "621e2f960038dcfb0daa2a9fe18a0c1c350faed297ba2856da1236a0360857b9"
+  },
+  "fixturesSource": {
+    "repository": "kemiller2002/causa-data",
+    "commit": "3d861bc181ad7f4f49d82c8147325737b6d3aa1c"
+  },
+  "tests": [
+    {
+      "testId": "dotnet:App.Engine.Tests.AiLoopTests.T27 D-004 a successful answer yields drafts that are recorded only as agent proposals",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-6886a2a6e612f704"
+      ],
+      "requirements": [
+        "AR-006"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.AiLoopTests.T27 R11.4 VPO-199103f9166730e7 instructions are fixed and investigation content travels only as delimited data",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-199103f9166730e7"
+      ],
+      "requirements": [
+        "AR-006"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 EXT-DATA-013 VPO-4b4747eaff96e385 the active historical catalog loads all three cases through the engine to their catalog states",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-4b4747eaff96e385"
+      ],
+      "requirements": [
+        "EXT-DATA-013"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 STORAGE-007 VPO-5933d986a6ba6dc3 VPO-2d84a4c6df612b0d the three release identities match the contract this engine implements",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-2d84a4c6df612b0d",
+        "VPO-5933d986a6ba6dc3"
+      ],
+      "requirements": [
+        "EXT-DATA-011"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 VPO-3d67d1f2b8287e39 five golden scenarios replay through the engine to their pinned digests and golden states",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-3d67d1f2b8287e39",
+        "VPO-f00be0cb5a2bb0f8"
+      ],
+      "requirements": [
+        "PF-004",
+        "PF-006"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 VPO-3d67d1f2b8287e39 golden scenarios.json agrees with the replayed histories (no CAUSA.GOLDEN_MISMATCH)",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-3d67d1f2b8287e39"
+      ],
+      "requirements": [
+        "PF-004"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 VPO-9c6055c47e4eb07d the writer reproduces every frozen file set byte for byte from the decoded events",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-9c6055c47e4eb07d"
+      ],
+      "requirements": [
+        "EXT-DATA-008"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 VPO-f52d9071426e82b3 all 90 negative fixtures are refused with their expected code and domain code",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-2d84a4c6df612b0d",
+        "VPO-821ce84e76d497b9",
+        "VPO-f52d9071426e82b3"
+      ],
+      "requirements": [
+        "AR-009",
+        "EXT-DATA-011",
+        "PF-007"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.HistoryAndProposalTests.T27 D-004 VPO-199103f9166730e7 VPO-6886a2a6e612f704 agent output enters only as proposals and becomes state only on human acceptance",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-199103f9166730e7",
+        "VPO-6886a2a6e612f704"
+      ],
+      "requirements": [
+        "AR-006"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.HistoryAndProposalTests.T27 R11.4 VPO-199103f9166730e7 instructions inside evidence are data and change nothing they name",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-199103f9166730e7"
+      ],
+      "requirements": [
+        "AR-006"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.HistoryAndProposalTests.T27 R5.4 VPO-199103f9166730e7 an agent cannot re-propose a falsified explanation",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-199103f9166730e7"
+      ],
+      "requirements": [
+        "AR-006"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.HistoryAndProposalTests.T27 VPO-199103f9166730e7 VPO-821ce84e76d497b9 agent output that is anything but proposals is refused whole",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-199103f9166730e7",
+        "VPO-821ce84e76d497b9"
+      ],
+      "requirements": [
+        "AR-006",
+        "AR-009"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.InterfaceManifestTests.T14 VPO-6886a2a6e612f704 the committed interface manifest equals the extraction from the compiled kernel",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-6886a2a6e612f704"
+      ],
+      "requirements": [
+        "AR-006"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.KernelTests.T13 D-001 D-002 VPO-5933d986a6ba6dc3 observations are kept verbatim with provenance through write and read",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-5933d986a6ba6dc3"
+      ],
+      "requirements": [
+        "EXT-DATA-011"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.KernelTests.T13 D-004 VPO-199103f9166730e7 an agent proposal needs a human to accept it",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-199103f9166730e7"
+      ],
+      "requirements": [
+        "AR-006"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.KernelTests.T13 D-007 D-003 VPO-199103f9166730e7 an open blocking unknown blocks the resolution it protects",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-199103f9166730e7"
+      ],
+      "requirements": [
+        "AR-006"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.KernelTests.T13 D-008 VPO-199103f9166730e7 implementation is not verification and blocks resolution until verified",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-199103f9166730e7"
+      ],
+      "requirements": [
+        "AR-006"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.KernelTests.T13 EXT-DATA-008 VPO-9c6055c47e4eb07d a command-created investigation is schema-valid replayable and round-trips",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-5933d986a6ba6dc3",
+        "VPO-9c6055c47e4eb07d"
+      ],
+      "requirements": [
+        "EXT-DATA-008",
+        "EXT-DATA-011"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.KernelTests.T13 G3 an ungated confirmation in a stored history is refused as HISTORY.UNGATED_CONFIRMATION",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-199103f9166730e7"
+      ],
+      "requirements": [
+        "AR-006"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.KernelTests.T13 G3 forged histories are refused by replay with their domain code",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-199103f9166730e7"
+      ],
+      "requirements": [
+        "AR-006"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.KernelTests.T13 UI-005-O2 VPO-cc57508f3ac056de original evidence is never altered when its interpretation changes",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-cc57508f3ac056de"
+      ],
+      "requirements": [
+        "UI-005"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.KernelTests.T13 VPO-199103f9166730e7 stale duplicate unauthorized and illegal submissions are typed rejections that change nothing",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-199103f9166730e7"
+      ],
+      "requirements": [
+        "AR-006"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.KernelTests.T13 VPO-6886a2a6e612f704 VPO-199103f9166730e7 hypothesis transitions follow the table and there is no generic state setter",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-199103f9166730e7",
+        "VPO-6886a2a6e612f704"
+      ],
+      "requirements": [
+        "AR-006"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.KernelTests.T13 VPO-6886a2a6e612f704 VPO-199103f9166730e7 lifecycle commands are accepted exactly where the transition table allows them",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-199103f9166730e7",
+        "VPO-6886a2a6e612f704"
+      ],
+      "requirements": [
+        "AR-006"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.KernelTests.T15 contract 5.2 managed SHA-256 SHA-1 and UUIDv5 equal the platform and the contract namespace",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-5933d986a6ba6dc3"
+      ],
+      "requirements": [
+        "EXT-DATA-011"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.WasmSafetyTests.WASM-SAFETY the kernel references no process file thread network or crypto-provider API",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-6886a2a6e612f704"
+      ],
+      "requirements": [
+        "AR-006"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-001-A negative control VPO-821ce84e76d497b9 VPO-7b54ff75e3784cae the check fails on a book that re-targets stale decisions",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-7b54ff75e3784cae",
+        "VPO-821ce84e76d497b9"
+      ],
+      "requirements": [
+        "AR-009",
+        "AR-022"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-001-B negative control VPO-821ce84e76d497b9 VPO-7b54ff75e3784cae the check fails on ref-equality reconciliation",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-7b54ff75e3784cae",
+        "VPO-821ce84e76d497b9"
+      ],
+      "requirements": [
+        "AR-009",
+        "AR-022"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-A negative control VPO-821ce84e76d497b9 VPO-7b54ff75e3784cae the check fails when answers are matched by kind",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-7b54ff75e3784cae",
+        "VPO-821ce84e76d497b9"
+      ],
+      "requirements": [
+        "AR-009",
+        "AR-022"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-B VPO-199103f9166730e7 VPO-6886a2a6e612f704 every user event is accepted only in its legal source states",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-199103f9166730e7",
+        "VPO-6886a2a6e612f704"
+      ],
+      "requirements": [
+        "AR-006"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-B VPO-199103f9166730e7 a refused event leaves the state unchanged and is a typed fault",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-199103f9166730e7"
+      ],
+      "requirements": [
+        "AR-006"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-B negative control VPO-821ce84e76d497b9 VPO-787e24f3c23195e9 the check fails on a book that writes during an unknown outcome",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-787e24f3c23195e9",
+        "VPO-821ce84e76d497b9"
+      ],
+      "requirements": [
+        "AR-009"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-003-A negative control VPO-821ce84e76d497b9 VPO-7b54ff75e3784cae the check fails on stage-blind failure classification",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-7b54ff75e3784cae",
+        "VPO-821ce84e76d497b9"
+      ],
+      "requirements": [
+        "AR-009",
+        "AR-022"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.REQUEST-IDENTITY negative control VPO-821ce84e76d497b9 the check fails when connection answers are matched by kind",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-821ce84e76d497b9"
+      ],
+      "requirements": [
+        "AR-009"
+      ]
+    },
+    {
+      "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.SYNC-HOOK Discard VPO-199103f9166730e7 a local unsent change can be discarded and is handed back",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx",
+      "obligations": [
+        "VPO-199103f9166730e7"
+      ],
+      "requirements": [
+        "AR-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.EvidenceTests.AR-002 WDL-015 every baseline obligation, WDL-001 to WDL-015 included, maps to a derived criterion or a recorded disposition",
+      "outcome": "passed",
+      "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx",
+      "obligations": [
+        "VPO-b55ed2a4a2fd465c",
+        "VPO-b5f193731c58028b"
+      ],
+      "requirements": [
+        "AR-002",
+        "WDL-015"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.EvidenceTests.AR-007 AR-011 every PASS cites its tests, result files, command, environment, run and source SHA; the ledger records the build inputs",
+      "outcome": "passed",
+      "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx",
+      "obligations": [
+        "VPO-42705f754abba51b",
+        "VPO-79a72fb717368c95"
+      ],
+      "requirements": [
+        "AR-007",
+        "AR-011"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.EvidenceTests.EXT-DATA-001 EXT-DATA-013 the built site and application source contain none of the eight investigation records",
+      "outcome": "passed",
+      "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx",
+      "obligations": [
+        "VPO-0304a8342e7147dd",
+        "VPO-77f6e22e08d5bba0",
+        "VPO-f8cbaa452cd4eb0b"
+      ],
+      "requirements": [
+        "EXT-DATA-001",
+        "EXT-DATA-013"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.EvidenceTests.EXT-DATA-010 R001 is unchanged: its repository head is still the commit Indy-init records as the R1 baseline",
+      "outcome": "passed",
+      "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx",
+      "obligations": [
+        "VPO-d8a63d43b7a2cf56"
+      ],
+      "requirements": [
+        "EXT-DATA-010"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.EvidenceTests.PF-011 the UI layer ran in a real browser against local builds, covering responsive, keyboard, palette, loading and failure",
+      "outcome": "passed",
+      "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx",
+      "obligations": [
+        "VPO-91b97073e4e85125"
+      ],
+      "requirements": [
+        "PF-011"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.EvidenceTests.PF-011 the domain layer is deterministic F# validation, replay and transition tests that ran and passed without credentials",
+      "outcome": "passed",
+      "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx",
+      "obligations": [
+        "VPO-8579de88e6b699f8"
+      ],
+      "requirements": [
+        "PF-011"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.EvidenceTests.PF-012 this run recorded each layer's measured time and outcome, and sets no budget before a baseline",
+      "outcome": "passed",
+      "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx",
+      "obligations": [
+        "VPO-39d6eb77cb2097af"
+      ],
+      "requirements": [
+        "PF-012"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.EvidenceTests.PF-018 every executed test and fixture set is mapped to its requirements and authoritative source commit",
+      "outcome": "passed",
+      "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx",
+      "obligations": [
+        "VPO-dfe1c434e9f7f329"
+      ],
+      "requirements": [
+        "PF-018"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.EvidenceTests.VER-004 AR-023 the exact release set is pinned by digest and the run used exactly that pin",
+      "outcome": "passed",
+      "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx",
+      "obligations": [
+        "VPO-0fcb67bd52732582",
+        "VPO-7478642aec32b7da",
+        "VPO-90a9a6272db10df8"
+      ],
+      "requirements": [
+        "AR-023",
+        "VER-004"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.EvidenceTests.VER-005 VER-003 AR-023 the installed stack is the published release set, with no prerelease and no fallback",
+      "outcome": "passed",
+      "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx",
+      "obligations": [
+        "VPO-8828df556b382d9a",
+        "VPO-882ef92ed9177a58",
+        "VPO-9145c1f2ed57ebca",
+        "VPO-d1885e94421cf8a4"
+      ],
+      "requirements": [
+        "AR-023",
+        "VER-003",
+        "VER-005"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.EvidenceTests.VER-006 every integrated Echelon system accepted this candidate's real inputs in this run",
+      "outcome": "passed",
+      "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx",
+      "obligations": [
+        "VPO-4e417c6f238cb460"
+      ],
+      "requirements": [
+        "VER-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.EvidenceTests.VER-006 the integrations were exercised in this run, not only compared as version strings",
+      "outcome": "passed",
+      "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx",
+      "obligations": [
+        "VPO-b82b86a55e20e54f"
+      ],
+      "requirements": [
+        "VER-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.PreservationTests.AR-002 PF-018 WDL-015 omitting a derived requirement (WDL-005) fails the gate",
+      "outcome": "passed",
+      "resultFile": "TestResults/preservation-adversarial/preservation-adversarial_net10.0_20261028022424.trx",
+      "obligations": [
+        "VPO-413ff7efb9ab1eaf",
+        "VPO-4b7f3050c9ba72b7",
+        "VPO-97136db88b6c60fb"
+      ],
+      "requirements": [
+        "AR-002",
+        "PF-018",
+        "WDL-015"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.PreservationTests.AR-002 PF-018 a negated obligation does not pass the gate",
+      "outcome": "passed",
+      "resultFile": "TestResults/preservation-adversarial/preservation-adversarial_net10.0_20261028022424.trx",
+      "obligations": [
+        "VPO-413ff7efb9ab1eaf",
+        "VPO-4b7f3050c9ba72b7"
+      ],
+      "requirements": [
+        "AR-002",
+        "PF-018"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.PreservationTests.AR-002 PF-018 a weakened obligation (MUST to SHOULD) does not pass the gate",
+      "outcome": "passed",
+      "resultFile": "TestResults/preservation-adversarial/preservation-adversarial_net10.0_20261028022424.trx",
+      "obligations": [
+        "VPO-413ff7efb9ab1eaf",
+        "VPO-4b7f3050c9ba72b7"
+      ],
+      "requirements": [
+        "AR-002",
+        "PF-018"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.PreservationTests.AR-002 PF-018 the derivation check fails a negation and a weakening and names each obligation",
+      "outcome": "passed",
+      "resultFile": "TestResults/preservation-adversarial/preservation-adversarial_net10.0_20261028022424.trx",
+      "obligations": [
+        "VPO-413ff7efb9ab1eaf",
+        "VPO-4b7f3050c9ba72b7"
+      ],
+      "requirements": [
+        "AR-002",
+        "PF-018"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.PreservationTests.AR-002 WDL-015 the derivation check fails an omitted document and names every obligation it carried",
+      "outcome": "passed",
+      "resultFile": "TestResults/preservation-adversarial/preservation-adversarial_net10.0_20261028022424.trx",
+      "obligations": [
+        "VPO-413ff7efb9ab1eaf",
+        "VPO-97136db88b6c60fb"
+      ],
+      "requirements": [
+        "AR-002",
+        "WDL-015"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.PreservationTests.AR-002 the derivation check fails a role swap (ADRP-001-O1 precedence exchanged) and names the obligation",
+      "outcome": "passed",
+      "resultFile": "TestResults/preservation-adversarial/preservation-adversarial_net10.0_20261028022424.trx",
+      "obligations": [
+        "VPO-413ff7efb9ab1eaf"
+      ],
+      "requirements": [
+        "AR-002"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.PreservationTests.AR-002 the derivation check fails a value swap (UI-016-O11 WCAG ratios exchanged) and names the obligation",
+      "outcome": "passed",
+      "resultFile": "TestResults/preservation-adversarial/preservation-adversarial_net10.0_20261028022424.trx",
+      "obligations": [
+        "VPO-413ff7efb9ab1eaf"
+      ],
+      "requirements": [
+        "AR-002"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.PreservationTests.control: the real derived package passes the derivation check, every obligation carried verbatim",
+      "outcome": "passed",
+      "resultFile": "TestResults/preservation-adversarial/preservation-adversarial_net10.0_20261028022424.trx",
+      "obligations": [
+        "VPO-b5f193731c58028b"
+      ],
+      "requirements": [
+        "AR-002"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.VerifierTests.AR-001 AR-019 a modified baseline is detected by both verifiers",
+      "outcome": "passed",
+      "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx",
+      "obligations": [
+        "VPO-a191144b5315b64a",
+        "VPO-e30db6532f5cf262"
+      ],
+      "requirements": [
+        "AR-001",
+        "AR-019"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.VerifierTests.AR-003 AR-019 an exclusion the agent approved itself is refused by both verifiers",
+      "outcome": "passed",
+      "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx",
+      "obligations": [
+        "VPO-74e10fdbcee13f97",
+        "VPO-9b0ea135ac4e6776",
+        "VPO-a191144b5315b64a"
+      ],
+      "requirements": [
+        "AR-003",
+        "AR-019"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.VerifierTests.AR-004 the acceptance step fails closed on an unpinned plan, baseline or approvals",
+      "outcome": "passed",
+      "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx",
+      "obligations": [
+        "VPO-60d3de8d19b647a8"
+      ],
+      "requirements": [
+        "AR-004"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.VerifierTests.AR-007 AR-018 rows forged to PASS without their evidence are not accepted by either verifier",
+      "outcome": "passed",
+      "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx",
+      "obligations": [
+        "VPO-8d0817ad76ab9956",
+        "VPO-a191144b5315b64a",
+        "VPO-b65e916f00fd843a"
+      ],
+      "requirements": [
+        "AR-007",
+        "AR-018",
+        "AR-019"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.VerifierTests.AR-018 AR-019 a gate claimed PASS without its CI evidence in the bundle is not accepted",
+      "outcome": "passed",
+      "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx",
+      "obligations": [
+        "VPO-9827ff5a95a7c74f",
+        "VPO-a191144b5315b64a"
+      ],
+      "requirements": [
+        "AR-018",
+        "AR-019"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.VerifierTests.AR-018 a report narrating acceptance cannot override the computed verdict",
+      "outcome": "passed",
+      "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx",
+      "obligations": [
+        "VPO-b65e916f00fd843a"
+      ],
+      "requirements": [
+        "AR-018"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.VerifierTests.AR-018 evidence presented for another source SHA, or a tampered manifest, is not accepted",
+      "outcome": "passed",
+      "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx",
+      "obligations": [
+        "VPO-9827ff5a95a7c74f"
+      ],
+      "requirements": [
+        "AR-018"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.VerifierTests.AR-019 AR-001 the verdict is computed from the pinned baseline, plan, approvals and this run's evidence",
+      "outcome": "passed",
+      "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx",
+      "obligations": [
+        "VPO-6f2f2edbfc6b5c65",
+        "VPO-a5795f29e0de763c"
+      ],
+      "requirements": [
+        "AR-001",
+        "AR-019"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.RunTests.VerifierTests.AR-019 a false accepted flag in the ledger is a contradictory claim, never an acceptance",
+      "outcome": "passed",
+      "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx",
+      "obligations": [
+        "VPO-a191144b5315b64a",
+        "VPO-a96869ed8f00e776"
+      ],
+      "requirements": [
+        "AR-019"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.Tests.AcceptanceTests.AR-002 verbatim carriage passes; value swaps, role swaps, negation and omission each fail with the obligation id",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx",
+      "obligations": [
+        "VPO-413ff7efb9ab1eaf"
+      ],
+      "requirements": [
+        "AR-002"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.Tests.AcceptanceTests.VER-005 an Echelon package outside the release set passes only when pinned against an accepted owner decision",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx",
+      "obligations": [
+        "VPO-8deeef0ef7b7e4ab"
+      ],
+      "requirements": [
+        "VER-005"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.Tests.AcceptanceTests.a Percepta contract counts as not applicable only when it cites an existing accepted DF decision",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx",
+      "obligations": [
+        "VPO-fd43b3e4e7e02f59"
+      ],
+      "requirements": [
+        "UI-015"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.Tests.AcceptanceTests.a defect class counts only when the reviewer closed it at a fix in the candidate's history",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx",
+      "obligations": [
+        "VPO-95819a9f20306ce1"
+      ],
+      "requirements": [
+        "AR-004"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.Tests.AcceptanceTests.a producer succeeds only when every selected test ran and passed",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx",
+      "obligations": [
+        "VPO-95819a9f20306ce1"
+      ],
+      "requirements": [
+        "AR-004"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.Tests.AcceptanceTests.a reviewer-closed defect class is PASS only with its fix in history, its review present and its tests passed, and its evidence is bundled",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx",
+      "obligations": [
+        "VPO-42705f754abba51b"
+      ],
+      "requirements": [
+        "AR-007"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.Tests.AcceptanceTests.failing, missing, skipped or merely declared tests are never reported PASS",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx",
+      "obligations": [
+        "VPO-95819a9f20306ce1",
+        "VPO-fd43b3e4e7e02f59"
+      ],
+      "requirements": [
+        "AR-004",
+        "UI-015"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.Tests.AcceptanceTests.gates pass only on producers that succeeded in this run; absent, reused or failed producers do not",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx",
+      "obligations": [
+        "VPO-2a6aa540f193ab6c",
+        "VPO-95819a9f20306ce1"
+      ],
+      "requirements": [
+        "AR-004",
+        "PF-011"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.Tests.AcceptanceTests.missing dependencies or unverifiable artifacts never yield PASS",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx",
+      "obligations": [
+        "VPO-22f350dce03290a4"
+      ],
+      "requirements": [
+        "VER-008"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.Tests.AcceptanceTests.the lock gate fails when an installed artifact differs from the locked set",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx",
+      "obligations": [
+        "VPO-e49383126481c2f7"
+      ],
+      "requirements": [
+        "VER-008"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.Tests.PipelineTests.AR-010 PF-017 each verification layer is its own job with its own published result",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx",
+      "obligations": [
+        "VPO-2f4beacb25bb0586",
+        "VPO-92aa50bd20b70eeb"
+      ],
+      "requirements": [
+        "AR-010",
+        "PF-017"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.Tests.PipelineTests.AR-013 AR-022 PF-019 batching and reuse never bypass a mandatory check",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx",
+      "obligations": [
+        "VPO-7f06980ae32e712b",
+        "VPO-98deffeeff197c5d",
+        "VPO-eac3d689399c924e"
+      ],
+      "requirements": [
+        "AR-013",
+        "AR-022",
+        "PF-019"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.Tests.PipelineTests.AR-013 reuse is selected by changed inputs; the workflow, lock files and solution force every producer to run",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx",
+      "obligations": [
+        "VPO-c83b17e570429db6"
+      ],
+      "requirements": [
+        "AR-013"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.Tests.PipelineTests.AR-014 PF-012 only the live provider jobs receive credentials; every other job runs with read-only contents and no secret",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx",
+      "obligations": [
+        "VPO-23b26660a58ef990",
+        "VPO-770de2a43b888b53"
+      ],
+      "requirements": [
+        "AR-014",
+        "PF-012"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.Tests.PipelineTests.AR-018 missing live credentials fail the live job and the deployment is not claimed without proof of the served SHA",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx",
+      "obligations": [
+        "VPO-9827ff5a95a7c74f"
+      ],
+      "requirements": [
+        "AR-018"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.Tests.PipelineTests.AR-022 CI runs on every push to main and to every stream branch and on every pull request",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx",
+      "obligations": [
+        "VPO-a71f7df7b092e654"
+      ],
+      "requirements": [
+        "AR-022"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.Tests.PipelineTests.PF-011 each verification level has its own executable command, CI job outcome and published evidence",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx",
+      "obligations": [
+        "VPO-da8e100075889a8d"
+      ],
+      "requirements": [
+        "PF-011"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.Tests.PipelineTests.PF-012 the README documents one command for a populated fixture-backed UI and one for the fast offline checks",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx",
+      "obligations": [
+        "VPO-89df49b291078827"
+      ],
+      "requirements": [
+        "PF-012"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.Tests.PipelineTests.PF-017 the offline layers do not depend on the live provider and an offline pass never waives a failing live gate",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx",
+      "obligations": [
+        "VPO-3c80e06a4abb77cf"
+      ],
+      "requirements": [
+        "PF-017"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.Tests.PipelineTests.PF-020 release acceptance requires domain, fixture UI, provider conformance, live and exact-SHA deployed browser verification",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx",
+      "obligations": [
+        "VPO-fe04733e99e5e461"
+      ],
+      "requirements": [
+        "PF-020"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.Acceptance.Tests.PipelineTests.UI-015 G5 succeeds only with 0 FAIL, 0 NOT-BOUND, no orphans, and NOT-APPLICABLE only by a cited accepted decision",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx",
+      "obligations": [
+        "VPO-fd43b3e4e7e02f59"
+      ],
+      "requirements": [
+        "UI-015"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.EnginePortTests.VPO-21abf6acd60d0acc a legal command produces events and every view refreshes from the one new version",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-21abf6acd60d0acc"
+      ],
+      "requirements": [
+        "UI-013"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.EnginePortTests.VPO-21abf6acd60d0acc a started investigation is projected by the engine at version 1 and opened",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-21abf6acd60d0acc"
+      ],
+      "requirements": [
+        "UI-013"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.EnginePortTests.VPO-2f4f9de66ddd6434 the production port refuses Connect and claims no connection",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-2f4f9de66ddd6434"
+      ],
+      "requirements": [
+        "UI-001"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.EnginePortTests.VPO-9659118aa1ef95ff an illegal command is refused with the engine's reasons and nothing changes",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-9659118aa1ef95ff"
+      ],
+      "requirements": [
+        "UI-004"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.EnginePortTests.VPO-b3efad6eb85360be the in-memory workspace never claims a save",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-b3efad6eb85360be"
+      ],
+      "requirements": [
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.EnginePortTests.VPO-b8e1657130d006fd an investigation that failed to load renders no partial state",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-b8e1657130d006fd"
+      ],
+      "requirements": [
+        "UI-010"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.EnginePortTests.VPO-be22751d9b5b8098 a stale-version submission is rejected and changes nothing",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-be22751d9b5b8098"
+      ],
+      "requirements": [
+        "UI-004"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.EnginePortTests.VPO-d0e33c8aaaf705f2 VPO-f0256bc31283be14 VPO-58231f4725864068 integrity that passed never becomes a Verified finding in the investigation views",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-58231f4725864068",
+        "VPO-d0e33c8aaaf705f2",
+        "VPO-f0256bc31283be14"
+      ],
+      "requirements": [
+        "UI-023"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.EnginePortTests.VPO-f8666daf6fdf79d7 VPO-ffda9fea0324a42e the report explains only from Projection.report's typed records",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-f8666daf6fdf79d7",
+        "VPO-ffda9fea0324a42e"
+      ],
+      "requirements": [
+        "UI-038"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.GraphTests.UI-005-O4 VPO-c7c84a08e62427e4 a hypothesis node opens its own evidence and every link is an application route",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-c7c84a08e62427e4"
+      ],
+      "requirements": [
+        "UI-005"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.GraphTests.UI-005-O4 VPO-c7c84a08e62427e4 the shell's hypothesis rows carry the evidence the engine relates to them, in admission order",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-c7c84a08e62427e4"
+      ],
+      "requirements": [
+        "UI-005"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.GraphTests.VPO-0a171a55852aaf80 VPO-d2d5200b61947ce8 only recorded causal members and their outcomes become nodes, each role labelled",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-0a171a55852aaf80",
+        "VPO-d2d5200b61947ce8"
+      ],
+      "requirements": [
+        "WDL-003"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.GraphTests.VPO-434d1a1d24b4b20e VPO-69f661459a587bbd the document carries no coordinates: placement is left to the workflow engine",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-434d1a1d24b4b20e",
+        "VPO-69f661459a587bbd"
+      ],
+      "requirements": [
+        "WDL-002",
+        "WDL-005"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.GraphTests.VPO-531b33816ba9cddf VPO-7f9018a0a0d1e32b determinism: the same projection in any order gives the same document",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-531b33816ba9cddf",
+        "VPO-7f9018a0a0d1e32b"
+      ],
+      "requirements": [
+        "WDL-009"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.GraphTests.VPO-b36c63fba6f83d4c VPO-1c3905d9fa746df0 a selected node reveals its authoritative record and evidence counts",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-1c3905d9fa746df0",
+        "VPO-b36c63fba6f83d4c"
+      ],
+      "requirements": [
+        "UI-026",
+        "WDL-010"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.GraphTests.WDL-004-O1 WDL-008-O2 VPO-beeaf5b2a56c521d VPO-17ea30ea2f160b62 Causa supplies semantics and domain-state tones only; geometry and visuals are left to the engine and Forma",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-17ea30ea2f160b62",
+        "VPO-beeaf5b2a56c521d"
+      ],
+      "requirements": [
+        "WDL-004",
+        "WDL-008"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.GraphTests.WDL-011-O1 VPO-0fa99d435ca39516 the deterministic synthetic graph fixtures are committed exactly as the projection produces them",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-0fa99d435ca39516"
+      ],
+      "requirements": [
+        "WDL-011"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.LanguageTests.VPO-6f0a2e18f9a19003 wording never implies an unsaved, ephemeral, read-only or in-flight change was saved",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-6f0a2e18f9a19003"
+      ],
+      "requirements": [
+        "UI-024"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.LanguageTests.VPO-7fff10ce82e7c162 domain terms and provenance are kept precisely",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-7fff10ce82e7c162"
+      ],
+      "requirements": [
+        "UI-024"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.LanguageTests.VPO-d8ac36bdb18a7b39 every typed domain state has one concise user-facing label, none raw or technical",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-d8ac36bdb18a7b39"
+      ],
+      "requirements": [
+        "UI-024"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.LanguageTests.VPO-d8ac36bdb18a7b39 the shell's wire-spelling labels agree with the typed mapping",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-d8ac36bdb18a7b39"
+      ],
+      "requirements": [
+        "UI-024"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.LanguageTests.VPO-e1fb14be4ca10f5f technical codes and data-integrity details stay out of routine wording",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-e1fb14be4ca10f5f"
+      ],
+      "requirements": [
+        "UI-024"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.LanguageTests.VPO-e8570ba5427ce32b VPO-885e4767b84371de findings wording never claims a confirmed cause or verification the domain does not assert",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-885e4767b84371de",
+        "VPO-e8570ba5427ce32b"
+      ],
+      "requirements": [
+        "UI-024",
+        "UI-030"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.LanguageTests.VPO-e8570ba5427ce32b views cannot invent a permission, a reason or a recommendation",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-e8570ba5427ce32b"
+      ],
+      "requirements": [
+        "UI-024"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.ProjectionTests.VPO-014f5e1139ed692b a frozen demonstration and a writable copy are labelled apart in the catalog and the investigation header",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-014f5e1139ed692b"
+      ],
+      "requirements": [
+        "UI-014"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.ProjectionTests.VPO-2f4f9de66ddd6434 before Connect only the empty, disconnected workspace with Connect is shown",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-2f4f9de66ddd6434"
+      ],
+      "requirements": [
+        "UI-001"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.ProjectionTests.VPO-34731ac9a977b818 on a conflict the shell offers reload and discard, and each reaches persistence for that investigation only",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-34731ac9a977b818"
+      ],
+      "requirements": [
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.ProjectionTests.VPO-56201f80b312c7c8 unknown counts are never shown as zero",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-56201f80b312c7c8"
+      ],
+      "requirements": [
+        "UI-022"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.ProjectionTests.VPO-89ed6170f531961e an unknown save outcome is its own state: neither saved nor failed, with check now and no retry",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-89ed6170f531961e"
+      ],
+      "requirements": [
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.ProjectionTests.VPO-9659118aa1ef95ff only the engine's capabilities are rendered, illegal ones with the engine's reason",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-9659118aa1ef95ff"
+      ],
+      "requirements": [
+        "UI-004"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.ProjectionTests.VPO-b3efad6eb85360be only a confirmed remote sync is described as saved to GitHub",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-b3efad6eb85360be"
+      ],
+      "requirements": [
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.ProjectionTests.VPO-bb08b9a414ba4cd7 the token leaves the shell model when Connect is handed to the port",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-bb08b9a414ba4cd7"
+      ],
+      "requirements": [
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.ProjectionTests.VPO-d4a9c8fd05795e00 unmapped domain values are never echoed raw",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-d4a9c8fd05795e00"
+      ],
+      "requirements": [
+        "UI-024"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.ProjectionTests.VPO-fd43b3e4e7e02f59 the proof page names the run and commit the evidence came from apart from this build, and says when none was published",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-fd43b3e4e7e02f59"
+      ],
+      "requirements": [
+        "UI-015"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.RecordsTests.VPO-141be05c7de03e17 VPO-885e4767b84371de a case with nothing recorded is not shown as having no work, and nothing is invented",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-141be05c7de03e17",
+        "VPO-885e4767b84371de"
+      ],
+      "requirements": [
+        "UI-030",
+        "UI-032"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.RecordsTests.VPO-29cc81617de241fb VPO-141be05c7de03e17 next steps come from the domain, link to their records, and carry the policy verdict",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-141be05c7de03e17",
+        "VPO-29cc81617de241fb"
+      ],
+      "requirements": [
+        "UI-032"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.RecordsTests.VPO-34334672f9ff0014 untrusted text is cleaned, only safe http(s) addresses become links, and missing provenance is labelled",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-34334672f9ff0014"
+      ],
+      "requirements": [
+        "UI-005"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.RecordsTests.VPO-5a85f3ea85db30b2 VPO-63d89380e8017050 traversal follows only recorded relationships, with stable ids and explicit absent links",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-5a85f3ea85db30b2",
+        "VPO-63d89380e8017050"
+      ],
+      "requirements": [
+        "UI-033"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.RecordsTests.VPO-ad49e5ff43f1ace6 one typed inspector contract serves evidence, hypotheses, causes, corrective actions and timeline events",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-ad49e5ff43f1ace6"
+      ],
+      "requirements": [
+        "UI-039"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.RecordsTests.VPO-f8666daf6fdf79d7 VPO-ffda9fea0324a42e a cause's explanation lists supporting and conflicting evidence, hypotheses, history and why it is unresolved",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-f8666daf6fdf79d7",
+        "VPO-ffda9fea0324a42e"
+      ],
+      "requirements": [
+        "UI-038"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.RecordsTests.VPO-ff2e466b7aaa3e12 evidence sharing a source is shown as dependent, never independent, and lineage lists its events in sequence",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-ff2e466b7aaa3e12"
+      ],
+      "requirements": [
+        "UI-005"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.RecordsTests.VPO-ff2e466b7aaa3e12 the evidence inspector shows source, timestamps, original content, assessment and links to hypotheses",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-ff2e466b7aaa3e12"
+      ],
+      "requirements": [
+        "UI-005"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.RouteTests.VPO-628a11b571e65796 an investigation has the six required sections in order",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-628a11b571e65796"
+      ],
+      "requirements": [
+        "UI-029"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.RouteTests.VPO-7bb1e8c5bdccc2f2 the three primary destinations are distinct routes",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-7bb1e8c5bdccc2f2"
+      ],
+      "requirements": [
+        "UI-029"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.RouteTests.VPO-adf482d16e75a882 every route round-trips through its hash",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-adf482d16e75a882"
+      ],
+      "requirements": [
+        "UI-013"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.RouteTests.VPO-adf482d16e75a882 formatting a parsed canonical hash gives the same hash",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-adf482d16e75a882"
+      ],
+      "requirements": [
+        "UI-013"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.UxViewTests.VPO-141be05c7de03e17 when the engine's records are unavailable, next steps say so instead of showing no work",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-141be05c7de03e17"
+      ],
+      "requirements": [
+        "UI-032"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.UxViewTests.VPO-1cd1f428fe646f06 cards sort by latest activity, title or status, and the selected card is marked",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-1cd1f428fe646f06"
+      ],
+      "requirements": [
+        "UI-001"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.UxViewTests.VPO-1cd1f428fe646f06 the catalog has distinct loading, error and empty states",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-1cd1f428fe646f06"
+      ],
+      "requirements": [
+        "UI-001"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.UxViewTests.VPO-885e4767b84371de VPO-02b53bd16db4ee17 an unknown count on a card is never shown as zero, and no next action is invented",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-02b53bd16db4ee17",
+        "VPO-885e4767b84371de"
+      ],
+      "requirements": [
+        "UI-001",
+        "UI-030"
+      ]
+    },
+    {
+      "testId": "dotnet:Causa.App.Tests.UxViewTests.VPO-be99a964783c59b5 the rendered commands are exactly the F# engine's capabilities for the current version, and move with it",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx",
+      "obligations": [
+        "VPO-be99a964783c59b5"
+      ],
+      "requirements": [
+        "UI-004"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.BlockedTests.VPO-9a5982e4a5994629 VPO-b58ad46c59853677 a missing provider secret is BLOCKED with a failing exit code, never a pass",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-9a5982e4a5994629",
+        "VPO-b58ad46c59853677"
+      ],
+      "requirements": [
+        "PF-015",
+        "PF-020"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.CatalogAppTests.VPO-8ba57ebcfe06030f another workspace of the same repository does not engage the catalog",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-8ba57ebcfe06030f"
+      ],
+      "requirements": [
+        "EXT-DATA-002"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.CatalogAppTests.VPO-9d59cc57fd44b927 VPO-f52d9071426e82b3 a malformed catalog pointer or manifest fails closed and presents no case",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-9d59cc57fd44b927",
+        "VPO-f52d9071426e82b3"
+      ],
+      "requirements": [
+        "PF-007"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.CatalogAppTests.VPO-c81484cbcf203d4f VPO-9d59cc57fd44b927 a missing catalog case fails the catalog closed",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-9d59cc57fd44b927",
+        "VPO-c81484cbcf203d4f"
+      ],
+      "requirements": [
+        "EXT-DATA-013",
+        "PF-007"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.CatalogAppTests.VPO-c81484cbcf203d4f VPO-d60e3a3a25cb106d VPO-dc48d066cfa2309d VPO-557743cb4997c484 after Connect every catalog case loads, replays to its manifest digest and is read-only",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-557743cb4997c484",
+        "VPO-7ced47ef45099aab",
+        "VPO-a500f6d5a0f3e254",
+        "VPO-c81484cbcf203d4f",
+        "VPO-d60e3a3a25cb106d",
+        "VPO-dc48d066cfa2309d"
+      ],
+      "requirements": [
+        "EXT-DATA-006",
+        "EXT-DATA-013",
+        "PF-004",
+        "UI-006",
+        "UI-019"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.CatalogAppTests.VPO-c81484cbcf203d4f a case that does not replay to its manifest digest fails the catalog closed and presents no case",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-2d84a4c6df612b0d",
+        "VPO-c81484cbcf203d4f"
+      ],
+      "requirements": [
+        "EXT-DATA-011",
+        "EXT-DATA-013"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.CatalogAppTests.VPO-c81484cbcf203d4f an investigation the manifest does not list is never presented as a catalog case",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-c81484cbcf203d4f"
+      ],
+      "requirements": [
+        "EXT-DATA-013"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.ConformanceTests.VPO-03b8215501e25334 VPO-74efa48033c82a96 VPO-bb13dc090d4c152b the fake agrees with every recorded GitHub scenario through the production interpreters",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-03b8215501e25334",
+        "VPO-74efa48033c82a96",
+        "VPO-bb13dc090d4c152b"
+      ],
+      "requirements": [
+        "PF-011",
+        "PF-013"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.ConformanceTests.VPO-533a2328decf91cb VPO-8fbeadc2bfc10f7a provider failures are classified as provider errors, distinct from data validation errors",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-533a2328decf91cb",
+        "VPO-8fbeadc2bfc10f7a"
+      ],
+      "requirements": [
+        "PF-008"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.ConformanceTests.VPO-a460a95198e68863 VPO-0e682dd716a12d49 a classic token with repo or admin scope is refused at connect",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-0e682dd716a12d49",
+        "VPO-a460a95198e68863",
+        "VPO-a500f6d5a0f3e254"
+      ],
+      "requirements": [
+        "EXT-DATA-004",
+        "UI-019"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.ConformanceTests.VPO-ab625062f52606bb VPO-c41f10e4ed8a086b VPO-3d7d8f82a053dce7 recordings are sanitized, versioned and name their source run",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-3d7d8f82a053dce7",
+        "VPO-ab625062f52606bb",
+        "VPO-c41f10e4ed8a086b"
+      ],
+      "requirements": [
+        "AR-014",
+        "PF-013"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-A VPO-34731ac9a977b818 the publication is parented by the decided-at commit and a moved branch is a held conflict without retry",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-34731ac9a977b818"
+      ],
+      "requirements": [
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-B DCT-003-A VPO-b3efad6eb85360be a commit carrying our marker but other bytes is a conflict, never saved",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-b3efad6eb85360be"
+      ],
+      "requirements": [
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-B DCT-003-A VPO-b3efad6eb85360be a write applied before its answer was lost is confirmed only after its bytes are read back",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-b3efad6eb85360be"
+      ],
+      "requirements": [
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-B DCT-003-A VPO-b3efad6eb85360be two devices: a lost write is never reconciled as applied because another device's commit followed the same head",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-b3efad6eb85360be"
+      ],
+      "requirements": [
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-002-A VPO-2d4b7557ce013e50 VPO-cd9dd8ec730c3d3e a late answer for a replaced write is discarded",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-2d4b7557ce013e50",
+        "VPO-cd9dd8ec730c3d3e"
+      ],
+      "requirements": [
+        "PF-009"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-002-B VPO-199103f9166730e7 VPO-6886a2a6e612f704 every user event is accepted only in its legal source states and a refusal changes nothing",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-199103f9166730e7",
+        "VPO-6886a2a6e612f704"
+      ],
+      "requirements": [
+        "AR-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A VPO-89ed6170f531961e a failure after send is unknown with no retry and reconcile reads the head first",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-89ed6170f531961e"
+      ],
+      "requirements": [
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A VPO-b3efad6eb85360be a GraphQL error of an unrecognised type after send is unknown, never not-written with retry",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-b3efad6eb85360be"
+      ],
+      "requirements": [
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A VPO-b3efad6eb85360be a reconcile whose read-back fails stays unknown",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-b3efad6eb85360be"
+      ],
+      "requirements": [
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A VPO-b3efad6eb85360be saved is claimed only after the read-back matches the sent bytes",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-b3efad6eb85360be"
+      ],
+      "requirements": [
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.DcTableTests.REQUEST-IDENTITY VPO-2d4b7557ce013e50 an answer to an earlier connection never lands on a newer one",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-2d4b7557ce013e50"
+      ],
+      "requirements": [
+        "PF-009"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.DctProviderTests.DCT-005-A VPO-2d4b7557ce013e50 every mutable read has a URL unique across sessions and page loads, and the new head is observed",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-2d4b7557ce013e50"
+      ],
+      "requirements": [
+        "PF-009"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.DctProviderTests.VPO-533a2328decf91cb an untyped GraphQL error (recorded live) is an unknown outcome, never a refusal",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-533a2328decf91cb"
+      ],
+      "requirements": [
+        "PF-008"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.FixtureTests.VPO-34731ac9a977b818 VPO-cd9dd8ec730c3d3e the fixture conflict scenario: a deterministic other writer, then Reload keeps the change and Discard adopts theirs",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-34731ac9a977b818",
+        "VPO-cd9dd8ec730c3d3e"
+      ],
+      "requirements": [
+        "PF-009",
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.FixtureTests.VPO-ad958e7a60d7fd9b VPO-f00be0cb5a2bb0f8 the fixture is one compact, complete synthetic investigation decided by the engine, with stable ids",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-ad958e7a60d7fd9b",
+        "VPO-f00be0cb5a2bb0f8"
+      ],
+      "requirements": [
+        "PF-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.FixtureTests.VPO-b090ff3e3c16c13d VPO-ff3dc45c64bfa0cb VPO-da07c2ac97baa9f1 VPO-d4b0d50550578aeb fixture and GitHub providers share one port and one program with the same semantics",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-557743cb4997c484",
+        "VPO-b090ff3e3c16c13d",
+        "VPO-d4b0d50550578aeb",
+        "VPO-da07c2ac97baa9f1",
+        "VPO-ff3dc45c64bfa0cb"
+      ],
+      "requirements": [
+        "PF-001",
+        "PF-003",
+        "PF-004"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.StoreTests.VPO-2d84a4c6df612b0d data of an unsupported contract version fails closed",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-2d84a4c6df612b0d"
+      ],
+      "requirements": [
+        "EXT-DATA-011"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.StoreTests.VPO-9c6055c47e4eb07d VPO-5933d986a6ba6dc3 a command-created investigation is a v1 file set that reads back byte-identically through the engine",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-5933d986a6ba6dc3",
+        "VPO-9c6055c47e4eb07d"
+      ],
+      "requirements": [
+        "EXT-DATA-008",
+        "EXT-DATA-011"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.StoreTests.VPO-acd13bfa08dba51a VPO-c90593e00b2dae72 VPO-c135d16c59f5baf8 an inadmissible history is refused through the persistence path by the engine's History.validate",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-acd13bfa08dba51a",
+        "VPO-c135d16c59f5baf8",
+        "VPO-c90593e00b2dae72"
+      ],
+      "requirements": [
+        "EXT-DATA-005",
+        "PF-002"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.StoreTests.VPO-c135d16c59f5baf8 VPO-f52d9071426e82b3 malformed and forged file sets fail closed at the first failing stage",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-c135d16c59f5baf8",
+        "VPO-f52d9071426e82b3"
+      ],
+      "requirements": [
+        "EXT-DATA-005",
+        "PF-007"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.StoreTests.VPO-c135d16c59f5baf8 a self-consistent but forged snapshot is refused as not the projection of the history",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-c135d16c59f5baf8"
+      ],
+      "requirements": [
+        "EXT-DATA-005"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-074f1b1804e54869 writes are confined to the selected workspace of the selected repository",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-074f1b1804e54869"
+      ],
+      "requirements": [
+        "EXT-DATA-012"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-1e613b30576dc52c VPO-70c58e3278725c35 the target is an explicit, validated selection and is never inferred from a token",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-1e613b30576dc52c",
+        "VPO-70c58e3278725c35"
+      ],
+      "requirements": [
+        "EXT-DATA-003"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-2d4b7557ce013e50 VPO-c135d16c59f5baf8 a revoked token fails the next request, drops the credential and keeps local work; a replacement token saves it",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-2d4b7557ce013e50",
+        "VPO-bb08b9a414ba4cd7",
+        "VPO-c135d16c59f5baf8"
+      ],
+      "requirements": [
+        "EXT-DATA-005",
+        "PF-009",
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-2d4b7557ce013e50 answers for unknown requests or an earlier connection are refused and change nothing",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-2d4b7557ce013e50"
+      ],
+      "requirements": [
+        "PF-009"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-2de744fb2c8bdc70 VPO-bb08b9a414ba4cd7 VPO-ca58030e3eecdf9b VPO-c41f10e4ed8a086b the token appears only in the Authorization header",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-2de744fb2c8bdc70",
+        "VPO-a500f6d5a0f3e254",
+        "VPO-bb08b9a414ba4cd7",
+        "VPO-c41f10e4ed8a086b",
+        "VPO-ca58030e3eecdf9b"
+      ],
+      "requirements": [
+        "AR-014",
+        "EXT-DATA-004",
+        "PF-015",
+        "UI-006",
+        "UI-019"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-34731ac9a977b818 a concurrent remote change is a conflict that keeps local edits and never overwrites remote history",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-34731ac9a977b818"
+      ],
+      "requirements": [
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-34731ac9a977b818 a moved branch that did not touch the investigation is reloaded and the change rebased, then saved",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-34731ac9a977b818"
+      ],
+      "requirements": [
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-4c2041ba04ba0b31 VPO-57fe23e7c821450f the eight connection states are distinct and a token alone never shows connected",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-4c2041ba04ba0b31",
+        "VPO-57fe23e7c821450f"
+      ],
+      "requirements": [
+        "EXT-DATA-007"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-54b0eef91ceeada4 VPO-89ed6170f531961e offline edits survive a reload; the credential does not and must be supplied again",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-54b0eef91ceeada4",
+        "VPO-89ed6170f531961e"
+      ],
+      "requirements": [
+        "EXT-DATA-004",
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-61b2e81f99761d55 VPO-9c6055c47e4eb07d VPO-4c06d10238d15c5c VPO-89ed6170f531961e explicit create is saved locally, written in one guarded commit and claimed synced only after the re-read",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-4c06d10238d15c5c",
+        "VPO-61b2e81f99761d55",
+        "VPO-89ed6170f531961e",
+        "VPO-9c6055c47e4eb07d"
+      ],
+      "requirements": [
+        "EXT-DATA-008",
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-7ced47ef45099aab connecting and reading never mutate the repository",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-7ced47ef45099aab"
+      ],
+      "requirements": [
+        "EXT-DATA-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-89ed6170f531961e a local store failure is shown as failed, distinct from every other state",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-89ed6170f531961e"
+      ],
+      "requirements": [
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-9c6055c47e4eb07d events accepted by the kernel are appended by the storage writer, saved, and a stale append is refused",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-9c6055c47e4eb07d"
+      ],
+      "requirements": [
+        "EXT-DATA-008"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-9d59cc57fd44b927 VPO-34731ac9a977b818 an investigation missing from the repository on reload keeps the device's copy and says so",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-34731ac9a977b818",
+        "VPO-9d59cc57fd44b927"
+      ],
+      "requirements": [
+        "PF-007",
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-b3efad6eb85360be VPO-cd9dd8ec730c3d3e a save whose answer was lost is unknown and is settled only by re-reading",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-b3efad6eb85360be",
+        "VPO-cd9dd8ec730c3d3e"
+      ],
+      "requirements": [
+        "PF-009",
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-b3efad6eb85360be a reload during a send restores it as unknown and the next connect settles it by reading",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-b3efad6eb85360be"
+      ],
+      "requirements": [
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-b3efad6eb85360be an acknowledged commit whose re-read fails is unknown, never saved",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-b3efad6eb85360be"
+      ],
+      "requirements": [
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-c135d16c59f5baf8 VPO-0157918192f093da authenticated but forged repository content fails closed and is not loaded",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-0157918192f093da",
+        "VPO-c135d16c59f5baf8"
+      ],
+      "requirements": [
+        "EXT-DATA-005",
+        "EXT-DATA-012"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-cd9dd8ec730c3d3e a lost save that was not applied reconciles back to pending and can be retried",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-cd9dd8ec730c3d3e"
+      ],
+      "requirements": [
+        "PF-009"
+      ]
+    },
+    {
+      "testId": "dotnet:Persistence.Tests.SyncAppTests.VPO-d79488f204e14ff8 VPO-8ba57ebcfe06030f a fresh launch is disconnected and empty, imports nothing and sends nothing",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx",
+      "obligations": [
+        "VPO-8ba57ebcfe06030f",
+        "VPO-d79488f204e14ff8"
+      ],
+      "requirements": [
+        "EXT-DATA-002"
+      ]
+    },
+    {
+      "testId": "playwright:deployed.spec.js > EXT-DATA-009 EXT-DATA-001 VER-006 the Pages deployment serves exactly the verified build of this SHA, byte for byte, and it starts in a browser [VPO-b50ee1d4e3e78f25] [VPO-f8cbaa452cd4eb0b] [VPO-86b8bffb323a80b7] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/deployed/deployed-results.json",
+      "obligations": [
+        "VPO-86b8bffb323a80b7",
+        "VPO-b50ee1d4e3e78f25",
+        "VPO-f8cbaa452cd4eb0b"
+      ],
+      "requirements": [
+        "EXT-DATA-001",
+        "EXT-DATA-009",
+        "VER-006"
+      ]
+    },
+    {
+      "testId": "playwright:deployed.spec.js > PF-016 deployed exact-SHA screenshots at desktop, iPad portrait and landscape and mobile sizes [VPO-727b07dc99ecb7c5] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/deployed/deployed-results.json",
+      "obligations": [
+        "VPO-727b07dc99ecb7c5"
+      ],
+      "requirements": [
+        "PF-016"
+      ]
+    },
+    {
+      "testId": "playwright:evidence-screens.spec.js > the evidence's own run and commit are labelled apart from this build's; missing traceability reads 'not published' [VPO-fd43b3e4e7e02f59] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-fd43b3e4e7e02f59"
+      ],
+      "requirements": [
+        "UI-015"
+      ]
+    },
+    {
+      "testId": "playwright:evidence-screens.spec.js > the factory view shows only published values: ROS work, requirement and test counts, Praxis, Aegis and the deployed commit [VPO-fd43b3e4e7e02f59] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-fd43b3e4e7e02f59"
+      ],
+      "requirements": [
+        "UI-015"
+      ]
+    },
+    {
+      "testId": "playwright:evidence-screens.spec.js > the requirements proof states published counts exactly, and a requirement is proven only when every obligation passed [VPO-fd43b3e4e7e02f59] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-fd43b3e4e7e02f59"
+      ],
+      "requirements": [
+        "UI-015"
+      ]
+    },
+    {
+      "testId": "playwright:fixture-mode.spec.js > UI-015-O3 mocked persistence is never represented as a live write, and the check is shown to catch a live claim (negative control) [VPO-0a23bb42b8fb58b4] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-0a23bb42b8fb58b4"
+      ],
+      "requirements": [
+        "PF-003"
+      ]
+    },
+    {
+      "testId": "playwright:fixture-mode.spec.js > a conflict is resolved in the browser: Reload keeps this device's change beside the repository's copy, Discard (confirmed) adopts the repository's copy [VPO-34731ac9a977b818] [VPO-cd9dd8ec730c3d3e] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-34731ac9a977b818",
+        "VPO-cd9dd8ec730c3d3e"
+      ],
+      "requirements": [
+        "PF-009",
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "playwright:fixture-mode.spec.js > fixture mode in the test build: the synthetic investigation loads through the same program, the mode is shown conspicuously and never as GitHub, and nothing is sent [VPO-6eaf42e86c5ffad7] [VPO-d4b0d50550578aeb] [VPO-0a23bb42b8fb58b4] [VPO-ad958e7a60d7fd9b] [VPO-b148b239fc1c24b0] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-0a23bb42b8fb58b4",
+        "VPO-6eaf42e86c5ffad7",
+        "VPO-ad958e7a60d7fd9b",
+        "VPO-b148b239fc1c24b0",
+        "VPO-d4b0d50550578aeb"
+      ],
+      "requirements": [
+        "PF-003",
+        "PF-006",
+        "WDL-011"
+      ]
+    },
+    {
+      "testId": "playwright:fixture-mode.spec.js > the production build has no fixture mode: Connect to local/fixture is refused before anything is sent, and neither the URL, storage nor a page global switches it on [VPO-00c1408c9f31d4a2] [VPO-0a23bb42b8fb58b4] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-00c1408c9f31d4a2",
+        "VPO-0a23bb42b8fb58b4"
+      ],
+      "requirements": [
+        "PF-003"
+      ]
+    },
+    {
+      "testId": "playwright:forms.spec.js > destructive or irreversible actions wait for confirmation; cancelling changes nothing [VPO-b9af1bcfc961c8bb] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-b9af1bcfc961c8bb"
+      ],
+      "requirements": [
+        "UI-004"
+      ]
+    },
+    {
+      "testId": "playwright:forms.spec.js > destructive or irreversible actions wait for confirmation; cancelling changes nothing [VPO-b9af1bcfc961c8bb] [webkit]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-b9af1bcfc961c8bb"
+      ],
+      "requirements": [
+        "UI-004"
+      ]
+    },
+    {
+      "testId": "playwright:forms.spec.js > evidence, links, hypothesis changes, causes and corrective actions are recorded through validated forms the engine decides [VPO-b9af1bcfc961c8bb] [VPO-ff2e466b7aaa3e12] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-b9af1bcfc961c8bb",
+        "VPO-ff2e466b7aaa3e12"
+      ],
+      "requirements": [
+        "UI-004",
+        "UI-005"
+      ]
+    },
+    {
+      "testId": "playwright:forms.spec.js > evidence, links, hypothesis changes, causes and corrective actions are recorded through validated forms the engine decides [VPO-b9af1bcfc961c8bb] [VPO-ff2e466b7aaa3e12] [webkit]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-b9af1bcfc961c8bb",
+        "VPO-ff2e466b7aaa3e12"
+      ],
+      "requirements": [
+        "UI-004",
+        "UI-005"
+      ]
+    },
+    {
+      "testId": "playwright:graph-layout.spec.js > causal graph accessibility > desktop, iPad and phone: the page never scrolls sideways, every node and connector has a text equivalent, and meaning is never colour alone @responsive [VPO-39cfd9f8545f99b9] [VPO-170fa438de9df91f] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-170fa438de9df91f",
+        "VPO-39cfd9f8545f99b9"
+      ],
+      "requirements": [
+        "WDL-007"
+      ]
+    },
+    {
+      "testId": "playwright:graph-layout.spec.js > causal graph accessibility > desktop, iPad and phone: the page never scrolls sideways, every node and connector has a text equivalent, and meaning is never colour alone @responsive [VPO-39cfd9f8545f99b9] [VPO-170fa438de9df91f] [ipad-landscape]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-170fa438de9df91f",
+        "VPO-39cfd9f8545f99b9"
+      ],
+      "requirements": [
+        "WDL-007"
+      ]
+    },
+    {
+      "testId": "playwright:graph-layout.spec.js > causal graph accessibility > desktop, iPad and phone: the page never scrolls sideways, every node and connector has a text equivalent, and meaning is never colour alone @responsive [VPO-39cfd9f8545f99b9] [VPO-170fa438de9df91f] [ipad-portrait]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-170fa438de9df91f",
+        "VPO-39cfd9f8545f99b9"
+      ],
+      "requirements": [
+        "WDL-007"
+      ]
+    },
+    {
+      "testId": "playwright:graph-layout.spec.js > causal graph accessibility > desktop, iPad and phone: the page never scrolls sideways, every node and connector has a text equivalent, and meaning is never colour alone @responsive [VPO-39cfd9f8545f99b9] [VPO-170fa438de9df91f] [phone-320]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-170fa438de9df91f",
+        "VPO-39cfd9f8545f99b9"
+      ],
+      "requirements": [
+        "WDL-007"
+      ]
+    },
+    {
+      "testId": "playwright:graph-layout.spec.js > causal graph accessibility > keyboard: every node can be reached and selected without a pointer, focus is visible, and the selection reaches the host @responsive [VPO-39cfd9f8545f99b9] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-39cfd9f8545f99b9"
+      ],
+      "requirements": [
+        "WDL-007"
+      ]
+    },
+    {
+      "testId": "playwright:graph-layout.spec.js > causal graph accessibility > keyboard: every node can be reached and selected without a pointer, focus is visible, and the selection reaches the host @responsive [VPO-39cfd9f8545f99b9] [ipad-landscape]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-39cfd9f8545f99b9"
+      ],
+      "requirements": [
+        "WDL-007"
+      ]
+    },
+    {
+      "testId": "playwright:graph-layout.spec.js > causal graph accessibility > keyboard: every node can be reached and selected without a pointer, focus is visible, and the selection reaches the host @responsive [VPO-39cfd9f8545f99b9] [ipad-portrait]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-39cfd9f8545f99b9"
+      ],
+      "requirements": [
+        "WDL-007"
+      ]
+    },
+    {
+      "testId": "playwright:graph-layout.spec.js > causal graph accessibility > keyboard: every node can be reached and selected without a pointer, focus is visible, and the selection reaches the host @responsive [VPO-39cfd9f8545f99b9] [phone-320]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-39cfd9f8545f99b9"
+      ],
+      "requirements": [
+        "WDL-007"
+      ]
+    },
+    {
+      "testId": "playwright:graph-layout.spec.js > causal graph layout, measured in the browser > every synthetic fixture lays out without overlapping nodes, clipped text, labels over nodes, detached or unlisted connectors, or hidden evidence counts, and within its crossing budget; zero, one, many, disconnected and cyclic graphs all lay out validly @responsive [VPO-9fe0158bf99720e2] [VPO-37a1821f8918e8a9] [VPO-2a3f7cbe7df14c03] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-2a3f7cbe7df14c03",
+        "VPO-37a1821f8918e8a9",
+        "VPO-9fe0158bf99720e2"
+      ],
+      "requirements": [
+        "WDL-005",
+        "WDL-006"
+      ]
+    },
+    {
+      "testId": "playwright:graph-layout.spec.js > causal graph layout, measured in the browser > every synthetic fixture lays out without overlapping nodes, clipped text, labels over nodes, detached or unlisted connectors, or hidden evidence counts, and within its crossing budget; zero, one, many, disconnected and cyclic graphs all lay out validly @responsive [VPO-9fe0158bf99720e2] [VPO-37a1821f8918e8a9] [VPO-2a3f7cbe7df14c03] [ipad-landscape]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-2a3f7cbe7df14c03",
+        "VPO-37a1821f8918e8a9",
+        "VPO-9fe0158bf99720e2"
+      ],
+      "requirements": [
+        "WDL-005",
+        "WDL-006"
+      ]
+    },
+    {
+      "testId": "playwright:graph-layout.spec.js > causal graph layout, measured in the browser > every synthetic fixture lays out without overlapping nodes, clipped text, labels over nodes, detached or unlisted connectors, or hidden evidence counts, and within its crossing budget; zero, one, many, disconnected and cyclic graphs all lay out validly @responsive [VPO-9fe0158bf99720e2] [VPO-37a1821f8918e8a9] [VPO-2a3f7cbe7df14c03] [ipad-portrait]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-2a3f7cbe7df14c03",
+        "VPO-37a1821f8918e8a9",
+        "VPO-9fe0158bf99720e2"
+      ],
+      "requirements": [
+        "WDL-005",
+        "WDL-006"
+      ]
+    },
+    {
+      "testId": "playwright:graph-layout.spec.js > causal graph layout, measured in the browser > every synthetic fixture lays out without overlapping nodes, clipped text, labels over nodes, detached or unlisted connectors, or hidden evidence counts, and within its crossing budget; zero, one, many, disconnected and cyclic graphs all lay out validly @responsive [VPO-9fe0158bf99720e2] [VPO-37a1821f8918e8a9] [VPO-2a3f7cbe7df14c03] [phone-320]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-2a3f7cbe7df14c03",
+        "VPO-37a1821f8918e8a9",
+        "VPO-9fe0158bf99720e2"
+      ],
+      "requirements": [
+        "WDL-005",
+        "WDL-006"
+      ]
+    },
+    {
+      "testId": "playwright:graph-layout.spec.js > causal graph layout, measured in the browser > the same document lays out identically on every load [VPO-37a1821f8918e8a9] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-37a1821f8918e8a9"
+      ],
+      "requirements": [
+        "WDL-006"
+      ]
+    },
+    {
+      "testId": "playwright:graph-layout.spec.js > causal graph visuals and responsibilities > Causa supplies semantics without geometry, the workflow engine alone places and routes (shown on a non-Causa document too), Forma alone styles [VPO-beeaf5b2a56c521d] [VPO-9ecccb3e2aa9f3f4] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-9ecccb3e2aa9f3f4",
+        "VPO-beeaf5b2a56c521d"
+      ],
+      "requirements": [
+        "WDL-004"
+      ]
+    },
+    {
+      "testId": "playwright:graph-layout.spec.js > causal graph visuals and responsibilities > Forma styles the graph with its tokens and components, and every colour is the UI-016 colour of the node's domain state [VPO-94576f95354806bd] [VPO-17ea30ea2f160b62] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-17ea30ea2f160b62",
+        "VPO-94576f95354806bd"
+      ],
+      "requirements": [
+        "WDL-008"
+      ]
+    },
+    {
+      "testId": "playwright:graph-layout.spec.js > workflow layout engine capability record (WDL-001, WDL-002) > the recorded engine is the installed one: owner, package, version, integrity, licence, API and constraints, with a working example [VPO-b34d65289bec1814] [VPO-35548bc529249967] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-35548bc529249967",
+        "VPO-b34d65289bec1814"
+      ],
+      "requirements": [
+        "WDL-001"
+      ]
+    },
+    {
+      "testId": "playwright:graph-layout.spec.js > workflow layout engine capability record (WDL-001, WDL-002) > there is no fallback layout: the record declares none and Causa has no layout or drawing code of its own [VPO-ebaf420b3a7538cd] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-ebaf420b3a7538cd"
+      ],
+      "requirements": [
+        "WDL-002"
+      ]
+    },
+    {
+      "testId": "playwright:graph-navigation.spec.js > navigation from the causal graph (UI-005-O4) > a hypothesis node's Open action lands on its evidence record in the evidence view [VPO-c7c84a08e62427e4] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-c7c84a08e62427e4"
+      ],
+      "requirements": [
+        "UI-005"
+      ]
+    },
+    {
+      "testId": "playwright:graph-navigation.spec.js > navigation from the causal graph (UI-005-O4) > a link outside #/investigations/ is never followed, even when the graph document carries it [VPO-c7c84a08e62427e4] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-c7c84a08e62427e4"
+      ],
+      "requirements": [
+        "UI-005"
+      ]
+    },
+    {
+      "testId": "playwright:history.spec.js > a past version is shown labelled historical with what it changed and what changed since; the latest is never mixed in [VPO-d08de632c7c1a4ab] [VPO-c3326322b8ed473a] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-c3326322b8ed473a",
+        "VPO-d08de632c7c1a4ab"
+      ],
+      "requirements": [
+        "UI-003",
+        "UI-013"
+      ]
+    },
+    {
+      "testId": "playwright:history.spec.js > a past version is shown labelled historical with what it changed and what changed since; the latest is never mixed in [VPO-d08de632c7c1a4ab] [VPO-c3326322b8ed473a] [webkit]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-c3326322b8ed473a",
+        "VPO-d08de632c7c1a4ab"
+      ],
+      "requirements": [
+        "UI-003",
+        "UI-013"
+      ]
+    },
+    {
+      "testId": "playwright:history.spec.js > the timeline lists events in sequence with event type, actor, event time and version; filtering by category works; an entry links to the record it touched [VPO-33324aeb860bce06] [VPO-c3326322b8ed473a] [VPO-7fe0d0f0d00df8a0] [VPO-db25c20e9414ab46] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-33324aeb860bce06",
+        "VPO-7fe0d0f0d00df8a0",
+        "VPO-c3326322b8ed473a",
+        "VPO-db25c20e9414ab46"
+      ],
+      "requirements": [
+        "UI-003"
+      ]
+    },
+    {
+      "testId": "playwright:history.spec.js > the timeline lists events in sequence with event type, actor, event time and version; filtering by category works; an entry links to the record it touched [VPO-33324aeb860bce06] [VPO-c3326322b8ed473a] [VPO-7fe0d0f0d00df8a0] [VPO-db25c20e9414ab46] [webkit]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-33324aeb860bce06",
+        "VPO-7fe0d0f0d00df8a0",
+        "VPO-c3326322b8ed473a",
+        "VPO-db25c20e9414ab46"
+      ],
+      "requirements": [
+        "UI-003"
+      ]
+    },
+    {
+      "testId": "playwright:identity.spec.js > absence of data does not force a status colour, and the same state has the same colours in every view [VPO-b3cab23e517cd0d3] [VPO-de371f74930347b8] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-b3cab23e517cd0d3",
+        "VPO-de371f74930347b8"
+      ],
+      "requirements": [
+        "UI-016"
+      ]
+    },
+    {
+      "testId": "playwright:identity.spec.js > fixture scenarios show navy, teal, amber, coral and ivory in the states they mean, each with a text label and measured contrast [VPO-8cd7943440a55f6f] [VPO-b3cab23e517cd0d3] [VPO-7fd9b69b4aa5b401] [VPO-f4f9d09fc20df79d] [VPO-5a993f5a761fd6ee] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-5a993f5a761fd6ee",
+        "VPO-7fd9b69b4aa5b401",
+        "VPO-8cd7943440a55f6f",
+        "VPO-b3cab23e517cd0d3",
+        "VPO-f4f9d09fc20df79d"
+      ],
+      "requirements": [
+        "PF-016",
+        "UI-016"
+      ]
+    },
+    {
+      "testId": "playwright:identity.spec.js > global and investigation navigation are two separate lists; settings never appear inside an investigation [VPO-dba405d7ed58872b] [VPO-628a11b571e65796] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-628a11b571e65796",
+        "VPO-dba405d7ed58872b"
+      ],
+      "requirements": [
+        "UI-029"
+      ]
+    },
+    {
+      "testId": "playwright:identity.spec.js > headings follow Forma's fixed application type steps at every width, not the marketing display scale [VPO-9501908622238a66] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-9501908622238a66"
+      ],
+      "requirements": [
+        "UI-014"
+      ]
+    },
+    {
+      "testId": "playwright:identity.spec.js > headings follow Forma's fixed application type steps at every width, not the marketing display scale [VPO-9501908622238a66] [ipad-landscape]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-9501908622238a66"
+      ],
+      "requirements": [
+        "UI-014"
+      ]
+    },
+    {
+      "testId": "playwright:identity.spec.js > headings follow Forma's fixed application type steps at every width, not the marketing display scale [VPO-9501908622238a66] [ipad-portrait]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-9501908622238a66"
+      ],
+      "requirements": [
+        "UI-014"
+      ]
+    },
+    {
+      "testId": "playwright:identity.spec.js > headings follow Forma's fixed application type steps at every width, not the marketing display scale [VPO-9501908622238a66] [phone-320]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-9501908622238a66"
+      ],
+      "requirements": [
+        "UI-014"
+      ]
+    },
+    {
+      "testId": "playwright:identity.spec.js > navigation tells a read-only demonstration from a writable copy and keeps the current investigation in view [VPO-014f5e1139ed692b] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-014f5e1139ed692b"
+      ],
+      "requirements": [
+        "UI-014"
+      ]
+    },
+    {
+      "testId": "playwright:identity.spec.js > no essential operation needs drag-and-drop or hover: hover only restyles, nothing is draggable, and a command completes by keyboard [VPO-40f80428200fc71c] [VPO-3b9b2a8a4bf56535] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-3b9b2a8a4bf56535",
+        "VPO-40f80428200fc71c"
+      ],
+      "requirements": [
+        "UI-004",
+        "UI-011"
+      ]
+    },
+    {
+      "testId": "playwright:identity.spec.js > the printed report stays legible in grayscale [VPO-406b16e7341d28c2] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-406b16e7341d28c2"
+      ],
+      "requirements": [
+        "UI-016"
+      ]
+    },
+    {
+      "testId": "playwright:live-graph.spec.js > WDL-012 the graph of each real historical investigation shows exactly its recorded causal structure and evidence counts, laid out without overlap or clipping, stable, with text equivalents [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/live/live-results.json",
+      "obligations": [
+        "VPO-3ec21931ff613a67",
+        "VPO-f635d053f07b64fe"
+      ],
+      "requirements": [
+        "WDL-012"
+      ]
+    },
+    {
+      "testId": "playwright:live-persistence.spec.js > DCT-LIVE-A create, write, reload, conflict (resolved by Reload), two tabs with a lost write (never reconciled as saved) and rejected token against the real test repository, each confirmed by an independent SHA re-read [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/live/live-results.json",
+      "obligations": [
+        "VPO-05eeddad528e2cd4",
+        "VPO-2de744fb2c8bdc70",
+        "VPO-34731ac9a977b818",
+        "VPO-37d860d18826cf0a",
+        "VPO-4c06d10238d15c5c",
+        "VPO-54b0eef91ceeada4",
+        "VPO-5581f11810c02191",
+        "VPO-57fe23e7c821450f",
+        "VPO-61b2e81f99761d55",
+        "VPO-6292ea3728a2532b",
+        "VPO-7672a3ef81f74ac5",
+        "VPO-89ed6170f531961e",
+        "VPO-903077d337faf198",
+        "VPO-bb08b9a414ba4cd7",
+        "VPO-c135d16c59f5baf8",
+        "VPO-c6c90d9f4acc5fe6",
+        "VPO-ca58030e3eecdf9b",
+        "VPO-d87bf2493f9268ae",
+        "VPO-fbcff0eece408886"
+      ],
+      "requirements": [
+        "AR-010",
+        "EXT-DATA-004",
+        "EXT-DATA-005",
+        "EXT-DATA-007",
+        "EXT-DATA-008",
+        "EXT-DATA-009",
+        "EXT-DATA-010",
+        "PF-005",
+        "PF-011",
+        "PF-014",
+        "PF-015",
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "playwright:live-persistence.spec.js > EXT-DATA-013 after Connect the browser loads exactly the catalog's three historical cases, verified and read-only; no record ships with the site and none is served by it [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/live/live-results.json",
+      "obligations": [
+        "VPO-0304a8342e7147dd",
+        "VPO-43aef41e6256b122",
+        "VPO-4b4747eaff96e385",
+        "VPO-557743cb4997c484",
+        "VPO-77f6e22e08d5bba0",
+        "VPO-903077d337faf198",
+        "VPO-acd13bfa08dba51a",
+        "VPO-c81484cbcf203d4f",
+        "VPO-d60e3a3a25cb106d",
+        "VPO-dc48d066cfa2309d",
+        "VPO-f8cbaa452cd4eb0b"
+      ],
+      "requirements": [
+        "EXT-DATA-001",
+        "EXT-DATA-012",
+        "EXT-DATA-013",
+        "PF-002",
+        "PF-004",
+        "PF-011",
+        "UI-006"
+      ]
+    },
+    {
+      "testId": "playwright:percepta.spec.js > every bound screen satisfies its Percepta contract (verify-app) [VPO-59c5cc78868b7d74] [VPO-447fd64210e3d9e3] [VPO-0684fde6ced06208] [VPO-9659118aa1ef95ff] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-0684fde6ced06208",
+        "VPO-447fd64210e3d9e3",
+        "VPO-59c5cc78868b7d74",
+        "VPO-9659118aa1ef95ff"
+      ],
+      "requirements": [
+        "UI-004",
+        "UI-011",
+        "UI-015"
+      ]
+    },
+    {
+      "testId": "playwright:production-hooks.spec.js > in the production page neither the runtime global nor the page can enable the Percepta hook or fixture mode [VPO-fba8a61be6d12adf] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-fba8a61be6d12adf"
+      ],
+      "requirements": [
+        "UI-010"
+      ]
+    },
+    {
+      "testId": "playwright:production-hooks.spec.js > the production .NET build has no EnableTestHooks export; the test build does (negative control) [VPO-c41f10e4ed8a086b] [VPO-fba8a61be6d12adf] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-c41f10e4ed8a086b",
+        "VPO-fba8a61be6d12adf"
+      ],
+      "requirements": [
+        "AR-014",
+        "UI-010"
+      ]
+    },
+    {
+      "testId": "playwright:proposals.spec.js > AI result state: a malformed answer is refused whole and offers Try again; nothing is recorded [VPO-e54ee03f405cdc8f] [VPO-97351596eb39e14e] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-97351596eb39e14e",
+        "VPO-e54ee03f405cdc8f"
+      ],
+      "requirements": [
+        "UI-010"
+      ]
+    },
+    {
+      "testId": "playwright:proposals.spec.js > AI result state: a rejected key (401) offers no Try again; nothing is recorded [VPO-e54ee03f405cdc8f] [VPO-97351596eb39e14e] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-97351596eb39e14e",
+        "VPO-e54ee03f405cdc8f"
+      ],
+      "requirements": [
+        "UI-010"
+      ]
+    },
+    {
+      "testId": "playwright:proposals.spec.js > AI result state: an unavailable model (404) offers no Try again; nothing is recorded [VPO-e54ee03f405cdc8f] [VPO-97351596eb39e14e] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-97351596eb39e14e",
+        "VPO-e54ee03f405cdc8f"
+      ],
+      "requirements": [
+        "UI-010"
+      ]
+    },
+    {
+      "testId": "playwright:proposals.spec.js > AI result state: overloaded (529) offers Try again; nothing is recorded [VPO-e54ee03f405cdc8f] [VPO-97351596eb39e14e] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-97351596eb39e14e",
+        "VPO-e54ee03f405cdc8f"
+      ],
+      "requirements": [
+        "UI-010"
+      ]
+    },
+    {
+      "testId": "playwright:proposals.spec.js > AI result state: rate limited (429) offers Try again; nothing is recorded [VPO-e54ee03f405cdc8f] [VPO-97351596eb39e14e] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-97351596eb39e14e",
+        "VPO-e54ee03f405cdc8f"
+      ],
+      "requirements": [
+        "UI-010"
+      ]
+    },
+    {
+      "testId": "playwright:proposals.spec.js > a rejected proposal records the person's reason and is never applied [VPO-9659118aa1ef95ff] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-9659118aa1ef95ff"
+      ],
+      "requirements": [
+        "UI-004"
+      ]
+    },
+    {
+      "testId": "playwright:proposals.spec.js > drafts made from an older version are labelled stale, never mixed in as current [VPO-d08de632c7c1a4ab] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-d08de632c7c1a4ab"
+      ],
+      "requirements": [
+        "UI-013"
+      ]
+    },
+    {
+      "testId": "playwright:proposals.spec.js > proposals are drafted, recorded only on request, and applied only when a person accepts one; the key goes only in the auth header [VPO-04eb901270c2994a] [VPO-f97eb988899c23af] [VPO-bb08b9a414ba4cd7] [VPO-c41f10e4ed8a086b] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-04eb901270c2994a",
+        "VPO-bb08b9a414ba4cd7",
+        "VPO-c41f10e4ed8a086b",
+        "VPO-f97eb988899c23af"
+      ],
+      "requirements": [
+        "AR-014",
+        "UI-004",
+        "UI-006",
+        "UI-025"
+      ]
+    },
+    {
+      "testId": "playwright:proposals.spec.js > proposals are drafted, recorded only on request, and applied only when a person accepts one; the key goes only in the auth header [VPO-04eb901270c2994a] [VPO-f97eb988899c23af] [VPO-bb08b9a414ba4cd7] [VPO-c41f10e4ed8a086b] [webkit]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-04eb901270c2994a",
+        "VPO-bb08b9a414ba4cd7",
+        "VPO-c41f10e4ed8a086b",
+        "VPO-f97eb988899c23af"
+      ],
+      "requirements": [
+        "AR-014",
+        "UI-004",
+        "UI-006",
+        "UI-025"
+      ]
+    },
+    {
+      "testId": "playwright:records-scan.spec.js > no causa-data investigation record is in the source, the test build or the deployable site [VPO-f8cbaa452cd4eb0b] [VPO-77f6e22e08d5bba0] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-77f6e22e08d5bba0",
+        "VPO-f8cbaa452cd4eb0b"
+      ],
+      "requirements": [
+        "EXT-DATA-001",
+        "EXT-DATA-013"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > Administration and Settings (UI-018, UI-019, VER-007) > Administration shows the versions actually loaded, and no investigation page or footer shows them [VPO-b93e86bd3809524a] [VPO-183d6671da7467b8] [VPO-a07751ce0dce5689] [VPO-a74264901d267d03] [VPO-3f3db98e519aa95c] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-183d6671da7467b8",
+        "VPO-3f3db98e519aa95c",
+        "VPO-a07751ce0dce5689",
+        "VPO-a74264901d267d03",
+        "VPO-b93e86bd3809524a"
+      ],
+      "requirements": [
+        "UI-018",
+        "UI-022",
+        "VER-007"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > Administration and Settings (UI-018, UI-019, VER-007) > Settings apply for the session only, show effective values and store nothing in the browser [VPO-1224fd4d58ddcaa6] [VPO-d39e3d1f28d9e2ac] [VPO-c5d77a4b2eb52927] [VPO-fc28e815f45f2e9b] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-1224fd4d58ddcaa6",
+        "VPO-c5d77a4b2eb52927",
+        "VPO-d39e3d1f28d9e2ac",
+        "VPO-fc28e815f45f2e9b"
+      ],
+      "requirements": [
+        "UI-019"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > causal graph with the Forma workflow engine (T23) > the causal analysis renders in the real forma-workflow frame, a selection shows its record, and the text list carries the same structure [VPO-684e6c5f94988bd9] [VPO-db2d02dab493e914] [VPO-b36c63fba6f83d4c] [VPO-05441c1c18ce3dc1] [VPO-0e6a69f7673cace8] [VPO-adec3c95bc6ac2c4] [VPO-3eba4ae44451132f] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-05441c1c18ce3dc1",
+        "VPO-0e6a69f7673cace8",
+        "VPO-3eba4ae44451132f",
+        "VPO-684e6c5f94988bd9",
+        "VPO-adec3c95bc6ac2c4",
+        "VPO-b36c63fba6f83d4c",
+        "VPO-db2d02dab493e914"
+      ],
+      "requirements": [
+        "UI-011",
+        "UI-026",
+        "WDL-010",
+        "WDL-014"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > identity, accessibility and layout (UI-011, UI-014, UI-016) > keyboard: skip link first, visible focus, landmarks and a favicon [VPO-447fd64210e3d9e3] [VPO-9501908622238a66] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-447fd64210e3d9e3",
+        "VPO-9501908622238a66"
+      ],
+      "requirements": [
+        "UI-011",
+        "UI-014"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > identity, accessibility and layout (UI-011, UI-014, UI-016) > reflows without horizontal scrolling and keeps 44px targets @responsive [VPO-0684fde6ced06208] [VPO-86dfcce77d8a048f] [VPO-3b9b2a8a4bf56535] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-0684fde6ced06208",
+        "VPO-3b9b2a8a4bf56535",
+        "VPO-86dfcce77d8a048f"
+      ],
+      "requirements": [
+        "UI-004",
+        "UI-011",
+        "UI-020"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > identity, accessibility and layout (UI-011, UI-014, UI-016) > reflows without horizontal scrolling and keeps 44px targets @responsive [VPO-0684fde6ced06208] [VPO-86dfcce77d8a048f] [VPO-3b9b2a8a4bf56535] [ipad-landscape]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-0684fde6ced06208",
+        "VPO-3b9b2a8a4bf56535",
+        "VPO-86dfcce77d8a048f"
+      ],
+      "requirements": [
+        "UI-004",
+        "UI-011",
+        "UI-020"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > identity, accessibility and layout (UI-011, UI-014, UI-016) > reflows without horizontal scrolling and keeps 44px targets @responsive [VPO-0684fde6ced06208] [VPO-86dfcce77d8a048f] [VPO-3b9b2a8a4bf56535] [ipad-portrait]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-0684fde6ced06208",
+        "VPO-3b9b2a8a4bf56535",
+        "VPO-86dfcce77d8a048f"
+      ],
+      "requirements": [
+        "UI-004",
+        "UI-011",
+        "UI-020"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > identity, accessibility and layout (UI-011, UI-014, UI-016) > reflows without horizontal scrolling and keeps 44px targets @responsive [VPO-0684fde6ced06208] [VPO-86dfcce77d8a048f] [VPO-3b9b2a8a4bf56535] [phone-320]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-0684fde6ced06208",
+        "VPO-3b9b2a8a4bf56535",
+        "VPO-86dfcce77d8a048f"
+      ],
+      "requirements": [
+        "UI-004",
+        "UI-011",
+        "UI-020"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > identity, accessibility and layout (UI-011, UI-014, UI-016) > the Causa palette is mapped to named Forma tokens with measured contrast [VPO-cecb71404071030d] [VPO-3d80d031f05ec0dc] [VPO-d0c711c2da0f3800] [VPO-e0e945fc040386e1] [VPO-fbc386df77130f2d] [VPO-8905fd51176a3fc6] [VPO-fe19413526420c16] [VPO-d657e8dd084961b1] [VPO-1a1aae8ffa920386] [VPO-5a993f5a761fd6ee] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-1a1aae8ffa920386",
+        "VPO-3d80d031f05ec0dc",
+        "VPO-5a993f5a761fd6ee",
+        "VPO-8905fd51176a3fc6",
+        "VPO-cecb71404071030d",
+        "VPO-d0c711c2da0f3800",
+        "VPO-d657e8dd084961b1",
+        "VPO-e0e945fc040386e1",
+        "VPO-fbc386df77130f2d",
+        "VPO-fe19413526420c16"
+      ],
+      "requirements": [
+        "UI-016"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > integration checkpoint 1: a legal command end to end through Limen and the F# kernel (T17) > starting and activating an investigation crosses Limen into the kernel; every view refreshes from the one new version; a refusal changes nothing [VPO-21abf6acd60d0acc] [VPO-b3efad6eb85360be] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-21abf6acd60d0acc",
+        "VPO-b3efad6eb85360be"
+      ],
+      "requirements": [
+        "UI-006",
+        "UI-013"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > integration checkpoint 1: a legal command end to end through Limen and the F# kernel (T17) > starting and activating an investigation crosses Limen into the kernel; every view refreshes from the one new version; a refusal changes nothing [VPO-21abf6acd60d0acc] [VPO-b3efad6eb85360be] [webkit]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-21abf6acd60d0acc",
+        "VPO-b3efad6eb85360be"
+      ],
+      "requirements": [
+        "UI-006",
+        "UI-013"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > investigation view through the F# projection (test build) > an injected state renders through the normal view: illegal commands are explained and linked to their blocker [VPO-9659118aa1ef95ff] [VPO-04eb901270c2994a] [VPO-628a11b571e65796] [VPO-12f35805677987db] [VPO-56201f80b312c7c8] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-04eb901270c2994a",
+        "VPO-12f35805677987db",
+        "VPO-56201f80b312c7c8",
+        "VPO-628a11b571e65796",
+        "VPO-9659118aa1ef95ff"
+      ],
+      "requirements": [
+        "UI-004",
+        "UI-022",
+        "UI-025",
+        "UI-029"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > loading experience (WASM-LOAD, T16) > a 503 for the runtime ends in an explained failure with Retry focused, and Retry then starts Causa [VPO-0bd752bd2ac89796] [VPO-4355a83607ddc8da] [VPO-e54ee03f405cdc8f] [VPO-97351596eb39e14e] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-0bd752bd2ac89796",
+        "VPO-4355a83607ddc8da",
+        "VPO-97351596eb39e14e",
+        "VPO-e54ee03f405cdc8f"
+      ],
+      "requirements": [
+        "UI-010",
+        "UI-014"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > loading experience (WASM-LOAD, T16) > the branded shell shows before the WebAssembly runtime and hands off without a blank frame [VPO-0bd752bd2ac89796] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-0bd752bd2ac89796"
+      ],
+      "requirements": [
+        "UI-014"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > loading experience (WASM-LOAD, T16) > the branded shell shows before the WebAssembly runtime and hands off without a blank frame [VPO-0bd752bd2ac89796] [webkit]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-0bd752bd2ac89796"
+      ],
+      "requirements": [
+        "UI-014"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > report, timeline and administration views (T22, T26, T29) > Administration groups facts by section and never presents an unverified item as passed [VPO-97a56b1abd22a396] [VPO-a74264901d267d03] [VPO-b27f3de8fd81d25c] [VPO-a4ab030e74ad080a] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-97a56b1abd22a396",
+        "VPO-a4ab030e74ad080a",
+        "VPO-a74264901d267d03",
+        "VPO-b27f3de8fd81d25c"
+      ],
+      "requirements": [
+        "UI-018",
+        "UI-031"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > report, timeline and administration views (T22, T26, T29) > an unresolved investigation's report says it is incomplete and states no conclusion it does not have [VPO-f97eb988899c23af] [VPO-e49834d009021cd0] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-e49834d009021cd0",
+        "VPO-f97eb988899c23af"
+      ],
+      "requirements": [
+        "UI-025"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > report, timeline and administration views (T22, T26, T29) > the timeline shows event time, recorded time and the version it was rendered from [VPO-33324aeb860bce06] [VPO-7fe0d0f0d00df8a0] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-33324aeb860bce06",
+        "VPO-7fe0d0f0d00df8a0"
+      ],
+      "requirements": [
+        "UI-003"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > routes and navigation (T16) > a deep link survives reload and an unknown address fails with a useful recovery [VPO-adf482d16e75a882] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-adf482d16e75a882"
+      ],
+      "requirements": [
+        "UI-013"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > routes and navigation (T16) > before Connect the workspace is empty and offers the explicit Connect action [VPO-2f4f9de66ddd6434] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-2f4f9de66ddd6434"
+      ],
+      "requirements": [
+        "UI-001"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > routes and navigation (T16) > the three primary destinations are distinct, reachable and mark the current one [VPO-e5cfc842f2367421] [VPO-7bb1e8c5bdccc2f2] [VPO-625e96f365f2c1b8] [VPO-41642822de594b56] [VPO-23d8a096e64b2625] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-23d8a096e64b2625",
+        "VPO-41642822de594b56",
+        "VPO-625e96f365f2c1b8",
+        "VPO-7bb1e8c5bdccc2f2",
+        "VPO-e5cfc842f2367421"
+      ],
+      "requirements": [
+        "UI-018",
+        "UI-019",
+        "UI-020",
+        "UI-029"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > security of the shell > a typed token never reaches the page, the URL or browser storage [VPO-bb08b9a414ba4cd7] [VPO-fba8a61be6d12adf] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-bb08b9a414ba4cd7",
+        "VPO-fba8a61be6d12adf"
+      ],
+      "requirements": [
+        "UI-006",
+        "UI-010"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > stack smoke (DEP-CURRENT-004) and defect classes > DCT-006-A a 503 on one framework .wasm shows the recoverable failure well before the start timeout, focus on Retry, and Retry reaches ready [VPO-0bd752bd2ac89796] [VPO-97351596eb39e14e] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-0bd752bd2ac89796",
+        "VPO-97351596eb39e14e"
+      ],
+      "requirements": [
+        "UI-010",
+        "UI-014"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > stack smoke (DEP-CURRENT-004) and defect classes > DCT-006-A a 503 on one framework .wasm shows the recoverable failure well before the start timeout, focus on Retry, and Retry reaches ready [VPO-0bd752bd2ac89796] [VPO-97351596eb39e14e] [webkit]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-0bd752bd2ac89796",
+        "VPO-97351596eb39e14e"
+      ],
+      "requirements": [
+        "UI-010",
+        "UI-014"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > stack smoke (DEP-CURRENT-004) and defect classes > DCT-INPUT-A typed text in bound inputs survives the projections that arrive while typing [VPO-be22751d9b5b8098] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-be22751d9b5b8098"
+      ],
+      "requirements": [
+        "UI-004"
+      ]
+    },
+    {
+      "testId": "playwright:shell.spec.js > stack smoke (DEP-CURRENT-004) and defect classes > DCT-INPUT-A typed text in bound inputs survives the projections that arrive while typing [VPO-be22751d9b5b8098] [webkit]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-be22751d9b5b8098"
+      ],
+      "requirements": [
+        "UI-004"
+      ]
+    },
+    {
+      "testId": "playwright:start-smoke.spec.js > the production starts on every primary route with no engine fault [VPO-0bd752bd2ac89796] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-0bd752bd2ac89796"
+      ],
+      "requirements": [
+        "UI-014"
+      ]
+    },
+    {
+      "testId": "playwright:start-smoke.spec.js > the production starts on every primary route with no engine fault [VPO-0bd752bd2ac89796] [webkit]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-0bd752bd2ac89796"
+      ],
+      "requirements": [
+        "UI-014"
+      ]
+    },
+    {
+      "testId": "playwright:start-smoke.spec.js > the test build starts on every primary route with no engine fault [VPO-0bd752bd2ac89796] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-0bd752bd2ac89796"
+      ],
+      "requirements": [
+        "UI-014"
+      ]
+    },
+    {
+      "testId": "playwright:start-smoke.spec.js > the test build starts on every primary route with no engine fault [VPO-0bd752bd2ac89796] [webkit]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-0bd752bd2ac89796"
+      ],
+      "requirements": [
+        "UI-014"
+      ]
+    },
+    {
+      "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > a cause's explanation lists its hypotheses, supporting and conflicting evidence, history and why it is not confirmed; nothing is concluded [VPO-f8666daf6fdf79d7] [VPO-ffda9fea0324a42e] [VPO-885e4767b84371de] [VPO-8a5de7e5afae98cb] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-885e4767b84371de",
+        "VPO-8a5de7e5afae98cb",
+        "VPO-f8666daf6fdf79d7",
+        "VPO-ffda9fea0324a42e"
+      ],
+      "requirements": [
+        "UI-030",
+        "UI-038",
+        "UI-040"
+      ]
+    },
+    {
+      "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > a selection that names no record of the investigation shows no inspector and says so [VPO-63d89380e8017050] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-63d89380e8017050"
+      ],
+      "requirements": [
+        "UI-033"
+      ]
+    },
+    {
+      "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > closing the inspector returns focus to the record's row, and the inspector reflows on every viewport @responsive [VPO-8f8156f91b64963b] [VPO-f3ebcdbe15cdf92d] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-8f8156f91b64963b",
+        "VPO-f3ebcdbe15cdf92d"
+      ],
+      "requirements": [
+        "UI-034"
+      ]
+    },
+    {
+      "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > closing the inspector returns focus to the record's row, and the inspector reflows on every viewport @responsive [VPO-8f8156f91b64963b] [VPO-f3ebcdbe15cdf92d] [ipad-landscape]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-8f8156f91b64963b",
+        "VPO-f3ebcdbe15cdf92d"
+      ],
+      "requirements": [
+        "UI-034"
+      ]
+    },
+    {
+      "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > closing the inspector returns focus to the record's row, and the inspector reflows on every viewport @responsive [VPO-8f8156f91b64963b] [VPO-f3ebcdbe15cdf92d] [ipad-portrait]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-8f8156f91b64963b",
+        "VPO-f3ebcdbe15cdf92d"
+      ],
+      "requirements": [
+        "UI-034"
+      ]
+    },
+    {
+      "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > closing the inspector returns focus to the record's row, and the inspector reflows on every viewport @responsive [VPO-8f8156f91b64963b] [VPO-f3ebcdbe15cdf92d] [phone-320]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-8f8156f91b64963b",
+        "VPO-f3ebcdbe15cdf92d"
+      ],
+      "requirements": [
+        "UI-034"
+      ]
+    },
+    {
+      "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > the evidence inspector shows provenance, timestamps, cleaned original text, missing provenance labelled, links to its hypothesis, dependents and lineage [VPO-ff2e466b7aaa3e12] [VPO-34334672f9ff0014] [VPO-5fe930a650a08b04] [VPO-c18f969a9c8b65bf] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-34334672f9ff0014",
+        "VPO-5fe930a650a08b04",
+        "VPO-c18f969a9c8b65bf",
+        "VPO-ff2e466b7aaa3e12"
+      ],
+      "requirements": [
+        "UI-005",
+        "UI-017",
+        "UI-031"
+      ]
+    },
+    {
+      "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > traversal follows recorded relationships with stable addresses and explicit absent links, and closing restores focus @responsive [VPO-5a85f3ea85db30b2] [VPO-63d89380e8017050] [VPO-f3ebcdbe15cdf92d] [VPO-8f8156f91b64963b] [VPO-ad49e5ff43f1ace6] [VPO-8a5de7e5afae98cb] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-5a85f3ea85db30b2",
+        "VPO-63d89380e8017050",
+        "VPO-8a5de7e5afae98cb",
+        "VPO-8f8156f91b64963b",
+        "VPO-ad49e5ff43f1ace6",
+        "VPO-f3ebcdbe15cdf92d"
+      ],
+      "requirements": [
+        "UI-033",
+        "UI-034",
+        "UI-039",
+        "UI-040"
+      ]
+    },
+    {
+      "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > traversal follows recorded relationships with stable addresses and explicit absent links, and closing restores focus @responsive [VPO-5a85f3ea85db30b2] [VPO-63d89380e8017050] [VPO-f3ebcdbe15cdf92d] [VPO-8f8156f91b64963b] [VPO-ad49e5ff43f1ace6] [VPO-8a5de7e5afae98cb] [ipad-landscape]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-5a85f3ea85db30b2",
+        "VPO-63d89380e8017050",
+        "VPO-8a5de7e5afae98cb",
+        "VPO-8f8156f91b64963b",
+        "VPO-ad49e5ff43f1ace6",
+        "VPO-f3ebcdbe15cdf92d"
+      ],
+      "requirements": [
+        "UI-033",
+        "UI-034",
+        "UI-039",
+        "UI-040"
+      ]
+    },
+    {
+      "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > traversal follows recorded relationships with stable addresses and explicit absent links, and closing restores focus @responsive [VPO-5a85f3ea85db30b2] [VPO-63d89380e8017050] [VPO-f3ebcdbe15cdf92d] [VPO-8f8156f91b64963b] [VPO-ad49e5ff43f1ace6] [VPO-8a5de7e5afae98cb] [ipad-portrait]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-5a85f3ea85db30b2",
+        "VPO-63d89380e8017050",
+        "VPO-8a5de7e5afae98cb",
+        "VPO-8f8156f91b64963b",
+        "VPO-ad49e5ff43f1ace6",
+        "VPO-f3ebcdbe15cdf92d"
+      ],
+      "requirements": [
+        "UI-033",
+        "UI-034",
+        "UI-039",
+        "UI-040"
+      ]
+    },
+    {
+      "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > traversal follows recorded relationships with stable addresses and explicit absent links, and closing restores focus @responsive [VPO-5a85f3ea85db30b2] [VPO-63d89380e8017050] [VPO-f3ebcdbe15cdf92d] [VPO-8f8156f91b64963b] [VPO-ad49e5ff43f1ace6] [VPO-8a5de7e5afae98cb] [phone-320]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-5a85f3ea85db30b2",
+        "VPO-63d89380e8017050",
+        "VPO-8a5de7e5afae98cb",
+        "VPO-8f8156f91b64963b",
+        "VPO-ad49e5ff43f1ace6",
+        "VPO-f3ebcdbe15cdf92d"
+      ],
+      "requirements": [
+        "UI-033",
+        "UI-034",
+        "UI-039",
+        "UI-040"
+      ]
+    },
+    {
+      "testId": "playwright:ux.spec.js > identity, failures and component ownership (UI-017-O4, UI-022-O1, UI-030-O4, UI-034-O3, UI-039-O2) > Administration never presents an unsupported or unmeasured item as passed [VPO-f70d9f1e42371d48] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-f70d9f1e42371d48"
+      ],
+      "requirements": [
+        "UI-030"
+      ]
+    },
+    {
+      "testId": "playwright:ux.spec.js > identity, failures and component ownership (UI-017-O4, UI-022-O1, UI-030-O4, UI-034-O3, UI-039-O2) > a connection failure says what happened and what to do in plain words; the technical detail is in Administration [VPO-7e849b4055bdfadf] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-7e849b4055bdfadf"
+      ],
+      "requirements": [
+        "UI-017"
+      ]
+    },
+    {
+      "testId": "playwright:ux.spec.js > identity, failures and component ownership (UI-017-O4, UI-022-O1, UI-030-O4, UI-034-O3, UI-039-O2) > the global header carries the application identity and navigation, never commits, versions or provider mechanics [VPO-8f9c1b8914be43f6] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-8f9c1b8914be43f6"
+      ],
+      "requirements": [
+        "UI-022"
+      ]
+    },
+    {
+      "testId": "playwright:ux.spec.js > identity, failures and component ownership (UI-017-O4, UI-022-O1, UI-030-O4, UI-034-O3, UI-039-O2) > the inspector is composed from Forma's own record header, key-value list and relationship index, which the served Forma stylesheet defines and Causa does not redefine [VPO-a2099d5e8abc8ef0] [VPO-f1f1bfbfc325fa21] [VPO-f3ebcdbe15cdf92d] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-a2099d5e8abc8ef0",
+        "VPO-f1f1bfbfc325fa21",
+        "VPO-f3ebcdbe15cdf92d"
+      ],
+      "requirements": [
+        "UI-034",
+        "UI-039"
+      ]
+    },
+    {
+      "testId": "playwright:ux.spec.js > investigation catalog (UI-001, UI-022) > cards show title, actual status, latest activity, domain counts, the policy's next action, an Open action and the reference id; no severity, owner or technical text [VPO-02b53bd16db4ee17] [VPO-05f9c2a398ed7454] [VPO-985886de7f012c74] [VPO-3fc89c9d18b678a4] [VPO-c6f789b832466ab9] [VPO-78852bf4d2da804b] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-02b53bd16db4ee17",
+        "VPO-05f9c2a398ed7454",
+        "VPO-3fc89c9d18b678a4",
+        "VPO-78852bf4d2da804b",
+        "VPO-985886de7f012c74",
+        "VPO-c6f789b832466ab9"
+      ],
+      "requirements": [
+        "UI-001",
+        "UI-022"
+      ]
+    },
+    {
+      "testId": "playwright:ux.spec.js > investigation catalog (UI-001, UI-022) > the catalog sorts, shows an empty state, keeps the selection, and opening keeps identity and context [VPO-1cd1f428fe646f06] [VPO-b3ea3d93850c4c8f] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-1cd1f428fe646f06",
+        "VPO-b3ea3d93850c4c8f"
+      ],
+      "requirements": [
+        "UI-001"
+      ]
+    },
+    {
+      "testId": "playwright:ux.spec.js > investigation work apart from Administration and Settings (UI-017, UI-018, UI-020, UI-021, UI-023, UI-029, UI-030, UI-031) > an investigation that loaded correctly but has unresolved findings is never labelled Verified; findings come from the domain [VPO-d0e33c8aaaf705f2] [VPO-c8114e2b7bd759fa] [VPO-f0256bc31283be14] [VPO-58231f4725864068] [VPO-885e4767b84371de] [VPO-6f0a2e18f9a19003] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-58231f4725864068",
+        "VPO-6f0a2e18f9a19003",
+        "VPO-885e4767b84371de",
+        "VPO-c8114e2b7bd759fa",
+        "VPO-d0e33c8aaaf705f2",
+        "VPO-f0256bc31283be14"
+      ],
+      "requirements": [
+        "UI-023",
+        "UI-024",
+        "UI-030"
+      ]
+    },
+    {
+      "testId": "playwright:ux.spec.js > investigation work apart from Administration and Settings (UI-017, UI-018, UI-020, UI-021, UI-023, UI-029, UI-030, UI-031) > evidence views keep source attribution and the record's provenance after technical details moved out [VPO-5c147c83f19f2c8c] [VPO-5fe930a650a08b04] [VPO-c18f969a9c8b65bf] [VPO-7fff10ce82e7c162] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-5c147c83f19f2c8c",
+        "VPO-5fe930a650a08b04",
+        "VPO-7fff10ce82e7c162",
+        "VPO-c18f969a9c8b65bf"
+      ],
+      "requirements": [
+        "UI-017",
+        "UI-024",
+        "UI-031"
+      ]
+    },
+    {
+      "testId": "playwright:ux.spec.js > investigation work apart from Administration and Settings (UI-017, UI-018, UI-020, UI-021, UI-023, UI-029, UI-030, UI-031) > routine investigation views carry no implementation prose, codes or versions; Administration keeps them [VPO-7b0ba1d1f6f663a5] [VPO-78541ad7e7bfc045] [VPO-0b37bb6a955165e2] [VPO-18e6fc4dd0730354] [VPO-2ad36bd062191d2b] [VPO-026da8a495857549] [VPO-5c147c83f19f2c8c] [VPO-bff050b54a481780] [VPO-e1fb14be4ca10f5f] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-026da8a495857549",
+        "VPO-0b37bb6a955165e2",
+        "VPO-18e6fc4dd0730354",
+        "VPO-2ad36bd062191d2b",
+        "VPO-5c147c83f19f2c8c",
+        "VPO-78541ad7e7bfc045",
+        "VPO-7b0ba1d1f6f663a5",
+        "VPO-bff050b54a481780",
+        "VPO-e1fb14be4ca10f5f"
+      ],
+      "requirements": [
+        "UI-017",
+        "UI-018",
+        "UI-021",
+        "UI-024",
+        "UI-030",
+        "UI-031"
+      ]
+    },
+    {
+      "testId": "playwright:ux.spec.js > investigation work apart from Administration and Settings (UI-017, UI-018, UI-020, UI-021, UI-023, UI-029, UI-030, UI-031) > workflow actions stay in the investigation, operational facts in Administration, preferences in Settings; two-level navigation [VPO-9eb8f87800355c73] [VPO-e5017d9f8ae702fb] [VPO-dba405d7ed58872b] [VPO-7fe69b1e93fa0c7f] [VPO-2ad36bd062191d2b] [VPO-fcf404b4a7afa635] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-2ad36bd062191d2b",
+        "VPO-7fe69b1e93fa0c7f",
+        "VPO-9eb8f87800355c73",
+        "VPO-dba405d7ed58872b",
+        "VPO-e5017d9f8ae702fb",
+        "VPO-fcf404b4a7afa635"
+      ],
+      "requirements": [
+        "UI-020",
+        "UI-021",
+        "UI-025",
+        "UI-029",
+        "UI-031"
+      ]
+    },
+    {
+      "testId": "playwright:ux.spec.js > next steps (UI-032, UI-040) > a fresh draft lists only what blocks resolution, never an empty list that reads as no work [VPO-141be05c7de03e17] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-141be05c7de03e17"
+      ],
+      "requirements": [
+        "UI-032"
+      ]
+    },
+    {
+      "testId": "playwright:ux.spec.js > next steps (UI-032, UI-040) > next steps come from the domain, link to the record and carry the policy's verdict; none is invented [VPO-29cc81617de241fb] [VPO-141be05c7de03e17] [VPO-8a5de7e5afae98cb] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-141be05c7de03e17",
+        "VPO-29cc81617de241fb",
+        "VPO-8a5de7e5afae98cb"
+      ],
+      "requirements": [
+        "UI-032",
+        "UI-040"
+      ]
+    },
+    {
+      "testId": "playwright:ux.spec.js > overview, graph, timeline, evidence inspector, comparison and report all refer to the same investigation id and authoritative version [VPO-f1a416eaeec6c129] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json",
+      "obligations": [
+        "VPO-f1a416eaeec6c129"
+      ],
+      "requirements": [
+        "UI-013"
+      ]
+    }
+  ],
+  "fixtures": [
+    {
+      "id": "storage-v1.0.0",
+      "path": "fixtures/v1.0.0/investigations",
+      "requirements": [
+        "EXT-DATA-013",
+        "EXT-DATA-008"
+      ],
+      "consumers": [
+        "dotnet:App.Engine.Tests.FixtureReplayTests."
+      ],
+      "ids": [
+        "6fd2ddc9-bedd-5fff-9093-5506c4d68cb3",
+        "a6747bd3-2794-5ac7-83b8-5ea2a0c50f5e",
+        "abd5f9b5-e335-5245-b951-802f01d5a2e5",
+        "c57e4407-dd43-5d63-8dbe-9d6ceac6c31a",
+        "d588748e-8df9-5f27-859e-5d36d9a2b53d"
+      ]
+    },
+    {
+      "id": "historical-v1",
+      "path": "workspaces/demo/historical-v1/investigations",
+      "manifest": "catalog/historical-v1/manifest.json",
+      "requirements": [
+        "EXT-DATA-013"
+      ],
+      "consumers": [
+        "dotnet:App.Engine.Tests.FixtureReplayTests.T15 EXT-DATA-013",
+        "wasm-smoke"
+      ],
+      "ids": [
+        "1784da3c-7141-59ee-a495-1d5d44bf2284",
+        "c6b26614-fc43-5013-a15c-cf95942ee07b",
+        "e3adbee5-5096-5a10-bbfb-cecda86a154b"
+      ]
+    }
+  ]
+}

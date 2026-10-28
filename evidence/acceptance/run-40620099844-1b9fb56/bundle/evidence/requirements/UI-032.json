@@ -1,0 +1,69 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "UI-032",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-29cc81617de241fb",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.RecordsTests.VPO-29cc81617de241fb VPO-141be05c7de03e17 next steps come from the domain, link to their records, and carry the policy verdict",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "playwright:ux.spec.js > next steps (UI-032, UI-040) > next steps come from the domain, link to the record and carry the policy's verdict; none is invented [VPO-29cc81617de241fb] [VPO-141be05c7de03e17] [VPO-8a5de7e5afae98cb] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-141be05c7de03e17",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.RecordsTests.VPO-141be05c7de03e17 VPO-885e4767b84371de a case with nothing recorded is not shown as having no work, and nothing is invented",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "dotnet:Causa.App.Tests.RecordsTests.VPO-29cc81617de241fb VPO-141be05c7de03e17 next steps come from the domain, link to their records, and carry the policy verdict",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "dotnet:Causa.App.Tests.UxViewTests.VPO-141be05c7de03e17 when the engine's records are unavailable, next steps say so instead of showing no work",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "playwright:ux.spec.js > next steps (UI-032, UI-040) > a fresh draft lists only what blocks resolution, never an empty list that reads as no work [VPO-141be05c7de03e17] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:ux.spec.js > next steps (UI-032, UI-040) > next steps come from the domain, link to the record and carry the policy's verdict; none is invented [VPO-29cc81617de241fb] [VPO-141be05c7de03e17] [VPO-8a5de7e5afae98cb] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    }
+  ]
+}

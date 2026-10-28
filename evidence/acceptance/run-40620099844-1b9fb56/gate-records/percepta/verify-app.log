@@ -1,0 +1,27 @@
+PASS            S01-investigation-start                  investigation-start
+PASS            S02-investigation-workspace              investigation-overview
+PASS            S03-hypothesis-battlefield               investigation-hypotheses
+PASS            S04-hypothesis-detail                    hypothesis-detail
+PASS            S05-evidence-capture                     investigation-evidence
+PASS            S06-evidence-detail                      investigation-evidence-detail
+PASS            S07-evidence-dependency                  investigation-evidence-detail
+PASS            S08-epistemic-blocker-detail             epistemic-blocker-detail
+PASS            S09-action-experiment-designer           action-experiment-designer
+PASS            S10-finding-result-capture               finding-result-capture
+PASS            S11-cause-review                         investigation-causal-analysis
+PASS            S12-corrective-action                    investigation-corrective-actions
+PASS            S13-verification                         verification
+PASS            S14-history-time-travel                  investigation-timeline
+PASS            S15-semantic-diff                        semantic-diff
+NOT-APPLICABLE  S16-counterfactual-sandbox               Owner scope decision R5-DEC-002 (research/decisions/DF-CAUSA-2026-0002--r5-dec-002-percepta-s16-not-applicable.md): the counterfactual sandbox is not applicable to Causa in Rehearsal 5; the engine has no counterfactual capability.
+PASS            S17-multi-agent-panel                    multi-agent-panel
+PASS            S18-research-tournament                  research-tournament
+PASS            S19-replay-spectator                     replay-spectator
+PASS            S20-factory-view                         factory-view
+PASS            S21-requirements-proof                   requirements-proof
+PASS            S22-report-preview                       investigation-report
+PASS            S23-persistence-conflict-recovery        persistence-conflict-recovery
+PASS            S24-settings-semantic-manifest           settings
+PASS            S25-demo-health                          administration
+Report: /home/runner/work/indy-init-rehearsal-005/indy-init-rehearsal-005/TestResults/percepta/verify-app.json
+Complete: true

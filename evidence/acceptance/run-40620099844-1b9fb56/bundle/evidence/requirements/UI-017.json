@@ -1,0 +1,82 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "UI-017",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-7b0ba1d1f6f663a5",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:ux.spec.js > investigation work apart from Administration and Settings (UI-017, UI-018, UI-020, UI-021, UI-023, UI-029, UI-030, UI-031) > routine investigation views carry no implementation prose, codes or versions; Administration keeps them [VPO-7b0ba1d1f6f663a5] [VPO-78541ad7e7bfc045] [VPO-0b37bb6a955165e2] [VPO-18e6fc4dd0730354] [VPO-2ad36bd062191d2b] [VPO-026da8a495857549] [VPO-5c147c83f19f2c8c] [VPO-bff050b54a481780] [VPO-e1fb14be4ca10f5f] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-78541ad7e7bfc045",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:ux.spec.js > investigation work apart from Administration and Settings (UI-017, UI-018, UI-020, UI-021, UI-023, UI-029, UI-030, UI-031) > routine investigation views carry no implementation prose, codes or versions; Administration keeps them [VPO-7b0ba1d1f6f663a5] [VPO-78541ad7e7bfc045] [VPO-0b37bb6a955165e2] [VPO-18e6fc4dd0730354] [VPO-2ad36bd062191d2b] [VPO-026da8a495857549] [VPO-5c147c83f19f2c8c] [VPO-bff050b54a481780] [VPO-e1fb14be4ca10f5f] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-0b37bb6a955165e2",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:ux.spec.js > investigation work apart from Administration and Settings (UI-017, UI-018, UI-020, UI-021, UI-023, UI-029, UI-030, UI-031) > routine investigation views carry no implementation prose, codes or versions; Administration keeps them [VPO-7b0ba1d1f6f663a5] [VPO-78541ad7e7bfc045] [VPO-0b37bb6a955165e2] [VPO-18e6fc4dd0730354] [VPO-2ad36bd062191d2b] [VPO-026da8a495857549] [VPO-5c147c83f19f2c8c] [VPO-bff050b54a481780] [VPO-e1fb14be4ca10f5f] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-7e849b4055bdfadf",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:ux.spec.js > identity, failures and component ownership (UI-017-O4, UI-022-O1, UI-030-O4, UI-034-O3, UI-039-O2) > a connection failure says what happened and what to do in plain words; the technical detail is in Administration [VPO-7e849b4055bdfadf] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-c18f969a9c8b65bf",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > the evidence inspector shows provenance, timestamps, cleaned original text, missing provenance labelled, links to its hypothesis, dependents and lineage [VPO-ff2e466b7aaa3e12] [VPO-34334672f9ff0014] [VPO-5fe930a650a08b04] [VPO-c18f969a9c8b65bf] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:ux.spec.js > investigation work apart from Administration and Settings (UI-017, UI-018, UI-020, UI-021, UI-023, UI-029, UI-030, UI-031) > evidence views keep source attribution and the record's provenance after technical details moved out [VPO-5c147c83f19f2c8c] [VPO-5fe930a650a08b04] [VPO-c18f969a9c8b65bf] [VPO-7fff10ce82e7c162] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    }
+  ]
+}

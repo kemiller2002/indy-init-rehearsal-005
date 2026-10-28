@@ -1,0 +1,41 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "defect",
+  "subject_id": "DC-004",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "review",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "fix_sha": "895fb6da3031da689cd3a6f54b4005f17f07edbe",
+  "fix_in_source_history": true,
+  "reviewer_evidence": {
+    "path": "acceptance/reviews/R5-independent-review.md",
+    "anchor": "dc-004",
+    "sha256": "9391bbd5abe5c24e663ee785a301bd67bd895ccea688c62baf72e51bd6375720"
+  },
+  "tests": [
+    {
+      "test": "DCT-004-A",
+      "testId": "dotnet:Persistence.Tests.DctProviderTests.DCT-004-A an absent permissions field is not denial; only GitHub's answer to the write decides",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-004-A",
+      "testId": "dotnet:Persistence.Tests.DctProviderTests.DCT-004-A push false is advisory; a refused write is held as write-denied and a renewed credential saves it",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    }
+  ]
+}

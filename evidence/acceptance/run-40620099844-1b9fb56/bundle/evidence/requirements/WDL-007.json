@@ -1,0 +1,94 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "WDL-007",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-39cfd9f8545f99b9",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:graph-layout.spec.js > causal graph accessibility > desktop, iPad and phone: the page never scrolls sideways, every node and connector has a text equivalent, and meaning is never colour alone @responsive [VPO-39cfd9f8545f99b9] [VPO-170fa438de9df91f] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:graph-layout.spec.js > causal graph accessibility > desktop, iPad and phone: the page never scrolls sideways, every node and connector has a text equivalent, and meaning is never colour alone @responsive [VPO-39cfd9f8545f99b9] [VPO-170fa438de9df91f] [ipad-landscape]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:graph-layout.spec.js > causal graph accessibility > desktop, iPad and phone: the page never scrolls sideways, every node and connector has a text equivalent, and meaning is never colour alone @responsive [VPO-39cfd9f8545f99b9] [VPO-170fa438de9df91f] [ipad-portrait]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:graph-layout.spec.js > causal graph accessibility > desktop, iPad and phone: the page never scrolls sideways, every node and connector has a text equivalent, and meaning is never colour alone @responsive [VPO-39cfd9f8545f99b9] [VPO-170fa438de9df91f] [phone-320]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:graph-layout.spec.js > causal graph accessibility > keyboard: every node can be reached and selected without a pointer, focus is visible, and the selection reaches the host @responsive [VPO-39cfd9f8545f99b9] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:graph-layout.spec.js > causal graph accessibility > keyboard: every node can be reached and selected without a pointer, focus is visible, and the selection reaches the host @responsive [VPO-39cfd9f8545f99b9] [ipad-landscape]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:graph-layout.spec.js > causal graph accessibility > keyboard: every node can be reached and selected without a pointer, focus is visible, and the selection reaches the host @responsive [VPO-39cfd9f8545f99b9] [ipad-portrait]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:graph-layout.spec.js > causal graph accessibility > keyboard: every node can be reached and selected without a pointer, focus is visible, and the selection reaches the host @responsive [VPO-39cfd9f8545f99b9] [phone-320]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-170fa438de9df91f",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:graph-layout.spec.js > causal graph accessibility > desktop, iPad and phone: the page never scrolls sideways, every node and connector has a text equivalent, and meaning is never colour alone @responsive [VPO-39cfd9f8545f99b9] [VPO-170fa438de9df91f] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:graph-layout.spec.js > causal graph accessibility > desktop, iPad and phone: the page never scrolls sideways, every node and connector has a text equivalent, and meaning is never colour alone @responsive [VPO-39cfd9f8545f99b9] [VPO-170fa438de9df91f] [ipad-landscape]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:graph-layout.spec.js > causal graph accessibility > desktop, iPad and phone: the page never scrolls sideways, every node and connector has a text equivalent, and meaning is never colour alone @responsive [VPO-39cfd9f8545f99b9] [VPO-170fa438de9df91f] [ipad-portrait]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:graph-layout.spec.js > causal graph accessibility > desktop, iPad and phone: the page never scrolls sideways, every node and connector has a text equivalent, and meaning is never colour alone @responsive [VPO-39cfd9f8545f99b9] [VPO-170fa438de9df91f] [phone-320]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    }
+  ]
+}

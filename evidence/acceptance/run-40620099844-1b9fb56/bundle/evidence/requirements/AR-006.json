@@ -1,0 +1,159 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "AR-006",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-6886a2a6e612f704",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:App.Engine.Tests.AiLoopTests.T27 D-004 a successful answer yields drafts that are recorded only as agent proposals",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.HistoryAndProposalTests.T27 D-004 VPO-199103f9166730e7 VPO-6886a2a6e612f704 agent output enters only as proposals and becomes state only on human acceptance",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.InterfaceManifestTests.T14 VPO-6886a2a6e612f704 the committed interface manifest equals the extraction from the compiled kernel",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 VPO-6886a2a6e612f704 VPO-199103f9166730e7 hypothesis transitions follow the table and there is no generic state setter",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 VPO-6886a2a6e612f704 VPO-199103f9166730e7 lifecycle commands are accepted exactly where the transition table allows them",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WasmSafetyTests.WASM-SAFETY the kernel references no process file thread network or crypto-provider API",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-B VPO-199103f9166730e7 VPO-6886a2a6e612f704 every user event is accepted only in its legal source states",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-002-B VPO-199103f9166730e7 VPO-6886a2a6e612f704 every user event is accepted only in its legal source states and a refusal changes nothing",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-199103f9166730e7",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:App.Engine.Tests.AiLoopTests.T27 R11.4 VPO-199103f9166730e7 instructions are fixed and investigation content travels only as delimited data",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.HistoryAndProposalTests.T27 D-004 VPO-199103f9166730e7 VPO-6886a2a6e612f704 agent output enters only as proposals and becomes state only on human acceptance",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.HistoryAndProposalTests.T27 R11.4 VPO-199103f9166730e7 instructions inside evidence are data and change nothing they name",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.HistoryAndProposalTests.T27 R5.4 VPO-199103f9166730e7 an agent cannot re-propose a falsified explanation",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.HistoryAndProposalTests.T27 VPO-199103f9166730e7 VPO-821ce84e76d497b9 agent output that is anything but proposals is refused whole",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 D-004 VPO-199103f9166730e7 an agent proposal needs a human to accept it",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 D-007 D-003 VPO-199103f9166730e7 an open blocking unknown blocks the resolution it protects",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 D-008 VPO-199103f9166730e7 implementation is not verification and blocks resolution until verified",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 G3 an ungated confirmation in a stored history is refused as HISTORY.UNGATED_CONFIRMATION",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 G3 forged histories are refused by replay with their domain code",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 VPO-199103f9166730e7 stale duplicate unauthorized and illegal submissions are typed rejections that change nothing",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 VPO-6886a2a6e612f704 VPO-199103f9166730e7 hypothesis transitions follow the table and there is no generic state setter",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 VPO-6886a2a6e612f704 VPO-199103f9166730e7 lifecycle commands are accepted exactly where the transition table allows them",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-B VPO-199103f9166730e7 VPO-6886a2a6e612f704 every user event is accepted only in its legal source states",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-002-B VPO-199103f9166730e7 a refused event leaves the state unchanged and is a typed fault",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.SYNC-HOOK Discard VPO-199103f9166730e7 a local unsent change can be discarded and is handed back",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-002-B VPO-199103f9166730e7 VPO-6886a2a6e612f704 every user event is accepted only in its legal source states and a refusal changes nothing",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        }
+      ]
+    }
+  ]
+}

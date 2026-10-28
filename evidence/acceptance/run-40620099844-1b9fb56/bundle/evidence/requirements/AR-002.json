@@ -1,0 +1,84 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "AR-002",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-b5f193731c58028b",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.Acceptance.RunTests.EvidenceTests.AR-002 WDL-015 every baseline obligation, WDL-001 to WDL-015 included, maps to a derived criterion or a recorded disposition",
+          "outcome": "passed",
+          "resultFile": "TestResults/acceptance-run/acceptance-run_net10.0_20261028024103.trx"
+        },
+        {
+          "testId": "dotnet:Causa.Acceptance.RunTests.PreservationTests.control: the real derived package passes the derivation check, every obligation carried verbatim",
+          "outcome": "passed",
+          "resultFile": "TestResults/preservation-adversarial/preservation-adversarial_net10.0_20261028022424.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-413ff7efb9ab1eaf",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.Acceptance.RunTests.PreservationTests.AR-002 PF-018 WDL-015 omitting a derived requirement (WDL-005) fails the gate",
+          "outcome": "passed",
+          "resultFile": "TestResults/preservation-adversarial/preservation-adversarial_net10.0_20261028022424.trx"
+        },
+        {
+          "testId": "dotnet:Causa.Acceptance.RunTests.PreservationTests.AR-002 PF-018 a negated obligation does not pass the gate",
+          "outcome": "passed",
+          "resultFile": "TestResults/preservation-adversarial/preservation-adversarial_net10.0_20261028022424.trx"
+        },
+        {
+          "testId": "dotnet:Causa.Acceptance.RunTests.PreservationTests.AR-002 PF-018 a weakened obligation (MUST to SHOULD) does not pass the gate",
+          "outcome": "passed",
+          "resultFile": "TestResults/preservation-adversarial/preservation-adversarial_net10.0_20261028022424.trx"
+        },
+        {
+          "testId": "dotnet:Causa.Acceptance.RunTests.PreservationTests.AR-002 PF-018 the derivation check fails a negation and a weakening and names each obligation",
+          "outcome": "passed",
+          "resultFile": "TestResults/preservation-adversarial/preservation-adversarial_net10.0_20261028022424.trx"
+        },
+        {
+          "testId": "dotnet:Causa.Acceptance.RunTests.PreservationTests.AR-002 WDL-015 the derivation check fails an omitted document and names every obligation it carried",
+          "outcome": "passed",
+          "resultFile": "TestResults/preservation-adversarial/preservation-adversarial_net10.0_20261028022424.trx"
+        },
+        {
+          "testId": "dotnet:Causa.Acceptance.RunTests.PreservationTests.AR-002 the derivation check fails a role swap (ADRP-001-O1 precedence exchanged) and names the obligation",
+          "outcome": "passed",
+          "resultFile": "TestResults/preservation-adversarial/preservation-adversarial_net10.0_20261028022424.trx"
+        },
+        {
+          "testId": "dotnet:Causa.Acceptance.RunTests.PreservationTests.AR-002 the derivation check fails a value swap (UI-016-O11 WCAG ratios exchanged) and names the obligation",
+          "outcome": "passed",
+          "resultFile": "TestResults/preservation-adversarial/preservation-adversarial_net10.0_20261028022424.trx"
+        },
+        {
+          "testId": "dotnet:Causa.Acceptance.Tests.AcceptanceTests.AR-002 verbatim carriage passes; value swaps, role swaps, negation and omission each fail with the obligation id",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022519.trx"
+        }
+      ]
+    }
+  ]
+}

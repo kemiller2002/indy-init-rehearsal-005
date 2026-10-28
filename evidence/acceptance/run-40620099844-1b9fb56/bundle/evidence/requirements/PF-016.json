@@ -1,0 +1,44 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "PF-016",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-8cd7943440a55f6f",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:identity.spec.js > fixture scenarios show navy, teal, amber, coral and ivory in the states they mean, each with a text label and measured contrast [VPO-8cd7943440a55f6f] [VPO-b3cab23e517cd0d3] [VPO-7fd9b69b4aa5b401] [VPO-f4f9d09fc20df79d] [VPO-5a993f5a761fd6ee] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-727b07dc99ecb7c5",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:deployed.spec.js > PF-016 deployed exact-SHA screenshots at desktop, iPad portrait and landscape and mobile sizes [VPO-727b07dc99ecb7c5] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/deployed/deployed-results.json"
+        }
+      ]
+    }
+  ]
+}

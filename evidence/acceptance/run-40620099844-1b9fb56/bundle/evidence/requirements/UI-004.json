@@ -1,0 +1,163 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "UI-004",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-be99a964783c59b5",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.UxViewTests.VPO-be99a964783c59b5 the rendered commands are exactly the F# engine's capabilities for the current version, and move with it",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-9659118aa1ef95ff",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.EnginePortTests.VPO-9659118aa1ef95ff an illegal command is refused with the engine's reasons and nothing changes",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "dotnet:Causa.App.Tests.ProjectionTests.VPO-9659118aa1ef95ff only the engine's capabilities are rendered, illegal ones with the engine's reason",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "playwright:percepta.spec.js > every bound screen satisfies its Percepta contract (verify-app) [VPO-59c5cc78868b7d74] [VPO-447fd64210e3d9e3] [VPO-0684fde6ced06208] [VPO-9659118aa1ef95ff] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:proposals.spec.js > a rejected proposal records the person's reason and is never applied [VPO-9659118aa1ef95ff] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > investigation view through the F# projection (test build) > an injected state renders through the normal view: illegal commands are explained and linked to their blocker [VPO-9659118aa1ef95ff] [VPO-04eb901270c2994a] [VPO-628a11b571e65796] [VPO-12f35805677987db] [VPO-56201f80b312c7c8] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-b9af1bcfc961c8bb",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:forms.spec.js > destructive or irreversible actions wait for confirmation; cancelling changes nothing [VPO-b9af1bcfc961c8bb] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:forms.spec.js > destructive or irreversible actions wait for confirmation; cancelling changes nothing [VPO-b9af1bcfc961c8bb] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:forms.spec.js > evidence, links, hypothesis changes, causes and corrective actions are recorded through validated forms the engine decides [VPO-b9af1bcfc961c8bb] [VPO-ff2e466b7aaa3e12] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:forms.spec.js > evidence, links, hypothesis changes, causes and corrective actions are recorded through validated forms the engine decides [VPO-b9af1bcfc961c8bb] [VPO-ff2e466b7aaa3e12] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-be22751d9b5b8098",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.EnginePortTests.VPO-be22751d9b5b8098 a stale-version submission is rejected and changes nothing",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "playwright:shell.spec.js > stack smoke (DEP-CURRENT-004) and defect classes > DCT-INPUT-A typed text in bound inputs survives the projections that arrive while typing [VPO-be22751d9b5b8098] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > stack smoke (DEP-CURRENT-004) and defect classes > DCT-INPUT-A typed text in bound inputs survives the projections that arrive while typing [VPO-be22751d9b5b8098] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-3b9b2a8a4bf56535",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:identity.spec.js > no essential operation needs drag-and-drop or hover: hover only restyles, nothing is draggable, and a command completes by keyboard [VPO-40f80428200fc71c] [VPO-3b9b2a8a4bf56535] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > identity, accessibility and layout (UI-011, UI-014, UI-016) > reflows without horizontal scrolling and keeps 44px targets @responsive [VPO-0684fde6ced06208] [VPO-86dfcce77d8a048f] [VPO-3b9b2a8a4bf56535] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > identity, accessibility and layout (UI-011, UI-014, UI-016) > reflows without horizontal scrolling and keeps 44px targets @responsive [VPO-0684fde6ced06208] [VPO-86dfcce77d8a048f] [VPO-3b9b2a8a4bf56535] [ipad-landscape]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > identity, accessibility and layout (UI-011, UI-014, UI-016) > reflows without horizontal scrolling and keeps 44px targets @responsive [VPO-0684fde6ced06208] [VPO-86dfcce77d8a048f] [VPO-3b9b2a8a4bf56535] [ipad-portrait]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > identity, accessibility and layout (UI-011, UI-014, UI-016) > reflows without horizontal scrolling and keeps 44px targets @responsive [VPO-0684fde6ced06208] [VPO-86dfcce77d8a048f] [VPO-3b9b2a8a4bf56535] [phone-320]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-04eb901270c2994a",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:proposals.spec.js > proposals are drafted, recorded only on request, and applied only when a person accepts one; the key goes only in the auth header [VPO-04eb901270c2994a] [VPO-f97eb988899c23af] [VPO-bb08b9a414ba4cd7] [VPO-c41f10e4ed8a086b] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:proposals.spec.js > proposals are drafted, recorded only on request, and applied only when a person accepts one; the key goes only in the auth header [VPO-04eb901270c2994a] [VPO-f97eb988899c23af] [VPO-bb08b9a414ba4cd7] [VPO-c41f10e4ed8a086b] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > investigation view through the F# projection (test build) > an injected state renders through the normal view: illegal commands are explained and linked to their blocker [VPO-9659118aa1ef95ff] [VPO-04eb901270c2994a] [VPO-628a11b571e65796] [VPO-12f35805677987db] [VPO-56201f80b312c7c8] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    }
+  ]
+}

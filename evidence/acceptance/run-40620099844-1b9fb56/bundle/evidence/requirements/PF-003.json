@@ -1,0 +1,81 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "PF-003",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-6eaf42e86c5ffad7",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:fixture-mode.spec.js > fixture mode in the test build: the synthetic investigation loads through the same program, the mode is shown conspicuously and never as GitHub, and nothing is sent [VPO-6eaf42e86c5ffad7] [VPO-d4b0d50550578aeb] [VPO-0a23bb42b8fb58b4] [VPO-ad958e7a60d7fd9b] [VPO-b148b239fc1c24b0] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-d4b0d50550578aeb",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Persistence.Tests.FixtureTests.VPO-b090ff3e3c16c13d VPO-ff3dc45c64bfa0cb VPO-da07c2ac97baa9f1 VPO-d4b0d50550578aeb fixture and GitHub providers share one port and one program with the same semantics",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "playwright:fixture-mode.spec.js > fixture mode in the test build: the synthetic investigation loads through the same program, the mode is shown conspicuously and never as GitHub, and nothing is sent [VPO-6eaf42e86c5ffad7] [VPO-d4b0d50550578aeb] [VPO-0a23bb42b8fb58b4] [VPO-ad958e7a60d7fd9b] [VPO-b148b239fc1c24b0] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-00c1408c9f31d4a2",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:fixture-mode.spec.js > the production build has no fixture mode: Connect to local/fixture is refused before anything is sent, and neither the URL, storage nor a page global switches it on [VPO-00c1408c9f31d4a2] [VPO-0a23bb42b8fb58b4] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-0a23bb42b8fb58b4",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:fixture-mode.spec.js > UI-015-O3 mocked persistence is never represented as a live write, and the check is shown to catch a live claim (negative control) [VPO-0a23bb42b8fb58b4] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:fixture-mode.spec.js > fixture mode in the test build: the synthetic investigation loads through the same program, the mode is shown conspicuously and never as GitHub, and nothing is sent [VPO-6eaf42e86c5ffad7] [VPO-d4b0d50550578aeb] [VPO-0a23bb42b8fb58b4] [VPO-ad958e7a60d7fd9b] [VPO-b148b239fc1c24b0] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:fixture-mode.spec.js > the production build has no fixture mode: Connect to local/fixture is refused before anything is sent, and neither the URL, storage nor a page global switches it on [VPO-00c1408c9f31d4a2] [VPO-0a23bb42b8fb58b4] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    }
+  ]
+}

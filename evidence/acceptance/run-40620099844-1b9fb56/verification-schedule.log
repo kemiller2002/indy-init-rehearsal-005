@@ -1,0 +1,6 @@
+Verification schedule for VP-e77a2134e1b0 (sha256:e77a2134e1b014539fd5e585a6c440debee03074dc274e3496c60b0e7c3b2942)
+  requirements: 108; acceptance blockers: 108
+  dependencies: 72 (unknown targets: 12); cycles: 0 (0 requirement(s) behind them)
+  implementation tasks: 326; required verification: 326; stale evidence: 0
+  independent waves: 6 (sizes 95/8/2/1/1/1)
+  schedule digest: sha256:f9a2fad9af9f283411a390b19068cd9d874a91404ebf95488a66f16e287b8e9a

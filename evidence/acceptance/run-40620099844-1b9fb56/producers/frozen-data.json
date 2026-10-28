@@ -1,0 +1,99 @@
+{
+  "schema": "causa.acceptance-producer/1",
+  "id": "frozen-data",
+  "description": "G4 / T15: the frozen fixture replay against causa-data (storage contract v1.0.0): five golden scenarios, byte-identical rewrite, 90 negative fixtures, locked digests, historical catalog.",
+  "status": "success",
+  "checks": [
+    {
+      "name": "plan requirements routed to G4",
+      "status": "PASS",
+      "detail": "all 1 G4 requirements bound and passing",
+      "tests": []
+    },
+    {
+      "name": "T15 fixture replay",
+      "status": "PASS",
+      "detail": "8 selected tests ran and passed",
+      "tests": [
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 VPO-3d67d1f2b8287e39 golden scenarios.json agrees with the replayed histories (no CAUSA.GOLDEN_MISMATCH)",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 VPO-9c6055c47e4eb07d the writer reproduces every frozen file set byte for byte from the decoded events",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 concurrent readers all verify (regression: the schema regex cache raced under parallel reads)",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 every frozen file still has its locked digest after the replay run",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 VPO-f52d9071426e82b3 all 90 negative fixtures are refused with their expected code and domain code",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 STORAGE-007 VPO-5933d986a6ba6dc3 VPO-2d84a4c6df612b0d the three release identities match the contract this engine implements",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 EXT-DATA-013 VPO-4b4747eaff96e385 the active historical catalog loads all three cases through the engine to their catalog states",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 VPO-3d67d1f2b8287e39 five golden scenarios replay through the engine to their pinned digests and golden states",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        }
+      ]
+    },
+    {
+      "name": "five golden scenarios",
+      "status": "PASS",
+      "detail": "1 selected tests ran and passed",
+      "tests": [
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 VPO-3d67d1f2b8287e39 five golden scenarios replay through the engine to their pinned digests and golden states",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        }
+      ]
+    },
+    {
+      "name": "negative fixtures",
+      "status": "PASS",
+      "detail": "1 selected tests ran and passed",
+      "tests": [
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 VPO-f52d9071426e82b3 all 90 negative fixtures are refused with their expected code and domain code",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        }
+      ]
+    },
+    {
+      "name": "locked digests",
+      "status": "PASS",
+      "detail": "1 selected tests ran and passed",
+      "tests": [
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 every frozen file still has its locked digest after the replay run",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        }
+      ]
+    }
+  ],
+  "runId": "40620099844-1",
+  "sourceSha": "1b9fb56873fe7a98dffd5172066d909449c17eae"
+}

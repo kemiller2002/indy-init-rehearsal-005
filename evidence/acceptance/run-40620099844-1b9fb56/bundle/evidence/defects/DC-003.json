@@ -1,0 +1,167 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "defect",
+  "subject_id": "DC-003",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "review",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "fix_sha": "b07d2a5def150e1cd741f0540667eac31b78330e",
+  "fix_in_source_history": true,
+  "reviewer_evidence": {
+    "path": "acceptance/reviews/R5-final-review.md",
+    "anchor": "dc-003-543ddc2",
+    "sha256": "31db648bd0410ca560bfd6e40f776c87edcf198b338e08fab01dc96a178b6313"
+  },
+  "tests": [
+    {
+      "test": "DCT-003-A",
+      "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-003-A saved is claimed only after the read-back matches",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+    },
+    {
+      "test": "DCT-003-A",
+      "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-003-A a failure after send is unknown with no retry and reconcile reads the head first",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+    },
+    {
+      "test": "DCT-003-A",
+      "testId": "dotnet:App.Engine.Tests.WriteInvariantTests.DCT-003-A negative control VPO-821ce84e76d497b9 VPO-7b54ff75e3784cae the check fails on stage-blind failure classification",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+    },
+    {
+      "test": "DCT-003-A",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A an unrecognised HTTP status after the write was sent is unknown and reconciled, never not-written with retry",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-003-A",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-B DCT-003-A VPO-b3efad6eb85360be a commit carrying our marker but other bytes is a conflict, never saved",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-003-A",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A an unrecognised HTTP status after the write was sent is unknown and reconciled, never not-written with retry",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-003-A",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A an unrecognised HTTP status after the write was sent is unknown and reconciled, never not-written with retry",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-003-A",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-B DCT-003-A VPO-b3efad6eb85360be a write applied before its answer was lost is confirmed only after its bytes are read back",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-003-A",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A VPO-b3efad6eb85360be a reconcile whose read-back fails stays unknown",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-003-A",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A a 200 answer that names a commit is never a refusal, even with a typed error",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-003-A",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-001-B DCT-003-A VPO-b3efad6eb85360be two devices: a lost write is never reconciled as applied because another device's commit followed the same head",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-003-A",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A VPO-b3efad6eb85360be saved is claimed only after the read-back matches the sent bytes",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-003-A",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A an unrecognised HTTP status after the write was sent is unknown and reconciled, never not-written with retry",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-003-A",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A an unrecognised HTTP status after the write was sent is unknown and reconciled, never not-written with retry",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-003-A",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A an unrecognised HTTP status after the write was sent is unknown and reconciled, never not-written with retry",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-003-A",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A VPO-89ed6170f531961e a failure after send is unknown with no retry and reconcile reads the head first",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-003-A",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A a 200 answer that names a commit is never a refusal, even with a typed error",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-003-A",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A an unrecognised HTTP status after the write was sent is unknown and reconciled, never not-written with retry",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-003-A",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A VPO-b3efad6eb85360be a GraphQL error of an unrecognised type after send is unknown, never not-written with retry",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-003-A",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A a 200 answer that names a commit is never a refusal, even with a typed error",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-003-A",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A an unrecognised HTTP status after the write was sent is unknown and reconciled, never not-written with retry",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-003-A",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A an unrecognised HTTP status after the write was sent is unknown and reconciled, never not-written with retry",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    },
+    {
+      "test": "DCT-003-A",
+      "testId": "dotnet:Persistence.Tests.DcTableTests.DCT-003-A a 200 answer that names a commit is never a refusal, even with a typed error",
+      "outcome": "passed",
+      "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "UI-023",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-d0e33c8aaaf705f2",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.EnginePortTests.VPO-d0e33c8aaaf705f2 VPO-f0256bc31283be14 VPO-58231f4725864068 integrity that passed never becomes a Verified finding in the investigation views",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "playwright:ux.spec.js > investigation work apart from Administration and Settings (UI-017, UI-018, UI-020, UI-021, UI-023, UI-029, UI-030, UI-031) > an investigation that loaded correctly but has unresolved findings is never labelled Verified; findings come from the domain [VPO-d0e33c8aaaf705f2] [VPO-c8114e2b7bd759fa] [VPO-f0256bc31283be14] [VPO-58231f4725864068] [VPO-885e4767b84371de] [VPO-6f0a2e18f9a19003] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-c8114e2b7bd759fa",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:ux.spec.js > investigation work apart from Administration and Settings (UI-017, UI-018, UI-020, UI-021, UI-023, UI-029, UI-030, UI-031) > an investigation that loaded correctly but has unresolved findings is never labelled Verified; findings come from the domain [VPO-d0e33c8aaaf705f2] [VPO-c8114e2b7bd759fa] [VPO-f0256bc31283be14] [VPO-58231f4725864068] [VPO-885e4767b84371de] [VPO-6f0a2e18f9a19003] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-f0256bc31283be14",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.EnginePortTests.VPO-d0e33c8aaaf705f2 VPO-f0256bc31283be14 VPO-58231f4725864068 integrity that passed never becomes a Verified finding in the investigation views",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "playwright:ux.spec.js > investigation work apart from Administration and Settings (UI-017, UI-018, UI-020, UI-021, UI-023, UI-029, UI-030, UI-031) > an investigation that loaded correctly but has unresolved findings is never labelled Verified; findings come from the domain [VPO-d0e33c8aaaf705f2] [VPO-c8114e2b7bd759fa] [VPO-f0256bc31283be14] [VPO-58231f4725864068] [VPO-885e4767b84371de] [VPO-6f0a2e18f9a19003] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-58231f4725864068",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.EnginePortTests.VPO-d0e33c8aaaf705f2 VPO-f0256bc31283be14 VPO-58231f4725864068 integrity that passed never becomes a Verified finding in the investigation views",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "playwright:ux.spec.js > investigation work apart from Administration and Settings (UI-017, UI-018, UI-020, UI-021, UI-023, UI-029, UI-030, UI-031) > an investigation that loaded correctly but has unresolved findings is never labelled Verified; findings come from the domain [VPO-d0e33c8aaaf705f2] [VPO-c8114e2b7bd759fa] [VPO-f0256bc31283be14] [VPO-58231f4725864068] [VPO-885e4767b84371de] [VPO-6f0a2e18f9a19003] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    }
+  ]
+}

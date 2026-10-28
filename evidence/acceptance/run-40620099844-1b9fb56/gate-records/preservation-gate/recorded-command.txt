@@ -1,0 +1,9 @@
+praxis requirements preservation verify \
+  --baseline '<indy-init>/requirements/causa-requirements-baseline.json' \
+  --source '<indy-init@aab8f80>' \
+  --derived research/requirements \
+  --disposition research/requirements-preservation/disposition.json \
+  --approvals '<indy-init>/kickoff/rehearsal-005/approvals.json' \
+  --approvals-sha256 711859d610ee6af1174aa33ebc6455ec77a7d107af02aa3fe80da0003616c011 \
+  --trusted-approver kemiller2002 \
+  --output evidence/requirements-preservation/gate-pre-implementation.json --json

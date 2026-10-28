@@ -1,0 +1,54 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "PF-006",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-ad958e7a60d7fd9b",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Persistence.Tests.FixtureTests.VPO-ad958e7a60d7fd9b VPO-f00be0cb5a2bb0f8 the fixture is one compact, complete synthetic investigation decided by the engine, with stable ids",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        },
+        {
+          "testId": "playwright:fixture-mode.spec.js > fixture mode in the test build: the synthetic investigation loads through the same program, the mode is shown conspicuously and never as GitHub, and nothing is sent [VPO-6eaf42e86c5ffad7] [VPO-d4b0d50550578aeb] [VPO-0a23bb42b8fb58b4] [VPO-ad958e7a60d7fd9b] [VPO-b148b239fc1c24b0] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-f00be0cb5a2bb0f8",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 VPO-3d67d1f2b8287e39 five golden scenarios replay through the engine to their pinned digests and golden states",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        },
+        {
+          "testId": "dotnet:Persistence.Tests.FixtureTests.VPO-ad958e7a60d7fd9b VPO-f00be0cb5a2bb0f8 the fixture is one compact, complete synthetic investigation decided by the engine, with stable ids",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022524.trx"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "UI-038",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-f8666daf6fdf79d7",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.EnginePortTests.VPO-f8666daf6fdf79d7 VPO-ffda9fea0324a42e the report explains only from Projection.report's typed records",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "dotnet:Causa.App.Tests.RecordsTests.VPO-f8666daf6fdf79d7 VPO-ffda9fea0324a42e a cause's explanation lists supporting and conflicting evidence, hypotheses, history and why it is unresolved",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > a cause's explanation lists its hypotheses, supporting and conflicting evidence, history and why it is not confirmed; nothing is concluded [VPO-f8666daf6fdf79d7] [VPO-ffda9fea0324a42e] [VPO-885e4767b84371de] [VPO-8a5de7e5afae98cb] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-ffda9fea0324a42e",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.EnginePortTests.VPO-f8666daf6fdf79d7 VPO-ffda9fea0324a42e the report explains only from Projection.report's typed records",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "dotnet:Causa.App.Tests.RecordsTests.VPO-f8666daf6fdf79d7 VPO-ffda9fea0324a42e a cause's explanation lists supporting and conflicting evidence, hypotheses, history and why it is unresolved",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > a cause's explanation lists its hypotheses, supporting and conflicting evidence, history and why it is not confirmed; nothing is concluded [VPO-f8666daf6fdf79d7] [VPO-ffda9fea0324a42e] [VPO-885e4767b84371de] [VPO-8a5de7e5afae98cb] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    }
+  ]
+}

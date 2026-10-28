@@ -1,0 +1,59 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "WDL-005",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-434d1a1d24b4b20e",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.GraphTests.VPO-434d1a1d24b4b20e VPO-69f661459a587bbd the document carries no coordinates: placement is left to the workflow engine",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-2a3f7cbe7df14c03",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:graph-layout.spec.js > causal graph layout, measured in the browser > every synthetic fixture lays out without overlapping nodes, clipped text, labels over nodes, detached or unlisted connectors, or hidden evidence counts, and within its crossing budget; zero, one, many, disconnected and cyclic graphs all lay out validly @responsive [VPO-9fe0158bf99720e2] [VPO-37a1821f8918e8a9] [VPO-2a3f7cbe7df14c03] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:graph-layout.spec.js > causal graph layout, measured in the browser > every synthetic fixture lays out without overlapping nodes, clipped text, labels over nodes, detached or unlisted connectors, or hidden evidence counts, and within its crossing budget; zero, one, many, disconnected and cyclic graphs all lay out validly @responsive [VPO-9fe0158bf99720e2] [VPO-37a1821f8918e8a9] [VPO-2a3f7cbe7df14c03] [ipad-landscape]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:graph-layout.spec.js > causal graph layout, measured in the browser > every synthetic fixture lays out without overlapping nodes, clipped text, labels over nodes, detached or unlisted connectors, or hidden evidence counts, and within its crossing budget; zero, one, many, disconnected and cyclic graphs all lay out validly @responsive [VPO-9fe0158bf99720e2] [VPO-37a1821f8918e8a9] [VPO-2a3f7cbe7df14c03] [ipad-portrait]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:graph-layout.spec.js > causal graph layout, measured in the browser > every synthetic fixture lays out without overlapping nodes, clipped text, labels over nodes, detached or unlisted connectors, or hidden evidence counts, and within its crossing budget; zero, one, many, disconnected and cyclic graphs all lay out validly @responsive [VPO-9fe0158bf99720e2] [VPO-37a1821f8918e8a9] [VPO-2a3f7cbe7df14c03] [phone-320]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    }
+  ]
+}

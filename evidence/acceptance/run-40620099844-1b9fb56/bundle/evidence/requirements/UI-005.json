@@ -1,0 +1,106 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "UI-005",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-ff2e466b7aaa3e12",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.RecordsTests.VPO-ff2e466b7aaa3e12 evidence sharing a source is shown as dependent, never independent, and lineage lists its events in sequence",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "dotnet:Causa.App.Tests.RecordsTests.VPO-ff2e466b7aaa3e12 the evidence inspector shows source, timestamps, original content, assessment and links to hypotheses",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "playwright:forms.spec.js > evidence, links, hypothesis changes, causes and corrective actions are recorded through validated forms the engine decides [VPO-b9af1bcfc961c8bb] [VPO-ff2e466b7aaa3e12] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:forms.spec.js > evidence, links, hypothesis changes, causes and corrective actions are recorded through validated forms the engine decides [VPO-b9af1bcfc961c8bb] [VPO-ff2e466b7aaa3e12] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > the evidence inspector shows provenance, timestamps, cleaned original text, missing provenance labelled, links to its hypothesis, dependents and lineage [VPO-ff2e466b7aaa3e12] [VPO-34334672f9ff0014] [VPO-5fe930a650a08b04] [VPO-c18f969a9c8b65bf] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-cc57508f3ac056de",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:App.Engine.Tests.KernelTests.T13 UI-005-O2 VPO-cc57508f3ac056de original evidence is never altered when its interpretation changes",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-34334672f9ff0014",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.RecordsTests.VPO-34334672f9ff0014 untrusted text is cleaned, only safe http(s) addresses become links, and missing provenance is labelled",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "playwright:ux.spec.js > detail inspector and relationships (UI-005, UI-033, UI-034, UI-038, UI-039) > the evidence inspector shows provenance, timestamps, cleaned original text, missing provenance labelled, links to its hypothesis, dependents and lineage [VPO-ff2e466b7aaa3e12] [VPO-34334672f9ff0014] [VPO-5fe930a650a08b04] [VPO-c18f969a9c8b65bf] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-c7c84a08e62427e4",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.GraphTests.UI-005-O4 VPO-c7c84a08e62427e4 a hypothesis node opens its own evidence and every link is an application route",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "dotnet:Causa.App.Tests.GraphTests.UI-005-O4 VPO-c7c84a08e62427e4 the shell's hypothesis rows carry the evidence the engine relates to them, in admission order",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "playwright:graph-navigation.spec.js > navigation from the causal graph (UI-005-O4) > a hypothesis node's Open action lands on its evidence record in the evidence view [VPO-c7c84a08e62427e4] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:graph-navigation.spec.js > navigation from the causal graph (UI-005-O4) > a link outside #/investigations/ is never followed, even when the graph document carries it [VPO-c7c84a08e62427e4] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    }
+  ]
+}

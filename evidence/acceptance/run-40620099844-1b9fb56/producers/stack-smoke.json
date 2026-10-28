@@ -1,0 +1,98 @@
+{
+  "schema": "causa.acceptance-producer/1",
+  "id": "stack-smoke",
+  "description": "DEP-CURRENT-004 stack smoke: Limen startup, Forma render and Folio print in a real browser (tests tagged @stack-smoke-limen/-forma/-folio) and the frozen golden replay; the WASM engine smoke is the separate wasm-smoke producer.",
+  "status": "success",
+  "checks": [
+    {
+      "name": "Limen startup",
+      "status": "PASS",
+      "detail": "8 selected tests ran and passed",
+      "tests": [
+        {
+          "testId": "playwright:shell.spec.js > loading experience (WASM-LOAD, T16) > the branded shell shows before the WebAssembly runtime and hands off without a blank frame [VPO-0bd752bd2ac89796] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > loading experience (WASM-LOAD, T16) > the branded shell shows before the WebAssembly runtime and hands off without a blank frame [VPO-0bd752bd2ac89796] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > stack smoke (DEP-CURRENT-004) and defect classes > Limen starts the F# application and binds its projection into the page [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > stack smoke (DEP-CURRENT-004) and defect classes > Limen starts the F# application and binds its projection into the page [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:start-smoke.spec.js > the production starts on every primary route with no engine fault [VPO-0bd752bd2ac89796] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:start-smoke.spec.js > the test build starts on every primary route with no engine fault [VPO-0bd752bd2ac89796] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:start-smoke.spec.js > the production starts on every primary route with no engine fault [VPO-0bd752bd2ac89796] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:start-smoke.spec.js > the test build starts on every primary route with no engine fault [VPO-0bd752bd2ac89796] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "name": "Forma render",
+      "status": "PASS",
+      "detail": "2 selected tests ran and passed",
+      "tests": [
+        {
+          "testId": "playwright:shell.spec.js > stack smoke (DEP-CURRENT-004) and defect classes > a Forma ef-* component renders with Forma's styles and Causa's tokens [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > stack smoke (DEP-CURRENT-004) and defect classes > a Forma ef-* component renders with Forma's styles and Causa's tokens [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "name": "Folio print",
+      "status": "PASS",
+      "detail": "1 selected tests ran and passed",
+      "tests": [
+        {
+          "testId": "playwright:shell.spec.js > stack smoke (DEP-CURRENT-004) and defect classes > the Folio print page renders the report with Folio's elements and print styles [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "name": "frozen golden replay",
+      "status": "PASS",
+      "detail": "1 selected tests ran and passed",
+      "tests": [
+        {
+          "testId": "dotnet:App.Engine.Tests.FixtureReplayTests.T15 VPO-3d67d1f2b8287e39 five golden scenarios replay through the engine to their pinned digests and golden states",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022523.trx"
+        }
+      ]
+    }
+  ],
+  "runId": "40620099844-1",
+  "sourceSha": "1b9fb56873fe7a98dffd5172066d909449c17eae"
+}

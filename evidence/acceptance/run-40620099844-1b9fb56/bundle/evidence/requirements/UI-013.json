@@ -1,0 +1,101 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "UI-013",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-f1a416eaeec6c129",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:ux.spec.js > overview, graph, timeline, evidence inspector, comparison and report all refer to the same investigation id and authoritative version [VPO-f1a416eaeec6c129] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-21abf6acd60d0acc",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.EnginePortTests.VPO-21abf6acd60d0acc a legal command produces events and every view refreshes from the one new version",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "dotnet:Causa.App.Tests.EnginePortTests.VPO-21abf6acd60d0acc a started investigation is projected by the engine at version 1 and opened",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "playwright:shell.spec.js > integration checkpoint 1: a legal command end to end through Limen and the F# kernel (T17) > starting and activating an investigation crosses Limen into the kernel; every view refreshes from the one new version; a refusal changes nothing [VPO-21abf6acd60d0acc] [VPO-b3efad6eb85360be] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > integration checkpoint 1: a legal command end to end through Limen and the F# kernel (T17) > starting and activating an investigation crosses Limen into the kernel; every view refreshes from the one new version; a refusal changes nothing [VPO-21abf6acd60d0acc] [VPO-b3efad6eb85360be] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-d08de632c7c1a4ab",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:history.spec.js > a past version is shown labelled historical with what it changed and what changed since; the latest is never mixed in [VPO-d08de632c7c1a4ab] [VPO-c3326322b8ed473a] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:history.spec.js > a past version is shown labelled historical with what it changed and what changed since; the latest is never mixed in [VPO-d08de632c7c1a4ab] [VPO-c3326322b8ed473a] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:proposals.spec.js > drafts made from an older version are labelled stale, never mixed in as current [VPO-d08de632c7c1a4ab] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-adf482d16e75a882",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.RouteTests.VPO-adf482d16e75a882 every route round-trips through its hash",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "dotnet:Causa.App.Tests.RouteTests.VPO-adf482d16e75a882 formatting a parsed canonical hash gives the same hash",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        },
+        {
+          "testId": "playwright:shell.spec.js > routes and navigation (T16) > a deep link survives reload and an unknown address fails with a useful recovery [VPO-adf482d16e75a882] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schema": "causa.derivation-check/1",
+  "verdict": "pass",
+  "rule": "verbatim carriage: every baseline obligation's derived criterion is byte-identical to its text, unless an approved transformation is recorded",
+  "summary": {
+    "requirements": 461,
+    "obligations": 2293,
+    "documents": 461,
+    "findings": 0
+  },
+  "findings": [],
+  "baseline": {
+    "path": "/home/runner/work/_temp/indy-init/requirements/causa-requirements-baseline.json",
+    "sha256": "621e2f960038dcfb0daa2a9fe18a0c1c350faed297ba2856da1236a0360857b9"
+  },
+  "derived": "research/requirements"
+}

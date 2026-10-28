@@ -1,0 +1,44 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "WDL-012",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-3ec21931ff613a67",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:live-graph.spec.js > WDL-012 the graph of each real historical investigation shows exactly its recorded causal structure and evidence counts, laid out without overlap or clipping, stable, with text equivalents [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/live/live-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-f635d053f07b64fe",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:live-graph.spec.js > WDL-012 the graph of each real historical investigation shows exactly its recorded causal structure and evidence counts, laid out without overlap or clipping, stable, with text equivalents [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/live/live-results.json"
+        }
+      ]
+    }
+  ]
+}

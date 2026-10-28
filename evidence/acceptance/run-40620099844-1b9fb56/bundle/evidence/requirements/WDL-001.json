@@ -1,0 +1,44 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "WDL-001",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-b34d65289bec1814",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:graph-layout.spec.js > workflow layout engine capability record (WDL-001, WDL-002) > the recorded engine is the installed one: owner, package, version, integrity, licence, API and constraints, with a working example [VPO-b34d65289bec1814] [VPO-35548bc529249967] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-35548bc529249967",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:graph-layout.spec.js > workflow layout engine capability record (WDL-001, WDL-002) > the recorded engine is the installed one: owner, package, version, integrity, licence, API and constraints, with a working example [VPO-b34d65289bec1814] [VPO-35548bc529249967] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    }
+  ]
+}

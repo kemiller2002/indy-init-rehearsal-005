@@ -1,0 +1,147 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "UI-010",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-4355a83607ddc8da",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:shell.spec.js > loading experience (WASM-LOAD, T16) > a 503 for the runtime ends in an explained failure with Retry focused, and Retry then starts Causa [VPO-0bd752bd2ac89796] [VPO-4355a83607ddc8da] [VPO-e54ee03f405cdc8f] [VPO-97351596eb39e14e] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-e54ee03f405cdc8f",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:proposals.spec.js > AI result state: a malformed answer is refused whole and offers Try again; nothing is recorded [VPO-e54ee03f405cdc8f] [VPO-97351596eb39e14e] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:proposals.spec.js > AI result state: a rejected key (401) offers no Try again; nothing is recorded [VPO-e54ee03f405cdc8f] [VPO-97351596eb39e14e] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:proposals.spec.js > AI result state: an unavailable model (404) offers no Try again; nothing is recorded [VPO-e54ee03f405cdc8f] [VPO-97351596eb39e14e] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:proposals.spec.js > AI result state: overloaded (529) offers Try again; nothing is recorded [VPO-e54ee03f405cdc8f] [VPO-97351596eb39e14e] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:proposals.spec.js > AI result state: rate limited (429) offers Try again; nothing is recorded [VPO-e54ee03f405cdc8f] [VPO-97351596eb39e14e] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > loading experience (WASM-LOAD, T16) > a 503 for the runtime ends in an explained failure with Retry focused, and Retry then starts Causa [VPO-0bd752bd2ac89796] [VPO-4355a83607ddc8da] [VPO-e54ee03f405cdc8f] [VPO-97351596eb39e14e] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-97351596eb39e14e",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:proposals.spec.js > AI result state: a malformed answer is refused whole and offers Try again; nothing is recorded [VPO-e54ee03f405cdc8f] [VPO-97351596eb39e14e] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:proposals.spec.js > AI result state: a rejected key (401) offers no Try again; nothing is recorded [VPO-e54ee03f405cdc8f] [VPO-97351596eb39e14e] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:proposals.spec.js > AI result state: an unavailable model (404) offers no Try again; nothing is recorded [VPO-e54ee03f405cdc8f] [VPO-97351596eb39e14e] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:proposals.spec.js > AI result state: overloaded (529) offers Try again; nothing is recorded [VPO-e54ee03f405cdc8f] [VPO-97351596eb39e14e] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:proposals.spec.js > AI result state: rate limited (429) offers Try again; nothing is recorded [VPO-e54ee03f405cdc8f] [VPO-97351596eb39e14e] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > loading experience (WASM-LOAD, T16) > a 503 for the runtime ends in an explained failure with Retry focused, and Retry then starts Causa [VPO-0bd752bd2ac89796] [VPO-4355a83607ddc8da] [VPO-e54ee03f405cdc8f] [VPO-97351596eb39e14e] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > stack smoke (DEP-CURRENT-004) and defect classes > DCT-006-A a 503 on one framework .wasm shows the recoverable failure well before the start timeout, focus on Retry, and Retry reaches ready [VPO-0bd752bd2ac89796] [VPO-97351596eb39e14e] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > stack smoke (DEP-CURRENT-004) and defect classes > DCT-006-A a 503 on one framework .wasm shows the recoverable failure well before the start timeout, focus on Retry, and Retry reaches ready [VPO-0bd752bd2ac89796] [VPO-97351596eb39e14e] [webkit]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-b8e1657130d006fd",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "dotnet:Causa.App.Tests.EnginePortTests.VPO-b8e1657130d006fd an investigation that failed to load renders no partial state",
+          "outcome": "passed",
+          "resultFile": "TestResults/dotnet/core_net10.0_20261028022522.trx"
+        }
+      ]
+    },
+    {
+      "id": "VPO-fba8a61be6d12adf",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:production-hooks.spec.js > in the production page neither the runtime global nor the page can enable the Percepta hook or fixture mode [VPO-fba8a61be6d12adf] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:production-hooks.spec.js > the production .NET build has no EnableTestHooks export; the test build does (negative control) [VPO-c41f10e4ed8a086b] [VPO-fba8a61be6d12adf] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > security of the shell > a typed token never reaches the page, the URL or browser storage [VPO-bb08b9a414ba4cd7] [VPO-fba8a61be6d12adf] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    }
+  ]
+}

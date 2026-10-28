@@ -1,0 +1,30 @@
+{
+  "schema": "indy-init.r5-final/1",
+  "recordedAfterRun": true,
+  "note": "Written after the rehearsal ended, from CI evidence; it adds no evidence and changes no product file.",
+  "startUtc": "2026-10-27T20:08:38Z",
+  "deadlineUtc": "2026-10-28T03:08:38Z",
+  "finalVerdictUtc": "2026-10-28T02:41:07Z",
+  "elapsedMinutes": 392,
+  "stopReason": "Final candidate's computed verdict was INCOMPLETE and nothing remaining before the deadline could reach ACCEPTED; work stopped at the verdict.",
+  "candidate": {
+    "sourceSha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+    "deployedSha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+    "pagesUrl": "https://kevinmmiller.us/indy-init-rehearsal-005/",
+    "ciRun": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844"
+  },
+  "verdict": {
+    "ledgerVerifier": "INCOMPLETE",
+    "planVerifier": "INCOMPLETE",
+    "accepted": false,
+    "evidence": "evidence/acceptance/run-40620099844-1b9fb56"
+  },
+  "gates": { "G0": "PASS", "G1": "PASS", "G2": "PASS", "G3": "PASS", "G4": "PASS", "G5": "PASS", "G6": "PASS", "G7": "PASS", "G8": "NOT_RUN", "G9": "NOT_RUN" },
+  "p0Requirements": { "total": 108, "pass": 77, "notRun": 31, "fail": 0 },
+  "obligations": { "total": 326, "pass": 277, "notRun": 49, "fail": 0 },
+  "defectClasses": { "DC-001": "PASS", "DC-002": "PASS", "DC-003": "PASS", "DC-004": "PASS", "DC-005": "PASS", "DC-006": "PASS", "R3-LESSON-3": "PASS", "DC-001..DC-005": "PASS" },
+  "reviews": [ "acceptance/reviews/R5-independent-review.md", "acceptance/reviews/R5-final-review.md" ],
+  "ownerDecisions": [ "research/decisions/DF-CAUSA-2026-0001--r5-dec-001-forma-workflow-1-1-0.md", "research/decisions/DF-CAUSA-2026-0002--r5-dec-002-percepta-s16-not-applicable.md" ],
+  "results": "https://github.com/kemiller2002/Indy-init/blob/main/docs/REHEARSAL-005-RESULTS.md",
+  "curatedPlan": { "planId": "VP-5d1202ddec1e", "indyInitCommit": "cf328bb3b671cff5c6e63a21bee74653b3a98b6a", "pinnedHere": false }
+}

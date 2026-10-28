@@ -1,0 +1,41 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "defect",
+  "subject_id": "DC-006",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "review",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "fix_sha": "578ebd3b0bbc99862dc2da945e9c3b9e3f719bba",
+  "fix_in_source_history": true,
+  "reviewer_evidence": {
+    "path": "acceptance/reviews/R5-independent-review.md",
+    "anchor": "dc-006",
+    "sha256": "9391bbd5abe5c24e663ee785a301bd67bd895ccea688c62baf72e51bd6375720"
+  },
+  "tests": [
+    {
+      "test": "DCT-006-A",
+      "testId": "playwright:shell.spec.js > stack smoke (DEP-CURRENT-004) and defect classes > DCT-006-A a 503 on one framework .wasm shows the recoverable failure well before the start timeout, focus on Retry, and Retry reaches ready [VPO-0bd752bd2ac89796] [VPO-97351596eb39e14e] [chromium]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json"
+    },
+    {
+      "test": "DCT-006-A",
+      "testId": "playwright:shell.spec.js > stack smoke (DEP-CURRENT-004) and defect classes > DCT-006-A a 503 on one framework .wasm shows the recoverable failure well before the start timeout, focus on Retry, and Retry reaches ready [VPO-0bd752bd2ac89796] [VPO-97351596eb39e14e] [webkit]",
+      "outcome": "passed",
+      "resultFile": "TestResults/playwright/browser-results.json"
+    }
+  ]
+}

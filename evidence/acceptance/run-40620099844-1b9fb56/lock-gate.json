@@ -1,0 +1,456 @@
+{
+  "schema": "causa.stack-lock-gate/1",
+  "task": "T11",
+  "verdict": "PASS",
+  "context": {
+    "sourceSha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+    "runId": "40620099844"
+  },
+  "summary": {
+    "PASS": 55,
+    "FAIL": 0,
+    "GAP": 0
+  },
+  "checks": [
+    {
+      "id": "channel.sha256",
+      "subject": "acceptance/stack channel resolution",
+      "expected": "d3774e7a24c0df9728ec2fcec197aa2582cfc612c642342c800d64aa4583a290",
+      "actual": "d3774e7a24c0df9728ec2fcec197aa2582cfc612c642342c800d64aa4583a290",
+      "status": "PASS",
+      "detail": "byte pin of the Echelon Registry channel file"
+    },
+    {
+      "id": "channel.profile",
+      "subject": "echelon-current profile version",
+      "expected": "1.29.0",
+      "actual": "1.29.0",
+      "status": "PASS",
+      "detail": "the channel resolves the profile this project is bootstrapped on"
+    },
+    {
+      "id": "channel.praxis",
+      "subject": "praxis resolved by echelon-current",
+      "expected": "3.22.0",
+      "actual": "3.22.0",
+      "status": "PASS",
+      "detail": "the stack named for this rehearsal equals the channel resolution"
+    },
+    {
+      "id": "channel.ordo",
+      "subject": "ordo resolved by echelon-current",
+      "expected": "1.18.0",
+      "actual": "1.18.0",
+      "status": "PASS",
+      "detail": "the stack named for this rehearsal equals the channel resolution"
+    },
+    {
+      "id": "channel.limen",
+      "subject": "limen resolved by echelon-current",
+      "expected": "0.9.0",
+      "actual": "0.9.0",
+      "status": "PASS",
+      "detail": "the stack named for this rehearsal equals the channel resolution"
+    },
+    {
+      "id": "channel.forma",
+      "subject": "forma resolved by echelon-current",
+      "expected": "0.9.0",
+      "actual": "0.9.0",
+      "status": "PASS",
+      "detail": "the stack named for this rehearsal equals the channel resolution"
+    },
+    {
+      "id": "channel.folio",
+      "subject": "folio resolved by echelon-current",
+      "expected": "0.4.1",
+      "actual": "0.4.1",
+      "status": "PASS",
+      "detail": "the stack named for this rehearsal equals the channel resolution"
+    },
+    {
+      "id": "channel.aegis",
+      "subject": "aegis resolved by echelon-current",
+      "expected": "1.0.0",
+      "actual": "1.0.0",
+      "status": "PASS",
+      "detail": "the stack named for this rehearsal equals the channel resolution"
+    },
+    {
+      "id": "channel.percepta",
+      "subject": "percepta resolved by echelon-current",
+      "expected": "0.1.0",
+      "actual": "0.1.0",
+      "status": "PASS",
+      "detail": "the stack named for this rehearsal equals the channel resolution"
+    },
+    {
+      "id": "channel.percepta-semantic",
+      "subject": "percepta-semantic resolved by echelon-current",
+      "expected": "0.3.0",
+      "actual": "0.3.0",
+      "status": "PASS",
+      "detail": "the stack named for this rehearsal equals the channel resolution"
+    },
+    {
+      "id": "channel.dokimos",
+      "subject": "dokimos resolved by echelon-current",
+      "expected": "0.8.0",
+      "actual": "0.8.0",
+      "status": "PASS",
+      "detail": "the stack named for this rehearsal equals the channel resolution"
+    },
+    {
+      "id": "lock.manifest",
+      "subject": ".conditor/lock.json manifestSha256",
+      "expected": "e55c8103b686425e704a4584307cbea0af52decfed05b60ecca0cd6e96ca280f",
+      "actual": "e55c8103b686425e704a4584307cbea0af52decfed05b60ecca0cd6e96ca280f",
+      "status": "PASS",
+      "detail": "the lock pins the exact conditor.json in the tree"
+    },
+    {
+      "id": "lock.praxis",
+      "subject": ".conditor/lock.json praxis",
+      "expected": "3.22.0",
+      "actual": "3.22.0",
+      "status": "PASS",
+      "detail": "locked version equals the channel resolution"
+    },
+    {
+      "id": "lock.ordo",
+      "subject": ".conditor/lock.json ordo",
+      "expected": "1.18.0",
+      "actual": "1.18.0",
+      "status": "PASS",
+      "detail": "locked version equals the channel resolution"
+    },
+    {
+      "id": "lock.percepta",
+      "subject": ".conditor/lock.json percepta",
+      "expected": "0.1.0",
+      "actual": "0.1.0",
+      "status": "PASS",
+      "detail": "locked version equals the channel resolution"
+    },
+    {
+      "id": "lock.aegis",
+      "subject": ".conditor/lock.json aegis",
+      "expected": "1.0.0",
+      "actual": "1.0.0",
+      "status": "PASS",
+      "detail": "locked version equals the channel resolution"
+    },
+    {
+      "id": "lock.limen",
+      "subject": ".conditor/lock.json limen",
+      "expected": "0.9.0",
+      "actual": "0.9.0",
+      "status": "PASS",
+      "detail": "locked version equals the channel resolution"
+    },
+    {
+      "id": "lock.forma",
+      "subject": ".conditor/lock.json forma",
+      "expected": "0.9.0",
+      "actual": "0.9.0",
+      "status": "PASS",
+      "detail": "locked version equals the channel resolution"
+    },
+    {
+      "id": "lock.folio",
+      "subject": ".conditor/lock.json folio",
+      "expected": "0.4.1",
+      "actual": "0.4.1",
+      "status": "PASS",
+      "detail": "locked version equals the channel resolution"
+    },
+    {
+      "id": "manifest.praxis",
+      "subject": "conditor.json praxis",
+      "expected": "3.22.0",
+      "actual": "3.22.0",
+      "status": "PASS",
+      "detail": "declared version equals the channel resolution"
+    },
+    {
+      "id": "manifest.ordo",
+      "subject": "conditor.json ordo",
+      "expected": "1.18.0",
+      "actual": "1.18.0",
+      "status": "PASS",
+      "detail": "declared version equals the channel resolution"
+    },
+    {
+      "id": "manifest.percepta",
+      "subject": "conditor.json percepta",
+      "expected": "0.1.0",
+      "actual": "0.1.0",
+      "status": "PASS",
+      "detail": "declared version equals the channel resolution"
+    },
+    {
+      "id": "manifest.aegis",
+      "subject": "conditor.json aegis",
+      "expected": "1.0.0",
+      "actual": "1.0.0",
+      "status": "PASS",
+      "detail": "declared version equals the channel resolution"
+    },
+    {
+      "id": "manifest.limen",
+      "subject": "conditor.json limen",
+      "expected": "0.9.0",
+      "actual": "0.9.0",
+      "status": "PASS",
+      "detail": "declared version equals the channel resolution"
+    },
+    {
+      "id": "manifest.forma",
+      "subject": "conditor.json forma",
+      "expected": "0.9.0",
+      "actual": "0.9.0",
+      "status": "PASS",
+      "detail": "declared version equals the channel resolution"
+    },
+    {
+      "id": "manifest.folio",
+      "subject": "conditor.json folio",
+      "expected": "0.4.1",
+      "actual": "0.4.1",
+      "status": "PASS",
+      "detail": "declared version equals the channel resolution"
+    },
+    {
+      "id": "npm.declared.limen",
+      "subject": "package.json @echelon-foundry/limen",
+      "expected": "0.9.0",
+      "actual": "0.9.0",
+      "status": "PASS",
+      "detail": "0.9.0"
+    },
+    {
+      "id": "npm.lock.limen",
+      "subject": "package-lock.json @echelon-foundry/limen",
+      "expected": "0.9.0",
+      "actual": "0.9.0",
+      "status": "PASS",
+      "detail": "sha512-noI4TcIfuomBmb2IDSEtm93RpYV3l+9D1eeqtHhW6dld63hpe9McKT335hEaLhc0EEbxNVd1dKlcvw+Nb+PMsw=="
+    },
+    {
+      "id": "npm.installed.limen",
+      "subject": "node_modules/@echelon-foundry/limen",
+      "expected": "0.9.0",
+      "actual": "0.9.0",
+      "status": "PASS",
+      "detail": "installed version"
+    },
+    {
+      "id": "npm.declared.forma",
+      "subject": "package.json @echelon-foundry/design-system",
+      "expected": "0.9.0",
+      "actual": "0.9.0",
+      "status": "PASS",
+      "detail": "0.9.0"
+    },
+    {
+      "id": "npm.lock.forma",
+      "subject": "package-lock.json @echelon-foundry/design-system",
+      "expected": "0.9.0",
+      "actual": "0.9.0",
+      "status": "PASS",
+      "detail": "sha512-nQuknl2iFfSeE44k6gJTdU2g7+p3MfsgQAKCgO0kn6HAVR040d+YX5lAqQqs1kMo6riHOAkuQn54qv3t4f+qxg=="
+    },
+    {
+      "id": "npm.installed.forma",
+      "subject": "node_modules/@echelon-foundry/design-system",
+      "expected": "0.9.0",
+      "actual": "0.9.0",
+      "status": "PASS",
+      "detail": "installed version"
+    },
+    {
+      "id": "npm.declared.folio",
+      "subject": "package.json @echelon-foundry/print-components",
+      "expected": "0.4.1",
+      "actual": "0.4.1",
+      "status": "PASS",
+      "detail": "https://github.com/kemiller2002/folio/releases/download/v0.4.1/echelon-foundry-print-components-0.4.1.tgz"
+    },
+    {
+      "id": "npm.lock.folio",
+      "subject": "package-lock.json @echelon-foundry/print-components",
+      "expected": "0.4.1",
+      "actual": "0.4.1",
+      "status": "PASS",
+      "detail": "sha512-zXNCks3uJMyOXDX62E5/5E2XLlJrB9nNQnY9mPj7nnNAKKPQVSp/fRXY7bpySOw7Bfj4DqCHP3+VsTM2143WFA=="
+    },
+    {
+      "id": "npm.installed.folio",
+      "subject": "node_modules/@echelon-foundry/print-components",
+      "expected": "0.4.1",
+      "actual": "0.4.1",
+      "status": "PASS",
+      "detail": "installed version"
+    },
+    {
+      "id": "outside.decision.@echelon-foundry/forma-workflow",
+      "subject": "decision record @echelon-foundry/forma-workflow (outside echelon-current; owner-approved DF-CAUSA-2026-0001)",
+      "expected": "DF-CAUSA-2026-0001 accepted for @echelon-foundry/forma-workflow 1.1.0",
+      "actual": "DF-CAUSA-2026-0001 accepted for @echelon-foundry/forma-workflow 1.1.0",
+      "status": "PASS",
+      "detail": "research/decisions/DF-CAUSA-2026-0001--r5-dec-001-forma-workflow-1-1-0.md"
+    },
+    {
+      "id": "outside.declared.@echelon-foundry/forma-workflow",
+      "subject": "package.json @echelon-foundry/forma-workflow (outside echelon-current; owner-approved DF-CAUSA-2026-0001)",
+      "expected": "1.1.0",
+      "actual": "1.1.0",
+      "status": "PASS",
+      "detail": "1.1.0"
+    },
+    {
+      "id": "outside.lock.@echelon-foundry/forma-workflow",
+      "subject": "package-lock.json @echelon-foundry/forma-workflow (outside echelon-current; owner-approved DF-CAUSA-2026-0001)",
+      "expected": "1.1.0",
+      "actual": "1.1.0",
+      "status": "PASS",
+      "detail": "sha512-20L1AeYGzqdXu9e2isuQSgvTdI8tRKROiUPpsn0oy/Y1SYSv/1PAtqRu1m3Ahf6Ez9+DyNqCU7bhclyr65Dslw=="
+    },
+    {
+      "id": "outside.integrity.@echelon-foundry/forma-workflow",
+      "subject": "package-lock.json integrity @echelon-foundry/forma-workflow (outside echelon-current; owner-approved DF-CAUSA-2026-0001)",
+      "expected": "sha512-20L1AeYGzqdXu9e2isuQSgvTdI8tRKROiUPpsn0oy/Y1SYSv/1PAtqRu1m3Ahf6Ez9+DyNqCU7bhclyr65Dslw==",
+      "actual": "sha512-20L1AeYGzqdXu9e2isuQSgvTdI8tRKROiUPpsn0oy/Y1SYSv/1PAtqRu1m3Ahf6Ez9+DyNqCU7bhclyr65Dslw==",
+      "status": "PASS",
+      "detail": "sha512-20L1AeYGzqdXu9e2isuQSgvTdI8tRKROiUPpsn0oy/Y1SYSv/1PAtqRu1m3Ahf6Ez9+DyNqCU7bhclyr65Dslw=="
+    },
+    {
+      "id": "outside.installed.@echelon-foundry/forma-workflow",
+      "subject": "node_modules @echelon-foundry/forma-workflow (outside echelon-current; owner-approved DF-CAUSA-2026-0001)",
+      "expected": "1.1.0",
+      "actual": "1.1.0",
+      "status": "PASS",
+      "detail": "installed version"
+    },
+    {
+      "id": "nuget.restored.aegis.src/app/Causa.App.fsproj",
+      "subject": "src/app/Causa.App.fsproj restored EchelonFoundry.Aegis.Core",
+      "expected": "1.0.0",
+      "actual": "1.0.0",
+      "status": "PASS",
+      "detail": "restored version (project.assets.json)"
+    },
+    {
+      "id": "nuget.declared.aegis.src/engine/App.Engine.fsproj",
+      "subject": "src/engine/App.Engine.fsproj EchelonFoundry.Aegis.Core",
+      "expected": "1.0.0",
+      "actual": "1.0.0",
+      "status": "PASS",
+      "detail": "PackageReference version"
+    },
+    {
+      "id": "nuget.restored.aegis.src/engine/App.Engine.fsproj",
+      "subject": "src/engine/App.Engine.fsproj restored EchelonFoundry.Aegis.Core",
+      "expected": "1.0.0",
+      "actual": "1.0.0",
+      "status": "PASS",
+      "detail": "restored version (project.assets.json)"
+    },
+    {
+      "id": "nuget.restored.aegis.src/persistence/Causa.Persistence.fsproj",
+      "subject": "src/persistence/Causa.Persistence.fsproj restored EchelonFoundry.Aegis.Core",
+      "expected": "1.0.0",
+      "actual": "1.0.0",
+      "status": "PASS",
+      "detail": "restored version (project.assets.json)"
+    },
+    {
+      "id": "nuget.restored.aegis.src/persistence/Tool/Causa.Persistence.Tool.fsproj",
+      "subject": "src/persistence/Tool/Causa.Persistence.Tool.fsproj restored EchelonFoundry.Aegis.Core",
+      "expected": "1.0.0",
+      "actual": "1.0.0",
+      "status": "PASS",
+      "detail": "restored version (project.assets.json)"
+    },
+    {
+      "id": "nuget.restored.aegis.tests/App.Engine.Tests/App.Engine.Tests.fsproj",
+      "subject": "tests/App.Engine.Tests/App.Engine.Tests.fsproj restored EchelonFoundry.Aegis.Core",
+      "expected": "1.0.0",
+      "actual": "1.0.0",
+      "status": "PASS",
+      "detail": "restored version (project.assets.json)"
+    },
+    {
+      "id": "nuget.restored.aegis.tests/Causa.App.Tests/Causa.App.Tests.fsproj",
+      "subject": "tests/Causa.App.Tests/Causa.App.Tests.fsproj restored EchelonFoundry.Aegis.Core",
+      "expected": "1.0.0",
+      "actual": "1.0.0",
+      "status": "PASS",
+      "detail": "restored version (project.assets.json)"
+    },
+    {
+      "id": "nuget.restored.aegis.tests/Persistence.Tests/Persistence.Tests.fsproj",
+      "subject": "tests/Persistence.Tests/Persistence.Tests.fsproj restored EchelonFoundry.Aegis.Core",
+      "expected": "1.0.0",
+      "actual": "1.0.0",
+      "status": "PASS",
+      "detail": "restored version (project.assets.json)"
+    },
+    {
+      "id": "praxis.pin.ros",
+      "subject": "ros.json rosVersion",
+      "expected": "3.22.0",
+      "actual": "3.22.0",
+      "status": "PASS",
+      "detail": "the version ./praxis installs"
+    },
+    {
+      "id": "praxis.pin.installed",
+      "subject": ".echelon/ros.json installedVersion",
+      "expected": "3.22.0",
+      "actual": "3.22.0",
+      "status": "PASS",
+      "detail": "the version ./praxis runs"
+    },
+    {
+      "id": "host.praxis",
+      "subject": "praxis --version",
+      "expected": "3.22.0",
+      "actual": "3.22.0",
+      "status": "PASS",
+      "detail": "installed host tool"
+    },
+    {
+      "id": "host.ordo",
+      "subject": "ordo --version",
+      "expected": "1.18.0",
+      "actual": "1.18.0",
+      "status": "PASS",
+      "detail": "installed host tool"
+    },
+    {
+      "id": "host.dokimos",
+      "subject": "dokimos --version",
+      "expected": "0.8.0",
+      "actual": "0.8.0",
+      "status": "PASS",
+      "detail": "installed host tool"
+    },
+    {
+      "id": "host.percepta",
+      "subject": "percepta --version",
+      "expected": "0.3.0",
+      "actual": "0.3.0",
+      "status": "PASS",
+      "detail": "installed host tool"
+    },
+    {
+      "id": "host.percepta-repo",
+      "subject": "percepta-repo --version",
+      "expected": "0.1.0",
+      "actual": "0.1.0",
+      "status": "PASS",
+      "detail": "installed host tool"
+    }
+  ]
+}

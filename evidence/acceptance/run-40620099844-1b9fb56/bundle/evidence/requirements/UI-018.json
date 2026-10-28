@@ -1,0 +1,93 @@
+{
+  "schema": "causa.acceptance-evidence/1",
+  "run_id": "40620099844-1",
+  "source_sha": "1b9fb56873fe7a98dffd5172066d909449c17eae",
+  "subject_type": "requirement",
+  "subject_id": "UI-018",
+  "status": "PASS",
+  "exit_code": 0,
+  "evidence_type": "test",
+  "command": "tools/acceptance/ci/acceptance.sh (run 40620099844-1)",
+  "environment": {
+    "runner.os": "Linux",
+    "runner.arch": "X64",
+    "runner.image": "ubuntu26 20261023.163.3",
+    "dotnet.runtime": ".NET 10.0.14",
+    "os.description": "Ubuntu 26.04.1 LTS",
+    "ci.run": "https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40620099844",
+    "ci.workflow": "Build and test"
+  },
+  "obligations": [
+    {
+      "id": "VPO-41642822de594b56",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:shell.spec.js > routes and navigation (T16) > the three primary destinations are distinct, reachable and mark the current one [VPO-e5cfc842f2367421] [VPO-7bb1e8c5bdccc2f2] [VPO-625e96f365f2c1b8] [VPO-41642822de594b56] [VPO-23d8a096e64b2625] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-a07751ce0dce5689",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:shell.spec.js > Administration and Settings (UI-018, UI-019, VER-007) > Administration shows the versions actually loaded, and no investigation page or footer shows them [VPO-b93e86bd3809524a] [VPO-183d6671da7467b8] [VPO-a07751ce0dce5689] [VPO-a74264901d267d03] [VPO-3f3db98e519aa95c] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-a74264901d267d03",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:shell.spec.js > Administration and Settings (UI-018, UI-019, VER-007) > Administration shows the versions actually loaded, and no investigation page or footer shows them [VPO-b93e86bd3809524a] [VPO-183d6671da7467b8] [VPO-a07751ce0dce5689] [VPO-a74264901d267d03] [VPO-3f3db98e519aa95c] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        },
+        {
+          "testId": "playwright:shell.spec.js > report, timeline and administration views (T22, T26, T29) > Administration groups facts by section and never presents an unverified item as passed [VPO-97a56b1abd22a396] [VPO-a74264901d267d03] [VPO-b27f3de8fd81d25c] [VPO-a4ab030e74ad080a] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-97a56b1abd22a396",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:shell.spec.js > report, timeline and administration views (T22, T26, T29) > Administration groups facts by section and never presents an unverified item as passed [VPO-97a56b1abd22a396] [VPO-a74264901d267d03] [VPO-b27f3de8fd81d25c] [VPO-a4ab030e74ad080a] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-18e6fc4dd0730354",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:ux.spec.js > investigation work apart from Administration and Settings (UI-017, UI-018, UI-020, UI-021, UI-023, UI-029, UI-030, UI-031) > routine investigation views carry no implementation prose, codes or versions; Administration keeps them [VPO-7b0ba1d1f6f663a5] [VPO-78541ad7e7bfc045] [VPO-0b37bb6a955165e2] [VPO-18e6fc4dd0730354] [VPO-2ad36bd062191d2b] [VPO-026da8a495857549] [VPO-5c147c83f19f2c8c] [VPO-bff050b54a481780] [VPO-e1fb14be4ca10f5f] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    },
+    {
+      "id": "VPO-b27f3de8fd81d25c",
+      "verification": "PASS",
+      "tests": [
+        {
+          "testId": "playwright:shell.spec.js > report, timeline and administration views (T22, T26, T29) > Administration groups facts by section and never presents an unverified item as passed [VPO-97a56b1abd22a396] [VPO-a74264901d267d03] [VPO-b27f3de8fd81d25c] [VPO-a4ab030e74ad080a] [chromium]",
+          "outcome": "passed",
+          "resultFile": "TestResults/playwright/browser-results.json"
+        }
+      ]
+    }
+  ]
+}
