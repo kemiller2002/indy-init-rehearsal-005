@@ -148,20 +148,22 @@ module AiLoop =
               "pendingProposals", JArray(arrayOf "proposals" s (stateIs [ "active" ]))
               "omitted", JArray [ JString "provenance"; JString "resolved unknowns"; JString "decided proposals"; JString "actions"; JString "findings"; JString "corrective actions" ] ]
 
-    let private body (profile: AiProfile) (task: string) (inv: Investigation) =
+    let private bodyWith (system: string) (profile: AiProfile) (task: string) (inv: Investigation) =
         let data = "<investigation-data>\n" + Json.canonical (context inv) + "\n</investigation-data>"
         match profile.Provider with
         | Anthropic ->
             JObject
                 [ "model", JString profile.Model
                   "max_tokens", JInt(int64 profile.MaxOutputTokens)
-                  "system", JString instructions
+                  "system", JString system
                   "messages",
                   JArray
                       [ JObject
                             [ "role", JString "user"
                               "content", JArray [ JObject [ "type", JString "text"; "text", JString data ]; JObject [ "type", JString "text"; "text", JString task ] ] ] ] ]
             |> Json.canonical
+
+    let private body = bodyWith instructions
 
     let private headers (profile: AiProfile) (key: ProviderKey) =
         match profile.Provider with
@@ -171,6 +173,16 @@ module AiLoop =
               // Required by the provider for calls made directly from a browser with the user's own key.
               "anthropic-dangerous-direct-browser-access", "true"
               "x-api-key", key.Value ]
+
+    /// One request with the given fixed instructions (a versioned prompt: never investigation content). Used by the
+    /// multi-agent panel and the research tournament, which run several requests against one frozen version.
+    let requestWith (request: int64) (key: ProviderKey) (system: string) (profile: AiProfile) (inv: Investigation) (task: string) : AiHttpEffect =
+        { Request = request
+          Method = "POST"
+          Url = profile.Endpoint
+          Headers = headers profile key
+          Body = bodyWith system profile task inv
+          TimeoutMs = profile.TimeoutMs }
 
     /// Start one proposal request for `task` on the current state. Refused when a request is already in flight or no
     /// key is held; otherwise the effect to perform.
@@ -283,6 +295,18 @@ module AiLoop =
                 match Proposals.parse (stripFence text) with
                 | Ok drafts -> Drafted(drafts, pending.ContextVersion, usage)
                 | Error e -> InvalidOutput e
+
+    /// Classify one outcome for a known pending request (no state): shared by the loop, the panel and the tournament.
+    let classify (pending: AiPending) (outcome: AiHttpOutcome) : AiResult =
+        match outcome with
+        | Responded(_, status, _, body) when status >= 200 && status < 300 -> success pending body
+        | Responded(_, status, hs, body) -> errorOf status hs body
+        | NetworkFailed _ -> NetworkFailure
+        | TimedOut _ -> TimedOutResult
+        | Cancelled _ -> CancelledResult
+        | OutcomeUnknown _ -> UnknownOutcome
+
+    let requestOfOutcome = requestOf
 
     /// Classify the outcome of the request in flight. An answer for any other request is refused and changes nothing.
     let receive (state: AiLoopState) (outcome: AiHttpOutcome) : Result<AiLoopState * AiResult, AiLoopFault> =
