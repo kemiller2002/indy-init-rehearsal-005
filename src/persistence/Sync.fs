@@ -115,7 +115,11 @@ type Model =
       InFlight: Map<string, InFlight>
       NextId: int
       /// The page-load nonce (Env.Nonce) of this session; mutable-read URLs carry it with the request id.
-      Nonce: string }
+      Nonce: string
+      /// The writer id of the local record this page restored from (review R2-F1): that record is this page's own.
+      RestoredFrom: string
+      /// Investigations for which another tab of this browser kept a different unsaved change (review R2-F1).
+      Preserved: string list }
 
 type Msg =
     /// Restore after a restart from the local store's text (None: nothing stored). First message only.
@@ -168,7 +172,9 @@ module Sync =
           LoadErrors = []
           InFlight = Map.empty
           NextId = 1
-          Nonce = "" }
+          Nonce = ""
+          RestoredFrom = ""
+          Preserved = [] }
 
     type private Step = Result<Model * Effect list, Refusal>
 
@@ -307,6 +313,8 @@ module Sync =
         Json.canonicalText (
             JObj
                 [ "schema", JStr "causa.local-store/2"
+                  "writer", JStr m.Nonce
+                  "basedOn", JStr m.RestoredFrom
                   "target", target
                   "documents", JArr(m.Documents |> Map.toList |> List.map snd |> List.filter (fun d -> not d.ReadOnly) |> List.map doc) ]
         )
@@ -397,6 +405,101 @@ module Sync =
             | _ -> Ok(target, [])
         | Ok _ -> Error "the local store holds an unknown record format"
         | Error e -> Error("the local store is unreadable: " + e)
+
+    // ---------- two tabs, one browser store (review R2-F1) ----------
+
+    let private storeSchema = "causa.local-store/2"
+
+    /// Work only this browser holds: never confirmed, held, unknown or in conflict.
+    let private precious (d: Document) = pending d || bookUnknown d.Book || bookHeld d.Book || d.RemoteConflict.IsSome
+
+    let private arrayField (k: string) (o: (string * JValue) list) =
+        match Json.field k o with
+        | Some(JArr a) -> a
+        | _ -> []
+
+    /// One stored document, read through the same full reader as a restore.
+    let private storedDoc (target: JValue) (dv: JValue) : Document option =
+        match parseStored (Json.canonicalText (JObj [ "schema", JStr storeSchema; "target", target; "documents", JArr [ dv ] ])) with
+        | Ok(_, [ d ]) -> Some d
+        | _ -> None
+
+    let private preservedEntries (o: (string * JValue) list) =
+        arrayField "preserved" o
+        |> List.choose (fun e ->
+            match e with
+            | JObj x ->
+                match Json.field "target" x, Json.field "document" x with
+                | Some t, Some dv -> Some(t, dv)
+                | _ -> None
+            | _ -> None)
+
+    /// The record to store: this page's record `mine` merged with what the store holds now (read just before the
+    /// write). A record this page wrote or restored from is superseded. Another tab's record is never overwritten
+    /// blindly: its investigations this page does not hold are kept, and its unsaved, held or unknown changes that this
+    /// page's copy does not include are preserved beside it (never dropped) until a copy that includes them is stored.
+    let mergeRecords (mine: string) (stored: string option) : string =
+        match stored with
+        | None -> mine
+        | Some text ->
+            match Json.parse mine, Json.parse text with
+            | Ok(JObj m), Ok(JObj o) when Json.str "schema" m = Some storeSchema && Json.str "schema" o = Some storeSchema ->
+                let tm = Json.field "target" m |> Option.defaultValue JNull
+                let key (t: JValue) = Json.canonicalText t
+                let mineDocs =
+                    arrayField "documents" m |> List.choose (storedDoc tm) |> List.map (fun d -> d.InvestigationId, d) |> Map.ofList
+                let covered (t: JValue) (d: Document) =
+                    key t = key tm
+                    && (match Map.tryFind d.InvestigationId mineDocs with
+                        | Some md -> Store.sameBytes d.Local md.Local || Result.isOk (Store.successor d.Local md.Local)
+                        | None -> false)
+                let keepEntry (t: JValue, dv: JValue) =
+                    match storedDoc t dv with
+                    | Some d -> precious d && not (covered t d)
+                    | None -> true
+                let own =
+                    match Json.str "writer" o with
+                    | Some w when w <> "" -> Some w = Json.str "writer" m || Some w = Json.str "basedOn" m
+                    | _ -> false
+                let tOther = Json.field "target" o |> Option.defaultValue JNull
+                let kept, preserved =
+                    if own then [], []
+                    else
+                        arrayField "documents" o
+                        |> List.fold (fun (kept, preserved) dv ->
+                            match storedDoc tOther dv with
+                            | Some d when key tOther = key tm && not (mineDocs.ContainsKey d.InvestigationId) -> kept @ [ dv ], preserved
+                            | _ when keepEntry (tOther, dv) -> kept, preserved @ [ tOther, dv ]
+                            | _ -> kept, preserved) ([], [])
+                let entries =
+                    (preservedEntries o @ preservedEntries m @ preserved)
+                    |> List.filter keepEntry
+                    |> List.distinctBy (fun (t, dv) -> key t + key dv)
+                    |> List.map (fun (t, dv) -> JObj [ "target", t; "document", dv ])
+                let fields = m |> List.filter (fun (k, _) -> k <> "documents" && k <> "preserved")
+                Json.canonicalText (JObj(fields @ [ "documents", JArr(arrayField "documents" m @ kept); "preserved", JArr entries ]))
+            | _ -> mine
+
+    /// Restore with the preserved changes of other tabs: one whose investigation this record does not hold, or holds
+    /// with nothing unsaved, is restored as the document; otherwise it stays preserved and is named (never dropped).
+    let private restoreRecord (text: string) : Result<Target option * Document list * string list * string, string> =
+        parseStored text
+        |> Result.map (fun (target, docs) ->
+            match Json.parse text with
+            | Ok(JObj o) ->
+                let tm = Json.field "target" o |> Option.defaultValue JNull
+                let docs = docs |> List.map (fun d -> d.InvestigationId, d) |> Map.ofList
+                let docs, elsewhere =
+                    preservedEntries o
+                    |> List.fold (fun (docs: Map<string, Document>, elsewhere) (t, dv) ->
+                        match storedDoc t dv with
+                        | Some d when Json.canonicalText t = Json.canonicalText tm ->
+                            match Map.tryFind d.InvestigationId docs with
+                            | Some current when precious current -> docs, elsewhere @ [ d.InvestigationId ]
+                            | _ -> Map.add d.InvestigationId d docs, elsewhere
+                        | _ -> docs, elsewhere) (docs, [])
+                target, (docs |> Map.toList |> List.map snd), List.distinct elsewhere, (Json.str "writer" o |> Option.defaultValue "")
+            | _ -> target, docs, [], "")
 
     // ---------- the book's effects, performed by this program ----------
 
@@ -792,6 +895,12 @@ module Sync =
                     sent st |> Result.bind (stepBook env id (Book.PublicationFailed(r, transport))) |> Result.map (persistLocal [ id ])
                 | Ok resp ->
                     let event, rejected =
+                        // After send, only answers documented as "not applied" are refusals (review R2-F2): 401 (the
+                        // request was not authenticated) and a 200 GraphQL answer whose typed error names no commit.
+                        // Any other status says nothing either way: unknown, settled by reconcile.
+                        if resp.Status = 401 then Book.PublicationRefused(r, Book.Refusal.Unauthorized), true
+                        elif resp.Status <> 200 then Book.PublicationFailed(r, Book.NetworkError), false
+                        else
                         match GitHub.parseCommit resp with
                         | Ok oid -> Book.PublicationAcknowledged(r, Book.Oid oid), false
                         | Error(HeadMoved _) -> Book.PublicationRefused(r, Book.StaleHead), false
@@ -914,8 +1023,9 @@ module Sync =
                 match stored with
                 | None -> Ok(m, [])
                 | Some text ->
-                    match parseStored text with
-                    | Ok(target, docs) -> Ok({ m with Target = target; Documents = docs |> List.map (fun d -> d.InvestigationId, d) |> Map.ofList }, [])
+                    match restoreRecord text with
+                    | Ok(target, docs, elsewhere, writer) ->
+                        Ok({ m with Target = target; Documents = docs |> List.map (fun d -> d.InvestigationId, d) |> Map.ofList; Preserved = elsewhere; RestoredFrom = writer }, [])
                     | Error e -> refuse ("The local copy could not be restored and was left untouched: " + e)
         | Connect(target, credential) ->
             if anyUnsettled m then refuse "A save or reload is still settling; wait for it before connecting again."
@@ -1078,4 +1188,4 @@ module Sync =
     let canReconcile (m: Model) (d: Document) = canWrite m && bookUnknown d.Book
 
     /// Investigations for which another tab of this browser kept a different unsaved change (review R2-F1).
-    let preservedElsewhere (_: Model) : string list = []
+    let preservedElsewhere (m: Model) : string list = m.Preserved

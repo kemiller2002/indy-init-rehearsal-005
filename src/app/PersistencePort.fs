@@ -31,6 +31,8 @@ module Book = IndyInitRootCauseInvestigator.Engine.Sync
 let private prefix = "persist-"
 let private bootId = "persist-boot"
 let private storePrefix = "persist-store-"
+/// A local write first reads the shared record, then stores the merge (review R2-F1: tabs share one store).
+let private mergePrefix = "persist-merge-"
 
 type private Boot =
     | NotBooted
@@ -46,7 +48,9 @@ type private State =
       Checked: Set<string>
       /// Local fixture mode (test build only): the in-page provider that answers instead of GitHub.
       Fixture: RecordedGitHub option
-      Notice: (string * string) option }
+      Notice: (string * string) option
+      /// Local writes waiting for their read of the shared record: write id -> key, this page's record.
+      Writes: Map<string, string * string> }
 
 /// Fixture mode exists only where the test build enables it (Dispatch.enableTestHooks); production never has it.
 let mutable private fixtureAllowed = false
@@ -85,7 +89,7 @@ let private toLimen (e: Effect) : EffectRequest =
               ResponseHeaders = Some [ "x-oauth-scopes"; "x-ratelimit-remaining"; "x-ratelimit-reset"; "retry-after" ]
               Credentials = Some HttpCredentials.Omit
               Xsrf = None }
-    | StoreLocal(writeId, key, value) -> EffectRequest.Storage(StorageEffectRequest.Set(CorrelationId(storePrefix + writeId), key, value))
+    | StoreLocal(writeId, key, _) -> EffectRequest.Storage(StorageEffectRequest.Get(CorrelationId(mergePrefix + writeId), key))
 
 let private connection (m: Model) : A.Connection =
     match Sync.connectionLabel m, m.Target with
@@ -222,7 +226,8 @@ and private apply (entropy: A.Entropy) (msg: Msg) (s: State) : State * EffectReq
     let s, effects = settle (drain (s, []) [ msg ]) 8
     let checkedNow = s.Checked |> Set.filter (fun id -> s.Model.Documents |> Map.tryFind id |> Option.exists (fun d -> Sync.documentStatus s.Model d = "unknown"))
     let methods = effects |> List.fold (fun acc e -> match e with Send(id, r) -> Map.add (prefix + id) r.Method acc | _ -> acc) s.Methods
-    { s with Methods = methods; Checked = checkedNow }, effects |> List.map toLimen
+    let writes = effects |> List.fold (fun acc e -> match e with StoreLocal(w, k, v) -> Map.add w (k, v) acc | _ -> acc) s.Writes
+    { s with Methods = methods; Checked = checkedNow; Writes = writes }, effects |> List.map toLimen
 
 and private answer (entropy: A.Entropy) (c: string) (result: EffectResult) (s: State) : State * EffectRequest list =
     match result with
@@ -234,10 +239,28 @@ and private answer (entropy: A.Entropy) (c: string) (result: EffectResult) (s: S
         let held = match s.Boot with Booting held -> held | _ -> []
         let s, fx = apply entropy (Restore stored) { s with Boot = Booted }
         // A record that cannot be restored is left untouched and reported; the workspace starts empty.
-        held
-        |> List.fold (fun (s, fx) input ->
-            let s2, fx2 = handleState entropy input s
-            s2, fx @ fx2) (s, fx)
+        let s, fx =
+            held
+            |> List.fold (fun (s, fx) input ->
+                let s2, fx2 = handleState entropy input s
+                s2, fx @ fx2) (s, fx)
+        match Sync.preservedElsewhere s.Model with
+        | [] -> s, fx
+        | ids ->
+            let notice =
+                sprintf "Another tab of this browser kept a different unsaved change to %d investigation(s). It is kept in this browser and was not overwritten; finish or discard the change in that tab." ids.Length
+            { s with Notice = Some("warning", notice) }, fx
+    | EffectResult.StorageResult(_, outcome) when c.StartsWith(mergePrefix, StringComparison.Ordinal) ->
+        let writeId = c.Substring mergePrefix.Length
+        match Map.tryFind writeId s.Writes with
+        | Some(key, value) ->
+            let merged =
+                match outcome with
+                | StorageOutcome.Success stored -> Sync.mergeRecords value stored
+                | StorageOutcome.Failure _ -> value
+            { s with Writes = s.Writes |> Map.remove writeId },
+            [ EffectRequest.Storage(StorageEffectRequest.Set(CorrelationId(storePrefix + writeId), key, merged)) ]
+        | None -> s, []
     | EffectResult.StorageResult(_, outcome) when c.StartsWith(storePrefix, StringComparison.Ordinal) ->
         let ok = match outcome with StorageOutcome.Success _ -> true | StorageOutcome.Failure _ -> false
         apply entropy (LocalStored(c.Substring storePrefix.Length, ok)) s
@@ -318,4 +341,5 @@ let persistence: EP.Persistence =
           Methods = Map.empty
           Checked = Set.empty
           Fixture = None
-          Notice = None }
+          Notice = None
+          Writes = Map.empty }

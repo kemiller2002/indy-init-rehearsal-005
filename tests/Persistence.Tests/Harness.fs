@@ -79,7 +79,8 @@ type App(fake: Fake) =
             queue <- queue.Tail
             match e with
             | StoreLocal(writeId, key, value) ->
-                if not this.StoreFails then store <- store |> Map.add key value
+                // Read-modify-write, as the browser port does: merge with what the shared store holds now.
+                if not this.StoreFails then store <- store |> Map.add key (Sync.mergeRecords value (Map.tryFind key store))
                 this.Dispatch(LocalStored(writeId, not this.StoreFails)) |> ignore
             | Send(id, request) ->
                 match this.Faults request with

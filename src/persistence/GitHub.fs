@@ -183,6 +183,9 @@ module GitHub =
                 match str [ "data"; "createCommitOnBranch"; "commit"; "oid" ] v with
                 | Some oid when isOid oid -> Ok oid
                 | _ -> Error(Malformed "commit answer lacks an oid")
+            | _ when (str [ "data"; "createCommitOnBranch"; "commit"; "oid" ] v |> Option.exists isOid) ->
+                // The answer names a commit: never a refusal, whatever error comes with it (review R2-F2).
+                Error(Unknown "GitHub named a commit and reported an error")
             | e :: _ ->
                 let kind = str [ "type" ] e |> Option.defaultValue ""
                 let msg = str [ "message" ] e |> Option.defaultValue ""
