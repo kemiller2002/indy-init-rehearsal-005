@@ -106,7 +106,7 @@ function recordRequests(page, into) {
 const syncStatus = (page) => page.locator(".causa-sync [role=status]");
 
 test(
-  "DCT-LIVE-A create, write, reload, conflict (resolved by Reload) and rejected token against the real test repository, each confirmed by an independent SHA re-read",
+  "DCT-LIVE-A create, write, reload, conflict (resolved by Reload), two tabs with a lost write (never reconciled as saved) and rejected token against the real test repository, each confirmed by an independent SHA re-read",
   { tag: ["@live", "@VPO-05eeddad528e2cd4", "@VPO-c6c90d9f4acc5fe6", "@VPO-37d860d18826cf0a", "@VPO-d87bf2493f9268ae", "@VPO-6292ea3728a2532b", "@VPO-7672a3ef81f74ac5", "@VPO-903077d337faf198", "@VPO-61b2e81f99761d55", "@VPO-34731ac9a977b818", "@VPO-89ed6170f531961e", "@VPO-4c06d10238d15c5c", "@VPO-54b0eef91ceeada4", "@VPO-2de744fb2c8bdc70", "@VPO-bb08b9a414ba4cd7", "@VPO-ca58030e3eecdf9b", "@VPO-c135d16c59f5baf8", "@VPO-57fe23e7c821450f", "@VPO-fbcff0eece408886", "@VPO-5581f11810c02191"] },
   async ({ page, browser }) => {
     test.setTimeout(300_000);
@@ -192,6 +192,41 @@ test(
     expect(rebased["events.ndjson"].startsWith(written["events.ndjson"])).toBe(true);
     expect(rebased["events.ndjson"]).toContain("A change decided before the other writer's commit.");
 
+    // Two tabs (review F-1): both decide a change at the same head. Tab B's write is cut off before it reaches GitHub
+    // (and so is its automatic check), so its outcome is unknown; tab A then saves. When B checks, A's commit is never
+    // taken for B's own: B is a conflict, A's change stays on the branch and B's is not written over it.
+    const tabB = await browser.newPage();
+    const tabBRequests = [];
+    recordRequests(tabB, tabBRequests);
+    await tabB.goto("index.html");
+    await started(tabB);
+    await connect(tabB, testRepo, branch, workspace);
+    await expect(tabB.locator(".causa-connection")).toHaveText(/Data repository: Connected/, { timeout: 60_000 });
+    await tabB.goto(`index.html#/investigations/${id}`);
+    await expect(tabB.getByRole("heading", { level: 1, name: title })).toBeVisible({ timeout: 60_000 });
+    const cut = (route) => route.abort("connectionreset");
+    await tabB.route(`${api}/graphql`, cut);
+    await tabB.route(/\/git\/ref\/heads\//, cut);
+    await tabB.locator('input[aria-labelledby="input-label-RecordObservation"]').fill("Tab B's change, whose write was lost.");
+    await tabB.locator('button[data-percepta-capability="RecordObservation"]').first().click();
+    await expect(syncStatus(tabB)).toContainText("may or may not have reached GitHub", { timeout: 90_000 });
+    expect(await head(testRepo, branch)).toBe(afterReload);
+    await observation.fill("Tab A's change, saved while tab B's outcome is unknown.");
+    await page.locator('button[data-percepta-capability="RecordObservation"]').first().click();
+    await expect(syncStatus(page)).toContainText("Saved to GitHub", { timeout: 90_000 });
+    const afterTabA = await head(testRepo, branch);
+    expect((await commit(testRepo, afterTabA)).parents.map((p) => p.sha)).toEqual([afterReload]);
+    await tabB.unrouteAll();
+    await tabB.getByRole("button", { name: "Check now" }).click();
+    await expect(syncStatus(tabB)).toContainText("someone else changed the repository", { timeout: 90_000 });
+    await expect(syncStatus(tabB)).not.toContainText("Saved to GitHub");
+    expect(await head(testRepo, branch)).toBe(afterTabA);
+    const afterTwoTabs = await filesAt(testRepo, dir, afterTabA);
+    expect(afterTwoTabs["events.ndjson"].startsWith(rebased["events.ndjson"])).toBe(true);
+    expect(afterTwoTabs["events.ndjson"]).toContain("Tab A's change, saved while tab B's outcome is unknown.");
+    expect(afterTwoTabs["events.ndjson"]).not.toContain("Tab B's change, whose write was lost.");
+    expect(tabBRequests.filter((r) => r.method === "POST").length).toBeGreaterThanOrEqual(1);
+
     // Rejected token: a second tab with a wrong token is refused and writes nothing.
     const other = await browser.newPage();
     const otherRequests = [];
@@ -202,28 +237,29 @@ test(
     await expect(other.getByRole("alert")).toContainText("rejected the credential", { timeout: 60_000 });
     await expect(other.locator(".causa-connection")).toContainText("Not connected");
     expect(otherRequests.filter((r) => r.method !== "GET")).toEqual([]);
-    expect(await head(testRepo, branch)).toBe(afterReload);
+    expect(await head(testRepo, branch)).toBe(afterTabA);
 
     // DC-005 in the browser: every mutable read (branch head, repository) has a URL never used before, across the
     // reload and the second tab.
-    const mutable = [...requests, ...otherRequests].filter((r) => r.method === "GET" && (/\/git\/ref\/heads\//.test(r.url) || /\/repos\/[^/]+\/[^/?]+\?/.test(r.url)));
+    const mutable = [...requests, ...otherRequests, ...tabBRequests].filter((r) => r.method === "GET" && (/\/git\/ref\/heads\//.test(r.url) || /\/repos\/[^/]+\/[^/?]+\?/.test(r.url)));
     expect(mutable.length).toBeGreaterThan(3);
     expect(mutable.every((r) => r.url.includes("causa_fresh="))).toBe(true);
     expect(new Set(mutable.map((r) => r.url)).size).toBe(mutable.length);
 
     // The token is nowhere but the Authorization header: not in a URL, the page, or browser storage.
-    for (const r of [...requests, ...otherRequests]) expect(r.url.includes(token)).toBe(false);
-    for (const p of [page, other]) {
+    for (const r of [...requests, ...otherRequests, ...tabBRequests]) expect(r.url.includes(token)).toBe(false);
+    for (const p of [page, other, tabB]) {
       expect((await p.content()).includes(token)).toBe(false);
       const stored = await p.evaluate(() => JSON.stringify({ ...localStorage }) + JSON.stringify({ ...sessionStorage }));
       expect(stored.includes(token)).toBe(false);
     }
     await other.close();
+    await tabB.close();
 
     // Bounded writes: every commit of this run (its investigation id or its workspace in the message; other writers in
     // between do not count) changed only paths under this run's own live workspaces: nothing under catalog/ or
     // historical-v1.
-    const changed = await gh(`/repos/${testRepo}/compare/${headAtConnect}...${afterReload}`);
+    const changed = await gh(`/repos/${testRepo}/compare/${headAtConnect}...${afterTabA}`);
     expect(changed.status).toBe(200);
     const mine = changed.json.commits.filter((c) => c.commit.message.includes(id) || c.commit.message.includes(workspace));
     expect(mine.length).toBeGreaterThanOrEqual(4);
@@ -236,7 +272,7 @@ test(
     }
 
     // Evidence (PF-014-O3): repository-neutral ids only; never the token.
-    test.info().annotations.push({ type: "live-evidence", description: JSON.stringify({ workspace, investigation: id, headAtConnect, afterCreate, afterWrite, moved, afterReload, ...timings }) });
+    test.info().annotations.push({ type: "live-evidence", description: JSON.stringify({ workspace, investigation: id, headAtConnect, afterCreate, afterWrite, moved, afterReload, afterTabA, ...timings }) });
   },
 );
 
