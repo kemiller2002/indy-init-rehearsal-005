@@ -75,6 +75,16 @@ let gitTracks (root: string) (path: string) =
         p.ExitCode = 0
     with _ -> false
 
+let isAncestorOfHead (root: string) (sha: string) =
+    try
+        let psi = Diagnostics.ProcessStartInfo("git", sprintf "-C \"%s\" merge-base --is-ancestor %s HEAD" root sha, RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false)
+        use p = Diagnostics.Process.Start psi
+        p.StandardOutput.ReadToEnd() |> ignore
+        p.StandardError.ReadToEnd() |> ignore
+        p.WaitForExit()
+        p.ExitCode = 0
+    with _ -> false
+
 let lockGate opts =
     let root = one opts "root" |> Option.defaultValue "."
     let stackPath = full root (required opts "stack")
@@ -158,6 +168,9 @@ let ledger opts =
           DependencyLockSha = dependencyLockSha root
           InterfaceManifestSha = one opts "interface-manifest-sha" |> Option.defaultValue "unavailable: no interface manifest in this candidate"
           Command = one opts "command" |> Option.defaultValue "causa-acceptance ledger"
+          Results = Discovery.discover root (many opts "results" |> List.map (full root)) (many opts "assemblies" |> List.map (full root))
+          IsAncestor = isAncestorOfHead root
+          ReadRepoFile = fun rel -> let p = full root rel in if File.Exists p then Some(File.ReadAllBytes p) else None
           Environment = runEnvironment () }
     let ctx =
         [ "runId", jstr inputs.RunId; "sourceSha", jstr inputs.SourceSha ] @ (contextOf opts |> List.map (fun (k, v) -> k, jstr v))

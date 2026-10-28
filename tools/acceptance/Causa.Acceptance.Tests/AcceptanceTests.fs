@@ -161,6 +161,9 @@ let ledgerInputs trace producers gates : Ledger.Inputs =
       DependencyLockSha = "l"
       InterfaceManifestSha = "i"
       Command = "test"
+      Results = []
+      IsAncestor = (fun _ -> true)
+      ReadRepoFile = (fun _ -> None)
       Environment = [ "runner.os", "Linux" ] }
 
 let gate id requires : Ledger.GateRule = { Id = id; Title = id; Requires = requires; EvidenceType = "ci"; Note = "" }
@@ -468,3 +471,37 @@ let ``a Percepta contract counts as not applicable only when it cites an existin
     Assert.NotEmpty(problems (bindings "the owner said so") (files (Some "accepted")))
     // No not-applicable entry: nothing to allow.
     Assert.Equal((0, []), Bindings.check (parse """{"screens":[{"contract":"S01","appScreen":"start"}]}""") (files None))
+
+// ---------------------------------------------------------------------------------------------------------------
+// Defect classes: a reviewer closure is PASS only when this run verifies it, and its evidence is in the bundle
+
+[<Fact; Trait("obligation", "VPO-42705f754abba51b")>]
+let ``a reviewer-closed defect class is PASS only with its fix in history, its review present and its tests passed, and its evidence is bundled`` () =
+    let trace = build plan [] []
+    let dc status fix ev : Ledger.DefectClass = { Id = "DC-1..DC-2"; Severity = "HIGH"; Tests = [ "DCT-1-A" ]; FixSha = fix; ReviewerEvidence = ev; Status = status }
+    let review = Text.Encoding.UTF8.GetBytes "# review\n## dc-1\nclosed"
+    let run results ancestor files (d: Ledger.DefectClass) =
+        let inputs = { ledgerInputs trace [] [] with DefectClasses = [ d ]; Results = results; IsAncestor = (fun _ -> ancestor); ReadRepoFile = files }
+        let built = Ledger.build inputs
+        let row = items "defect_classes" built.Ledger |> List.head
+        strOr "" "status" row, row, built
+    let passing = [ { result "dotnet:S.DCT-1-A reproduces" Passed [] with DisplayName = "S.DCT-1-A reproduces" } ]
+    let haveReview p = if p = "acceptance/reviews/r.md" then Some review else None
+    let closed = dc "PASS" (Some(String('b', 40))) (Some "acceptance/reviews/r.md#dc-1")
+    let status, row, built = run passing true haveReview closed
+    Assert.Equal("PASS", status)
+    let path = strings "evidence_paths" row |> List.exactlyOne
+    Assert.Equal("evidence/defects/DC-1__DC-2.json", path)
+    let ev = built.Evidence |> List.find (fun (p, _) -> p = path) |> snd
+    Assert.Equal(Some "review", str "evidence_type" ev)
+    Assert.Equal(Some "defect", str "subject_type" ev)
+    Assert.Equal(Some(sha256Hex review), ev["reviewer_evidence"] |> str "sha256")
+    // Fix not in history, review absent, a failing-first test failed: FAIL. Tests did not run: NOT_RUN.
+    Assert.Equal("FAIL", (let s, _, _ = run passing false haveReview closed in s))
+    Assert.Equal("FAIL", (let s, _, _ = run passing true (fun _ -> None) closed in s))
+    Assert.Equal("FAIL", (let s, _, _ = run [ { passing.Head with Outcome = Failed } ] true haveReview closed in s))
+    Assert.Equal("NOT_RUN", (let s, _, _ = run [] true haveReview closed in s))
+    // A class the reviewer left open is never PASS, whatever ran.
+    let openStatus, openRow, _ = run passing true haveReview (dc "NOT_RUN" None None)
+    Assert.Equal("NOT_RUN", openStatus)
+    Assert.Empty(strings "evidence_paths" openRow)
