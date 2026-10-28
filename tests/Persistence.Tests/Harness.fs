@@ -15,6 +15,8 @@ type Fault =
     | LoseWithoutApplying
     /// The answer is held back for the test to deliver later (delay/reorder).
     | Hold
+    /// GitHub answers with this response instead of the fake (nothing is applied).
+    | Answer of HttpResponse
 
 let token = "causa-test-token-7f3a9c"
 
@@ -83,6 +85,7 @@ type App(fake: Fake) =
                     this.Dispatch(HttpFailed(id, TransportFailure.OutcomeUnknown "connection lost after sending")) |> ignore
                 | LoseWithoutApplying -> this.Dispatch(HttpFailed(id, TransportFailure.OutcomeUnknown "connection lost")) |> ignore
                 | Hold -> held <- held @ [ id, Ok(fake.Handle request) ]
+                | Answer resp -> this.Dispatch(HttpAnswered(id, resp)) |> ignore
 
     member this.Step(msg: Msg) =
         let r = this.Dispatch msg
