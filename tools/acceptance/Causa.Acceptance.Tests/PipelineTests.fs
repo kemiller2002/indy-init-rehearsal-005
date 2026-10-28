@@ -203,3 +203,12 @@ let ``PF-012 the README documents one command for a populated fixture-backed UI 
     for script in [ "fixture-ui.sh"; "offline-checks.sh" ] do
         let mode = File.GetUnixFileMode(Path.Combine(repoRoot, "tools/acceptance/ci", script))
         Assert.True(mode.HasFlag(UnixFileMode.UserExecute), script)
+
+[<Fact; Trait("obligation", "VPO-fd43b3e4e7e02f59")>]
+let ``UI-015 G5 succeeds only with 0 FAIL, 0 NOT-BOUND, no orphans, and NOT-APPLICABLE only by a cited accepted decision`` () =
+    let p = job "percepta"
+    Assert.Contains("$CA bindings-check --root . --bindings .percepta/bindings.json", p)
+    Assert.Contains(@"[ ""${{ steps.na.outputs.allow-not-applicable }}"" = true ] && allow=""--allow-not-applicable""", p)
+    Assert.Contains(@".complete == true and .counts.FAIL == 0 and .counts[""NOT-BOUND""] == 0 and (.orphanBindings // []) == []", p)
+    // An incomplete report is never success.
+    Assert.Contains(@"echo ""status=not-produced"" >> ""$GITHUB_OUTPUT""", p)

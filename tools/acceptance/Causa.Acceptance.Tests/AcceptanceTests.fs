@@ -450,3 +450,21 @@ let ``AR-002 verbatim carriage passes; value swaps, role swaps, negation and omi
     Assert.Equal<(string * string) list>([ "R-1-O1", "unapproved-transformation" ], kinds swapValues transformed)
     let approved = Derivation.check (derivationInputs swapValues transformed """{"approvals":[{"id":"APR-1"}]}""")
     Assert.Empty approved
+
+// ---------------------------------------------------------------------------------------------------------------
+// G5: NOT-APPLICABLE only by an accepted owner decision
+
+[<Fact; Trait("obligation", "VPO-fd43b3e4e7e02f59")>]
+let ``a Percepta contract counts as not applicable only when it cites an existing accepted DF decision`` () =
+    let decision status = sprintf "---\nid: DF-CAUSA-2026-0002\nstatus: %s\n---\n# R5-DEC-002\n" status
+    let path = "research/decisions/DF-CAUSA-2026-0002--r5-dec-002-percepta-s16-not-applicable.md"
+    let bindings reason =
+        parse (sprintf """{"screens":[{"contract":"S01","appScreen":"start"},{"contract":"S16","notApplicable":"Owner decision R5-DEC-002 (%s): not applicable."}]}""" reason)
+    let files (status: string option) (p: string) = if p = path then status |> Option.map decision else None
+    Assert.Equal((1, []), Bindings.check (bindings path) (files (Some "accepted")))
+    let problems b f = snd (Bindings.check b f)
+    Assert.NotEmpty(problems (bindings path) (files (Some "proposed")))
+    Assert.NotEmpty(problems (bindings path) (files None))
+    Assert.NotEmpty(problems (bindings "the owner said so") (files (Some "accepted")))
+    // No not-applicable entry: nothing to allow.
+    Assert.Equal((0, []), Bindings.check (parse """{"screens":[{"contract":"S01","appScreen":"start"}]}""") (files None))
