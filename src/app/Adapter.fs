@@ -50,7 +50,11 @@ type CardProjection =
       LastActivity: string option
       Hypotheses: Count
       Evidence: Count
-      Contradictions: Count }
+      Contradictions: Count
+      /// Open questions (unknowns not yet answered or accepted), when the domain holds them.
+      OpenQuestionCount: Count
+      /// The next lifecycle action the F# policy allows now (Records.nextLegalAction); None offers none.
+      NextAction: string option }
 
 type HypothesisRow =
     { Id: string
@@ -241,6 +245,9 @@ type InvestigationProjection =
       Integrity: string option
       Report: ReportView option
       Capabilities: Capability list
+      /// The engine's typed projection and history (Records: relationships, inspector, explanations, next steps);
+      /// None for a shell-only fixture.
+      Typed: Records.Source option
       /// Records behind the analysis screens (S03, S04, S11, S12, S13).
       Detail: InvestigationDetail }
 

@@ -177,7 +177,46 @@ let actor (a: Actor) =
     | Agent(provider, model) -> $"{a.ActorId} (AI agent, {provider} {model})"
 
 /// A timestamp as provenance: always UTC, always labelled, never reformatted into a relative phrase.
-let stamp (t: DateTimeOffset) = t.UtcDateTime.ToString("yyyy-MM-dd HH:mm 'UTC'")
+let stamp (t: DateTimeOffset) = t.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss 'UTC'")
+
+/// What one recorded event did, in words (the latest meaningful activity, timeline entries). Never the wire name.
+let event (body: EventBody) =
+    match body with
+    | InvestigationStarted _ -> "Investigation started"
+    | LifecycleChanged(_, target, _, _) -> $"Status changed to {lifecycle target}"
+    | ObservationRecorded _ -> "Observation recorded"
+    | HypothesisRecorded _ -> "Hypothesis recorded"
+    | HypothesisTransitioned(_, _, target, _, _, _) -> $"Hypothesis marked {hypothesis target}"
+    | EvidenceAdmitted _ -> "Evidence admitted"
+    | EvidenceSuperseded _ -> "Evidence superseded"
+    | EvidenceVerificationAssessed(_, v) -> $"Evidence assessed: {evidenceAssessment v}"
+    | EvidenceRelated(_, _, _, kind, _) -> $"Evidence linked to a hypothesis ({relationship kind})"
+    | UnknownIdentified _ -> "Open question recorded"
+    | UnknownTransitioned(_, s, _) -> $"Open question: {unknownState s}"
+    | AssumptionRecorded _ -> "Assumption recorded"
+    | AssumptionTransitioned(_, s) -> $"Assumption: {assumptionState s}"
+    | ContradictionRecorded _ -> "Contradiction recorded"
+    | ContradictionTransitioned(_, s, _) -> $"Contradiction: {contradictionState s}"
+    | PredictionRecorded _ -> "Prediction recorded"
+    | ActionRecorded _ -> "Investigation action recorded"
+    | ActionTransitioned(_, s) -> $"Investigation action: {actionState s}"
+    | FindingRecorded _ -> "Finding recorded"
+    | NegativeKnowledgeEstablished _ -> "Ruled-out explanation recorded"
+    | CausalAssertionRecorded _ -> "Causal relationship recorded"
+    | CausalAssertionConfirmed _ -> "Cause confirmed"
+    | CausalAssertionReopened _ -> "Cause reopened"
+    | CorrectiveActionRecorded _ -> "Corrective action recorded"
+    | CorrectiveActionTransitioned(_, s) -> $"Corrective action: {correctiveState s}"
+    | CriterionRecorded _ -> "Verification criterion recorded"
+    | VerificationRecorded(_, _, o, _) -> $"Verification recorded: {verificationOutcome o}"
+    | ConclusionRecorded _ -> "Conclusion recorded"
+    | ProposalRecorded _ -> "AI proposal recorded for review"
+    | ProposalWasAccepted _ -> "Proposal accepted by a person"
+    | ProposalWasRejected _ -> "Proposal rejected"
+
+/// The latest meaningful activity: what the last event did and when.
+let activity (history: DomainEvent list) =
+    history |> List.sortBy (fun e -> e.Version) |> List.tryLast |> Option.map (fun e -> $"{event e.Body}, {stamp e.At}")
 
 // ---- findings versus data integrity (UI-023) ----
 
@@ -201,6 +240,10 @@ let integrity (i: DataIntegrity option) =
     | Some d when d.AdmissibilityChecked -> "Integrity check passed (history replayed and admissible)"
     | Some _ -> "Integrity not checked"
     | None -> "Not read from a repository; no integrity check applies"
+
+/// A correction's verification of effect, as the domain holds it (criteria satisfied in the current round).
+let correctionVerification (verifiedEffective: bool) (satisfied: int) (criteria: int) =
+    if verifiedEffective then "Verified effective" else $"Not verified effective ({satisfied} of {criteria} criteria satisfied)"
 
 // ---- authority and next steps ----
 

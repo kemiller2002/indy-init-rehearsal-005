@@ -147,7 +147,7 @@ let ``every connection state has its own words`` () =
 
 [<Fact>]
 let ``VPO-014f5e1139ed692b a frozen demonstration and a writable copy are labelled apart in the catalog and the investigation header`` () =
-    let card id writable = { Id = id; Title = "T " + id; Lifecycle = "active"; Writable = writable; LastActivity = None; Hypotheses = Known 0; Evidence = Known 0; Contradictions = Known 0 }
+    let card id writable = { Id = id; Title = "T " + id; Lifecycle = "active"; Writable = writable; LastActivity = None; Hypotheses = Known 0; Evidence = Known 0; Contradictions = Known 0; OpenQuestionCount = Known 0; NextAction = None }
     let ws = { emptyWorkspace with Connection = ConnectedTo("a/b", "main", "w"); Investigations = Loaded [ card "00000000-0000-4000-8000-00000000000a" false; card "00000000-0000-4000-8000-00000000000b" true ] }
     let view = View.project { Shell.initial with Route = Routes.Investigations; Port = Port.fixedAt ws }
     let kinds = itemsOf view "cards" |> List.map (fun c -> field c "kind")

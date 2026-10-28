@@ -20,6 +20,7 @@
     <Compile Include="Routes.fs" />
     <Compile Include="Language.fs" />
     <Compile Include="Records.fs" />
+    <Compile Include="UxFixture.fs" />
     <Compile Include="Adapter.fs" />
     <Compile Include="Presentation.fs" />
     <Compile Include="Graph.fs" />
@@ -29,6 +30,7 @@
     <Compile Include="Shell.fs" />
     <Compile Include="TestState.fs" />
     <Compile Include="Evidence.fs" />
+    <Compile Include="UxView.fs" />
     <Compile Include="View.fs" />
     <Compile Include="AnalysisView.fs" />
     <Compile Include="Dispatch.fs" />

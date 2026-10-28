@@ -139,4 +139,4 @@ let ``VPO-7fff10ce82e7c162 domain terms and provenance are kept precisely`` () =
     // Provenance: an agent is always named as an agent with its provider and model; times are labelled UTC.
     Assert.Equal("causa-ai (AI agent, anthropic model-x)", Language.actor { ActorId = "causa-ai"; Kind = Agent("anthropic", "model-x") })
     Assert.Equal("investigator-a", Language.actor person)
-    Assert.Equal("2026-03-01 09:00 UTC", Language.stamp at0)
+    Assert.Equal("2026-03-01 09:00:00 UTC", Language.stamp at0)

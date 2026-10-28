@@ -108,6 +108,7 @@ let toProjection (s: Injected) : WorkspaceProjection =
           Report = None
           Timeline = [ { Sequence = 1L; EventType = "InvestigationOpened"; OccurredAt = "2026-01-01T00:00:00Z"; RecordedAt = Some "2026-01-01T00:00:00Z"; Actor = Some "Fixture"; Category = "lifecycle"; Affected = []; ClockBeforePrevious = false } ]
           Capabilities = capabilities
+          Typed = UxFixture.source
           Detail =
             { Contradictions = [ { Id = "x-1"; Text = "The recorded temperature and the operator's log disagree."; State = "Unresolved"; Related = [ "e-1" ] } ]
               Assumptions = [ { Id = "a-1"; Text = "The sensor was calibrated before the event."; State = "Not verified · Material"; Related = [] } ]
@@ -131,7 +132,9 @@ let toProjection (s: Injected) : WorkspaceProjection =
                 LastActivity = Some "2026-01-01"
                 Hypotheses = Known 1
                 Evidence = Known 1
-                Contradictions = Unknown } ]
+                Contradictions = Unknown
+                OpenQuestionCount = Unknown
+                NextAction = None } ]
       Opened = Map.ofList [ fixtureId, Loaded investigation ]
       Sync = (if s.Conflict then Conflict else NoChanges)
       Capabilities = capabilities
