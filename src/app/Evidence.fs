@@ -17,6 +17,10 @@ type Proof =
     { Commit: string option
       Run: (string * string) option
       TraceabilitySource: string option
+      /// Whether traceability was published at all, and the run and commit it came from (not this build's).
+      TraceabilityPublished: bool
+      EvidenceRun: string option
+      EvidenceSha: string option
       PlanId: string option
       PlanDigest: string option
       Requirements: Requirement list }
@@ -47,6 +51,9 @@ let parseProof (text: string) : Result<Proof, string> =
             { Commit = str r "commit"
               Run = obj r "run" |> Option.bind (fun x -> match str x "id", str x "url" with Some i, Some u -> Some(i, u) | _ -> None)
               TraceabilitySource = trace |> Option.bind (fun t -> str t "source")
+              TraceabilityPublished = trace.IsSome
+              EvidenceRun = trace |> Option.bind (fun t -> match t.TryGetProperty "run" with | true, v when v.ValueKind = JsonValueKind.String -> Some(v.GetString()) | true, v when v.ValueKind = JsonValueKind.Number -> Some(v.GetRawText()) | _ -> None)
+              EvidenceSha = trace |> Option.bind (fun t -> str t "sourceSha")
               PlanId = plan |> Option.bind (fun p -> str p "planId")
               PlanDigest = plan |> Option.bind (fun p -> str p "digest")
               Requirements =
@@ -92,7 +99,7 @@ let private loadState (model: Model) (name: string) =
     | _ -> Error ""
 
 /// S21 keys.
-let private proofKeys (model: Model) : (string * ViewValue) list =
+let proofKeys (model: Model) : (string * ViewValue) list =
     let shown = model.Route = RequirementsProof
     let proof = loadState model "proof" |> Result.bind (fun t -> if t = "" then Error "" else parseProof t)
     let loading = match model.Evidence.TryFind "proof" with Some Loading | None -> true | _ -> false
@@ -106,6 +113,7 @@ let private proofKeys (model: Model) : (string * ViewValue) list =
 
     let summary =
         match proof with
+        | Ok p when not p.TraceabilityPublished -> "Traceability was not published with this build, so nothing is shown as proven."
         | Ok p ->
             let plan = p.PlanId |> Option.defaultValue "the pinned plan"
             $"""Of {obligations.Length} obligations in {plan}: {count "PASS"} proven by passing tests, {count "FAIL"} failing, {obligations.Length - count "PASS" - count "FAIL"} not proven (no test, or not run in the published evidence)."""
@@ -157,14 +165,24 @@ let private proofKeys (model: Model) : (string * ViewValue) list =
           | Ok p ->
               let c = p.Commit |> Option.defaultValue "not recorded"
               let d = p.PlanDigest |> Option.map (fun d -> d.Substring(0, min 12 d.Length) + "…") |> Option.defaultValue "not recorded"
-              $"Built from commit {c}; verification plan digest {d}."
+              $"This build: commit {c}; verification plan digest {d}."
+          | Error _ -> ""
+      )
+      "proof.evidenceFrom",
+      text (
+          match proof with
+          | Ok p when not p.TraceabilityPublished -> "Evidence: not published with this build."
+          | Ok p ->
+              let run = p.EvidenceRun |> Option.defaultValue "not recorded"
+              let sha = p.EvidenceSha |> Option.defaultValue "not recorded"
+              $"Evidence from main run {run} at {sha}."
           | Error _ -> ""
       )
       "proof.runtime",
       text (
           match proof with
-          | Ok { Run = Some(id, url) } -> $"Evidence from CI run {id}: {url}"
-          | Ok p -> $"""This build was not made by CI, so no run is recorded. Traceability read from {p.TraceabilitySource |> Option.defaultValue "nowhere"} as committed."""
+          | Ok { Run = Some(id, url) } -> $"This build: CI run {id} ({url})."
+          | Ok _ -> "This build: not made by CI, so no run is recorded."
           | Error _ -> ""
       ) ]
 
