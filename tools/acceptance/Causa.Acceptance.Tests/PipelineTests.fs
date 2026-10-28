@@ -193,7 +193,8 @@ let ``PF-012 the README documents one command for a populated fixture-backed UI 
     Assert.Contains("?percepta=default", fixtureUi)
     // The fixture investigation is rendered only by the test build's hook (main.ts), never by the deployed site.
     let main = File.ReadAllText(Path.Combine(repoRoot, "src/kernel/main.ts"))
-    Assert.Contains(@"TEST_BUILD && new URLSearchParams(location.search).get(""percepta"") === ""default""", main)
+    Assert.Contains(@"new URLSearchParams(location.search).get(""percepta"")", main)
+    Assert.Contains(@"if (TEST_BUILD && (perceptaDefault === ""default""", main)
     let offline = File.ReadAllText(Path.Combine(repoRoot, "tools/acceptance/ci/offline-checks.sh"))
     Assert.Contains("unset CAUSA_GITHUB_TOKEN CAUSA_TEST_REPO", offline)
     Assert.Contains("dotnet test App.slnx", offline)
