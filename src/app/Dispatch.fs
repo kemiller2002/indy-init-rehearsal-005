@@ -7,8 +7,9 @@ open Limen.Contract.Core
 open Causa.App.Adapter
 open Causa.App.Shell
 
-/// Unique per page load: fresh-read URLs never repeat across sessions or reloads.
-let private nonce = Guid.NewGuid().ToString("N").Substring(0, 12)
+/// Unique per page load (a version-4 GUID: 122 random bits): fresh-read URLs and write markers never repeat across
+/// tabs, devices, sessions or reloads (review F-1).
+let private nonce = Guid.NewGuid().ToString("N")
 
 let private entropy () =
     { Now = DateTime.UtcNow
