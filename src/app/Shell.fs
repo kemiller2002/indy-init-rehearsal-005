@@ -235,6 +235,21 @@ let rec private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
         match model.Route with
         | Investigation(id, _) -> toPort entropy (RequestProposals(id, model.Settings.AiModel, d.AiTask)) model
         | _ -> model, []
+    // S17 / S18: the panel and the tournament use the same key, model setting and task as single requests.
+    | "panel-request" ->
+        match model.Route with
+        | Investigation(id, _) -> toPort entropy (RequestPanel(id, model.Settings.AiModel, d.AiTask)) model
+        | _ -> model, []
+    | "tournament-request" ->
+        match model.Route with
+        | Investigation(id, _) ->
+            let input k = model.CommandInputs |> Map.tryFind ("Tournament." + k) |> Option.defaultValue ""
+            let treatments =
+                [ input "modelA", input "promptA"; input "modelB", input "promptB" ]
+                |> List.filter (fun (m, _) -> m.Trim() <> "")
+                |> List.map (fun (m, v) -> m, (if v = "" then "causa.proposal-prompt/1" else v))
+            toPort entropy (RequestTournament(id, treatments, d.AiTask)) model
+        | _ -> model, []
     | "ai-cancel" -> toPort entropy CancelProposals model
     | "ai-discard" -> toPort entropy DiscardDrafts model
     | "ai-record" ->

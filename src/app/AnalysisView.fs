@@ -199,6 +199,21 @@ let extend (model: Model) (view: ViewState) : ViewState =
     let next = stepIndex |> Option.bind (fun k -> stepAt (k + 1))
     let replayHref (v: int64) = Routes.format (Investigation(invId, Timeline)) + $"?item=replay&version={v}"
 
+    // ---- S17 / S18: multi-agent panel and research tournament (AI proposals ?item=panel / ?item=tournament) ----
+    let onProposals = on AiProposals
+    let showPanel = onProposals && model.Selected = "panel"
+    let showTournament = onProposals && model.Selected = "tournament"
+    let mine = ws.Ai.Investigation = Some invId
+    let panel = if mine then ws.Ai.Panel else None
+    let tournament = if mine then ws.Ai.Tournament else None
+    let invVersion = inv |> Option.map (fun i -> i.Version) |> Option.defaultValue 0L
+    let canAsk = ws.Ai.KeyHeld && model.Settings.AiModel <> ""
+    let askReason =
+        if not ws.Ai.KeyHeld then "Enter your provider key in Settings first; it is kept in memory only."
+        elif model.Settings.AiModel = "" then "Set the AI model id in Settings first; there is no default model."
+        else ""
+    let draftsText (ds: DraftRow list) = if ds.IsEmpty then "No drafts." else ds |> List.map (fun d -> $"{d.Kind}: {d.Text}") |> String.concat " · "
+
     // ---- S24: settings semantic manifest ----
     let pin =
         match ws.Capabilities |> List.tryFind (fun c -> c.Id = "PinPolicyVersion") with
@@ -406,6 +421,42 @@ let extend (model: Model) (view: ViewState) : ViewState =
           "an.replay.hasNext", flag next.IsSome
           "an.replay.nextHref", text (next |> Option.map (fun t -> replayHref t.Sequence) |> Option.defaultValue "")
           "an.replay.next", text (match next with Some t -> $"Next recorded event: #{t.Sequence} {t.EventType}." | None -> "This is the last recorded event; nothing follows.")
+          // S17
+          "an.proposals.screen", text (if showPanel then "multi-agent-panel" elif showTournament then "research-tournament" else "investigation-proposals")
+          "an.proposals.panelHref", text (Routes.formatItem (Investigation(invId, AiProposals)) "panel")
+          "an.proposals.tournamentHref", text (Routes.formatItem (Investigation(invId, AiProposals)) "tournament")
+          "an.panel.show", flag showPanel
+          "an.panel.source",
+          text (
+              match panel with
+              | Some p -> $"Every role analysed version {p.SourceVersion}, independently, from the same recorded state." + (if p.SourceVersion <> invVersion then $" The investigation is now at version {invVersion}; review the drafts against it." else "")
+              | None -> $"No panel has run for this investigation. When it runs, every role analyses version {invVersion}, the version open now."
+          )
+          "an.panel.roles", items ((match panel with Some p -> p.Roles | None -> EngineView.panelRoles) |> List.mapi (fun k (n, f, v) -> item [ "id", string k; "text", n; "state", f + " Prompt " + v + "." ]))
+          "an.panel.answers", items (panel |> Option.map (fun p -> p.Answers |> List.mapi (fun k a -> item [ "id", string k; "text", a.Label + ": " + a.Outcome; "state", draftsText a.Drafts ])) |> Option.defaultValue [])
+          "an.panel.answers.empty", flag (panel |> Option.forall (fun p -> p.Answers.IsEmpty))
+          "an.panel.running", flag (panel |> Option.exists (fun p -> p.Running))
+          "an.panel.disagreements", items (panel |> Option.map (fun p -> lines (p.Disagreements @ p.Agreements)) |> Option.defaultValue [])
+          "an.panel.disagreements.empty", flag (panel |> Option.forall (fun p -> p.Disagreements.IsEmpty && p.Agreements.IsEmpty))
+          "an.panel.provenance", items (panel |> Option.map (fun p -> p.Answers |> List.mapi (fun k a -> item [ "id", string k; "text", $"{a.Label}: model {a.Model}, prompt {a.PromptVersion}, source version {a.SourceVersion}" ])) |> Option.defaultValue [])
+          "an.ai.disabled", flag (not canAsk || (panel |> Option.exists (fun p -> p.Running)) || (tournament |> Option.exists (fun t -> t.Running)))
+          "an.ai.reason", text askReason
+          // S18
+          "an.tour.show", flag showTournament
+          "an.tour.experiment",
+          text (
+              match tournament with
+              | Some t -> $"Task: “{t.Task}”. Every treatment ran on version {t.SourceVersion}, frozen when the run started."
+              | None -> $"No comparison has run for this investigation. A run sends the same task to each treatment against version {invVersion}, frozen."
+          )
+          "an.tour.treatments", items (tournament |> Option.map (fun t -> t.Treatments |> List.map (fun r -> item [ "id", r.Id; "text", $"{r.Id}: model {r.Model}, prompt {r.PromptVersion}" ])) |> Option.defaultValue [])
+          "an.tour.treatments.empty", flag (tournament |> Option.forall (fun t -> t.Treatments.IsEmpty))
+          "an.tour.metrics", items (tournament |> Option.map (fun t -> t.Treatments |> List.map (fun r -> item [ "id", r.Id; "text", r.Id; "state", String.concat " · " r.Measurements ])) |> Option.defaultValue [])
+          "an.tour.metrics.empty", flag (tournament |> Option.forall (fun t -> t.Treatments.IsEmpty))
+          "an.tour.limitations", items (lines (tournament |> Option.map (fun t -> t.Limitations) |> Option.defaultValue [ "Nothing has been measured yet."; "When a comparison runs, no treatment is ranked or named the winner." ]))
+          "an.tour.prompts", items (IndyInitRootCauseInvestigator.Engine.Panel.prompts |> List.map (fun (v, _) -> item [ "id", v; "value", v; "label", v ]))
+          "an.form.tour.modelA", text (field "Tournament.modelA")
+          "an.form.tour.modelB", text (field "Tournament.modelB")
           // S24
           "an.manifest.semantic", text "Semantic version 1.0.0 of the Causa investigation model (storage contract v1.0.0). It changes only through an approved semantic evolution, never silently."
           "an.manifest.pack", text "No domain pack is installed: the core investigation model applies. Storage contract v1.0.0 allows no domain packs."

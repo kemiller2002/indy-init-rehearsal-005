@@ -158,7 +158,7 @@ test("global and investigation navigation are two separate lists; settings never
   const primary = page.getByRole("navigation", { name: "Primary" });
   const sections = page.getByRole("navigation", { name: "Investigation sections" });
   await expect(primary.getByRole("link")).toHaveText(["Investigations", "Administration", "Settings"]);
-  await expect(sections.getByRole("link")).toHaveText(["Overview", "Causal analysis", "Evidence", "Hypotheses", "Timeline", "Corrective actions", "Report", "AI proposals"]);
+  await expect(sections.getByRole("link")).toHaveText(["Overview", "Causal analysis", "Evidence", "Hypotheses", "Timeline", "Corrective actions", "Report", "AI proposals", "Actions"]);
   // Neither list contains the other's destinations, and no investigation view carries settings controls.
   await expect(sections.getByRole("link", { name: /Settings|Administration/ })).toHaveCount(0);
   await expect(primary.getByRole("link", { name: /Overview|Timeline|Evidence/ })).toHaveCount(0);

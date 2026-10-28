@@ -1049,7 +1049,7 @@
           </div>
         </template>
         <template data-if="section.proposals">
-          <section aria-labelledby="sec-proposals" data-percepta-screen="investigation-proposals">
+          <section aria-labelledby="sec-proposals" data-bind-data-percepta-screen="an.proposals.screen">
             <h2 id="sec-proposals">AI proposals</h2>
             <p class="causa-muted">An AI assistant can only propose hypotheses, open questions or actions. Nothing it proposes changes the investigation until you accept it.</p>
             <template data-if="ai.noKey"><p class="causa-notice" data-tone="warning">Enter your provider key in <a href="#/settings">Settings</a> to request proposals.</p></template>
@@ -1061,6 +1061,62 @@
               </div>
               <button type="submit" class="ef-button" data-ef-variant="primary" data-bind-disabled="ai.requestDisabled">Request proposals</button>
             </form>
+            <p><a class="causa-related" data-bind-href="an.proposals.panelHref">Compare specialised analyses (panel)</a> · <a class="causa-related" data-bind-href="an.proposals.tournamentHref">Compare models and prompts (tournament)</a></p>
+            <!-- Multi-agent panel (S17): blind role analyses of one version; disagreements are structural, never a vote. -->
+            <template data-if="an.panel.show">
+              <section class="causa-panel" aria-labelledby="mp-heading">
+                <h3 id="mp-heading">Panel of specialised analyses</h3>
+                <p class="causa-muted">Each role works alone on the same recorded version. Where roles agree is not evidence and is never a vote; every draft is only a proposal until you accept it.</p>
+                <p><button type="button" class="ef-button" data-ef-variant="primary" data-event="panel-request" data-bind-disabled="an.ai.disabled">Run the panel on the task above</button> <span class="causa-capability__reason" data-text="an.ai.reason"></span></p>
+                <template data-if="an.panel.running"><p role="status">Waiting for the roles' answers…</p></template>
+                <div class="causa-overview-grid">
+                  <div data-percepta-region="source-version"><h4>Source version</h4><p data-text="an.panel.source"></p></div>
+                  <div data-percepta-region="roles"><h4>Roles</h4>
+                    <ul class="causa-list" aria-label="Panel roles"><template data-each="an.panel.roles" data-key="id"><li class="causa-item"><p data-text="text"></p><p class="causa-muted" data-text="state"></p></li></template></ul></div>
+                  <div data-percepta-region="proposals"><h4>What each role proposed</h4>
+                    <template data-if="an.panel.answers.empty"><p class="causa-muted">No role has answered yet.</p></template>
+                    <ul class="causa-list" aria-label="Answers by role"><template data-each="an.panel.answers" data-key="id"><li class="causa-item"><p data-text="text"></p><p class="causa-muted" data-text="state"></p></li></template></ul></div>
+                  <div data-percepta-region="disagreements"><h4>Where the roles differ</h4>
+                    <template data-if="an.panel.disagreements.empty"><p class="causa-muted">No differences to show: no two roles have answered with drafts.</p></template>
+                    <ul class="causa-list" aria-label="Differences between roles"><template data-each="an.panel.disagreements" data-key="id"><li data-text="text"></li></template></ul></div>
+                  <div data-percepta-region="provenance"><h4>Provenance</h4>
+                    <template data-if="an.panel.answers.empty"><p class="causa-muted">Nothing to attribute yet.</p></template>
+                    <ul class="causa-list" aria-label="Provenance of each answer"><template data-each="an.panel.provenance" data-key="id"><li data-text="text"></li></template></ul></div>
+                </div>
+              </section>
+            </template>
+            <!-- Research tournament (S18): treatments on one frozen version; measurements only, no winner. -->
+            <template data-if="an.tour.show">
+              <section class="causa-panel" aria-labelledby="rt-heading">
+                <h3 id="rt-heading">Compare models and prompts</h3>
+                <form class="ef-form causa-form" data-event="tournament-request" aria-labelledby="rt-heading">
+                  <div class="causa-form__row">
+                    <div class="ef-field"><label class="ef-field__label" id="rt-model-a-label" for="rt-model-a">Treatment A model id</label>
+                      <input id="rt-model-a" aria-labelledby="rt-model-a-label" class="causa-input" type="text" autocomplete="off" data-event="field-Tournament.modelA" data-on="input" data-bind-value="an.form.tour.modelA"></div>
+                    <div class="ef-field"><label class="ef-field__label" id="rt-prompt-a-label" for="rt-prompt-a">Treatment A prompt version</label>
+                      <select id="rt-prompt-a" aria-labelledby="rt-prompt-a-label" class="causa-input" data-event="field-Tournament.promptA"><template data-each="an.tour.prompts" data-key="id"><option data-bind-value="value" data-text="label"></option></template></select></div>
+                  </div>
+                  <div class="causa-form__row">
+                    <div class="ef-field"><label class="ef-field__label" id="rt-model-b-label" for="rt-model-b">Treatment B model id</label>
+                      <input id="rt-model-b" aria-labelledby="rt-model-b-label" class="causa-input" type="text" autocomplete="off" data-event="field-Tournament.modelB" data-on="input" data-bind-value="an.form.tour.modelB"></div>
+                    <div class="ef-field"><label class="ef-field__label" id="rt-prompt-b-label" for="rt-prompt-b">Treatment B prompt version</label>
+                      <select id="rt-prompt-b" aria-labelledby="rt-prompt-b-label" class="causa-input" data-event="field-Tournament.promptB"><template data-each="an.tour.prompts" data-key="id"><option data-bind-value="value" data-text="label"></option></template></select></div>
+                  </div>
+                  <p><button type="submit" class="ef-button" data-ef-variant="primary" data-bind-disabled="an.ai.disabled">Run both on the task above</button> <span class="causa-capability__reason" data-text="an.ai.reason"></span></p>
+                </form>
+                <div class="causa-overview-grid">
+                  <div data-percepta-region="experiment"><h4>Experiment</h4><p data-text="an.tour.experiment"></p></div>
+                  <div data-percepta-region="treatments"><h4>Treatments</h4>
+                    <template data-if="an.tour.treatments.empty"><p class="causa-muted">No treatment has run yet.</p></template>
+                    <ul class="causa-list" aria-label="Treatments"><template data-each="an.tour.treatments" data-key="id"><li data-text="text"></li></template></ul></div>
+                  <div data-percepta-region="metrics"><h4>Measurements (no ranking)</h4>
+                    <template data-if="an.tour.metrics.empty"><p class="causa-muted">Nothing has been measured yet.</p></template>
+                    <ul class="causa-list" aria-label="Measurements per treatment"><template data-each="an.tour.metrics" data-key="id"><li class="causa-item"><p data-text="text"></p><p class="causa-muted" data-text="state"></p></li></template></ul></div>
+                  <div data-percepta-region="limitations"><h4>Limitations</h4>
+                    <ul class="causa-list" aria-label="Limitations"><template data-each="an.tour.limitations" data-key="id"><li data-text="text"></li></template></ul></div>
+                </div>
+              </section>
+            </template>
             <template data-if="ai.inFlight"><div class="causa-ai-status" role="status"><p>Waiting for the provider…</p><button type="button" class="ef-button" data-event="ai-cancel">Cancel the request</button></div></template>
             <template data-if="ai.result.show"><div class="ef-alert causa-notice" role="status" data-bind-data-tone="ai.result.tone"><p class="causa-notice__text" data-text="ai.result.text"></p>
               <template data-if="ai.retryable"><button type="button" class="ef-button" data-event="ai-retry">Try again</button></template></div></template>

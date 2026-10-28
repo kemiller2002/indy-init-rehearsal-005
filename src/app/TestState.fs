@@ -140,7 +140,33 @@ let toProjection (s: Injected) : WorkspaceProjection =
       Capabilities = capabilities
       Blockers = blockers
       Message = None
-      Ai = noAi
+      Ai =
+        { noAi with
+            Investigation = Some fixtureId
+            Panel =
+              Some
+                  { SourceVersion = 7L
+                    Running = false
+                    Roles = EngineView.panelRoles
+                    Answers =
+                      [ { Label = "Evidence auditor"; Model = "fixture-model"; PromptVersion = "causa.panel-role/evidence-auditor/1"; SourceVersion = 7L; Outcome = "1 proposal(s) to review."
+                          Drafts = [ { Kind = "Open question"; Text = "Was the seal temperature measured at the joint?"; Rationale = None } ] }
+                        { Label = "Alternative-cause seeker"; Model = "fixture-model"; PromptVersion = "causa.panel-role/alternative-cause-seeker/1"; SourceVersion = 7L; Outcome = "1 proposal(s) to review."
+                          Drafts = [ { Kind = "Hypothesis"; Text = "Putty blow-by opened a leak path."; Rationale = None } ] }
+                        { Label = "Timeline checker"; Model = "fixture-model"; PromptVersion = "causa.panel-role/timeline-checker/1"; SourceVersion = 7L; Outcome = "The model declined to answer."; Drafts = [] } ]
+                    Disagreements =
+                      [ "Open question “Was the seal temperature measured at the joint?”: proposed by Evidence auditor; not proposed by Alternative-cause seeker."
+                        "Hypothesis “Putty blow-by opened a leak path.”: proposed by Alternative-cause seeker; not proposed by Evidence auditor." ]
+                    Agreements = [] }
+            Tournament =
+              Some
+                  { SourceVersion = 7L
+                    Running = false
+                    Task = "Propose next hypotheses."
+                    Treatments =
+                      [ { Id = "Treatment A"; Model = "fixture-model-a"; PromptVersion = "causa.proposal-prompt/1"; Measurements = [ "Valid output: yes"; "Drafts: 2"; "Refused: no"; "Latency: 1200 ms (measured in this browser)"; "Provider tokens: 900 in, 60 out (as reported)" ] }
+                        { Id = "Treatment B"; Model = "fixture-model-b"; PromptVersion = "causa.panel-role/evidence-auditor/1"; Measurements = [ "Valid output: no"; "Drafts: 0"; "Refused: no"; "Latency: 400 ms (measured in this browser)"; "Provider tokens: not reported" ] } ]
+                    Limitations = [ "One investigation at one frozen version (7); results do not generalise to other cases."; "No treatment is ranked or named the winner; compare the measurements for the question you have." ] } }
       Administration = [ { Id = "fixture"; Section = "persistence"; Label = "Data provider"; Value = "Percepta fixture state " + s.Name; State = "Unknown" } ] }
 
 /// The fixture's history (S15): version 1 against the fixture's latest version, as fixed words.
