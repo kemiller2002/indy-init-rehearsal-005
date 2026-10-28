@@ -36,6 +36,8 @@ type Model =
       Settings: Settings
       /// build-info.json as served next to the page (VER-007-O2: what is actually deployed).
       Build: Loadable<(string * string) list>
+      /// Evidence published next to the site (evidence/proof.json, evidence/factory.json), as text, by name.
+      Evidence: Map<string, Loadable<string>>
       Port: Port
       Counter: int
       /// Correlation ids of requests the shell itself made; every other answer belongs to the port.
@@ -67,6 +69,7 @@ let initial =
       Notice = None
       Settings = { LargeText = false; ReducedMotion = false; AiModel = "" }
       Build = NotRequested
+      Evidence = Map.empty
       Port = EnginePort.create PersistencePort.persistence
       Counter = 0
       ShellPending = Set.empty
@@ -97,6 +100,34 @@ let private readBuildInfo (model: Model) =
             ResponseHeaders = None
             Credentials = Some HttpCredentials.Omit
             Xsrf = None } ]
+
+/// Reads one published evidence file (S20/S21) once; the answer is kept as text and parsed by the screen module.
+let private readEvidence (name: string) (model: Model) =
+    if model.Evidence.ContainsKey name then model, []
+    else
+        let corr = $"shell-ev-{name}-{model.Counter + 1}"
+        { model with Counter = model.Counter + 1; ShellPending = model.ShellPending.Add corr; Evidence = model.Evidence.Add(name, Loading) },
+        [ EffectRequest.Http
+              { CorrelationId = CorrelationId corr
+                Method = HttpMethod.Get
+                Url = model.PageBase + $"evidence/{name}.json?fresh=" + corr
+                Headers = None
+                Body = None
+                TimeoutMs = requestTimeoutMs
+                Response = Some HttpResponseKind.Text
+                ResponseHeaders = None
+                Credentials = Some HttpCredentials.Omit
+                Xsrf = None } ]
+
+/// The evidence the route needs, requested when it is first shown.
+let private evidenceFor (model: Model) =
+    match model.Route with
+    | RequirementsProof -> readEvidence "proof" model
+    | FactoryView ->
+        let model, fx = readEvidence "factory" model
+        let model, more = readEvidence "proof" model
+        model, fx @ more
+    | _ -> model, []
 
 /// build-info.json is a flat object of strings plus a "components" object of strings; anything else is refused.
 let parseBuildInfo (text: string) : Result<(string * string) list, string> =
@@ -189,6 +220,10 @@ let rec private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
         | true, n when n >= 1L -> { model with HistoryVersion = Some n }, []
         | _ -> { model with HistoryVersion = None }, []
     | "catalog-sort" -> { model with CatalogSort = (if List.exists (fun (v, _) -> v = value) [ "activity", (); "title", (); "status", () ] then value else "activity") }, []
+    | "proof-pick" ->
+        let corr = $"shell-nav-{model.Counter + 1}"
+        let url = Routes.formatItem RequirementsProof value
+        { model with Counter = model.Counter + 1; Selected = value }, [ EffectRequest.Navigation(NavigationEffectRequest.Replace(CorrelationId corr, url)) ]
     | "timeline-filter" -> { model with TimelineFilter = (if value = "" then "all" else value) }, []
     | "ai-model" -> { model with Settings = { model.Settings with AiModel = value.Trim() } }, []
     | "ai-key" -> { model with Drafts = { d with AiKey = value } }, []
@@ -278,10 +313,22 @@ let update (entropy: Entropy) (message: BrowserToEngineMessage) (model: Model) :
         // Restore this device's work first, so it shows before Connect (persistence's Boot).
         let model, boot = toPort entropy Boot model
         let model, more = openRoute entropy model
-        model, fx @ boot @ more
+        let model, ev = evidenceFor model
+        model, fx @ boot @ more @ ev
     | BrowserToEngineMessage.LocationChanged location ->
-        openRoute entropy { model with Route = Routes.parse location.Hash; Selected = Routes.selection location.Hash; HistoryVersion = Routes.versionOf location.Hash; Notice = None; PendingConfirm = None }
+        let model, fx = openRoute entropy { model with Route = Routes.parse location.Hash; Selected = Routes.selection location.Hash; HistoryVersion = Routes.versionOf location.Hash; Notice = None; PendingConfirm = None }
+        let model, ev = evidenceFor model
+        model, fx @ ev
     | BrowserToEngineMessage.Event e -> onEvent entropy e model
+    | BrowserToEngineMessage.EffectResult(EffectResult.HttpResult(CorrelationId corr, outcome)) when model.ShellPending.Contains corr && corr.StartsWith("shell-ev-", StringComparison.Ordinal) ->
+        let name = corr.Split('-')[2]
+        let loaded =
+            match outcome with
+            | EffectOutcome.Success(200L, RawJson body, _) ->
+                Loaded(try Text.Json.JsonSerializer.Deserialize<string>(body: string) with _ -> body)
+            | EffectOutcome.Success(status, _, _) -> Failed $"evidence/{name}.json answered HTTP {status}: it was not published with this build"
+            | _ -> Failed $"evidence/{name}.json could not be reached"
+        { model with ShellPending = model.ShellPending.Remove corr; Evidence = model.Evidence.Add(name, loaded) }, []
     | BrowserToEngineMessage.EffectResult(EffectResult.HttpResult(CorrelationId corr, outcome)) when model.ShellPending.Contains corr ->
         let model = { model with ShellPending = model.ShellPending.Remove corr }
 

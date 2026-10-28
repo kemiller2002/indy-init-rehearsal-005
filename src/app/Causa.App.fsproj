@@ -29,6 +29,7 @@
     <Compile Include="PersistencePort.fs" />
     <Compile Include="Shell.fs" />
     <Compile Include="TestState.fs" />
+    <Compile Include="Evidence.fs" />
     <Compile Include="UxView.fs" />
     <Compile Include="View.fs" />
     <Compile Include="AnalysisView.fs" />

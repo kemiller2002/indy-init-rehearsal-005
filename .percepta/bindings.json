@@ -156,6 +156,24 @@
         "fixtures/blocker-only.json",
         "fixtures/no-predicates.json"
       ]
+    },
+    {
+      "contract": "S20-factory-view",
+      "appScreen": "factory-view",
+      "path": "index.html?percepta=default#/administration/factory",
+      "fixtures": [
+        "fixtures/blocker-only.json",
+        "fixtures/no-predicates.json"
+      ]
+    },
+    {
+      "contract": "S21-requirements-proof",
+      "appScreen": "requirements-proof",
+      "path": "index.html?percepta=default#/administration/proof",
+      "fixtures": [
+        "fixtures/blocker-only.json",
+        "fixtures/no-predicates.json"
+      ]
     }
   ]
 }
