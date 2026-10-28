@@ -67,7 +67,8 @@ let ``VPO-434d1a1d24b4b20e VPO-69f661459a587bbd the document carries no coordina
         Assert.DoesNotContain(word, doc)
 
 [<Fact>]
-let ``VPO-2a3f7cbe7df14c03 zero, one, many and disconnected graphs are all valid`` () =
+/// Projection only (node and edge counts); the layout of these cases is measured in graph-layout.spec.js.
+let ``zero, one, many and disconnected projections have the expected nodes and edges`` () =
     Assert.Equal("", Graph.toDocument "T" "x" (Graph.ofInvestigation (inv [] [])))
     let one = Graph.ofInvestigation (inv [] [ { Id = "c1"; Outcome = "O"; State = "identified"; Members = [] } ])
     Assert.Single(one.Nodes) |> ignore

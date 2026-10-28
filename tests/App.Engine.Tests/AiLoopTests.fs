@@ -122,10 +122,9 @@ let ``T27 R11.4 VPO-199103f9166730e7 instructions are fixed and investigation co
     Assert.Equal(Active, (session.State |> Option.get).Lifecycle)
 
 [<Fact>]
-[<Trait("obligation", "VPO-199103f9166730e7")>]
 [<Trait("obligation", "VPO-6886a2a6e612f704")>]
 [<Trait("task", "T27")>]
-let ``T27 D-004 VPO-199103f9166730e7 a successful answer yields drafts that are recorded only as agent proposals`` () =
+let ``T27 D-004 a successful answer yields drafts that are recorded only as agent proposals`` () =
     let session, _, _ = started ()
     let text = "```json\n{\"proposals\":[{\"kind\":\"hypothesis\",\"text\":\"Connection pool exhausted\",\"rationale\":\"pattern\"}]}\n```"
     match classify (fun r -> Responded(r, 200, [], anthropicText text "end_turn")) with
@@ -146,7 +145,6 @@ let ``T27 D-004 VPO-199103f9166730e7 a successful answer yields drafts that are 
     | other -> failwithf "%A" other
 
 [<Fact>]
-[<Trait("obligation", "VPO-199103f9166730e7")>]
 [<Trait("engineEvidenceFor", "EXT-DATA-004-O1")>]
 [<Trait("task", "T27")>]
 let ``T27 every provider outcome is classified and only the honest ones offer retry`` () =

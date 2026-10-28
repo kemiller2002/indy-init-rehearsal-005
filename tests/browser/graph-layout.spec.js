@@ -29,7 +29,12 @@ const slotOfStatus = {
 };
 
 test.describe("causal graph layout, measured in the browser", () => {
-  test("every synthetic fixture lays out without overlapping nodes, clipped text, labels over nodes, detached or unlisted connectors, or hidden evidence counts, and within its crossing budget @responsive [VPO-9fe0158bf99720e2] [VPO-37a1821f8918e8a9]", { tag: ["@responsive"] }, async ({ page }, testInfo) => {
+  test("every synthetic fixture lays out without overlapping nodes, clipped text, labels over nodes, detached or unlisted connectors, or hidden evidence counts, and within its crossing budget; zero, one, many, disconnected and cyclic graphs all lay out validly @responsive [VPO-9fe0158bf99720e2] [VPO-37a1821f8918e8a9] [VPO-2a3f7cbe7df14c03]", { tag: ["@responsive"] }, async ({ page }, testInfo) => {
+    // WDL-005-O2: zero nodes is no document at all (nothing to lay out, the text list says so); one, many,
+    // disconnected and cyclic are each laid out and measured below.
+    expect(byName.empty.document).toBeNull();
+    expect(byName["single-node"].document.nodes.length).toBe(1);
+    expect(byName["dense-evidence"].document.nodes.length).toBeGreaterThan(10);
     expect(drawn.map((f) => f.name)).toEqual(["cycle", "dense-evidence", "disconnected", "four-roles", "long-labels", "single-node"]);
     for (const fixture of drawn) {
       const doc = fixture.document;
