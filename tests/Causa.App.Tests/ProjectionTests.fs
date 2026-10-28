@@ -45,7 +45,7 @@ let ``VPO-2f4f9de66ddd6434 before Connect only the empty, disconnected workspace
     Assert.Equal("Not connected", textOf view "connection.label")
 
 [<Fact>]
-let ``VPO-be99a964783c59b5 VPO-9659118aa1ef95ff only the engine's capabilities are rendered, illegal ones with the engine's reason`` () =
+let ``VPO-9659118aa1ef95ff only the engine's capabilities are rendered, illegal ones with the engine's reason`` () =
     let ws = injected "\"material-blocker-exists\"" "\"RecordObservation\":\"legal\",\"ConfirmCause\":\"illegal\""
     let view = View.project (at (Routes.Investigation(TestState.fixtureId, Routes.Overview)) (Port.fixedAt ws))
     let caps = itemsOf view "capabilities"

@@ -253,7 +253,7 @@ function siteFiles(dir = "dist") {
 
 test(
   "EXT-DATA-013 after Connect the browser loads exactly the catalog's three historical cases, verified and read-only; no record ships with the site and none is served by it",
-  { tag: ["@live", "@VPO-c81484cbcf203d4f", "@VPO-4b4747eaff96e385", "@VPO-d60e3a3a25cb106d", "@VPO-dc48d066cfa2309d", "@VPO-acd13bfa08dba51a", "@VPO-557743cb4997c484", "@VPO-c81b5785b2ffa1c2", "@VPO-903077d337faf198", "@VPO-a59ccf551bbd8407", "@VPO-43aef41e6256b122", "@VPO-f8cbaa452cd4eb0b", "@VPO-0304a8342e7147dd", "@VPO-77f6e22e08d5bba0"] },
+  { tag: ["@live", "@VPO-c81484cbcf203d4f", "@VPO-4b4747eaff96e385", "@VPO-d60e3a3a25cb106d", "@VPO-dc48d066cfa2309d", "@VPO-acd13bfa08dba51a", "@VPO-557743cb4997c484", "@VPO-903077d337faf198", "@VPO-a59ccf551bbd8407", "@VPO-43aef41e6256b122", "@VPO-f8cbaa452cd4eb0b", "@VPO-0304a8342e7147dd", "@VPO-77f6e22e08d5bba0"] },
   async ({ page }) => {
     test.setTimeout(300_000);
     blockedUnlessConfigured();
