@@ -451,3 +451,35 @@ let ``LOCAL-DURABILITY two tabs with different unsaved changes to one investigat
     let stored = a.Store |> Map.toList |> List.map snd |> String.concat "\n"
     Assert.Contains("Hypothesis unknown in tab A", stored)
     Assert.Contains(iid, Sync.preservedElsewhere a.Model)
+
+// Review R3-F1: a tab that reopened from another tab's record must not treat that tab's later records as its own.
+[<Fact>]
+let ``LOCAL-DURABILITY a tab restored from another tab's record never replaces that tab's later unsaved change`` () =
+    let fake = newFake ()
+    let v = investigation "r3-f1" 0
+    seed fake v |> ignore
+    let iid = v.InvestigationId
+    let a = App(fake)
+    let b = App(fake)
+    ok (a.Connect ws)
+    b.Store <- a.Store
+    ok (b.Connect ws)
+    // A reopens from B's record.
+    a.Store <- b.Store
+    ok (a.Reload())
+    ok (a.Connect ws)
+    // B, still open, queues an offline change Y; then A writes its record.
+    b.Store <- a.Store
+    b.Faults <- (fun r -> if r.Method = "POST" then NotSentFault else Deliver)
+    ok (b.Step(Submit(hypothesis iid v.Version "offline Y in tab B")))
+    ok (b.Step(Save iid))
+    Assert.Equal("queuedOffline", b.Status iid)
+    a.Store <- b.Store
+    ok (a.Step(Disconnect))
+    ok (a.Connect ws)
+    let stored = a.Store |> Map.toList |> List.map snd |> String.concat "\n"
+    Assert.Contains("Hypothesis offline Y in tab B", stored)
+    // B reopens: Y is restored (nothing else unsaved for that investigation).
+    b.Store <- a.Store
+    ok (b.Reload())
+    Assert.Contains("Hypothesis offline Y in tab B", text (b.Doc(iid).Local.EventsFile))
