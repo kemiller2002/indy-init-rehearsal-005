@@ -47,6 +47,8 @@ type Model =
       HistoryVersion: int64 option
       /// Timeline category filter ("all" or a category key, UI-003-O2).
       TimelineFilter: string
+      /// The investigation catalog's order (stream ux): "activity", "title" or "status".
+      CatalogSort: string
       /// A destructive or irreversible action waiting for the person's confirmation (UI-004-O3), with its words.
       PendingConfirm: (AdapterInput * string) option
       /// Bumped each time a token or key is taken, so the page can empty its password fields.
@@ -77,6 +79,7 @@ let initial =
       PendingConfirm = None
       HistoryVersion = None
       TimelineFilter = "all"
+      CatalogSort = "activity"
       TestHooks = false
       InjectedState = None }
 
@@ -216,6 +219,7 @@ let rec private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
         match Int64.TryParse value with
         | true, n when n >= 1L -> { model with HistoryVersion = Some n }, []
         | _ -> { model with HistoryVersion = None }, []
+    | "catalog-sort" -> { model with CatalogSort = (if List.exists (fun (v, _) -> v = value) [ "activity", (); "title", (); "status", () ] then value else "activity") }, []
     | "proof-pick" ->
         let corr = $"shell-nav-{model.Counter + 1}"
         let url = Routes.formatItem RequirementsProof value
@@ -235,6 +239,10 @@ let rec private onEvent (entropy: Entropy) (e: SemanticEvent) (model: Model) =
     | "panel-request" ->
         match model.Route with
         | Investigation(id, _) -> toPort entropy (RequestPanel(id, model.Settings.AiModel, d.AiTask)) model
+        | _ -> model, []
+    | "panel-record" ->
+        match model.Route, e.Key with
+        | Investigation(id, _), Some role -> toPort entropy (RecordPanelDrafts(id, role)) model
         | _ -> model, []
     | "tournament-request" ->
         match model.Route with

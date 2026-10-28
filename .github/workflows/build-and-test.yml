@@ -754,10 +754,13 @@ jobs:
           retention-days: 30
 
   # G5: `percepta verify-app` against the test configuration of the built site (obj/site-test, built from dist/ with
-  # the Percepta state hook) with the committed .percepta/bindings.json and contracts. Producer status:
-  #   success       exit 0 and the report is complete (every contract bound and PASS)
+  # the Percepta state hook) with the committed .percepta/bindings.json and contracts. A contract counts as
+  # NOT-APPLICABLE only by an owner decision: `--allow-not-applicable` is passed only when every notApplicable binding
+  # cites an existing, accepted research/decisions/DF-… record (causa-acceptance bindings-check); an uncited one fails.
+  # Producer status:
+  #   success       exit 0, 0 FAIL, 0 NOT-BOUND, no orphan bindings (NOT-APPLICABLE only as above)
   #   not-produced  exit 3 (incomplete: NOT-BOUND contracts remain) with no FAIL, or no site / no bindings
-  #   failure       anything else (a FAIL, an error, no report)
+  #   failure       anything else (a FAIL, an uncited NOT-APPLICABLE, an error, no report)
   percepta:
     needs: site
     if: always() && needs.site.result == 'success'
@@ -782,6 +785,15 @@ jobs:
         with:
           name: site-test
           path: obj/site-test
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - name: Not-applicable contracts cite accepted owner decisions
+        id: na
+        run: |
+          dotnet build tools/acceptance/Causa.Acceptance -c Release > /dev/null
+          if [ ! -f .percepta/bindings.json ]; then echo "allow-not-applicable=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          $CA bindings-check --root . --bindings .percepta/bindings.json | tee -a "$GITHUB_STEP_SUMMARY" | grep '^allow-not-applicable=' >> "$GITHUB_OUTPUT"
       - name: percepta verify-app
         id: verify
         timeout-minutes: 20
@@ -802,8 +814,10 @@ jobs:
           (node scripts/serve.mjs obj/site-test 4330 > /dev/null 2>&1 &)
           for i in $(seq 1 30); do curl -fsS -o /dev/null http://127.0.0.1:4330/index.html && break; sleep 1; done
           set +e
+          allow=""
+          [ "${{ steps.na.outputs.allow-not-applicable }}" = true ] && allow="--allow-not-applicable"
           percepta verify-app --base-url http://127.0.0.1:4330/ --bindings .percepta/bindings.json --contracts .percepta/contracts \
-            --out TestResults/percepta/verify-app.json > TestResults/percepta/verify-app.log 2>&1
+            $allow --out TestResults/percepta/verify-app.json > TestResults/percepta/verify-app.log 2>&1
           code=$?
           set -e
           cat TestResults/percepta/verify-app.log
@@ -811,7 +825,7 @@ jobs:
           report=TestResults/percepta/verify-app.json
           counts=$(jq -c '.counts' "$report" 2>/dev/null || echo none)
           echo "percepta verify-app: exit $code, complete $(jq -r .complete "$report" 2>/dev/null), counts $counts" | tee -a "$GITHUB_STEP_SUMMARY"
-          if [ "$code" -eq 0 ] && jq -e '.complete == true and .counts.FAIL == 0' "$report" > /dev/null 2>&1; then
+          if [ "$code" -eq 0 ] && jq -e '.complete == true and .counts.FAIL == 0 and .counts["NOT-BOUND"] == 0 and (.orphanBindings // []) == []' "$report" > /dev/null 2>&1; then
             echo "status=success" >> "$GITHUB_OUTPUT"
           elif [ "$code" -eq 3 ] && jq -e '.counts.FAIL == 0 and (.orphanBindings // []) == []' "$report" > /dev/null 2>&1; then
             echo "status=not-produced" >> "$GITHUB_OUTPUT"

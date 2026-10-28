@@ -50,7 +50,11 @@ type CardProjection =
       LastActivity: string option
       Hypotheses: Count
       Evidence: Count
-      Contradictions: Count }
+      Contradictions: Count
+      /// Open questions (unknowns not yet answered or accepted), when the domain holds them.
+      OpenQuestionCount: Count
+      /// The next lifecycle action the F# policy allows now (Records.nextLegalAction); None offers none.
+      NextAction: string option }
 
 type HypothesisRow =
     { Id: string
@@ -112,7 +116,9 @@ type DraftRow = { Kind: string; Text: string; Rationale: string option }
 
 /// One role's (S17) or treatment's (S18) answer with its provenance, in words.
 type PanelAnswerRow =
-    { Label: string
+    { /// The role id (S17) or treatment id (S18): the key for recording this answer's drafts.
+      Key: string
+      Label: string
       Model: string
       PromptVersion: string
       SourceVersion: int64
@@ -239,6 +245,9 @@ type InvestigationProjection =
       Integrity: string option
       Report: ReportView option
       Capabilities: Capability list
+      /// The engine's typed projection and history (Records: relationships, inspector, explanations, next steps);
+      /// None for a shell-only fixture.
+      Typed: Records.Source option
       /// Records behind the analysis screens (S03, S04, S11, S12, S13).
       Detail: InvestigationDetail }
 
@@ -303,6 +312,8 @@ type AdapterInput =
     | RequestPanel of investigation: string * model: string * task: string
     /// S18: one request per treatment (model id, prompt version) against the open version, frozen.
     | RequestTournament of investigation: string * treatments: (string * string) list * task: string
+    /// S17: record one role's drafts as agent proposals (the role in provenance); a human still accepts each one.
+    | RecordPanelDrafts of investigation: string * role: string
     /// Record the drafted proposals (still proposals: a human accepts each one) or discard them.
     | RecordDrafts of investigation: string * model: string
     | DiscardDrafts

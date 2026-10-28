@@ -433,7 +433,7 @@ let extend (model: Model) (view: ViewState) : ViewState =
               | None -> $"No panel has run for this investigation. When it runs, every role analyses version {invVersion}, the version open now."
           )
           "an.panel.roles", items ((match panel with Some p -> p.Roles | None -> EngineView.panelRoles) |> List.mapi (fun k (n, f, v) -> item [ "id", string k; "text", n; "state", f + " Prompt " + v + "." ]))
-          "an.panel.answers", items (panel |> Option.map (fun p -> p.Answers |> List.mapi (fun k a -> item [ "id", string k; "text", a.Label + ": " + a.Outcome; "state", draftsText a.Drafts ])) |> Option.defaultValue [])
+          "an.panel.answers", items (panel |> Option.map (fun p -> p.Answers |> List.mapi (fun k a -> itemF [ "id", (if a.Key = "" then string k else a.Key); "text", a.Label + ": " + a.Outcome; "state", draftsText a.Drafts ] [ "hasDrafts", not a.Drafts.IsEmpty ])) |> Option.defaultValue [])
           "an.panel.answers.empty", flag (panel |> Option.forall (fun p -> p.Answers.IsEmpty))
           "an.panel.running", flag (panel |> Option.exists (fun p -> p.Running))
           "an.panel.disagreements", items (panel |> Option.map (fun p -> lines (p.Disagreements @ p.Agreements)) |> Option.defaultValue [])

@@ -422,8 +422,8 @@ let ofProjection (writable: bool) (history: DomainEvent list) (p: InvestigationP
         |> List.sortBy (fun e -> e.AdmittedAtVersion)
         |> List.map (fun e ->
             ({ Id = e.Id.Text
-               Content = (match e.Content with TextContent t -> t.Value | ArtifactContent url -> url)
-               Source = Some e.Source.Value
+               Content = Records.clean (match e.Content with TextContent t -> t.Value | ArtifactContent url -> url)
+               Source = Some(Records.clean e.Source.Value)
                Category = category e.Category
                RecordedAt = Some(stamp e.Provenance.RecordedAt) }: A.EvidenceRow))
       Blockers = p.Obligations |> List.map (fun o -> ({ Id = o.EntityId; Question = o.Message; Material = true }: A.BlockerRow))
@@ -456,6 +456,8 @@ let ofProjection (writable: bool) (history: DomainEvent list) (p: InvestigationP
                State = (match p.State with ProposalActive -> "Awaiting your decision" | ProposalAccepted -> "Accepted" | ProposalRejected -> "Rejected")
                By =
                  match p.Provenance.Actor.Kind with
+                 | Agent(provider, model) when p.Provenance.Actor.ActorId.StartsWith("causa-panel/", StringComparison.Ordinal) ->
+                     $"Proposed by an AI agent ({provider}, {model}), panel role {p.Provenance.Actor.ActorId.Substring 12}"
                  | Agent(provider, model) -> $"Proposed by an AI agent ({provider}, {model})"
                  | _ -> "Proposed by " + p.Provenance.Actor.ActorId }: A.ProposalRow))
       Findings =
@@ -470,6 +472,7 @@ let ofProjection (writable: bool) (history: DomainEvent list) (p: InvestigationP
             $"events SHA-256 {i.EventsSha256.Substring(0, min 12 i.EventsSha256.Length)}…, state SHA-256 {i.StateSha256.Substring(0, min 12 i.StateSha256.Length)}…, admissibility {checkedText}")
       Report = Some(reportView inv)
       Capabilities = capabilities
+      Typed = Some { Projection = p; History = history }
       Detail = detail p }
 
 /// The card for the investigation list: counts the engine state actually holds (never unknown-as-zero).
@@ -480,10 +483,12 @@ let card (writable: bool) (p: InvestigationProjection) (history: DomainEvent lis
       Title = p.Title
       Lifecycle = lifecycle p.Lifecycle
       Writable = writable
-      LastActivity = history |> List.tryLast |> Option.map (fun e -> stamp e.At)
+      LastActivity = Language.activity history
       Hypotheses = A.Known inv.Hypotheses.Count
       Evidence = A.Known inv.Evidence.Count
-      Contradictions = A.Known(values inv.Contradictions |> List.filter Policy.isOpenContradiction |> List.length) }
+      Contradictions = A.Known(values inv.Contradictions |> List.filter Policy.isOpenContradiction |> List.length)
+      OpenQuestionCount = A.Known(Records.openQuestions inv)
+      NextAction = Records.nextLegalAction p }
 
 let private draftKind =
     function
@@ -493,7 +498,8 @@ let private draftKind =
 
 let private answerRow (a: PanelAnswer) : A.PanelAnswerRow =
     let roleName = a.Provenance.Role |> Option.bind (fun r -> Panel.roles |> List.tryFind (fun x -> x.Id = r) |> Option.map (fun x -> x.Name))
-    { Label = roleName |> Option.orElse a.Provenance.Treatment |> Option.defaultValue "Unnamed"
+    { Key = a.Provenance.Role |> Option.orElse a.Provenance.Treatment |> Option.defaultValue ""
+      Label = roleName |> Option.orElse a.Provenance.Treatment |> Option.defaultValue "Unnamed"
       Model = a.Provenance.Model
       PromptVersion = a.Provenance.PromptVersion
       SourceVersion = a.Provenance.SourceVersion

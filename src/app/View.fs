@@ -892,3 +892,5 @@ let private formsKeys (model: Model) : (string * ViewValue) list =
 /// WebAssembly interpreter's per-method limit ("locals size too big") once its optimizer passes are off.
 let project (model: Model) : ViewState =
     [ navKeys; invKeys; screensKeys; listKeys; historyKeys; reportKeys; aiKeys; adminKeys; formsKeys ] |> List.collect (fun part -> part model) |> fun keys -> keys @ Evidence.keys model |> Map.ofList
+    // Catalog, inspector, evidence detail, next steps and record links (stream ux), merged after.
+    |> UxView.merge model (match screenOf model with InvestigationScreen(i, _) -> Some i | _ -> None)

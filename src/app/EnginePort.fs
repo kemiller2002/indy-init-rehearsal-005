@@ -502,6 +502,33 @@ and private handle (entropy: A.Entropy) (input: A.AdapterInput) (p: Persistence)
     | A.RequestProposals(id, model, task) -> requestProposals id model task
     | A.CancelProposals -> portOf at p None { ai with Loop = AiLoop.cancel ai.Loop; Result = Some CancelledResult }, []
     | A.DiscardDrafts -> portOf at p None { ai with Result = None }, []
+    | A.RecordPanelDrafts(id, role) ->
+        match ai.Panel, p.Documents.TryFind id with
+        | Some(batch, sent), Some(A.Loaded d) when ai.Investigation = Some id ->
+            match batch.Answers |> List.tryFind (fun a -> a.Provenance.Role = Some role) with
+            | Some({ Result = Drafted(drafts, _, _) } as answer) when not drafts.IsEmpty ->
+                let version = d.Session.State |> Option.map (fun i -> i.Version) |> Option.defaultValue 0L
+                let ids = entropy.Ids |> List.chunkBySize 2 |> List.filter (fun c -> c.Length = 2) |> List.map (fun c -> c[0], c[1])
+                if ids.Length < drafts.Length then say "warning" "Too many proposals to record at once."
+                else
+                    let agent: AgentIdentity = { AgentId = "causa-panel/" + role; Provider = answer.Provenance.Provider; Model = answer.Provenance.Model }
+                    let envelopes = Proposals.commands agent (Id.ofGuid (Guid.Parse id)) version at (ids |> List.truncate drafts.Length) drafts
+                    let rec submit (session: Session) (events: DomainEvent list) (envs: CommandEnvelope list) =
+                        match envs with
+                        | [] -> Ok(session, events)
+                        | e :: rest ->
+                            match Kernel.submit session e with
+                            | Ok a -> submit a.Session (events @ a.Events) rest
+                            | Error r -> Error r
+                    match submit d.Session [] envelopes with
+                    | Ok(session, events) ->
+                        let p, fx = p.Handle entropy (Accepted(id, Some version, session, events))
+                        // Recorded once: the role's answer leaves the panel so the same drafts cannot be recorded twice.
+                        let remaining = { batch with Answers = batch.Answers |> List.filter (fun a -> a.Provenance.Role <> Some role) }
+                        portOf at p (Some("info", $"{drafts.Length} proposal(s) from the panel role recorded for your review. None is applied until you accept it. Not saved yet.")) { ai with Panel = Some(remaining, sent) }, fx
+                    | Error rejection -> say "warning" ("The proposals were not recorded: " + String.concat " " (Kernel.reasons rejection))
+            | _ -> say "warning" "That role has no drafted proposals to record."
+        | _ -> say "warning" "There is no panel result to record."
     | A.RecordDrafts(id, model) ->
         match ai.Result, p.Documents.TryFind id with
         | Some(Drafted(drafts, _, _)), Some(A.Loaded d) when ai.Investigation = Some id ->

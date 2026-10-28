@@ -28,6 +28,9 @@ let usage =
   derivation-check --baseline FILE --baseline-sha256 HEX --derived DIR --disposition FILE --approvals FILE --approvals-sha256 HEX --out FILE
               AR-002-O2: every derived criterion is the baseline obligation's exact text (verbatim carriage), unless an
               approved transformation is recorded. Exit 0 pass, 1 findings, 2 unusable input.
+  bindings-check --root DIR --bindings FILE
+              Every notApplicable Percepta binding cites an existing, accepted research/decisions/DF-… record. Prints
+              allow-not-applicable=true|false; exit 1 on any uncited or unaccepted entry.
   report      --verdict FILE --traceability FILE --out FILE [--assessment FILE] [--lock-gate FILE] [--context k=v]...
 """
 
@@ -364,6 +367,15 @@ let derivationCheck opts =
         printfn "derivation check: %s (%d documents, %d findings)" (if findings.IsEmpty then "pass" else "fail") inputs.Documents.Length findings.Length
         if findings.IsEmpty then 0 else 1
 
+let bindingsCheck opts =
+    let root = one opts "root" |> Option.defaultValue "."
+    let read rel = let p = full root rel in if File.Exists p then Some(File.ReadAllText p) else None
+    let count, problems = Bindings.check (Json.load (full root (required opts "bindings"))) read
+    for p in problems do eprintfn "%s: %s" p.Contract p.Reason
+    printfn "allow-not-applicable=%b" (count > 0 && problems.IsEmpty)
+    printfn "not-applicable entries: %d, problems: %d" count problems.Length
+    if problems.IsEmpty then 0 else 1
+
 let report opts =
     let verdict = Json.load (required opts "verdict")
     let assessment = one opts "assessment" |> Option.bind Json.tryLoad
@@ -399,6 +411,7 @@ let main argv =
                 | "curation" -> curation opts
                 | "produce" -> produce opts
                 | "derivation-check" -> derivationCheck opts
+                | "bindings-check" -> bindingsCheck opts
                 | "apply-curation" -> applyCuration opts
                 | other ->
                     eprintfn "unknown command %s\n%s" other usage

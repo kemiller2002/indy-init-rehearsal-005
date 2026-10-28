@@ -108,6 +108,7 @@ let toProjection (s: Injected) : WorkspaceProjection =
           Report = None
           Timeline = [ { Sequence = 1L; EventType = "InvestigationOpened"; OccurredAt = "2026-01-01T00:00:00Z"; RecordedAt = Some "2026-01-01T00:00:00Z"; Actor = Some "Fixture"; Category = "lifecycle"; Affected = []; ClockBeforePrevious = false } ]
           Capabilities = capabilities
+          Typed = UxFixture.source
           Detail =
             { Contradictions = [ { Id = "x-1"; Text = "The recorded temperature and the operator's log disagree."; State = "Unresolved"; Related = [ "e-1" ] } ]
               Assumptions = [ { Id = "a-1"; Text = "The sensor was calibrated before the event."; State = "Not verified · Material"; Related = [] } ]
@@ -131,7 +132,9 @@ let toProjection (s: Injected) : WorkspaceProjection =
                 LastActivity = Some "2026-01-01"
                 Hypotheses = Known 1
                 Evidence = Known 1
-                Contradictions = Unknown } ]
+                Contradictions = Unknown
+                OpenQuestionCount = Unknown
+                NextAction = None } ]
       Opened = Map.ofList [ fixtureId, Loaded investigation ]
       Sync = (if s.Conflict then Conflict else NoChanges)
       Capabilities = capabilities
@@ -146,11 +149,11 @@ let toProjection (s: Injected) : WorkspaceProjection =
                     Running = false
                     Roles = EngineView.panelRoles
                     Answers =
-                      [ { Label = "Evidence auditor"; Model = "fixture-model"; PromptVersion = "causa.panel-role/evidence-auditor/1"; SourceVersion = 7L; Outcome = "1 proposal(s) to review."
+                      [ { Key = "evidence-auditor"; Label = "Evidence auditor"; Model = "fixture-model"; PromptVersion = "causa.panel-role/evidence-auditor/1"; SourceVersion = 7L; Outcome = "1 proposal(s) to review."
                           Drafts = [ { Kind = "Open question"; Text = "Was the seal temperature measured at the joint?"; Rationale = None } ] }
-                        { Label = "Alternative-cause seeker"; Model = "fixture-model"; PromptVersion = "causa.panel-role/alternative-cause-seeker/1"; SourceVersion = 7L; Outcome = "1 proposal(s) to review."
+                        { Key = "alternative-cause-seeker"; Label = "Alternative-cause seeker"; Model = "fixture-model"; PromptVersion = "causa.panel-role/alternative-cause-seeker/1"; SourceVersion = 7L; Outcome = "1 proposal(s) to review."
                           Drafts = [ { Kind = "Hypothesis"; Text = "Putty blow-by opened a leak path."; Rationale = None } ] }
-                        { Label = "Timeline checker"; Model = "fixture-model"; PromptVersion = "causa.panel-role/timeline-checker/1"; SourceVersion = 7L; Outcome = "The model declined to answer."; Drafts = [] } ]
+                        { Key = "timeline-checker"; Label = "Timeline checker"; Model = "fixture-model"; PromptVersion = "causa.panel-role/timeline-checker/1"; SourceVersion = 7L; Outcome = "The model declined to answer."; Drafts = [] } ]
                     Disagreements =
                       [ "Open question “Was the seal temperature measured at the joint?”: proposed by Evidence auditor; not proposed by Alternative-cause seeker."
                         "Hypothesis “Putty blow-by opened a leak path.”: proposed by Alternative-cause seeker; not proposed by Evidence auditor." ]

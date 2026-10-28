@@ -1,0 +1,8 @@
+{
+  "name": "evidence-legal",
+  "predicates": [],
+  "capabilities": {
+    "AdmitEvidence": "legal",
+    "RelateEvidence": "legal"
+  }
+}
