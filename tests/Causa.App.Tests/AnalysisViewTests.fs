@@ -265,3 +265,24 @@ let ``S18 the tournament measures each treatment on one frozen version and names
     Assert.Contains("Waiting for the answer.", metrics)
     Assert.DoesNotContain("winner", metrics.ToLowerInvariant())
     Assert.Contains("No treatment is ranked", sprintf "%A" (v |> Map.find "an.tour.limitations"))
+
+[<Fact>]
+let ``S17 a role's drafts are recorded as agent proposals with the role in provenance, once, and still await a human decision`` () =
+    let port, id, _ = active ()
+    let port, _ = port.Handle (entropy ()) (SetAiKey "fake-key-for-tests-0000")
+    let port, _ = port.Handle (entropy ()) (RequestPanel(id, "fixture-model", "Propose next steps."))
+    let port = port.Handle (entropy ()) (Answer("panel-1", EffectResult.HttpResult(CorrelationId "panel-1", providerAnswer [ "unknown", "Was the gateway restarted?" ]))) |> fst
+    let before = (opened port id).Version
+    let more () = { entropy () with Ids = List.init 8 (fun _ -> Guid.NewGuid()) }
+    let port, _ = port.Handle (more ()) (RecordPanelDrafts(id, "evidence-auditor"))
+    let inv = opened port id
+    Assert.Equal(before + 1L, inv.Version)
+    let p = inv.Proposals |> List.exactlyOne
+    Assert.Equal("Was the gateway restarted?", p.Text)
+    Assert.Equal("Awaiting your decision", p.State)
+    Assert.Equal("Proposed by an AI agent (anthropic, fixture-model), panel role evidence-auditor", p.By)
+    // Recording is not repeatable, and a role without drafts records nothing.
+    let again, _ = port.Handle (more ()) (RecordPanelDrafts(id, "evidence-auditor"))
+    Assert.Equal(inv.Version, (opened again id).Version)
+    let other, _ = port.Handle (more ()) (RecordPanelDrafts(id, "timeline-checker"))
+    Assert.Equal(inv.Version, (opened other id).Version)

@@ -456,6 +456,8 @@ let ofProjection (writable: bool) (history: DomainEvent list) (p: InvestigationP
                State = (match p.State with ProposalActive -> "Awaiting your decision" | ProposalAccepted -> "Accepted" | ProposalRejected -> "Rejected")
                By =
                  match p.Provenance.Actor.Kind with
+                 | Agent(provider, model) when p.Provenance.Actor.ActorId.StartsWith("causa-panel/", StringComparison.Ordinal) ->
+                     $"Proposed by an AI agent ({provider}, {model}), panel role {p.Provenance.Actor.ActorId.Substring 12}"
                  | Agent(provider, model) -> $"Proposed by an AI agent ({provider}, {model})"
                  | _ -> "Proposed by " + p.Provenance.Actor.ActorId }: A.ProposalRow))
       Findings =
@@ -493,7 +495,8 @@ let private draftKind =
 
 let private answerRow (a: PanelAnswer) : A.PanelAnswerRow =
     let roleName = a.Provenance.Role |> Option.bind (fun r -> Panel.roles |> List.tryFind (fun x -> x.Id = r) |> Option.map (fun x -> x.Name))
-    { Label = roleName |> Option.orElse a.Provenance.Treatment |> Option.defaultValue "Unnamed"
+    { Key = a.Provenance.Role |> Option.orElse a.Provenance.Treatment |> Option.defaultValue ""
+      Label = roleName |> Option.orElse a.Provenance.Treatment |> Option.defaultValue "Unnamed"
       Model = a.Provenance.Model
       PromptVersion = a.Provenance.PromptVersion
       SourceVersion = a.Provenance.SourceVersion
