@@ -52,3 +52,23 @@ test("the factory view shows only published values: ROS work, requirement and te
   const reqs = proof().requirements;
   await expect(page.locator("[data-percepta-region=requirements]")).toContainText(`${reqs.length} P0 requirements: ${reqs.filter((r) => status(r) === "Proven").length} proven`);
 });
+
+test("the evidence's own run and commit are labelled apart from this build's; missing traceability reads 'not published' [VPO-fd43b3e4e7e02f59]", async ({ page }) => {
+  const p = proof();
+  await page.goto("index.html#/administration/proof");
+  await started(page);
+  const region = page.locator("[data-percepta-region=runtime-evidence]");
+  const run = p.traceability?.run ?? "not recorded";
+  const sha = p.traceability?.sourceSha ?? "not recorded";
+  await expect(region).toContainText(`Evidence from main run ${run} at ${sha}.`);
+  await expect(region).toContainText("This build:");
+  await expect(page.locator("[data-percepta-region=commit]")).toContainText(`This build: commit ${p.commit}`);
+
+  // The same page when the build published no traceability: nothing is shown as proven.
+  await page.route("**/evidence/proof.json*", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ...p, traceability: null, requirements: [] }) }));
+  await page.goto("index.html#/administration/proof");
+  await page.reload();
+  await started(page);
+  await expect(region).toContainText("Evidence: not published with this build.");
+  await expect(page.getByText("Traceability was not published with this build, so nothing is shown as proven.")).toBeVisible();
+});

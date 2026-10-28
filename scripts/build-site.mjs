@@ -104,7 +104,8 @@ writeFileSync(join(site, "evidence/proof.json"), JSON.stringify({
   schema: "causa.requirements-proof/1",
   commit,
   run,
-  traceability: trace ? { source: relative(root, traceabilityPath), schema: trace.schema, generatedBy: trace.context?.generatedBy ?? null, plan: trace.plan ?? null, summary: trace.summary ?? null } : null,
+  // The run and commit the traceability was produced from (often an earlier main run), kept apart from this build's.
+  traceability: trace ? { source: relative(root, traceabilityPath), schema: trace.schema, generatedBy: trace.context?.generatedBy ?? null, run: trace.context?.runId ?? null, sourceSha: trace.context?.sourceSha ?? null, plan: trace.plan ?? null, summary: trace.summary ?? null } : null,
   planSource: planPath ? relative(root, planPath) : null,
   requirements: [...byRequirement.entries()].map(([id, obligations]) => {
     const r = planReq.get(id);

@@ -156,3 +156,18 @@ let ``VPO-014f5e1139ed692b a frozen demonstration and a writable copy are labell
     let readOnly = fixture.Opened |> Map.map (fun _ l -> match l with Loaded i -> Loaded { i with Writable = false } | o -> o)
     let opened = View.project { Shell.initial with Route = Routes.Investigation(TestState.fixtureId, Routes.Overview); Port = Port.fixedAt { fixture with Opened = readOnly } }
     Assert.Equal("Read-only demonstration", textOf opened "inv.kind")
+
+let private proofView (json: string) =
+    let model = { Shell.initial with Route = Routes.RequirementsProof; Evidence = Map.ofList [ "proof", Loaded json ] }
+    Evidence.proofKeys model |> Map.ofList
+
+[<Fact>]
+let ``VPO-fd43b3e4e7e02f59 the proof page names the run and commit the evidence came from apart from this build, and says when none was published`` () =
+    let published =
+        proofView """{"commit":"aaaa111","run":null,"traceability":{"source":"bundle/traceability.json","run":"40999","sourceSha":"bbbb222","plan":{"planId":"VP-x","digest":"d"}},"requirements":[{"id":"UI-1","obligations":[{"id":"VPO-1","source":"UI-1-O1","text":"t","verification":"NOT_RUN","tests":[]}]}]}"""
+    Assert.Equal("Evidence from main run 40999 at bbbb222.", textOf published "proof.evidenceFrom")
+    Assert.StartsWith("This build: commit aaaa111", textOf published "proof.commit")
+    Assert.Equal("This build: not made by CI, so no run is recorded.", textOf published "proof.runtime")
+    let missing = proofView """{"commit":"aaaa111","run":null,"traceability":null,"requirements":[]}"""
+    Assert.Equal("Evidence: not published with this build.", textOf missing "proof.evidenceFrom")
+    Assert.Equal("Traceability was not published with this build, so nothing is shown as proven.", textOf missing "proof.summary")
