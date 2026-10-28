@@ -12,7 +12,7 @@ async function started(page) {
 }
 
 test.describe("loading experience (WASM-LOAD, T16)", () => {
-  test("the branded shell shows before the WebAssembly runtime and hands off without a blank frame [VPO-0bd752bd2ac89796] [VPO-cb75698b278332f5]", { tag: ["@stack-smoke-limen", "@webkit"] }, async ({ page }) => {
+  test("the branded shell shows before the WebAssembly runtime and hands off without a blank frame [VPO-0bd752bd2ac89796]", { tag: ["@stack-smoke-limen", "@webkit"] }, async ({ page }) => {
     let release;
     const gate = new Promise((resolve) => { release = resolve; });
     await page.route("**/wasm/_framework/dotnet.js", async (route) => { await gate; await route.continue(); });
@@ -164,7 +164,7 @@ test.describe("security of the shell", () => {
 });
 
 test.describe("identity, accessibility and layout (UI-011, UI-014, UI-016)", () => {
-  test("the Causa palette is mapped to named Forma tokens with measured contrast [VPO-cecb71404071030d] [VPO-3d80d031f05ec0dc] [VPO-d0c711c2da0f3800] [VPO-e0e945fc040386e1] [VPO-fbc386df77130f2d] [VPO-8905fd51176a3fc6] [VPO-fe19413526420c16] [VPO-d657e8dd084961b1] [VPO-6051ea46b65ebe27] [VPO-1a1aae8ffa920386] [VPO-5a993f5a761fd6ee]", async ({ page }) => {
+  test("the Causa palette is mapped to named Forma tokens with measured contrast [VPO-cecb71404071030d] [VPO-3d80d031f05ec0dc] [VPO-d0c711c2da0f3800] [VPO-e0e945fc040386e1] [VPO-fbc386df77130f2d] [VPO-8905fd51176a3fc6] [VPO-fe19413526420c16] [VPO-d657e8dd084961b1] [VPO-1a1aae8ffa920386] [VPO-5a993f5a761fd6ee]", async ({ page }) => {
     await page.goto("index.html");
     await started(page);
     const tokens = await page.evaluate(() => {
@@ -255,7 +255,7 @@ test.describe("investigation view through the F# projection (test build)", () =>
 });
 
 test.describe("causal graph with the Forma workflow engine (T23)", () => {
-  test("the causal analysis renders in the real forma-workflow frame, a selection shows its record, and the text list carries the same structure [VPO-684e6c5f94988bd9] [VPO-db2d02dab493e914] [VPO-b36c63fba6f83d4c] [VPO-05441c1c18ce3dc1] [VPO-0e6a69f7673cace8] [VPO-4c6f9ea0dcc0bd29] [VPO-adec3c95bc6ac2c4] [VPO-3eba4ae44451132f]", async ({ page }) => {
+  test("the causal analysis renders in the real forma-workflow frame, a selection shows its record, and the text list carries the same structure [VPO-684e6c5f94988bd9] [VPO-db2d02dab493e914] [VPO-b36c63fba6f83d4c] [VPO-05441c1c18ce3dc1] [VPO-0e6a69f7673cace8] [VPO-adec3c95bc6ac2c4] [VPO-3eba4ae44451132f]", async ({ page }) => {
     await page.goto(TEST_SITE + "index.html#/investigations/00000000-0000-4000-8000-0000000000f1/causal-analysis");
     await started(page);
     await page.evaluate(() => window.__perceptaSetState({ name: "graph", predicates: [], capabilities: {} }));

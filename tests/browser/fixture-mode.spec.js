@@ -106,7 +106,7 @@ async function recordObservation(page, text) {
 }
 
 test(
-  "UI-015-O3 mocked persistence is never represented as a live write, and the check is shown to catch a live claim (negative control) [VPO-5c8d5917d17f8960] [VPO-0a23bb42b8fb58b4]",
+  "UI-015-O3 mocked persistence is never represented as a live write, and the check is shown to catch a live claim (negative control) [VPO-0a23bb42b8fb58b4]",
   async ({ page, githubRequests }) => {
     await openFixtureInvestigation(page, "synthetic-fixture");
     await recordObservation(page, "A change made against the fixture.");
