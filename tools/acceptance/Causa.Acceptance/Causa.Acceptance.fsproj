@@ -16,6 +16,7 @@
     <Compile Include="Ledger.fs" />
     <Compile Include="Producers.fs" />
     <Compile Include="Derivation.fs" />
+    <Compile Include="Bindings.fs" />
     <Compile Include="Reuse.fs" />
     <Compile Include="Report.fs" />
     <Compile Include="Program.fs" />
