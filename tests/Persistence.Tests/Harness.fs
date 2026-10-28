@@ -17,6 +17,8 @@ type Fault =
     | Hold
     /// GitHub answers with this response instead of the fake (nothing is applied).
     | Answer of HttpResponse
+    /// GitHub applies the request, then the client receives this response instead of GitHub's answer.
+    | ApplyThenAnswer of HttpResponse
 
 let token = "causa-test-token-7f3a9c"
 
@@ -50,7 +52,10 @@ type App(fake: Fake) =
     member val StoreFails = false with get, set
 
     member _.Model = model
-    member _.Store = store
+    /// The browser's local storage this tab sees; tabs of one browser share it (set it to model that).
+    member _.Store
+        with get () = store
+        and set v = store <- v
     member _.Refusals = refusals
     member _.Effects = effectsSeen
     member _.Held = held
@@ -86,6 +91,9 @@ type App(fake: Fake) =
                 | LoseWithoutApplying -> this.Dispatch(HttpFailed(id, TransportFailure.OutcomeUnknown "connection lost")) |> ignore
                 | Hold -> held <- held @ [ id, Ok(fake.Handle request) ]
                 | Answer resp -> this.Dispatch(HttpAnswered(id, resp)) |> ignore
+                | ApplyThenAnswer resp ->
+                    fake.Handle request |> ignore
+                    this.Dispatch(HttpAnswered(id, resp)) |> ignore
 
     member this.Step(msg: Msg) =
         let r = this.Dispatch msg

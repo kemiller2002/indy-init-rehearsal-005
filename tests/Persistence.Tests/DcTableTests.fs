@@ -336,3 +336,118 @@ let ``DCT-003-A VPO-b3efad6eb85360be a GraphQL error of an unrecognised type aft
     | Error(ProviderFailure.Unknown _) -> ()
     | other -> failwithf "%A" other
 
+
+// Review R2-F2 (R5-final-review.md): after the write was sent, an HTTP status not documented as "not applied" says
+// nothing either way. It is unknown and settled by reconcile, never "not written" with Retry. Both halves: GitHub
+// applied it (reconcile confirms by read-back) and GitHub did not (reconcile hands the change back as pending).
+let private statusAfterSend (status: int) =
+    { Status = status; Headers = [ "content-type", "application/json; charset=utf-8" ]; Body = """{"message":"x"}""" }
+
+[<Theory>]
+[<InlineData(400)>]
+[<InlineData(408)>]
+[<InlineData(409)>]
+[<InlineData(403)>]
+[<InlineData(404)>]
+[<InlineData(422)>]
+[<InlineData(500)>]
+[<InlineData(502)>]
+[<InlineData(418)>]
+let ``DCT-003-A an unrecognised HTTP status after the write was sent is unknown and reconciled, never not-written with retry`` (status: int) =
+    for applied in [ true; false ] do
+        let fake, app, iid, _ = withChange (sprintf "r2-f2-%d-%b" status applied)
+        let head = fake.Head branch
+        let answer = statusAfterSend status
+        app.Faults <- (fun r -> if r.Method = "POST" then (if applied then ApplyThenAnswer answer else Answer answer) else Deliver)
+        ok (app.Step(Save iid))
+        Assert.Equal("unknown", app.Status iid)
+        Assert.False(Sync.canSave app.Model (app.Doc iid))
+        Assert.True(Sync.canReconcile app.Model (app.Doc iid))
+        app.Faults <- (fun _ -> Deliver)
+        ok (app.Step(Reconcile iid))
+        if applied then
+            Assert.Equal("remotelySynced", app.Status iid)
+        else
+            Assert.Equal(head, fake.Head branch)
+            Assert.True(Sync.canSave app.Model (app.Doc iid), app.Status iid)
+            ok (app.Step(Save iid))
+            Assert.Equal("remotelySynced", app.Status iid)
+
+[<Theory>]
+[<InlineData("NOT_FOUND")>]
+[<InlineData("UNPROCESSABLE")>]
+[<InlineData("FORBIDDEN")>]
+[<InlineData("RATE_LIMITED")>]
+let ``DCT-003-A a 200 answer that names a commit is never a refusal, even with a typed error`` (kind: string) =
+    let fake, app, iid, _ = withChange ("r2-f2-oid-" + kind.ToLowerInvariant())
+    let posts0 = (posts fake).Length
+    let body (oid: string) = sprintf """{"data":{"createCommitOnBranch":{"commit":{"oid":"%s"}}},"errors":[{"type":"%s","message":"x"}]}""" oid kind
+    app.Faults <-
+        (fun r ->
+            if r.Method = "POST" then
+                let resp = fake.Handle r
+                let oid = fake.Head branch
+                Answer { resp with Body = body oid }
+            else Deliver)
+    ok (app.Step(Save iid))
+    Assert.Equal("unknown", app.Status iid)
+    refused (app.Step(Save iid))
+    Assert.Equal(posts0 + 1, (posts fake).Length)
+    app.Faults <- (fun _ -> Deliver)
+    ok (app.Step(Reconcile iid))
+    Assert.Equal("remotelySynced", app.Status iid)
+
+// Review R2-F1: two tabs of one browser share one local store. A change only one tab holds (queued offline, or a
+// write whose outcome is unknown) is never overwritten by the other tab's record; when the tab reopens it is there.
+[<Fact>]
+let ``LOCAL-DURABILITY two tabs sharing one browser store never lose a change only one tab holds`` () =
+    let fake = newFake ()
+    let v = investigation "r2-f1-offline" 0
+    seed fake v |> ignore
+    let iid = v.InvestigationId
+    let a = App(fake)
+    let b = App(fake)
+    ok (a.Connect ws)
+    b.Store <- a.Store
+    ok (b.Connect ws)
+    a.Store <- b.Store
+    a.Faults <- (fun r -> if r.Method = "POST" then NotSentFault else Deliver)
+    ok (a.Step(Submit(hypothesis iid v.Version "offline in tab A")))
+    ok (a.Step(Save iid))
+    Assert.Equal("queuedOffline", a.Status iid)
+    // Tab B, sharing the store, only reads (connect): its record must not erase A's queued change.
+    b.Store <- a.Store
+    ok (b.Step(Disconnect))
+    ok (b.Connect ws)
+    a.Store <- b.Store
+    ok (a.Reload())
+    Assert.Contains("Hypothesis offline in tab A", text (a.Doc(iid).Local.EventsFile))
+
+[<Fact>]
+let ``LOCAL-DURABILITY two tabs with different unsaved changes to one investigation keep both and say so`` () =
+    let fake = newFake ()
+    let v = investigation "r2-f1-both" 0
+    seed fake v |> ignore
+    let iid = v.InvestigationId
+    let a = App(fake)
+    let b = App(fake)
+    ok (a.Connect ws)
+    b.Store <- a.Store
+    ok (b.Connect ws)
+    a.Store <- b.Store
+    // A's write is applied but its answer is lost: unknown, held only in A's record.
+    a.Faults <- (fun r -> if r.Method = "POST" then ApplyThenLose else Deliver)
+    ok (a.Step(Submit(hypothesis iid v.Version "unknown in tab A")))
+    ok (a.Step(Save iid))
+    Assert.Equal("unknown", a.Status iid)
+    b.Store <- a.Store
+    ok (b.Step(Submit(hypothesis iid v.Version "tab B edit")))
+    a.Store <- b.Store
+    let stored = a.Store |> Map.toList |> List.map snd |> String.concat "\n"
+    Assert.Contains("Hypothesis unknown in tab A", stored)
+    Assert.Contains("Hypothesis tab B edit", stored)
+    // Reopening: both changes are still in the store, and the program says another tab's change is kept.
+    ok (a.Reload())
+    let stored = a.Store |> Map.toList |> List.map snd |> String.concat "\n"
+    Assert.Contains("Hypothesis unknown in tab A", stored)
+    Assert.Contains(iid, Sync.preservedElsewhere a.Model)

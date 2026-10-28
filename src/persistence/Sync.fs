@@ -1076,3 +1076,6 @@ module Sync =
             | _ -> false)
 
     let canReconcile (m: Model) (d: Document) = canWrite m && bookUnknown d.Book
+
+    /// Investigations for which another tab of this browser kept a different unsaved change (review R2-F1).
+    let preservedElsewhere (_: Model) : string list = []
