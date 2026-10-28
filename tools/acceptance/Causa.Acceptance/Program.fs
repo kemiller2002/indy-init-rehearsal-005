@@ -25,6 +25,9 @@ let usage =
   apply-curation --curation CURATION.json --plan PLAN.json --bindings TESTBINDINGS.json --out FILE
               Replaces `testBindings` in a COPY of Indy-init's curation/verification-plan.json with a run's
               curation-test-bindings.json, after checking every binding against the current plan. Never edits in place.
+  derivation-check --baseline FILE --baseline-sha256 HEX --derived DIR --disposition FILE --approvals FILE --approvals-sha256 HEX --out FILE
+              AR-002-O2: every derived criterion is the baseline obligation's exact text (verbatim carriage), unless an
+              approved transformation is recorded. Exit 0 pass, 1 findings, 2 unusable input.
   report      --verdict FILE --traceability FILE --out FILE [--assessment FILE] [--lock-gate FILE] [--context k=v]...
 """
 
@@ -339,6 +342,28 @@ let applyCuration opts =
         printfn "testBindings: %d of %d obligations of plan %s bound (%d unbound stay missing)" bound.Count known.Count plan.PlanId (known.Count - bound.Count)
         0
 
+let derivationCheck opts =
+    let baseline = required opts "baseline"
+    let pinned = required opts "baseline-sha256"
+    let actual = sha256File baseline
+    let approvals = required opts "approvals"
+    let approvalsActual = sha256File approvals
+    if actual <> pinned then
+        eprintfn "baseline %s hashes to %s, pinned %s" baseline actual pinned
+        2
+    elif approvalsActual <> required opts "approvals-sha256" then
+        eprintfn "approvals %s hashes to %s, pinned %s" approvals approvalsActual (required opts "approvals-sha256")
+        2
+    else
+        let inputs = Derivation.load baseline (required opts "derived") (required opts "disposition") (required opts "approvals")
+        let findings = Derivation.check inputs
+        let ctx = [ "baseline", jobj [ "path", jstr baseline; "sha256", jstr actual ]; "derived", jstr (required opts "derived") ]
+        Json.write (required opts "out") (Derivation.toJson inputs findings ctx) |> ignore
+        for f in findings |> List.truncate 50 do
+            eprintfn "%s %s %s %s" (Derivation.kindName f.Kind) f.Obligation f.Criterion (if f.Kind = Derivation.Differs then Derivation.firstDifference f.Expected f.Actual else "")
+        printfn "derivation check: %s (%d documents, %d findings)" (if findings.IsEmpty then "pass" else "fail") inputs.Documents.Length findings.Length
+        if findings.IsEmpty then 0 else 1
+
 let report opts =
     let verdict = Json.load (required opts "verdict")
     let assessment = one opts "assessment" |> Option.bind Json.tryLoad
@@ -373,6 +398,7 @@ let main argv =
                 | "report" -> report opts
                 | "curation" -> curation opts
                 | "produce" -> produce opts
+                | "derivation-check" -> derivationCheck opts
                 | "apply-curation" -> applyCuration opts
                 | other ->
                     eprintfn "unknown command %s\n%s" other usage

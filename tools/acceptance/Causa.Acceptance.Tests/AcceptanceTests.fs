@@ -406,3 +406,47 @@ let ``VER-005 an Echelon package outside the release set passes only when pinned
     // A different integrity than the decision pinned fails.
     let other = entry.Replace("sha512-abc", "sha512-other")
     Assert.Contains(outside (pinWith other), fun c -> c.Id.StartsWith "outside.integrity" && c.Status = LockGate.Fail)
+
+// ---------------------------------------------------------------------------------------------------------------
+// AR-002-O2: the independent derivation check
+
+let derivationInputs (rows: string list) (mappings: string) (approvals: string) : Derivation.Inputs =
+    { Baseline =
+        parse
+            """{"requirements":[{"id":"R-1","obligations":[
+                 {"id":"R-1-O1","text":"Contrast for normal text (4.5:1), large text (3:1)."},
+                 {"id":"R-1-O2","text":"Precedence: (1) safety; (2) contract."},
+                 {"id":"R-1-O3","text":"A | B table cell."}]}]}"""
+      Documents = [ "RQ-1.md", "---\nid: RQ-1\nstatus: accepted\n---\n\n| ID | Statement |\n|---|---|\n" + String.concat "\n" rows + "\n" ]
+      Disposition = parse (sprintf """{"dispositions":[{"requirement":"R-1","disposition":"preserved","mappings":%s}]}""" mappings)
+      Approvals = parse approvals }
+
+let allMapped =
+    """[{"obligation":"R-1-O1","criteria":["RQ-1#R-1-O1"]},{"obligation":"R-1-O2","criteria":["RQ-1#R-1-O2"]},{"obligation":"R-1-O3","criteria":["RQ-1#R-1-O3"]}]"""
+
+let verbatim =
+    [ "| R-1-O1 | Contrast for normal text (4.5:1), large text (3:1). |"
+      "| R-1-O2 | Precedence: (1) safety; (2) contract. |"
+      "| R-1-O3 | A \\| B table cell. |" ]
+
+let noApprovals = """{"approvals":[]}"""
+
+[<Fact; Trait("obligation", "VPO-413ff7efb9ab1eaf")>]
+let ``AR-002 verbatim carriage passes; value swaps, role swaps, negation and omission each fail with the obligation id`` () =
+    let kinds rows mappings = Derivation.check (derivationInputs rows mappings noApprovals) |> List.map (fun f -> f.Obligation, Derivation.kindName f.Kind)
+    Assert.Empty(kinds verbatim allMapped)
+    let swapValues = verbatim |> List.map (fun r -> r.Replace("(4.5:1), large text (3:1)", "(3:1), large text (4.5:1)"))
+    Assert.Equal<(string * string) list>([ "R-1-O1", "differs" ], kinds swapValues allMapped)
+    let swapRoles = verbatim |> List.map (fun r -> r.Replace("(1) safety; (2) contract", "(1) contract; (2) safety"))
+    Assert.Equal<(string * string) list>([ "R-1-O2", "differs" ], kinds swapRoles allMapped)
+    let negated = verbatim |> List.map (fun r -> r.Replace("Contrast for", "No contrast for"))
+    Assert.Equal<(string * string) list>([ "R-1-O1", "differs" ], kinds negated allMapped)
+    Assert.Equal<(string * string) list>([ "R-1-O3", "missing-criterion" ], kinds (verbatim |> List.take 2) allMapped)
+    let unmapped = """[{"obligation":"R-1-O1","criteria":["RQ-1#R-1-O1"]},{"obligation":"R-1-O3","criteria":["RQ-1#R-1-O3"]}]"""
+    Assert.Equal<(string * string) list>([ "R-1-O2", "unmapped"; "", "extra" ], kinds verbatim unmapped)
+    // A difference is accepted only through a recorded transformation whose approval is in the pinned approvals file.
+    let transformed =
+        """[{"obligation":"R-1-O1","criteria":["RQ-1#R-1-O1"],"approvedTransformation":{"approval":"APR-1","text":"Contrast for normal text (3:1), large text (4.5:1)."}},{"obligation":"R-1-O2","criteria":["RQ-1#R-1-O2"]},{"obligation":"R-1-O3","criteria":["RQ-1#R-1-O3"]}]"""
+    Assert.Equal<(string * string) list>([ "R-1-O1", "unapproved-transformation" ], kinds swapValues transformed)
+    let approved = Derivation.check (derivationInputs swapValues transformed """{"approvals":[{"id":"APR-1"}]}""")
+    Assert.Empty approved
