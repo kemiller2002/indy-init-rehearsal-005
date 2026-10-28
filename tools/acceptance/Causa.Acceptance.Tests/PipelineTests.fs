@@ -67,7 +67,12 @@ let ``AR-014 PF-012 only the live provider jobs receive credentials; every other
         if m.Success then m.Groups[1].Value.Split('\n') |> Array.map (fun l -> l.Trim()) |> Array.filter (fun l -> l <> "" && l <> "contents: read") |> List.ofArray
         else []
     let elevated = jobs.Value |> Map.filter (fun _ t -> not (grants t).IsEmpty) |> Map.keys |> List.ofSeq
-    Assert.Equal<string list>([ "acceptance"; "deploy" ], elevated)
+    Assert.Equal<string list>([ "acceptance"; "deploy"; "site" ], elevated)
+    // The site job reads the previous main run's acceptance evidence and nothing more.
+    Assert.Matches(@"(?m)^    permissions:\s*\n      contents: read\s*\n      actions: read\s*$", job "site")
+    // The proof page never publishes the committed (stale) traceability file.
+    Assert.Contains("CAUSA_TRACEABILITY: ${{ steps.trace.outputs.path }}", job "site")
+    Assert.Contains("no-traceability-published.json", job "site")
     // The acceptance job reads its own run's job records (timings) and nothing more.
     Assert.Matches(@"(?m)^    permissions:\s*\n      contents: read\s*\n      actions: read\s*$", job "acceptance")
     Assert.Matches(@"pages: write", job "deploy")
