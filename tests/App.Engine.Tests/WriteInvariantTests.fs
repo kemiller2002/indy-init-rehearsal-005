@@ -325,9 +325,8 @@ let ``DCT-002-B negative control VPO-821ce84e76d497b9 VPO-787e24f3c23195e9 the c
     Assert.False(userEventsGuarded unguardedWrite)
 
 [<Fact>]
-[<Trait("obligation", "VPO-199103f9166730e7")>]
 [<Trait("defectClass", "DC-002")>]
-let ``DCT-002-B R3 D-04 VPO-199103f9166730e7 resubmitting an unchanged held change keeps its target parent`` () =
+let ``DCT-002-B R3 D-04 resubmitting an unchanged held change keeps its target parent`` () =
     let s = connectedAt real A
     let s, fx = run' real s [ Edit sample; Write ]
     let w = lastRequest fx
