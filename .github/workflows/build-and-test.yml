@@ -629,7 +629,15 @@ jobs:
           git -C "$RUNNER_TEMP/indy-init" worktree add --detach "$RUNNER_TEMP/indy-init-aab8f80" aab8f80c7743392e794b3b631542903ed4ed6f64
       - name: Install Praxis (verified against the pinned channel)
         run: tools/acceptance/ci/install-host-tool.sh praxis praxis "$RUNNER_TEMP/host-tools" >> "$GITHUB_PATH"
-      - name: praxis requirements preservation verify (as recorded)
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - name: Build causa-acceptance (the independent derivation check)
+        run: dotnet build tools/acceptance/Causa.Acceptance -c Release
+      # Two independent checks of the same derived package against the same pinned inputs. G0's producer succeeds
+      # only when both pass: the Praxis gate (as recorded) and causa-acceptance derivation-check (AR-002-O2:
+      # verbatim carriage, which also catches value and role swaps the Praxis 3.22.0 gate passes).
+      - name: praxis requirements preservation verify (as recorded) and the derivation check
         id: gate
         env:
           INDY_INIT: ${{ runner.temp }}/indy-init
@@ -638,11 +646,20 @@ jobs:
         run: |
           set +e
           tools/acceptance/ci/preservation-gate.sh | tee -a "$GITHUB_STEP_SUMMARY"
-          status=$?
+          praxis_status=$?
+          $CA derivation-check --baseline "$INDY_INIT/requirements/causa-requirements-baseline.json" \
+            --baseline-sha256 621e2f960038dcfb0daa2a9fe18a0c1c350faed297ba2856da1236a0360857b9 \
+            --derived research/requirements --disposition research/requirements-preservation/disposition.json \
+            --approvals "$INDY_INIT/kickoff/rehearsal-005/approvals.json" \
+            --approvals-sha256 711859d610ee6af1174aa33ebc6455ec77a7d107af02aa3fe80da0003616c011 \
+            --out TestResults/preservation/derivation-check.json | tee -a "$GITHUB_STEP_SUMMARY"
+          derivation_status=$?
           set -e
-          echo "status=$(cat TestResults/preservation/status 2>/dev/null || echo failure)" >> "$GITHUB_OUTPUT"
+          praxis=$(cat TestResults/preservation/status 2>/dev/null || echo failure)
+          if [ "$praxis" = success ] && [ "$derivation_status" -eq 0 ]; then status=success; else status=failure; fi
+          echo "status=$status" >> "$GITHUB_OUTPUT"
           cat TestResults/preservation/compare.txt
-          exit $status
+          [ "$status" = success ]
       - name: Publish the preservation gate record
         if: always()
         uses: actions/upload-artifact@v4

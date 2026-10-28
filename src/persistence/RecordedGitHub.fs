@@ -136,6 +136,9 @@ type RecordedGitHub(owner: string, repo: string, defaultBranch: string, publicRe
     member val ReadOnly: Set<string> = Set.empty with get, set
     /// Local fixture mode: no credential exists or is needed; every request is answered as authorized.
     member val AnyCredential = false with get, set
+    /// A deterministic concurrency scenario (PF-009): runs once, just before the first write is handled, as another
+    /// writer committing first.
+    member val BeforeFirstWrite: (unit -> unit) option = None with get, set
     member _.Head(branch: string) = Map.find branch branches
     member _.Branches = branches
 
@@ -299,6 +302,11 @@ type RecordedGitHub(owner: string, repo: string, defaultBranch: string, publicRe
             Recorded.respond
                 "write.forbidden"
                 (Some(JObj [ "errors", JArr [ JObj [ "type", JStr "FORBIDDEN"; "message", JStr "fake: not accessible"; "path", JArr [ JStr "createCommitOnBranch" ]; "locations", JArr [ JObj [ "line", JInt 1L; "column", JInt 1L ] ]; "extensions", JObj [ "saml_failure", JBool false; "ip_allow_list_failure", JBool false ] ] ] ]))
+        | _, "POST" when path = "/graphql" && this.BeforeFirstWrite.IsSome ->
+            let other = this.BeforeFirstWrite.Value
+            this.BeforeFirstWrite <- None
+            other ()
+            this.Handle r
         | _, "POST" when path = "/graphql" ->
             let input =
                 match r.Body |> Option.map Json.parse with

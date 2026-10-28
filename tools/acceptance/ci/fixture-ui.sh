@@ -4,7 +4,7 @@
 # the fixture investigation through the real F# projection. The deployable site (dist/) never has the hook.
 #   tools/acceptance/ci/fixture-ui.sh [PORT]        then open the printed URL
 set -eu
-port="${1:-4322}"
+port="${1:-4822}"
 [ -d node_modules ] || npm ci
 npm run build
 [ -f obj/site-test/index.html ] || npm run build:test
