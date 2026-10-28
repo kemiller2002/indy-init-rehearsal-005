@@ -79,6 +79,7 @@ let private screenName =
     | InvestigationScreen(_, CorrectiveActions) -> "investigation-corrective-actions"
     | InvestigationScreen(_, Report) -> "investigation-report"
     | InvestigationScreen(_, AiProposals) -> "investigation-proposals"
+    | InvestigationScreen(_, Actions) -> "investigation-actions"
     | FailedScreen _ -> "investigation-failed"
     | MissingScreen -> "investigation-missing"
     | AdministrationScreen -> "administration"

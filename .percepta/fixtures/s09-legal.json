@@ -1,0 +1,8 @@
+{
+  "name": "s09-legal",
+  "predicates": [],
+  "capabilities": {
+    "RecordInvestigationAction": "legal",
+    "RecordPrediction": "legal"
+  }
+}

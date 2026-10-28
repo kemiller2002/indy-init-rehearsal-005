@@ -1,0 +1,9 @@
+{
+  "name": "s10-blocked",
+  "predicates": [
+    "material-blocker-exists"
+  ],
+  "capabilities": {
+    "RecordFinding": "illegal"
+  }
+}

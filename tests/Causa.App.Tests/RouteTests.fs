@@ -43,7 +43,7 @@ let ``VPO-7bb1e8c5bdccc2f2 the three primary destinations are distinct routes`` 
 [<Fact>]
 let ``VPO-628a11b571e65796 an investigation has the six required sections in order`` () =
     let names = sections |> List.map (fun (_, _, n) -> n)
-    Assert.Equal<string list>([ "Overview"; "Causal analysis"; "Evidence"; "Hypotheses"; "Timeline"; "Corrective actions"; "Report"; "AI proposals" ], names)
+    Assert.Equal<string list>([ "Overview"; "Causal analysis"; "Evidence"; "Hypotheses"; "Timeline"; "Corrective actions"; "Report"; "AI proposals"; "Actions" ], names)
 
 [<Fact>]
 let ``a query selects one record only when the id is safe`` () =

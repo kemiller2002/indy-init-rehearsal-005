@@ -182,3 +182,44 @@ let ``S08 a selected open question shows what waits on it, and answering it goes
     else Assert.Equal((opened port id).Version, (opened model.Port id).Version)
     // Without a selection the overview keeps its own identity.
     Assert.Equal("investigation-overview", textOf (view port route "") "an.overview.screen")
+
+[<Fact>]
+let ``S09 S10 the actions section designs an action and records its result through the engine; unsupported fields say not recorded`` () =
+    let port, id, h = active ()
+    let port = send port id "RecordPrediction" [ "hypothesis", h; "statement", "The seal shows wear marks."; "strength", "discriminating" ]
+    let port = send port id "RecordInvestigationAction" [ "purpose", "Inspect the seal."; "kind", "inspection"; "hypothesis", h ]
+    let designer = view port (Routes.Investigation(id, Routes.Actions)) ""
+    Assert.True(flagOf designer "an.actions.designer")
+    Assert.Equal("1 of 1 predictions were recorded before any finding (prospective); the rest were recorded after one and are marked retrospective.", textOf designer "an.actions.prereg")
+    Assert.StartsWith("Cost, time and risk: not recorded.", textOf designer "an.actions.cost")
+    let a = (opened port id).Detail.Actions.Head
+    let route = Routes.Investigation(id, Routes.Actions)
+    let capture = view port route a.Id
+    Assert.True(flagOf capture "an.actions.capture")
+    Assert.True(flagOf capture "an.capture.results.empty")
+    let legal = (opened port id).Capabilities |> List.exists (fun c -> c.Id = "RecordFinding:" + a.Id && c.Legal)
+    Assert.Equal(not legal, flagOf capture "an.finding.disabled")
+    let ev name value: SemanticEvent = { Name = name; Key = None; Value = Some value; Checked = None; Values = None; Submitter = None }
+    let model = { Shell.initial with Route = route; Port = port; Selected = a.Id }
+    let model, _ = Shell.update (entropy ()) (BrowserToEngineMessage.Event(ev "field-RecordFinding.result" "Wear marks along one edge.")) model
+    let model, _ = Shell.update (entropy ()) (BrowserToEngineMessage.Event(ev "submit-RecordFinding" "")) model
+    if legal then
+        let f = (opened model.Port id).Detail.Findings.Head
+        Assert.Equal("Wear marks along one edge.", f.Text)
+        Assert.Equal<string list>([ a.Id ], f.Related)
+        Assert.Equal("No interpretation recorded.", f.State)
+
+[<Fact>]
+let ``S19 replay steps through recorded versions read-only, showing the hypotheses as they stood`` () =
+    let port, id, _ = active ()
+    let route = Routes.Investigation(id, Routes.Timeline)
+    let at v = { Shell.initial with Route = route; Port = port; Selected = "replay"; HistoryVersion = v }
+    let first = View.project (at None) |> AnalysisView.extend (at None)
+    Assert.Equal("replay-spectator", textOf first "an.timeline.screen")
+    Assert.StartsWith("Step 1 of 3: version 1 of 3.", textOf first "an.replay.version")
+    Assert.True(flagOf first "an.replay.hypotheses.empty")
+    Assert.False(flagOf first "an.replay.hasPrev")
+    Assert.EndsWith("?item=replay&version=2", textOf first "an.replay.nextHref")
+    let last = View.project (at (Some 3L)) |> AnalysisView.extend (at (Some 3L))
+    Assert.Contains("The valve seal is worn.", sprintf "%A" (last |> Map.find "an.replay.hypotheses"))
+    Assert.Equal("This is the last recorded event; nothing follows.", textOf last "an.replay.next")

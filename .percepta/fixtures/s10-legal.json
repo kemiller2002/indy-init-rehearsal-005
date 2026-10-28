@@ -1,0 +1,7 @@
+{
+  "name": "s10-legal",
+  "predicates": [],
+  "capabilities": {
+    "RecordFinding": "legal"
+  }
+}
