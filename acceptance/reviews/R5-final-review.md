@@ -218,3 +218,139 @@ cites DF-CAUSA-2026-0002, and the builders' narrowed DCT-002-B legal source stat
 - **Whether GitHub documents 403, 404 and 422 as "not applied" for `createCommitOnBranch`.** This affects how far
   R2-F2 reaches. 400, 408 and 409 stand regardless.
 - **Praxis/ROS state.** Out of scope; I did not touch it.
+
+## Re-review at `543ddc2` (R2-F1 / R2-F2 fixes)
+
+| | |
+| --- | --- |
+| Candidate SHA | `543ddc2981503f0498d6fccbbc2c62b318c05f47` (origin/main, "Praxis: reconcile the R2-F1/R2-F2 fixes under WI-0005"). Fix commits: `7e3f3625949111d7829bacf559a20c411dc68820` (failing-first tests) and `b07d2a5def150e1cd741f0540667eac31b78330e` (fix), both ancestors of the candidate. |
+| Candidate CI | Build and test run [40618681305](https://github.com/kemiller2002/indy-init-rehearsal-005/actions/runs/40618681305). Its `core` job (122588438544) checked out `543ddc2…` and passed: Acceptance 32, App 72, App.Engine 71, Persistence 75 (60 + 15 new), with 0 failed and 0 skipped. Its `live` job (122589145039) also checked out `543ddc2…` and passed all 3 `@live` tests against real GitHub, including `DCT-LIVE-A`. The browser job was still running when I wrote this. |
+| Branch | `r5/review2`, with origin/main (`543ddc2`) merged in. This section, `acceptance/defect-classes.json` |
+
+### Method
+
+I read the changes to `src/persistence/Sync.fs` (status rule after send, `mergeRecords`, `restoreRecord`, the
+`writer`/`basedOn` fields), `GitHub.parseCommit` and `src/app/PersistencePort.fs` (StoreLocal is now a Get, followed by a
+merge and a Set). I then ran scratch scenarios V12-V15 against the real program, in a `git archive` copy of `543ddc2` with
+the harness's shared-store convention. To model one browser's `localStorage`, I copy the shared map into a tab before
+each of its steps and back out after. I also ran two mutations against the committed `DcTableTests`:
+
+- M3: after send, only 5xx is unknown (the pre-fix rule). 7 committed tests fail, so the mutation is killed.
+- M4: a 200 that names a commit becomes a refusal again. 4 committed tests fail, so the mutation is killed.
+
+### R2-F2: fixed
+
+V14: the fake applies the write, then the client receives each of these statuses: 400, 403, 404, 408, 409, 422, 429 and
+201. Every one is `unknown` with Save withheld, and Reconcile reaches `remotelySynced` through the read-back.
+
+A 200 that names a commit and also carries a typed error is `Unknown` (M4 is killed by the committed tests). A 200 with
+a typed "not applied" error and no commit is still a refusal with Retry (V15). That is the documented contract, not a
+finding: the answer itself says the write was not applied.
+
+### R3-F1 (high): the R2-F1 merge still loses one tab's device-only change after the other tab reloads
+
+`mergeRecords` treats the stored record as the page's own whenever its `writer` equals this page's `basedOn`, which is
+the record the page restored from. In that case the stored record is replaced wholesale: its documents are neither kept
+nor preserved. After tab A reloads, A's `basedOn` is tab B's writer id. Every later record B writes then counts as
+"A's own", so A's next local write erases B's newer device-only changes.
+
+Reproduction (scratch V12, at `543ddc2`):
+
+1. Tabs A and B connect and share one store. Both are offline (`NotSentFault` on POST).
+2. B records X and saves; X is queued.
+3. A reloads. It restores B's record, so A holds X and A's `basedOn` becomes B's writer id.
+4. B records Y and saves; Y is queued. The store now holds Y.
+5. A reconnects, which writes A's record.
+6. The store no longer holds Y. B's tab is closed and reopened, and Y is gone: `preservedElsewhere = []`, and nothing
+   tells the user.
+
+Observed: "storeHasY before A writes=true after=false; B reopened has Y=false preserved=[]".
+
+The trigger is realistic: two tabs, a reload of one, and the other tab's later change made before it next writes.
+Suggested fix: a record is "own" only when its `writer` is this page's own nonce. A record restored from another tab is
+superseded only for the documents this page's copy covers, using the same `covered` test that already guards other
+tabs' records.
+
+### R3-F2 (medium): the local read-modify-write is not atomic across tabs
+
+`PersistencePort` performs StoreLocal as a Storage `Get`, then sends a `Set` of the merge when the Get's result comes
+back. Between those two effects another tab can Set. That tab's write is then overwritten by a merge computed from the
+older value, which is a lost update.
+
+Reproduction (scratch V13, at `543ddc2`, modelling the interleaving): B's Get returns the store before A's write. A then
+writes its queued offline change. B's Set lands afterwards. A's reopened tab no longer has its change.
+
+The window is short (one asynchronous round trip in the kernel), so this is rarer than R3-F1. Suggested fix: a `storage`
+event re-merge, or per-tab keys merged on read.
+
+### Defect classes at `543ddc2`
+
+| Class | Decision | fixSha |
+| --- | --- | --- |
+| DC-001 | PASS (still holds) | `5336ec40372323dbdbbb821878ad87c51597af7a` |
+| DC-002 | PASS (still holds) | `e8e32c1ebf6db77344cb8e8bc5bd30b422cdd379` |
+| DC-003 | **PASS (closed now)** | `b07d2a5def150e1cd741f0540667eac31b78330e` |
+| DC-004 | PASS (still holds) | `895fb6da3031da689cd3a6f54b4005f17f07edbe` |
+| DC-005 | PASS (still holds) | `895fb6da3031da689cd3a6f54b4005f17f07edbe` |
+| DC-006 | PASS (still holds) | `578ebd3b0bbc99862dc2da945e9c3b9e3f719bba` |
+| R3-LESSON-3 | PASS (still holds) | `578ebd3b0bbc99862dc2da945e9c3b9e3f719bba` |
+| DC-001..DC-005 (DCT-LIVE-A) | **PASS (closed now)** | `b07d2a5def150e1cd741f0540667eac31b78330e` |
+
+<a id="dc-003-543ddc2"></a>
+#### DC-003: closed at `543ddc2`
+
+- **(a) Original reproduction.** `DCT-003-A a failure after send is unknown with no retry and reconcile reads the head
+  first`, and `… saved is claimed only after the read-back …`.
+- **(b) Adversarial variants.** All are committed in `DcTableTests` and pass in core job 122588438544:
+  - the read-back on reconcile, and a read-back that fails, from F-1;
+  - an unrecognised GraphQL type (F-2);
+  - every HTTP status after send, 403/404/408/409/418/422/500/502 (R2-F2);
+  - a 200 naming a commit together with each typed error (R2-F2).
+
+  My V14 extends the status set to 400, 429 and 201. The class invariant ("once sent, any failure is unknown, never not
+  written") held in every case I tried.
+- **(c) Enforcement at the authority boundary.** `Sync.fs`'s `BookPublish` answer rule: 401 is a refusal; any other
+  non-200 is `PublicationFailed`, which becomes `Unknown` after `PublicationSent`. `parseCommit` never refuses an answer
+  that names a commit. The reconcile path reads back before it claims saved. Mutations M1, M3 and M4 are each killed by
+  committed tests.
+- **(d) Independent review.** This review. R3-F1 and R3-F2 are local-durability defects. They do not make a sent write
+  look "not written", so they are reported as separate findings and do not reopen DC-003.
+- **SHA-bound proof.** Run 40618681305, core job 122588438544, at `543ddc2`: Persistence 75/75 and App.Engine 71/71
+  passed, including every DCT-003-A test.
+
+#### DC-001 re-confirmed at `543ddc2`
+
+The reconcile and marker code is unchanged since `5336ec4`. Every DCT-001-A/B test passed in the same core job. The
+`543ddc2` changes touch only the publication answer rule and the local store, neither of which can parent a write on a
+commit it did not read. DC-001 still holds.
+
+<a id="dct-live-a-543ddc2"></a>
+#### DC-001..DC-005 (DCT-LIVE-A): closed at `543ddc2`
+
+Closed at `543ddc2`.
+
+- **(a) Original live scenarios.** Create, write, reload, conflict (resolved by Reload) and rejected token, each
+  confirmed by an independent SHA re-read against the real test repository.
+- **(b) Adversarial live variant.** The two-tab F-1 variant (`3627f92`): tab B's write and its check are reset before
+  reaching GitHub, tab A saves, and B's check must show a conflict, never "Saved". The same test also checks fresh-read
+  URL uniqueness across the reload and both extra tabs (DC-005), and that the token is absent from URLs, page and storage.
+- **(c) Enforcement.** Every component class it covers, DC-001 to DC-005, is now closed with its enforcement at the
+  authority boundary (sections above).
+- **(d) Independent review.** This review.
+- **SHA-bound proof.** Run 40618681305, live job 122589145039, at `543ddc2`: `DCT-LIVE-A …` passed (3 of 3 live tests).
+- **`fixSha`.** `b07d2a5` is the first commit holding every component fix (the last was DC-003's) and the two-tab
+  live variant. It is an ancestor of the candidate.
+- **Limit.** The live test does not drive R2-F2's status answers; those are proven only at fixture level against the
+  recorded-behaviour fake.
+
+### Over-tagging at `543ddc2`
+
+The four partial tags reported above (UI-011-O4, WDL-014-O1, UI-015-O3, UI-016-O11) were removed in `f412598`. I did
+not re-sample other obligations in this pass.
+
+### What I could not check in this pass
+
+- **R3-F1 and R3-F2 in a real browser.** I reproduced both with the program and the harness only.
+- **The candidate run's browser job.** It was still running when I wrote this, so DC-006 and R3-LESSON-3 rest on the
+  earlier evidence. The kernel files they depend on are unchanged since `be01851`.
+- **WebKit and the deployed site.** Not checked.
