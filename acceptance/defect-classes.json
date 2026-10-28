@@ -14,9 +14,9 @@
         "DCT-001-A",
         "DCT-001-B"
       ],
-      "status": "NOT_RUN",
-      "fixSha": null,
-      "reviewerEvidence": null
+      "status": "PASS",
+      "fixSha": "5336ec40372323dbdbbb821878ad87c51597af7a",
+      "reviewerEvidence": "acceptance/reviews/R5-final-review.md#dc-001"
     },
     {
       "id": "DC-002",
