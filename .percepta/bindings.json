@@ -41,6 +41,33 @@
       ]
     },
     {
+      "contract": "S05-evidence-capture",
+      "appScreen": "investigation-evidence",
+      "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/evidence",
+      "fixtures": [
+        "fixtures/evidence-legal.json",
+        "fixtures/evidence-blocked.json"
+      ]
+    },
+    {
+      "contract": "S06-evidence-detail",
+      "appScreen": "investigation-evidence-detail",
+      "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/evidence?item=00000000-0000-4000-8000-0000000000e1",
+      "fixtures": [
+        "fixtures/evidence-legal.json",
+        "fixtures/evidence-blocked.json"
+      ]
+    },
+    {
+      "contract": "S07-evidence-dependency",
+      "appScreen": "investigation-evidence-detail",
+      "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1/evidence?item=00000000-0000-4000-8000-0000000000e1",
+      "fixtures": [
+        "fixtures/blocker-only.json",
+        "fixtures/no-predicates.json"
+      ]
+    },
+    {
       "contract": "S08-epistemic-blocker-detail",
       "appScreen": "epistemic-blocker-detail",
       "path": "index.html?percepta=default#/investigations/00000000-0000-4000-8000-0000000000f1?item=blocker-1",
